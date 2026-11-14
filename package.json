@@ -19,6 +19,9 @@
     "db:generate": "bun run --cwd backend db:generate",
     "db:migrate": "bun run --cwd backend db:migrate",
     "db:push": "bun run --cwd backend db:push",
-    "db:studio": "bun run --cwd backend db:studio"
+    "db:studio": "bun run --cwd backend db:studio",
+    "docker:up": "docker compose up --build --renew-anon-volumes -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   }
 }

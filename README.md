@@ -78,6 +78,28 @@ bun dev                                      # backend :4000 + frontend :3000 in
 
 Open http://localhost:3000. The page shows the API and database status.
 
+### Running everything in Docker
+
+`docker-compose.yml` runs the whole stack locally with hot reload: a **local Postgres 17** container (not Neon), the API (`bun --watch`), and the frontend (`next dev`). `backend/` and `frontend/` are bind-mounted into the containers, so edits on your machine reload immediately.
+
+```bash
+bun run docker:up                   # build + start (also refreshes container node_modules)
+bun run docker:logs                 # follow logs
+bun run docker:down                 # stop (docker compose down -v also wipes the database)
+docker compose run --rm migrate     # re-sync the Drizzle schema after editing *.schema.ts
+```
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| `frontend` | http://localhost:3000 | `next dev`; calls the API at `http://backend:4000` |
+| `backend` | http://localhost:4000 | `bun --watch` |
+| `db` | `postgres://frontpage:frontpage@localhost:5432/frontpage` | Data persists in the `frontpage_db-data` volume |
+| `migrate` | — | One-shot `drizzle-kit push` that syncs the schema before the API starts |
+
+- **Dependencies:** `node_modules` lives inside the containers, not on the bind mount. After `bun add`, run `bun run docker:up` again to reinstall.
+- **Neon stays untouched:** because of the bind mount, `backend/.env` is visible in the containers. Bun runs with `--no-env-file`, and compose sets every database variable explicitly, so the stack only talks to the local Postgres. Keep it that way if you edit `docker-compose.yml`.
+- **File names:** the images are built from `backend/Dockerfile.local` and `frontend/Dockerfile.local`. They're named `.local` so Railway keeps building the backend with Railpack instead of picking up a `Dockerfile`.
+
 ## Scripts (repo root)
 
 | Command | What it runs |
@@ -90,6 +112,7 @@ Open http://localhost:3000. The page shows the API and database status.
 | `bun run test` / `test:watch` | Backend API tests (`bun test`) |
 | `bun run lint` | Lint the frontend |
 | `bun run db:generate` / `db:migrate` / `db:push` / `db:studio` | Drizzle Kit (backend) |
+| `bun run docker:up` / `docker:down` / `docker:logs` | Local Docker stack (see above) |
 
 You can also `cd frontend` or `cd backend` and use their own scripts directly. To add a dependency, run `bun add <pkg>` **inside** the folder that needs it.
 
