@@ -1,0 +1,4 @@
+[test]
+# Runs before every test file: pins the environment so tests never touch
+# your real database or depend on what's in backend/.env.
+preload = ["./test/setup.ts"]

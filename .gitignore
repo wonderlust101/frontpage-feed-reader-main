@@ -1,0 +1,51 @@
+# ── Dependencies ───────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.*
+
+# ── Build output & caches ──────────────────────────────────────
+.next/
+out/
+dist/
+build/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+.eslintcache
+coverage/
+
+# ── Environment & secrets (only *.example files are committed) ─
+.env
+.env.*
+!.env.example
+http-client.private.env.json
+*.pem
+*.key
+*.p12
+
+# ── Logs ───────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS & editors ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ── AI tooling: personal/local files only ──────────────────────
+# (shared config like .claude/settings.json, .cursorignore, .aiignore IS committed)
+.claude/settings.local.json
+CLAUDE.local.md
+.aider*
+
+# ── Challenge reference material ───────────────────────────────
+# Kept locally for planning and AI sessions; not part of the shipped solution.
+# Root-anchored so frontend/AGENTS.md (Next.js agent rules) is still committed.
+/docs/spec/
+/docs/guidance/
+/docs/challenge-brief.md
+/docs/starter-tailwind.reference.css
+/AGENTS.md
+/CLAUDE.md

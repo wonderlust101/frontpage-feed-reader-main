@@ -1,0 +1,27 @@
+### Frontpage API — manual requests
+# JetBrains IDEs: click ▶ next to a request and pick an environment (local / railway).
+# VS Code: install the "REST Client" extension, then "Send Request".
+# Environments live in http-client.env.json (committed, no secrets).
+# Put tokens in http-client.private.env.json (git-ignored).
+# Start the backend first: `bun run dev:backend` from the repo root.
+
+### Health check
+GET {{baseUrl}}/api/health
+Accept: application/json
+
+### CORS — allowed origin (expect Access-Control-Allow-Origin in the response)
+GET {{baseUrl}}/api/health
+Origin: http://localhost:3000
+
+### CORS — disallowed origin (expect no Access-Control-Allow-Origin)
+GET {{baseUrl}}/api/health
+Origin: https://evil.example
+
+### Unknown route → JSON 404
+GET {{baseUrl}}/api/does-not-exist
+
+### Malformed JSON body → JSON 400
+POST {{baseUrl}}/api/health
+Content-Type: application/json
+
+{ not json

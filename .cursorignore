@@ -1,0 +1,39 @@
+# Cursor: files excluded from indexing and AI features.
+# Unlike .gitignore, docs/spec, AGENTS.md etc. stay visible: the AI needs them.
+
+# ── Secrets: never send to an AI model ──────────────────────────
+.env
+.env.*
+!.env.example
+http-client.private.env.json
+*.pem
+*.key
+*.p12
+.vercel/
+
+# ── Generated / vendored: noise, wastes context ───────────────
+node_modules/
+.next/
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+**/bun.lock
+backend/drizzle/meta/
+
+# ── Binary assets ──────────────────────────────────────────────
+*.ico
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.avif
+*.woff
+*.woff2
+
+# ── Logs & IDE ─────────────────────────────────────────────────
+*.log
+.idea/

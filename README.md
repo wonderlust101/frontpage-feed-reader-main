@@ -1,0 +1,215 @@
+# Frontpage
+
+A customizable RSS/Atom feed reader — a [Frontend Mentor](https://www.frontendmentor.io) Product Challenge. The original challenge brief lives in [`docs/challenge-brief.md`](docs/challenge-brief.md).
+
+## Stack
+
+| Part | Tech | Hosted on |
+|------|------|-----------|
+| Frontend | Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 | Vercel |
+| Backend | Express 5 · TypeScript · Bun runtime | Railway |
+| Database | Neon Postgres · Drizzle ORM | Neon |
+
+Bun is the package manager and script runner everywhere.
+
+## Project structure
+
+`frontend/` and `backend/` are **two independent Bun projects** in one Git repo. Each has its own `package.json`, `bun.lock` and `node_modules`. There are no workspaces and no shared code; the root `package.json` only holds convenience scripts.
+
+```
+.
+├── frontend/                 # Next.js → Vercel (Root Directory: frontend)
+│   ├── vercel.json
+│   ├── .env.example
+│   └── src/
+│       ├── app/              # routes, layout, globals.css (Tailwind + theme)
+│       ├── components/
+│       ├── lib/api.ts        # server-side client for the backend
+│       └── styles/tokens.css # brand design tokens
+├── backend/                  # Express → Railway (Root Directory: /backend)
+│   ├── .env.example
+│   ├── drizzle.config.ts
+│   ├── neon.ts               # Neon infrastructure-as-code (linked via .neon)
+│   ├── bunfig.toml           # bun test config (preloads test/setup.ts)
+│   ├── data/                 # sample feeds (JSON + OPML) for the guest experience
+│   ├── test/                 # API tests: setup.ts, helpers.ts, *.test.ts
+│   ├── requests/             # .http files for manual API requests
+│   └── src/
+│       ├── index.ts          # starts the server (PORT, graceful shutdown)
+│       ├── app.ts            # Express app: global middleware + mounts module routers
+│       ├── env.ts            # typed environment variables
+│       ├── modules/          # one folder per feature; each owns its routes, logic and tables
+│       │   ├── health/       #   health.routes.ts → GET /api/health
+│       │   └── feeds/        #   feeds.schema.ts  → Drizzle "feeds" table
+│       ├── middleware/       # Express middleware shared by all modules (404, error handler; later auth)
+│       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
+│       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
+│       ├── types/            # cross-module types; api.ts = response shapes mirrored in the frontend
+│       └── scripts/          # one-off scripts run with `bun src/scripts/<name>.ts` (e.g. seeding)
+├── docs/                     # challenge spec, guidance, brief (local reference, git-ignored)
+├── package.json              # root convenience scripts only
+├── AGENTS.md / CLAUDE.md     # AI collaboration context
+└── .gitignore · .cursorignore · .aiignore · .claude/settings.json
+```
+
+### Backend modules
+
+Each feature lives in `backend/src/modules/<feature>/`, with files named after the feature:
+
+| File | Holds |
+|------|-------|
+| `<feature>.routes.ts` | Express `Router`, mounted in `app.ts` (`app.use("/api/<feature>", router)`) |
+| `<feature>.service.ts` | Business logic and database queries; routes call this |
+| `<feature>.schema.ts` | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it |
+| `<feature>.types.ts` | Types used only inside this module |
+
+Only create the files a module needs. `health/` has just routes; `feeds/` currently has just its table.
+
+The sample feeds live in `backend/data/` because a Railway service with a Root Directory only receives that folder.
+
+## Getting started
+
+```bash
+bun install                                  # root postinstall installs frontend/ and backend/
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+bun dev                                      # backend :4000 + frontend :3000 in parallel
+```
+
+Open http://localhost:3000. The page shows the API and database status.
+
+## Scripts (repo root)
+
+| Command | What it runs |
+|---------|--------------|
+| `bun dev` | Both dev servers in parallel |
+| `bun run dev:frontend` / `dev:backend` | One dev server |
+| `bun run build` | Production build of the frontend |
+| `bun run start:frontend` / `start:backend` | Production servers |
+| `bun run typecheck` | Type-check both projects |
+| `bun run test` / `test:watch` | Backend API tests (`bun test`) |
+| `bun run lint` | Lint the frontend |
+| `bun run db:generate` / `db:migrate` / `db:push` / `db:studio` | Drizzle Kit (backend) |
+
+You can also `cd frontend` or `cd backend` and use their own scripts directly. To add a dependency, run `bun add <pkg>` **inside** the folder that needs it.
+
+## Testing the API locally
+
+### Automated tests
+
+```bash
+bun run test          # from the repo root (or `bun test` inside backend/)
+bun run test:watch    # re-run on save
+```
+
+- Tests live in `backend/test/*.test.ts` and use Bun's built-in runner (`bun:test`). No extra dependencies.
+- `startTestServer()` (`backend/test/helpers.ts`) starts the real Express app on a random free port, so tests call it with plain `fetch`. You don't need `bun dev` running.
+- `backend/test/setup.ts` runs before every test file (via `backend/bunfig.toml`). It blanks `DATABASE_URL` and pins `WEB_ORIGIN`, so tests behave the same on every machine and never touch your real Neon database, even though `bun test` auto-loads `backend/.env`.
+
+Template for a new endpoint test:
+
+```ts
+import { afterAll, beforeAll, expect, test } from "bun:test";
+import { startTestServer } from "./helpers";
+
+let server: Awaited<ReturnType<typeof startTestServer>>;
+beforeAll(async () => { server = await startTestServer(); });
+afterAll(async () => { await server.close(); });
+
+test("GET /api/feeds returns a list", async () => {
+  const res = await fetch(`${server.url}/api/feeds`);
+  expect(res.status).toBe(200);
+});
+```
+
+### Manual requests
+
+`backend/requests/api.http` holds ready-made requests. Start the backend (`bun run dev:backend`), then:
+
+- **JetBrains IDEs:** open the file, click ▶ next to a request, and choose the `local` or `railway` environment.
+- **VS Code:** install the *REST Client* extension, then click **Send Request**.
+- **Terminal:** `curl -i http://localhost:4000/api/health`
+
+Environments (base URLs) are in `backend/requests/http-client.env.json`. Update the `railway` URL once you have a domain. Tokens and other secrets go in `http-client.private.env.json` next to it, which is git-ignored.
+
+## Environment variables
+
+Each project has an `.env.example` (committed) documenting every variable, and a local copy that git ignores:
+
+| Project | Local file | Production |
+|---------|------------|------------|
+| Backend | `backend/.env` | Railway → backend service → **Variables** |
+| Frontend | `frontend/.env.local` | Vercel → Project → **Settings → Environment Variables** |
+
+- **Backend:** server (`PORT`, `WEB_ORIGIN`), Neon (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), auth (`AUTH_SECRET`, `AUTH_URL`), password-reset email (`RESEND_API_KEY`, `EMAIL_FROM`), feed fetching (`FEED_*`). Read through `backend/src/env.ts`.
+- **Frontend:** `API_URL` (the Railway URL) and `NEXT_PUBLIC_SITE_URL`.
+
+Generate production secrets with `openssl rand -base64 32`, and don't reuse your local ones.
+
+### Neon (database)
+
+`backend/` is linked to the Neon project **Frontpage Feed Reader** (`long-mode-29061688`), branch `production`:
+
+- `backend/.neon`: org/project/branch the CLI is linked to (git-ignored by `backend/.gitignore`)
+- `backend/neon.ts`: Neon infrastructure-as-code (Postgres only for now; new non-default branches auto-expire after 7 days)
+- `backend/.env`: `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` (direct), `NEON_BRANCH`, `NEON_BRANCH_ID` and `NEON_FUNCTION_HOST_SUFFIX`, written by the CLI
+
+Common commands (run inside `backend/`):
+
+```bash
+bunx neon@latest deploy                    # apply neon.ts and re-pull env into .env
+bunx neon@latest env pull                  # refresh .env from the linked branch
+bunx neon@latest checkout dev --create     # work on a throwaway dev branch (switches .env to it)
+```
+
+The backend connects with **node-postgres** (`pg`): one shared pool over the pooled `DATABASE_URL`, reused across requests, because the backend is a long-running server. Drizzle Kit migrations use the direct `DATABASE_URL_UNPOOLED`. Push the schema with `bun run db:push` (or `db:generate` + `db:migrate`).
+
+Without `DATABASE_URL` the backend still runs, and `/api/health` reports the database as `skipped`.
+
+## Deploying
+
+Deploy the **backend first**, because the frontend needs its URL.
+
+### Backend → Railway
+
+1. Railway → **New Project → Deploy from GitHub repo** → pick this repo.
+2. In the service's **Settings**:
+
+   | Setting | Value | Why |
+   |---|---|---|
+   | Root Directory | `/backend` | Railway builds only this folder |
+   | Watch Paths | `/backend/**` | Frontend-only commits don't redeploy the backend |
+   | Healthcheck Path | `/api/health` | Railway waits for this before switching traffic |
+   | Pre-deploy Command | `bun run db:migrate` | *Only once `DATABASE_URL` is set and you use migration files* |
+   | Networking | **Generate Domain** | Gives you `https://<name>.up.railway.app` |
+
+   Build and start are automatic. Railpack detects Bun from `packageManager` in `backend/package.json` and runs `bun run start`. Railway injects `PORT`.
+3. **Variables:** add those from `backend/.env.example`. Leave out `PORT`, and set `WEB_ORIGIN` to your Vercel domain and `NODE_ENV=production`.
+
+### Frontend → Vercel
+
+1. Vercel → **Add New → Project** → import this repo.
+2. Set **Root Directory** to `frontend`. Next.js is detected; `frontend/vercel.json` pins the Bun install and build commands.
+3. **Environment Variables:** `API_URL` = the Railway domain, and `NEXT_PUBLIC_SITE_URL` = your Vercel domain.
+4. Deploy, then put the Vercel domain into the backend's `WEB_ORIGIN` on Railway.
+
+`frontend/vercel.json` has an `ignoreCommand` (`git diff --quiet HEAD^ HEAD -- .`) that skips Vercel builds when a commit doesn't touch `frontend/`.
+
+> Vercel preview deployments call the same `API_URL` as production unless you set a different value for the *Preview* environment (for example, a Railway staging environment).
+
+## Ignore files
+
+| File | Read by | Purpose |
+|------|---------|---------|
+| `.gitignore` | Git | Dependencies, builds, env files and secrets, IDE files, local AI settings, challenge reference docs |
+| `.claude/settings.json` | Claude Code | `permissions.deny` stops Claude from reading env files and secrets, or printing them via the Vercel/Railway CLIs |
+| `.cursorignore` | Cursor | Hides secrets and generated noise from indexing and AI |
+| `.aiignore` | JetBrains AI Assistant / Junie | Same list as `.cursorignore` |
+
+The AI ignore lists deliberately **don't** hide `docs/`, `AGENTS.md` or `CLAUDE.md`. Git ignores those, but AI tools need them. GitHub Copilot has no ignore file: configure content exclusion in the repository's GitHub settings.
+
+## API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/health` | `{ api: "ok", database: "connected" \| "skipped" \| "error" }` |
