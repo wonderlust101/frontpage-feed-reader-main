@@ -1,0 +1,4 @@
+[install]
+# One node_modules at the repo root (packages that need a different version get a nested copy).
+# Plain layout that Next.js/Turbopack, Drizzle Kit and Docker bind mounts all handle.
+linker = "hoisted"

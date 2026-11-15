@@ -14,10 +14,15 @@ Bun is the package manager and script runner everywhere.
 
 ## Project structure
 
-`frontend/` and `backend/` are **two independent Bun projects** in one Git repo. Each has its own `package.json`, `bun.lock` and `node_modules`. There are no workspaces and no shared code; the root `package.json` only holds convenience scripts.
+The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and `packages/shared/`. Each has its own `package.json`, but there is one `bun.lock` and one (hoisted) `node_modules` at the root. Run `bun install` from the root; add a dependency inside the package that needs it (`cd backend && bun add x`).
+
+`packages/shared` (`@frontpage/shared`) holds code both sides use, starting with the API response types. Backend and frontend import it the same way (`import type { HealthResponse } from "@frontpage/shared"`), so the API contract is defined once.
 
 ```
 .
+├── packages/
+│   └── shared/               # @frontpage/shared: code used by both sides
+│       └── src/api.ts        #   API response types (the backend ↔ frontend contract)
 ├── frontend/                 # Next.js → Vercel (Root Directory: frontend)
 │   ├── vercel.json
 │   ├── .env.example
@@ -26,7 +31,7 @@ Bun is the package manager and script runner everywhere.
 │       ├── components/
 │       ├── lib/api.ts        # server-side client for the backend
 │       └── styles/tokens.css # brand design tokens
-├── backend/                  # Express → Railway (Root Directory: /backend)
+├── backend/                  # Express → Railway (built from the repo root)
 │   ├── .env.example
 │   ├── drizzle.config.ts
 │   ├── neon.ts               # Neon infrastructure-as-code (linked via .neon)
@@ -44,10 +49,11 @@ Bun is the package manager and script runner everywhere.
 │       ├── middleware/       # Express middleware shared by all modules (404, error handler; later auth)
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
 │       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
-│       ├── types/            # cross-module types; api.ts = response shapes mirrored in the frontend
+│       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
 │       └── scripts/          # one-off scripts run with `bun src/scripts/<name>.ts` (e.g. seeding)
 ├── docs/                     # challenge spec, guidance, brief (local reference, git-ignored)
-├── package.json              # root convenience scripts only
+├── package.json              # workspace definition + root scripts
+├── bun.lock · bunfig.toml    # single lockfile; hoisted node_modules
 ├── AGENTS.md / CLAUDE.md     # AI collaboration context
 └── .gitignore · .cursorignore · .aiignore · .claude/settings.json
 ```
@@ -65,12 +71,12 @@ Each feature lives in `backend/src/modules/<feature>/`, with files named after t
 
 Only create the files a module needs. `health/` has just routes; `feeds/` currently has just its table.
 
-The sample feeds live in `backend/data/` because a Railway service with a Root Directory only receives that folder.
+The sample feeds live in `backend/data/` because only the backend reads them.
 
 ## Getting started
 
 ```bash
-bun install                                  # root postinstall installs frontend/ and backend/
+bun install                                  # installs every workspace package from the root
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 bun dev                                      # backend :4000 + frontend :3000 in parallel
@@ -80,7 +86,7 @@ Open http://localhost:3000. The page shows the API and database status.
 
 ### Running everything in Docker
 
-`docker-compose.yml` runs the whole stack locally with hot reload: a **local Postgres 17** container (not Neon), the API (`bun --watch`), and the frontend (`next dev`). `backend/` and `frontend/` are bind-mounted into the containers, so edits on your machine reload immediately.
+`docker-compose.yml` runs the whole stack locally with hot reload: a **local Postgres 17** container (not Neon), the API (`bun --watch`), and the frontend (`next dev`). `backend/`, `frontend/` and `packages/` are bind-mounted into the containers, so edits on your machine reload immediately. Images build from the repo root so they can see the workspace lockfile and `packages/shared`.
 
 ```bash
 bun run docker:up                   # build + start (also refreshes container node_modules)
@@ -107,6 +113,7 @@ docker compose run --rm migrate     # re-sync the Drizzle schema after editing *
 | `bun dev` | Both dev servers in parallel |
 | `bun run dev:frontend` / `dev:backend` | One dev server |
 | `bun run build` | Production build of the frontend |
+| `bun run build:backend` | Type-check the backend (Railway's build step; the backend runs from source) |
 | `bun run start:frontend` / `start:backend` | Production servers |
 | `bun run typecheck` | Type-check both projects |
 | `bun run test` / `test:watch` | Backend API tests (`bun test`) |
@@ -200,23 +207,25 @@ Deploy the **backend first**, because the frontend needs its URL.
 
    | Setting | Value | Why |
    |---|---|---|
-   | Root Directory | `/backend` | Railway builds only this folder |
-   | Watch Paths | `/backend/**` | Frontend-only commits don't redeploy the backend |
+   | Root Directory | *(empty: repo root)* | The backend needs `packages/shared` and the root `bun.lock` |
+   | Build Command | `bun run build:backend` | Typechecks the backend. Without it Railpack would run the root `build`, which builds the frontend |
+   | Start Command | `bun run start:backend` | Runs `bun src/index.ts` inside `backend/` |
+   | Watch Paths | `/backend/**`, `/packages/**`, `/package.json`, `/bun.lock`, `/bunfig.toml` | Frontend-only commits don't redeploy the backend |
    | Healthcheck Path | `/api/health` | Railway waits for this before switching traffic |
    | Pre-deploy Command | `bun run db:migrate` | *Only once `DATABASE_URL` is set and you use migration files* |
    | Networking | **Generate Domain** | Gives you `https://<name>.up.railway.app` |
 
-   Build and start are automatic. Railpack detects Bun from `packageManager` in `backend/package.json` and runs `bun run start`. Railway injects `PORT`.
+   Railpack detects Bun from `packageManager` in the root `package.json` and installs the whole workspace. Railway injects `PORT`.
 3. **Variables:** add those from `backend/.env.example`. Leave out `PORT`, and set `WEB_ORIGIN` to your Vercel domain and `NODE_ENV=production`.
 
 ### Frontend → Vercel
 
 1. Vercel → **Add New → Project** → import this repo.
-2. Set **Root Directory** to `frontend`. Next.js is detected; `frontend/vercel.json` pins the Bun install and build commands.
+2. Set **Root Directory** to `frontend`, and keep **Include files outside the root directory in the Build Step** enabled (Settings → Build and Deployment), so the build can see `packages/shared` and the root `bun.lock`. Next.js is detected; `frontend/vercel.json` pins the Bun install and build commands. `bun install` run inside `frontend/` installs from the workspace root.
 3. **Environment Variables:** `API_URL` = the Railway domain, and `NEXT_PUBLIC_SITE_URL` = your Vercel domain.
 4. Deploy, then put the Vercel domain into the backend's `WEB_ORIGIN` on Railway.
 
-`frontend/vercel.json` has an `ignoreCommand` (`git diff --quiet HEAD^ HEAD -- .`) that skips Vercel builds when a commit doesn't touch `frontend/`.
+To skip Vercel builds for backend-only commits, add an `ignoreCommand` to `frontend/vercel.json` that also watches the shared code: `git diff --quiet HEAD^ HEAD -- . ../packages ../package.json ../bun.lock`.
 
 > Vercel preview deployments call the same `API_URL` as production unless you set a different value for the *Preview* environment (for example, a Railway staging environment).
 

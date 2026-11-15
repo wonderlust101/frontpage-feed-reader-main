@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { HealthResponse } from "../src/types";
+import type { HealthResponse } from "@frontpage/shared";
 import { startTestServer } from "./helpers";
 
 let server: Awaited<ReturnType<typeof startTestServer>>;

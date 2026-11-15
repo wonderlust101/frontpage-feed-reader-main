@@ -1,3 +1,4 @@
+# Build context is the repo root (workspace): see docker-compose.yml.
 FROM oven/bun:1.4.4-slim
 
 WORKDIR /app
@@ -6,10 +7,18 @@ USER bun
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY --chown=bun:bun package.json bun.lock ./
-RUN bun install --frozen-lockfile
+# Every workspace package.json must be present for --frozen-lockfile; --filter then
+# installs only the frontend and what it depends on (incl. packages/shared).
+COPY --chown=bun:bun package.json bun.lock bunfig.toml ./
+COPY --chown=bun:bun backend/package.json backend/
+COPY --chown=bun:bun frontend/package.json frontend/
+COPY --chown=bun:bun packages/shared/package.json packages/shared/
+RUN bun install --frozen-lockfile --filter frontpage-frontend
 
-COPY --chown=bun:bun . .
+COPY --chown=bun:bun packages packages
+COPY --chown=bun:bun frontend frontend
+
+WORKDIR /app/frontend
 RUN mkdir -p .next
 
 EXPOSE 3000

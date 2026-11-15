@@ -3,24 +3,27 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import { env } from "../env";
 import * as schema from "./schema";
-import type { DbStatus } from "../types";
+import type { DbStatus } from "@frontpage/shared";
 
-// The backend is a long-running server (Railway), so it keeps one node-postgres pool
-// for its whole lifetime and reuses connections across requests. DATABASE_URL is Neon's
-// *pooled* connection string (PgBouncer, host contains "-pooler"); migrations use the
-// direct string instead (see drizzle.config.ts).
+/**
+ The backend is a long-running server, so it keeps one node-postgres pool
+for its whole lifetime and reuses connections across requests. DATABASE_URL is Neon's
+*pooled* connection string (PgBouncer, host contains "-pooler"); migrations use the
+direct string instead (see drizzle.config.ts).
+ **/
 export const pool = env.DATABASE_URL
   ? new Pool({
       connectionString: env.DATABASE_URL,
       max: 10,
       idleTimeoutMillis: 30_000,
-      // Neon computes scale to zero; the first connection after a suspend can take a moment.
       connectionTimeoutMillis: 10_000,
     })
   : null;
 
-// An idle pooled connection can be dropped by the server (e.g. compute suspended);
-// log it instead of crashing the process. The pool replaces the connection.
+/**
+ The server can drop an idle pooled connection (e.g. compute suspended);
+log it instead of crashing the process. The pool replaces the connection.
+ **/
 pool?.on("error", (err) => {
   console.error("Postgres pool error:", err.message);
 });
