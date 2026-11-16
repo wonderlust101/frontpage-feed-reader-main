@@ -128,19 +128,21 @@ You can also `cd frontend` or `cd backend` and use their own scripts directly. T
 ### Automated tests
 
 ```bash
-bun run test          # from the repo root (or `bun test` inside backend/)
-bun run test:watch    # re-run on save
+bun run test            # from the repo root (or `bun test` inside backend/)
+bun run test:watch      # re-run on save
+bun run test:live       # opt-in: hit the real curated feeds over the network
+bun run fixtures:feeds  # re-download the curated feed snapshots used by the tests
 ```
 
-- Tests live in `backend/test/*.test.ts` and use Bun's built-in runner (`bun:test`). No extra dependencies.
-- `startTestServer()` (`backend/test/helpers.ts`) starts the real Express app on a random free port, so tests call it with plain `fetch`. You don't need `bun dev` running.
+- Tests live in `backend/test/` and use Bun's built-in runner (`bun:test`). No extra dependencies. The folder mirrors `backend/src/` (the test for `src/x/y.ts` is `test/x/y.test.ts`). See [`backend/test/README.md`](backend/test/README.md) for the layout rules, which `test/structure.test.ts` enforces in CI.
+- `startTestServer()` (`backend/test/helpers/test-server.ts`) starts the real Express app on a random free port, so tests call it with plain `fetch`. You don't need `bun dev` running.
 - `backend/test/setup.ts` runs before every test file (via `backend/bunfig.toml`). It blanks `DATABASE_URL` and pins `WEB_ORIGIN`, so tests behave the same on every machine and never touch your real Neon database, even though `bun test` auto-loads `backend/.env`.
 
-Template for a new endpoint test:
+Template for a new endpoint test, e.g. `backend/test/modules/feeds/feeds.routes.test.ts`:
 
 ```ts
 import { afterAll, beforeAll, expect, test } from 'bun:test';
-import { startTestServer } from './helpers';
+import { startTestServer } from '../../helpers/test-server';
 
 let server: Awaited<ReturnType<typeof startTestServer>>;
 beforeAll(async () => {

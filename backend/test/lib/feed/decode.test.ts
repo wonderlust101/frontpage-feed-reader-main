@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { decodeFeed, detectCharset } from '../src/lib/feed';
-import { readFixture } from './feed-fixtures';
+import { decodeFeed, detectCharset } from '../../../src/lib/feed';
+import { readFixture } from '../../helpers/fixtures';
 
 const enc = (s: string) => new TextEncoder().encode(s);
 

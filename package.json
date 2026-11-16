@@ -22,6 +22,8 @@
         "typecheck:frontend": "bun run --cwd frontend typecheck",
         "typecheck:backend": "bun run --cwd backend typecheck",
         "test": "bun run --cwd backend test",
+        "test:live": "bun run --cwd backend test:live",
+        "fixtures:feeds": "bun run --cwd backend fixtures:feeds",
         "test:watch": "bun run --cwd backend test:watch",
         "db:generate": "bun run --cwd backend db:generate",
         "db:migrate": "bun run --cwd backend db:migrate",

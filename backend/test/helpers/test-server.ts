@@ -1,6 +1,6 @@
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
-import { app } from '../src/app';
+import { app } from '../../src/app';
 
 /** Starts the Express app on a random free port. Call `close()` in afterAll. */
 export async function startTestServer() {

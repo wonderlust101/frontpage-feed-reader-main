@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import type { FeedErrorResponse, FetchFeedResponse } from '@frontpage/shared';
-import { clearFeedCache } from '../src/modules/feeds/feeds.service';
-import { startTestServer } from './helpers';
-import { ETAG, LAST_MODIFIED, startFeedServer } from './feed-server';
+import { clearFeedCache } from '../../../src/modules/feeds/feeds.service';
+import { startTestServer } from '../../helpers/test-server';
+import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 
 let api: Awaited<ReturnType<typeof startTestServer>>;
 let upstream: ReturnType<typeof startFeedServer>;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { parseFeedDate } from '../src/lib/feed';
+import { parseFeedDate } from '../../../src/lib/feed';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');
 const EXPECTED = '2024-10-02T15:00:00.000Z';

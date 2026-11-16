@@ -1,9 +1,9 @@
 // Live check against the real curated feeds. Skipped unless LIVE_FEEDS=1, so CI stays offline:
-//   LIVE_FEEDS=1 bun test feeds-live
+//   LIVE_FEEDS=1 bun run test:live
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import type { FeedErrorResponse, FetchFeedResponse } from '@frontpage/shared';
-import sampleFeeds from '../data/sample-feeds.json';
-import { startTestServer } from './helpers';
+import sampleFeeds from '../../data/sample-feeds.json';
+import { startTestServer } from '../helpers/test-server';
 
 const feeds = sampleFeeds.categories.flatMap((c) => c.feeds);
 

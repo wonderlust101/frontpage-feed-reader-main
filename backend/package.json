@@ -9,6 +9,8 @@
         "typecheck": "tsc --noEmit",
         "test": "bun test",
         "test:watch": "bun test --watch",
+        "test:live": "LIVE_FEEDS=1 bun test live/",
+        "fixtures:feeds": "bun src/scripts/snapshot-feeds.ts",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
         "db:push": "drizzle-kit push",

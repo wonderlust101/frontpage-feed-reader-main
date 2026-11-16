@@ -1,6 +1,6 @@
 // Downloads the curated feeds from data/sample-feeds.json into test/fixtures/feeds/curated/
 // so tests run offline. Large feeds are trimmed to their first 10 items.
-// Usage (from backend/): bun src/scripts/snapshot-feeds.ts
+// Usage: bun run fixtures:feeds
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env } from '../env';

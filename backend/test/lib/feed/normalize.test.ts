@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { NormalizedFeed } from '@frontpage/shared';
-import { FeedError, decodeFeed, normalizeFeed } from '../src/lib/feed';
-import { curatedFixtures, readFixture } from './feed-fixtures';
+import { FeedError, decodeFeed, normalizeFeed } from '../../../src/lib/feed';
+import { curatedFixtures, readFixture } from '../../helpers/fixtures';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');
 const FEED_URL = 'https://odd.example/feed.xml';

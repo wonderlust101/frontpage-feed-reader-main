@@ -1,4 +1,4 @@
-import { readFixture } from './feed-fixtures';
+import { readFixture } from './fixtures';
 
 export const ETAG = '"v1"';
 export const LAST_MODIFIED = 'Tue, 10 Jun 2025 09:00:00 GMT';

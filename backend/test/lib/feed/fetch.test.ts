@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { FeedError, fetchFeed, isPrivateAddress, parseFeedUrl, type FetchFeedOptions } from '../src/lib/feed';
-import { ETAG, LAST_MODIFIED, startFeedServer } from './feed-server';
+import { FeedError, fetchFeed, isPrivateAddress, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed';
+import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 
 let upstream: ReturnType<typeof startFeedServer>;
 const opts: FetchFeedOptions = { allowPrivate: true, timeoutMs: 2_000 };
