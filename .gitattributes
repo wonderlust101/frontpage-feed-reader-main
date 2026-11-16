@@ -1,0 +1,2 @@
+# Feed fixtures are byte-exact copies of real feeds (encodings, BOMs, CRLFs); never normalize them.
+backend/test/fixtures/** -text
