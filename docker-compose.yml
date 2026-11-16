@@ -1,5 +1,3 @@
-# Local dev stack. backend/.env (Neon) is visible via the bind mount: --no-env-file and the
-# explicit DATABASE_URL* values below keep the stack on the local Postgres. Don't remove them.
 name: frontpage
 
 x-database-url: &database-url postgres://frontpage:frontpage@db:5432/frontpage
@@ -12,35 +10,36 @@ services:
       POSTGRES_PASSWORD: frontpage
       POSTGRES_DB: frontpage
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U frontpage -d frontpage"]
+      test: ['CMD-SHELL', 'pg_isready -U frontpage -d frontpage']
       interval: 2s
       timeout: 5s
       retries: 20
 
   migrate:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.local
-    command: ["bun", "--no-env-file", "x", "drizzle-kit", "push", "--force"]
+      context: .
+      dockerfile: backend/Dockerfile.local
+    command: ['bun', '--no-env-file', 'x', 'drizzle-kit', 'migrate']
     environment:
       DATABASE_URL: *database-url
       DATABASE_URL_UNPOOLED: *database-url
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend:/app/backend
+      - ./packages:/app/packages
+      - /app/backend/node_modules
     depends_on:
       db:
         condition: service_healthy
-    restart: "no"
+    restart: 'no'
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.local
+      context: .
+      dockerfile: backend/Dockerfile.local
     environment:
       NODE_ENV: development
       PORT: 4000
@@ -48,12 +47,13 @@ services:
       DATABASE_URL: *database-url
       DATABASE_URL_UNPOOLED: *database-url
       AUTH_URL: http://localhost:4000
-    command: ["bun", "--no-env-file", "--watch", "src/index.ts"]
+    command: ['bun', '--no-env-file', '--watch', 'src/index.ts']
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend:/app/backend
+      - ./packages:/app/packages
+      - /app/backend/node_modules
     ports:
-      - "4000:4000"
+      - '4000:4000'
     depends_on:
       db:
         condition: service_healthy
@@ -72,17 +72,18 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.local
+      context: .
+      dockerfile: frontend/Dockerfile.local
     environment:
       API_URL: http://backend:4000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      - ./frontend:/app/frontend
+      - ./packages:/app/packages
+      - /app/frontend/node_modules
+      - /app/frontend/.next
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       backend:
         condition: service_healthy

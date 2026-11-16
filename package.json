@@ -1,27 +1,46 @@
 {
-  "name": "frontpage",
-  "private": true,
-  "packageManager": "bun@1.4.4",
-  "scripts": {
-    "postinstall": "bun install --cwd frontend && bun install --cwd backend",
-    "dev": "bun run --parallel dev:backend dev:frontend",
-    "dev:frontend": "bun run --cwd frontend dev",
-    "dev:backend": "bun run --cwd backend dev",
-    "build": "bun run --cwd frontend build",
-    "start:frontend": "bun run --cwd frontend start",
-    "start:backend": "bun run --cwd backend start",
-    "lint": "bun run --cwd frontend lint",
-    "typecheck": "bun run --sequential --no-exit-on-error typecheck:frontend typecheck:backend",
-    "typecheck:frontend": "bun run --cwd frontend typecheck",
-    "typecheck:backend": "bun run --cwd backend typecheck",
-    "test": "bun run --cwd backend test",
-    "test:watch": "bun run --cwd backend test:watch",
-    "db:generate": "bun run --cwd backend db:generate",
-    "db:migrate": "bun run --cwd backend db:migrate",
-    "db:push": "bun run --cwd backend db:push",
-    "db:studio": "bun run --cwd backend db:studio",
-    "docker:up": "docker compose up --build --renew-anon-volumes -d",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
-  }
+    "name": "frontpage",
+    "private": true,
+    "workspaces": [
+        "backend",
+        "frontend",
+        "packages/*"
+    ],
+    "packageManager": "bun@1.4.4",
+    "scripts": {
+        "dev": "bun run --parallel dev:backend dev:frontend",
+        "dev:frontend": "bun run --cwd frontend dev",
+        "dev:backend": "bun run --cwd backend dev",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "build": "bun run --cwd frontend build",
+        "build:backend": "bun run --cwd backend typecheck",
+        "start:frontend": "bun run --cwd frontend start",
+        "start:backend": "bun run --cwd backend start",
+        "lint": "bun run --cwd frontend lint",
+        "typecheck": "bun run --sequential --no-exit-on-error typecheck:frontend typecheck:backend",
+        "typecheck:frontend": "bun run --cwd frontend typecheck",
+        "typecheck:backend": "bun run --cwd backend typecheck",
+        "test": "bun run --cwd backend test",
+        "test:watch": "bun run --cwd backend test:watch",
+        "db:generate": "bun run --cwd backend db:generate",
+        "db:migrate": "bun run --cwd backend db:migrate",
+        "db:push": "bun run --cwd backend db:push",
+        "db:studio": "bun run --cwd backend db:studio",
+        "docker:up": "docker compose up --build --renew-anon-volumes -d",
+        "docker:down": "docker compose down",
+        "docker:logs": "docker compose logs -f"
+    },
+    "devDependencies": {
+        "prettier": "^3.10.1",
+        "typescript": "^5"
+    },
+    "trustedDependencies": [
+        "sharp",
+        "unrs-resolver"
+    ],
+    "ignoreScripts": [
+        "sharp",
+        "unrs-resolver"
+    ]
 }
