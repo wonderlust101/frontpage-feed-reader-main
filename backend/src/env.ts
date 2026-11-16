@@ -26,6 +26,8 @@ export const env = {
     FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? 'Frontpage/0.1 (RSS reader)',
     FEED_MAX_CONCURRENCY: int(process.env.FEED_MAX_CONCURRENCY, 5),
     FEED_MIN_REFETCH_MINUTES: int(process.env.FEED_MIN_REFETCH_MINUTES, 15),
+    // SSRF guard: feeds on localhost/private networks are refused unless this is true (tests only).
+    FEED_ALLOW_PRIVATE_HOSTS: process.env.FEED_ALLOW_PRIVATE_HOSTS === 'true',
 
     // Background refresh of all feeds; 0 disables it.
     FEED_REFRESH_INTERVAL_MINUTES: int(process.env.FEED_REFRESH_INTERVAL_MINUTES, 30),
