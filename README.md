@@ -37,15 +37,15 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │   ├── neon.ts               # Neon infrastructure-as-code (linked via .neon)
 │   ├── bunfig.toml           # bun test config (preloads test/setup.ts)
 │   ├── data/                 # sample feeds (JSON + OPML) for the guest experience
-│   ├── test/                 # API tests: setup.ts, helpers.ts, *.test.ts
+│   ├── test/                 # bun:test tests mirroring src/ (see backend/test/README.md)
 │   ├── requests/             # .http files for manual API requests
 │   └── src/
 │       ├── index.ts          # starts the server (PORT, graceful shutdown)
 │       ├── app.ts            # Express app: global middleware + mounts module routers
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
-│       │   ├── health/       #   health.routes.ts → GET /api/health
-│       │   └── feeds/        #   feeds.schema.ts  → Drizzle "feeds" table
+│       │   ├── health/       #   GET /api/health (routes → controller)
+│       │   └── feeds/        #   GET /api/fetch (routes → controller → service) + Drizzle "feeds" table
 │       ├── middleware/       # Express middleware shared by all modules (404, error handler; later auth)
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
 │       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
@@ -62,14 +62,15 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 
 Each feature lives in `backend/src/modules/<feature>/`, with files named after the feature:
 
-| File                   | Holds                                                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `<feature>.routes.ts`  | Express `Router`, mounted in `app.ts` (`app.use("/api/<feature>", router)`)                                   |
-| `<feature>.service.ts` | Business logic and database queries; routes call this                                                         |
-| `<feature>.schema.ts`  | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it |
-| `<feature>.types.ts`   | Types used only inside this module                                                                            |
+| File                      | Holds                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `<feature>.routes.ts`     | Express `Router`, mounted in `app.ts` (`app.use("/api/<feature>", router)`). Only maps URL + method → controller          |
+| `<feature>.controller.ts` | HTTP in/out: reads `req` (query, params, headers, body), calls the service, sets status/headers, maps errors to responses |
+| `<feature>.service.ts`    | Business logic and database queries; controllers call this. Never touches `req`/`res`                                     |
+| `<feature>.schema.ts`     | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it             |
+| `<feature>.types.ts`      | Types used only inside this module                                                                                        |
 
-Only create the files a module needs. `health/` has just routes; `feeds/` currently has just its table.
+Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, service and its table.
 
 The sample feeds live in `backend/data/` because only the backend reads them.
 

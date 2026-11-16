@@ -1,16 +1,7 @@
 import { Router } from 'express';
-import type { HealthResponse } from '@frontpage/shared';
-import { checkDatabase } from '../../db';
+import { healthController } from './health.controller';
 
 export const healthRouter = Router();
 
-// GET /api/health
-healthRouter.get('/', async (_req, res) => {
-    const database = await checkDatabase();
-    const body: HealthResponse = {
-        api: 'ok',
-        database: database.status,
-        ...(database.error && { error: database.error }),
-    };
-    res.json(body);
-});
+// Mounted at /api/health in app.ts.
+healthRouter.get('/', healthController);
