@@ -15,5 +15,13 @@
     "singleAttributePerLine": false,
     "proseWrap": "preserve",
     "htmlWhitespaceSensitivity": "css",
-    "embeddedLanguageFormatting": "auto"
+    "embeddedLanguageFormatting": "auto",
+    "overrides": [
+        {
+            "files": ["*.yml", "*.yaml"],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
 }
