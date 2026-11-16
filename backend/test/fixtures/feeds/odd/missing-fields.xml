@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<item>
+<description>&lt;p&gt;An item with only a description, no title, link, guid or date. It should still get a readable title from this text.&lt;/p&gt;</description>
+</item>
+<item>
+<title></title>
+<description></description>
+</item>
+<item>
+<title>Has a title only</title>
+</item>
+</channel></rss>

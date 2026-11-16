@@ -1,0 +1,135 @@
+[
+    {
+        "slug": "css-tricks",
+        "title": "CSS-Tricks",
+        "feedUrl": "https://css-tricks.com/feed/",
+        "file": "css-tricks.xml",
+        "contentType": "application/rss+xml; charset=UTF-8"
+    },
+    {
+        "slug": "smashing-magazine",
+        "title": "Smashing Magazine",
+        "feedUrl": "https://www.smashingmagazine.com/feed/",
+        "file": "smashing-magazine.xml",
+        "contentType": "application/xml"
+    },
+    {
+        "slug": "josh-w-comeau",
+        "title": "Josh W. Comeau",
+        "feedUrl": "https://www.joshwcomeau.com/rss.xml",
+        "file": "josh-w-comeau.xml",
+        "contentType": "application/xml"
+    },
+    {
+        "slug": "kent-c-dodds",
+        "title": "Kent C. Dodds",
+        "feedUrl": "https://kentcdodds.com/blog/rss.xml",
+        "file": "kent-c-dodds.xml",
+        "contentType": "application/xml"
+    },
+    {
+        "slug": "web-dev",
+        "title": "web.dev",
+        "feedUrl": "https://web.dev/static/blog/feed.xml",
+        "file": "web-dev.xml",
+        "contentType": "text/xml"
+    },
+    {
+        "slug": "mdn-blog",
+        "title": "MDN Blog",
+        "feedUrl": "https://developer.mozilla.org/en-US/blog/rss.xml",
+        "file": "mdn-blog.xml",
+        "contentType": "application/xml"
+    },
+    {
+        "slug": "sidebar-io",
+        "title": "Sidebar.io",
+        "feedUrl": "https://sidebar.io/feed.xml",
+        "file": "sidebar-io.xml",
+        "contentType": "text/html; charset=utf-8"
+    },
+    {
+        "slug": "nielsen-norman-group",
+        "title": "Nielsen Norman Group",
+        "feedUrl": "https://www.nngroup.com/feed/rss/",
+        "file": "nielsen-norman-group.xml",
+        "contentType": "application/rss+xml; charset=utf-8"
+    },
+    {
+        "slug": "figma-blog",
+        "title": "Figma Blog",
+        "feedUrl": "https://www.figma.com/blog/feed/atom.xml",
+        "file": "figma-blog.xml",
+        "contentType": "application/rss+xml"
+    },
+    {
+        "slug": "a-list-apart",
+        "title": "A List Apart",
+        "feedUrl": "https://alistapart.com/main/feed/",
+        "file": "a-list-apart.xml",
+        "contentType": "text/xml; charset=UTF-8"
+    },
+    {
+        "slug": "ux-collective",
+        "title": "UX Collective",
+        "feedUrl": "https://uxdesign.cc/feed",
+        "file": "ux-collective.xml",
+        "contentType": "text/xml; charset=UTF-8"
+    },
+    {
+        "slug": "cloudflare-blog",
+        "title": "Cloudflare Blog",
+        "feedUrl": "https://blog.cloudflare.com/rss/",
+        "file": "cloudflare-blog.xml",
+        "contentType": "application/rss+xml; charset=utf-8"
+    },
+    {
+        "slug": "vercel-blog",
+        "title": "Vercel Blog",
+        "feedUrl": "https://vercel.com/atom",
+        "file": "vercel-blog.xml",
+        "contentType": "application/atom+xml"
+    },
+    {
+        "slug": "the-github-blog",
+        "title": "The GitHub Blog",
+        "feedUrl": "https://github.blog/feed/",
+        "file": "the-github-blog.xml",
+        "contentType": "application/rss+xml; charset=UTF-8"
+    },
+    {
+        "slug": "netlify-blog",
+        "title": "Netlify Blog",
+        "feedUrl": "https://www.netlify.com/feed.xml",
+        "file": "netlify-blog.xml",
+        "contentType": "application/xml"
+    },
+    {
+        "slug": "the-pragmatic-engineer",
+        "title": "The Pragmatic Engineer",
+        "feedUrl": "https://blog.pragmaticengineer.com/rss/",
+        "file": "the-pragmatic-engineer.xml",
+        "contentType": "application/rss+xml; charset=utf-8"
+    },
+    {
+        "slug": "hacker-news-best",
+        "title": "Hacker News Best",
+        "feedUrl": "https://hnrss.org/best",
+        "file": "hacker-news-best.xml",
+        "contentType": "application/xml; charset=utf-8"
+    },
+    {
+        "slug": "simon-willison-s-weblog",
+        "title": "Simon Willison's Weblog",
+        "feedUrl": "https://simonwillison.net/atom/everything/",
+        "file": "simon-willison-s-weblog.xml",
+        "contentType": "application/xml; charset=utf-8"
+    },
+    {
+        "slug": "hugging-face-blog",
+        "title": "Hugging Face Blog",
+        "feedUrl": "https://huggingface.co/blog/feed.xml",
+        "file": "hugging-face-blog.xml",
+        "contentType": "application/rss+xml; charset=utf-8"
+    }
+]

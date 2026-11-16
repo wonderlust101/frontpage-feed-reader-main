@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+<title><![CDATA[CDATA & <em>Title</em>]]></title>
+<link>https://cdata.example/</link>
+<item>
+<title><![CDATA[Full content item]]></title>
+<link>https://cdata.example/full</link>
+<guid>https://cdata.example/full</guid>
+<dc:creator><![CDATA[Grace Hopper]]></dc:creator>
+<category><![CDATA[CSS]]></category><category>CSS</category><category>Layout</category>
+<pubDate>Tue, 10 Jun 2025 09:00:00 GMT</pubDate>
+<media:content url="https://cdata.example/hero.jpg" medium="image"/>
+<description><![CDATA[A short excerpt.]]></description>
+<content:encoded><![CDATA[<p>A short excerpt.</p><p>This is the much longer full article body with several paragraphs of text that go well beyond the excerpt length so the engine can tell full content from a summary.</p>]]></content:encoded>
+</item>
+</channel></rss>

@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xml:lang="en-us" xmlns="http://www.w3.org/2005/Atom"><title>Simon Willison's Weblog</title><link href="http://simonwillison.net/" rel="alternate"/><link href="http://simonwillison.net/atom/everything/" rel="self"/><id>http://simonwillison.net/</id><updated>2026-11-15T23:58:36+00:00</updated><author><name>Simon Willison</name></author><entry><title>datasette-maplibre 0.1a0</title><link href="https://simonwillison.net/2026/Nov/15/datasette-maplibre/" rel="alternate"/><published>2026-11-15T23:58:36+00:00</published><updated>2026-11-15T23:58:36+00:00</updated><id>https://simonwillison.net/2026/Nov/15/datasette-maplibre/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/datasette/datasette-maplibre/releases/tag/0.1a0"&gt;datasette-maplibre 0.1a0&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;The first new Datasette geospatial plugin in quite a while! This one combines the excellent &lt;a href="https://maplibre.org/maplibre-gl-js/docs/"&gt;MapLibre GL&lt;/a&gt; library with &lt;a href="https://openfreemap.org"&gt;OpenFreeMap&lt;/a&gt;, the free vector map server operated by Zsolt Ero (you should &lt;a href="https://github.com/sponsors/hyperknot"&gt;sponsor Zsolt on GitHub&lt;/a&gt;.)&lt;/p&gt;
+&lt;p&gt;I built most of this with a single prompt to Claude Fable 5.2:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Look at datasette-cluster-map and datasette-leaflet-geojson plugins, then look at ~/dev/tools/openfreemap-demo.html - then build a brand new Datasette plugin that uses maplibreGL and openfreemap and combines the features of those other two plugins - but be creative and think outside the box for other useful features the plugin might have&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;"Be creative and think outside the box" resulted in a few neat ideas - my favorite is that it displays SVG previews of GeoJSON shapes, then loads a WebGL preview only when they scroll into view.&lt;/p&gt;
+&lt;p&gt;I also had Claude build a comprehensive demo which works in the latest Datasette Lite, so you can &lt;a href="https://lite.datasette.io/?install=datasette-maplibre&amp;amp;url=https://gist.githubusercontent.com/simonw/39fa5d399465766039549912e2b3d291/raw/f6dfba99a75cbb8b5d9386223220eb52272767ee/demo.db&amp;amp;metadata=https://gist.githubusercontent.com/simonw/39fa5d399465766039549912e2b3d291/raw/f6dfba99a75cbb8b5d9386223220eb52272767ee/metadata.yml"&gt;visit this link&lt;/a&gt; to load the plugin and a demo database in your browser via Pyodide and WebAssembly.&lt;/p&gt;
+&lt;p&gt;I like &lt;a href="https://lite.datasette.io/?install=datasette-maplibre&amp;amp;url=https://gist.githubusercontent.com/simonw/39fa5d399465766039549912e2b3d291/raw/f6dfba99a75cbb8b5d9386223220eb52272767ee/demo.db&amp;amp;metadata=https://gist.githubusercontent.com/simonw/39fa5d399465766039549912e2b3d291/raw/f6dfba99a75cbb8b5d9386223220eb52272767ee/metadata.yml#/demo/capitals_and_countries%23map=0/4.2/180&amp;amp;color=continent"&gt;this demo page&lt;/a&gt; showing both GeoJSON shapes and lat/lon points on the same map:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Screenshot of a web map interface. Toolbar: &amp;quot;View&amp;quot; set to &amp;quot;Clusters&amp;quot;, &amp;quot;Colour by&amp;quot; set to &amp;quot;continent&amp;quot;, plus &amp;quot;Filter to this area&amp;quot; and &amp;quot;Download GeoJSON&amp;quot; buttons. A world map shows countries outlined and shaded by continent, with coloured dots and numbered cluster circles. A popup for a point in South America reads: capital Caracas, country Venezuela, continent South America, capital_population 2985000, latitude 10.502944, longitude -66.918983. Legend: Africa (52), Asia (45), Europe (39), North America (16), South America (13), Oceania (6). Text: &amp;quot;All 171 rows are on the map&amp;quot;. Below, a table with columns country, continent, capital_population, latitude, longitude, boundary. First row: Afghanistan, Asia, 3277000, 34.518636, 69.181314, with a small map in the boundary column showing Afghanistan outlined and shaded in blue." src="https://static.simonwillison.net/static/cors-allow/2026/datasette-maplibre.webp" /&gt;&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/visualization"&gt;visualization&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette-lite"&gt;datasette-lite&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude-mythos-fable"&gt;claude-mythos-fable&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/geospatial"&gt;geospatial&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/openstreetmap"&gt;openstreetmap&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="visualization"/><category term="generative-ai"/><category term="datasette-lite"/><category term="claude-mythos-fable"/><category term="ai"/><category term="llms"/><category term="geospatial"/><category term="openstreetmap"/><category term="datasette"/></entry><entry><title>datasette 1.0a43</title><link href="https://simonwillison.net/2026/Nov/15/datasette/" rel="alternate"/><published>2026-11-15T23:20:27+00:00</published><updated>2026-11-15T23:20:27+00:00</updated><id>https://simonwillison.net/2026/Nov/15/datasette/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/datasette/releases/tag/1.0a43"&gt;datasette 1.0a43&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;I've been leaning hard into Claude Fable 5.2 to help knock things off the &lt;a href="https://github.com/simonw/datasette/milestone/37"&gt;1.0 milestone&lt;/a&gt;, which is now 53% complete.&lt;/p&gt;
+&lt;p&gt;The biggest 1.0 item in this release is &lt;a href="https://docs.datasette.io/en/latest/plugin_hooks.html#plugin-register-output-renderer-streaming"&gt;streaming support for output renderers&lt;/a&gt; - the built-in TSV and CSV export mechanisms now use this as well, and plugins can register themselves as capable of streaming every row in a table in one go via the new &lt;a href="https://docs.datasette.io/en/latest/internals.html#internals-response-stream"&gt;Response.stream()&lt;/a&gt; method.&lt;/p&gt;
+&lt;p&gt;There are a couple of security fixes, one of which I deemed &lt;a href="https://github.com/simonw/datasette/security/advisories/GHSA-mw6v-83vp-7c4c"&gt;deserving of a GitHub advisory&lt;/a&gt;: private stored queries could be exposed, granting access to the title and SQL of the query (but not allowing that query to be executed).&lt;/p&gt;
+&lt;p&gt;There are dozens of smaller improvements. The row page JSON representation &lt;a href="https://docs.datasette.io/en/latest/json_api.html#json-api-row"&gt;finally has a design suitable for 1.0&lt;/a&gt;. A new &lt;code&gt;&amp;lt;datasette-copy-button&amp;gt;&lt;/code&gt; Web Component provides copy-schema in various places. JSON in columns on the row page can be pretty-printed. There's a new &lt;a href="https://docs.datasette.io/en/latest/javascript_plugins.html#javascript-plugins-modal-confirm"&gt;DatasetteModal.confirm()&lt;/a&gt; JavaScript utility method. Plus dozens of bug fixes, including contributions by &lt;a href="https://github.com/PDGGK"&gt;Zihan Dai&lt;/a&gt;, &lt;a href="https://github.com/peterolkhov"&gt;Peter Olkhovets&lt;/a&gt;, &lt;a href="https://github.com/IlyaKhalafi"&gt;Ilya Khalafi&lt;/a&gt;, and &lt;a href="https://github.com/AnkitaAdvitot"&gt;Ankita Advitot&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The feature I'm most excited about is a pretty tiny one: I've added CSS multi-page view transitions to Datasette! &lt;a href="https://github.com/simonw/datasette/commit/7da8a85ea77786edef975a4066bbadfab0966a0c"&gt;Here's the commit&lt;/a&gt; - key CSS is as follows:&lt;/p&gt;
+&lt;div class="highlight highlight-source-css"&gt;&lt;pre&gt;&lt;span class="pl-c"&gt;/* Enable cross-document view transitions,&lt;/span&gt;
+&lt;span class="pl-c"&gt;   for anyone without prefers-reduced-motion */&lt;/span&gt;
+&lt;span class="pl-k"&gt;@media&lt;/span&gt; &lt;span class="pl-kos"&gt;(&lt;/span&gt;&lt;span class="pl-c1"&gt;prefers-reduced-motion&lt;/span&gt;&lt;span class="pl-kos"&gt;:&lt;/span&gt; no-preference&lt;span class="pl-kos"&gt;)&lt;/span&gt; &lt;span class="pl-kos"&gt;{&lt;/span&gt;
+    &lt;span class="pl-k"&gt;@view-transition&lt;/span&gt; &lt;span class="pl-kos"&gt;{&lt;/span&gt;
+        &lt;span class="pl-c1"&gt;navigation&lt;/span&gt;&lt;span class="pl-kos"&gt;:&lt;/span&gt; auto&lt;span class="pl-kos"&gt;;&lt;/span&gt;
+    &lt;span class="pl-kos"&gt;}&lt;/span&gt;
+&lt;span class="pl-kos"&gt;}&lt;/span&gt;
+&lt;span class="pl-c"&gt;/* .facet-results should morph from old position to new */&lt;/span&gt;
+&lt;span class="pl-ent"&gt;html&lt;/span&gt;&lt;span class="pl-kos"&gt;:&lt;/span&gt;&lt;span class="pl-c1"&gt;active-view-transition&lt;/span&gt; &lt;span class="pl-kos"&gt;.&lt;/span&gt;&lt;span class="pl-c1"&gt;content&lt;/span&gt; &lt;span class="pl-c1"&gt;&amp;gt;&lt;/span&gt; &lt;span class="pl-kos"&gt;.&lt;/span&gt;&lt;span class="pl-c1"&gt;facet-results&lt;/span&gt; &lt;span class="pl-kos"&gt;{&lt;/span&gt;
+    &lt;span class="pl-c1"&gt;view-transition-name&lt;/span&gt;&lt;span class="pl-kos"&gt;:&lt;/span&gt; facet-results&lt;span class="pl-kos"&gt;;&lt;/span&gt;
+&lt;span class="pl-kos"&gt;}&lt;/span&gt;
+&lt;span class="pl-c"&gt;/* So should a .table-wrapper, provided it contains .rows-and-columns */&lt;/span&gt;
+&lt;span class="pl-ent"&gt;html&lt;/span&gt;&lt;span class="pl-kos"&gt;:&lt;/span&gt;&lt;span class="pl-c1"&gt;active-view-transition&lt;/span&gt; &lt;span class="pl-kos"&gt;.&lt;/span&gt;&lt;span class="pl-c1"&gt;table-wrapper&lt;/span&gt;&lt;span class="pl-kos"&gt;:&lt;/span&gt;&lt;span class="pl-c1"&gt;has&lt;/span&gt;&lt;span class="pl-kos"&gt;(&lt;/span&gt;&lt;span class="pl-c1"&gt;&amp;gt;&lt;/span&gt; &lt;span class="pl-ent"&gt;table&lt;/span&gt;&lt;span class="pl-kos"&gt;.&lt;/span&gt;&lt;span class="pl-c1"&gt;rows-and-columns&lt;/span&gt;&lt;span class="pl-kos"&gt;)&lt;/span&gt; &lt;span class="pl-kos"&gt;{&lt;/span&gt;
+    &lt;span class="pl-c1"&gt;view-transition-name&lt;/span&gt;&lt;span class="pl-kos"&gt;:&lt;/span&gt; rows-table&lt;span class="pl-kos"&gt;;&lt;/span&gt;
+&lt;span class="pl-kos"&gt;}&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With that in place, navigations within Datasette - still staunchly a multi-page application - feel more like an SPA. This works on Safari and Chrome at the moment and I believe supports for Firefox is due to land in &lt;a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/162#changes_for_web_developers"&gt;Firefox 162&lt;/a&gt; on December 8th 2026 (seeing as they are no longer feature-flagged in Firefox Nightly.)&lt;/p&gt;
+&lt;video controls playsinline preload="none" width="930" height="720" poster="https://static.simonwillison.net/static/cors-allow/2026/css-transitions-datasette.webp"&gt;
+  &lt;source src="https://static.simonwillison.net/static/cors-allow/2026/css-transitions-datasette.mp4" type="video/mp4"&gt;
+&lt;/video&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/security"&gt;security&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/css"&gt;css&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/browsers"&gt;browsers&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/annotated-release-notes"&gt;annotated-release-notes&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/firefox"&gt;firefox&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/javascript"&gt;javascript&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/safari"&gt;safari&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/chrome"&gt;chrome&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="security"/><category term="datasette"/><category term="css"/><category term="browsers"/><category term="annotated-release-notes"/><category term="firefox"/><category term="javascript"/><category term="safari"/><category term="chrome"/></entry><entry><title>datasette 0.65.6</title><link href="https://simonwillison.net/2026/Nov/15/datasette-2/" rel="alternate"/><published>2026-11-15T23:18:17+00:00</published><updated>2026-11-15T23:18:17+00:00</updated><id>https://simonwillison.net/2026/Nov/15/datasette-2/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/datasette/releases/tag/0.65.6"&gt;datasette 0.65.6&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;I backported a minor security fix from 1.0a43:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Fixed a security issue where a database registered using &lt;code&gt;add_database(db, name=..., route=...)&lt;/code&gt; with a route that differs from its name could be downloaded from &lt;code&gt;/&amp;lt;route&amp;gt;.db&lt;/code&gt; by actors who were denied access to it. [...]&lt;/p&gt;
+&lt;/blockquote&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/security"&gt;security&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="security"/><category term="datasette"/></entry><entry><title>datasette-apps 0.4a0</title><link href="https://simonwillison.net/2026/Nov/15/datasette-apps/" rel="alternate"/><published>2026-11-15T04:02:45+00:00</published><updated>2026-11-15T04:02:45+00:00</updated><id>https://simonwillison.net/2026/Nov/15/datasette-apps/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/datasette/datasette-apps/releases/tag/0.4a0"&gt;datasette-apps 0.4a0&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Datasette Apps are sandboxed HTML and JavaScript applications that live inside Datasette - think Claude Artifacts, but these ones can run SQL queries against your data.&lt;/p&gt;
+&lt;p&gt;0.4a0 adds support for linking: you can link to an app with &lt;code&gt;#fragments&lt;/code&gt; in the URL and the app can see and use those, plus supported URL schemes are reported back to Datasette Agent so it can help write apps that link to each other.&lt;/p&gt;
+&lt;p&gt;This means you can have e.g. an app that shows details about a specific record, and a completely separate app that searches those records and links to their representations in the first app.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/datasette-agent"&gt;datasette-agent&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette-apps"&gt;datasette-apps&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/urls"&gt;urls&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="datasette-agent"/><category term="datasette-apps"/><category term="datasette"/><category term="urls"/></entry><entry><title>datasette-agent 0.6a0</title><link href="https://simonwillison.net/2026/Nov/15/datasette-agent/" rel="alternate"/><published>2026-11-15T03:49:47+00:00</published><updated>2026-11-15T03:49:47+00:00</updated><id>https://simonwillison.net/2026/Nov/15/datasette-agent/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/datasette/datasette-agent/releases/tag/0.6a0"&gt;datasette-agent 0.6a0&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Accumulated small fixes for Datasette Agent, my agent plugin for Datasette that lets you ask questions about your data. Most notably, it now adds an agent prompt directly to the Datasette homepage, with support for hash-mentions of tables and queries:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Datasette homepage. Below the search box is a Datasette Agent heading with a text input and an ask button. User has typed: Tell me about #re - the box is showing autocomplete results for the repos and releases tables." src="https://static.simonwillison.net/static/cors-allow/2026/datasette-agent-homepage.webp" /&gt;&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/datasette-agent"&gt;datasette-agent&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="datasette-agent"/><category term="llm"/><category term="datasette"/><category term="llms"/><category term="ai"/><category term="generative-ai"/></entry><entry><title>datasette-llm 0.1a11</title><link href="https://simonwillison.net/2026/Nov/14/datasette-llm/" rel="alternate"/><published>2026-11-14T23:59:28+00:00</published><updated>2026-11-14T23:59:28+00:00</updated><id>https://simonwillison.net/2026/Nov/14/datasette-llm/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/datasette/datasette-llm/releases/tag/0.1a11"&gt;datasette-llm 0.1a11&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;&lt;code&gt;datasette-llm&lt;/code&gt; is the intermediate plugin for Datasette that supports configuring LLMs for use with other Datasette plugins.&lt;/p&gt;
+&lt;p&gt;This release adds support for OpenAI-compatible endpoints, so you can configure Datasette to use an LLM hosted anywhere that talks the OpenAI pseudo-standard web protocol.&lt;/p&gt;
+&lt;p&gt;This means that if you're running local models with &lt;a href="https://lmstudio.ai"&gt;LM Studio&lt;/a&gt; or &lt;a href="https://ollama.com"&gt;Ollama&lt;/a&gt; or &lt;a href="https://github.com/ggml-org/llama.cpp"&gt;llama.cpp&lt;/a&gt; (which just hit &lt;a href="https://huggingface.co/blog/ggml-org/llama-cpp-v1"&gt;v1.0.0&lt;/a&gt;) you can run Datasette via &lt;code&gt;uvx&lt;/code&gt; like this:&lt;/p&gt;
+&lt;div class="highlight highlight-source-shell"&gt;&lt;pre&gt;wget https://datasette.io/content.db
+
+uvx --with datasette-agent datasette \
+  --root --secret 1 \
+  -s plugins.datasette-llm.default_model &lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;'&lt;/span&gt;{&lt;/span&gt;
+&lt;span class="pl-s"&gt;    "model": "lmstudio-qwen",&lt;/span&gt;
+&lt;span class="pl-s"&gt;    "model_name": "qwen/qwen3.8-27b",&lt;/span&gt;
+&lt;span class="pl-s"&gt;    "api_base": "http://localhost:1234/v1"&lt;/span&gt;
+&lt;span class="pl-s"&gt;  }&lt;span class="pl-pds"&gt;'&lt;/span&gt;&lt;/span&gt; content.db&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And you'll get a local server running a Datasette Agent instance powered by your local model!&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Screenshot of a chat interface. Header bar reads &amp;quot;home&amp;quot; on the left and &amp;quot;root&amp;quot; with a hamburger menu icon on the right. Below is a back arrow, the heading &amp;quot;Chat&amp;quot;, a model label &amp;quot;lmstudio-qwen&amp;quot; and an &amp;quot;EXPORT&amp;quot; button. A blue user message bubble says &amp;quot;how many repos and how many releases are there?&amp;quot; Below it is a collapsed tool call &amp;quot;list_databases_and_tables&amp;quot; and an expanded tool call &amp;quot;sql_query&amp;quot;. Its REQUEST section shows database &amp;quot;content&amp;quot;, display &amp;quot;both&amp;quot; and the SQL: SELECT (SELECT COUNT(*) FROM repos) AS repo_count, (SELECT COUNT(*) FROM releases) AS release_count. Its RESPONSE section shows columns repo_count and release_count with a single row of 200 and 1889. Below that is a table with columns repo_count and release_count and one row: 200, 1889, followed by a &amp;quot;View SQL query&amp;quot; button. The assistant reply reads &amp;quot;There are 200 repos and 1,889 releases in the content database.&amp;quot; At the bottom is a text input with placeholder &amp;quot;Type a message... (# to tag a table or query)&amp;quot; and a blue &amp;quot;Send&amp;quot; button." src="https://static.simonwillison.net/static/2026/lmstudio-datasette-agent.webp" /&gt;&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/uv"&gt;uv&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette-agent"&gt;datasette-agent&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="uv"/><category term="datasette-agent"/><category term="llm"/><category term="datasette"/><category term="llms"/><category term="ai"/><category term="generative-ai"/></entry><entry><title>datasette-vega 0.7</title><link href="https://simonwillison.net/2026/Nov/14/datasette-vega/" rel="alternate"/><published>2026-11-14T17:09:09+00:00</published><updated>2026-11-14T17:09:09+00:00</updated><id>https://simonwillison.net/2026/Nov/14/datasette-vega/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/datasette-vega/releases/tag/0.7"&gt;datasette-vega 0.7&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;A new release of Datasette's longest untouched plugin, for rendering charts (using &lt;a href="https://vega.github.io/vega-lite/"&gt;Vega-Lite&lt;/a&gt;) against data in a table or custom query. The last release was in July 2018!&lt;/p&gt;
+&lt;p&gt;I finally bumped it for compatibility with the latest Datasette alphas, plus some cosmetic tweaks to make it work better with &lt;a href="https://lite.datasette.io/"&gt;Datasette Lite&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;(Datasette Lite just gained the ability to run JavaScript plugins like this! I'll write more about that soon.)&lt;/p&gt;
+&lt;p&gt;Since it works with Datasette Lite, the live demo in the README now &lt;a href="https://lite.datasette.io/?install=datasette-vega&amp;amp;csv=https%3A%2F%2Fraw.githubusercontent.com%2Ffivethirtyeight%2Fdata%2Fmaster%2Fairline-safety%2Fairline-safety.csv#/data/airline-safety?_size=max#g.mark=bar&amp;amp;g.x_column=airline&amp;amp;g.x_type=ordinal&amp;amp;g.y_column=fatalities_00_14&amp;amp;g.y_type=quantitative"&gt;links to this demo on Datasette Lite&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Screenshot of a charting tool. A panel headed &amp;quot;Charting options&amp;quot; has radio buttons for &amp;quot;Bar&amp;quot; (selected), &amp;quot;Line&amp;quot; and &amp;quot;Scatter&amp;quot;. Below are select menus: &amp;quot;X column&amp;quot; set to &amp;quot;airline&amp;quot; with &amp;quot;Type&amp;quot; set to &amp;quot;Label&amp;quot;, and &amp;quot;Y column&amp;quot; set to &amp;quot;fatalities_00_14&amp;quot; with &amp;quot;Type&amp;quot; set to &amp;quot;Numeric&amp;quot;. A &amp;quot;Swap X and Y&amp;quot; button sits beneath those, followed by &amp;quot;Color&amp;quot; and &amp;quot;Size&amp;quot; menus both set to &amp;quot;-- none --&amp;quot;. Underneath the panel is a blue bar chart with airline names along the X axis and fatalities_00_14 on the Y axis, running from 0 to 550 - most airlines have no bar, a handful have bars, and Malaysia Airlines is the tallest." src="https://static.simonwillison.net/static/2026/datasette-vega.webp" /&gt;&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette-lite"&gt;datasette-lite&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="datasette"/><category term="datasette-lite"/></entry><entry><title>datasette-cluster-map 0.19</title><link href="https://simonwillison.net/2026/Nov/13/datasette-cluster-map/" rel="alternate"/><published>2026-11-13T23:02:45+00:00</published><updated>2026-11-13T23:02:45+00:00</updated><id>https://simonwillison.net/2026/Nov/13/datasette-cluster-map/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/datasette-cluster-map/releases/tag/0.19"&gt;datasette-cluster-map 0.19&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;One of the oldest Datasette plugins, and still one of my favorites. It now works with Datasette 1.0a42, and depends on &lt;a href="https://simonwillison.net/2026/Nov/13/datasette-leaflet/"&gt;the new datasette-leaflet&lt;/a&gt; to ensure OpenStreetMap tiles are requested with a referrer header.&lt;/p&gt;
+&lt;p&gt;Here's &lt;a href="https://datasette.io/global-power-plants/global-power-plants?owner=Pacific+Gas+%26+Electric+Co."&gt;a map of power plants owned by California's PG&amp;amp;E&lt;/a&gt;, also demonstrating Datasette's recently &lt;a href="https://github.com/simonw/datasette/pull/3032"&gt;redesigned facets&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Screenshot of a faceted map interface. Three facet panels at the top: &amp;quot;country_long 1&amp;quot; with United States of America 81 selected; &amp;quot;owner 1&amp;quot; with Pacific Gas &amp;amp; Electric Co. 81 selected; &amp;quot;primary_fuel 5&amp;quot; listing Hydro 63, Solar 10, Gas 5, Storage 2, Nuclear 1. Each primary_fuel row has a pale blue horizontal bar behind its label, sized in proportion to its count: Hydro's bar fills most of the row width, Solar's is a short sliver, Gas's is shorter still, and Storage and Nuclear have only a thin strip at the left edge. Below is a Leaflet map with + and − zoom controls showing California and Nevada, with marker clusters across northern and central California: 9 near Redding, 21 near Chico, 2 to the west of Chico, 13 northeast of Sacramento, 7 east of Stockton, 6 at Oakland, 10 at Fresno, 9 west of Visalia, 2 north of Bakersfield, plus two individual blue pin markers on the coast, one in the far north and one north of Santa Maria. Attribution: Leaflet | © OpenStreetMap contributors" src="https://static.simonwillison.net/static/2026/power-plants-pge.webp" /&gt;&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/geospatial"&gt;geospatial&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/openstreetmap"&gt;openstreetmap&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="datasette"/><category term="geospatial"/><category term="openstreetmap"/></entry><entry><title>datasette-leaflet 0.3</title><link href="https://simonwillison.net/2026/Nov/13/datasette-leaflet/" rel="alternate"/><published>2026-11-13T22:30:54+00:00</published><updated>2026-11-13T22:30:54+00:00</updated><id>https://simonwillison.net/2026/Nov/13/datasette-leaflet/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/datasette-leaflet/releases/tag/0.3"&gt;datasette-leaflet 0.3&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;OpenStreetMap have a very reasonable policy that hits to their hosted tile server &lt;a href="https://wiki.openstreetmap.org/wiki/Referer"&gt;should send a referrer header&lt;/a&gt;. Datasette table pages used the &lt;code&gt;Referrer-Policy: no-referrer&lt;/code&gt; HTTP header, causing plugins that loaded tiles from OpenStreetMap to violate that policy.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;datasette-leaflet&lt;/code&gt; is the plugin that loads a bundled Leaflet so other Datasette plugins can depend on it. It now sets the referrer policy on the tile requests themselves to &lt;code&gt;strict-origin-when-cross-origin&lt;/code&gt;, passing the host but not the full path to the page.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/leaflet"&gt;leaflet&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/openstreetmap"&gt;openstreetmap&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="leaflet"/><category term="datasette"/><category term="openstreetmap"/></entry><entry><title>llm-gemini 0.37</title><link href="https://simonwillison.net/2026/Nov/12/llm-gemini/" rel="alternate"/><published>2026-11-12T22:55:19+00:00</published><updated>2026-11-12T22:55:19+00:00</updated><id>https://simonwillison.net/2026/Nov/12/llm-gemini/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/llm-gemini/releases/tag/0.37"&gt;llm-gemini 0.37&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Google launched &lt;a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/"&gt;Gemini 4 Hydrogen&lt;/a&gt; today - the lowest cost member of the Gemini 4 family.&lt;/p&gt;
+&lt;p&gt;It's actually not too far off the price of its much bigger siblings, Carbon and Argon. I'm finding Gemini 4's pricing &lt;em&gt;really&lt;/em&gt; confusing. Here's the pricing scheme:&lt;/p&gt;
+&lt;center&gt;&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Model&lt;/th&gt;
+      &lt;th&gt;Dates&lt;/th&gt;
+      &lt;th&gt;Input ($/M)&lt;/th&gt;
+      &lt;th&gt;Cached input&lt;/th&gt;
+      &lt;th&gt;Output&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td rowspan="2"&gt;Gemini 4 Carbon&lt;/td&gt;
+      &lt;td&gt;Through Nov 30, 2026&lt;/td&gt;
+      &lt;td&gt;$2.00&lt;/td&gt;
+      &lt;td&gt;$0.10&lt;/td&gt;
+      &lt;td&gt;$10.00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;From Dec 1, 2026&lt;/td&gt;
+      &lt;td&gt;$4.00&lt;/td&gt;
+      &lt;td&gt;$0.20&lt;/td&gt;
+      &lt;td&gt;$20.00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td rowspan="2"&gt;Gemini 4 Argon&lt;/td&gt;
+      &lt;td&gt;Through Nov 30, 2026&lt;/td&gt;
+      &lt;td&gt;$2.00&lt;/td&gt;
+      &lt;td&gt;$0.10&lt;/td&gt;
+      &lt;td&gt;$10.00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;From Dec 1, 2026&lt;/td&gt;
+      &lt;td&gt;$4.00&lt;/td&gt;
+      &lt;td&gt;$0.20&lt;/td&gt;
+      &lt;td&gt;$20.00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Gemini 4 Hydrogen&lt;/td&gt;
+      &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+      &lt;td&gt;$1.50&lt;/td&gt;
+      &lt;td&gt;$0.075&lt;/td&gt;
+      &lt;td&gt;$7.50&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;&lt;/center&gt;
+
+&lt;p&gt;Carbon and Argon are &lt;em&gt;the same price&lt;/em&gt;, and both are scheduled to double in price on December 1st. If they're the same price, why have two different models? &lt;a href="https://aistudio.google.com/docs/pricing"&gt;Google says&lt;/a&gt; that Argon "delivers Gemini 4 intelligence with faster responses and lower token spend per turn compared to Gemini 4 Carbon" - so it may be priced the same, but it will use less tokens per task.&lt;/p&gt;
+&lt;p&gt;Hydrogen, supposedly the cheap model, is currently only a 25% discount on its more capable peers. The Hydrogen price will make more sense after December 1st, when it will represent a 75% discount. It's still considerably more expensive than Claude Haiku 5.5 and GPT-6 Luna - they're both $0.10/$0.50, so Hydrogen is 15x that.&lt;/p&gt;
+&lt;p&gt;I had Hydrogen &lt;a href="https://tools.simonwillison.net/markdown-svg-renderer?url=https%3A%2F%2Fgist.github.com%2Fsimonw%2Fce357e95149cd16f65ec7e7106ed4fed"&gt;generate some pelicans&lt;/a&gt;. Here's a &lt;a href="https://static.simonwillison.net/static/2026/gemini-4-pelicans.html"&gt;full comparison grid&lt;/a&gt; showing the pelicans for all three members of the Gemini 4 family at their three supported effort levels:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Comparison grid of nine SVG-style illustrations of a pelican riding a bicycle, three models across by three thinking levels down. Column headers: Thinking, gemini-4-carbon, gemini-4-argon, gemini-4-hydrogen. Row HIGH: gemini-4-carbon draws a detailed pelican in a sailor cap riding a red cruiser bicycle with fenders and a wicker basket holding a fish, along a beach road with sea, sun, clouds and birds, captioned 40 input tokens, 20,305 output = 20.31 cents · 4m 11s; gemini-4-argon draws a pelican in a red cap and a streaming teal striped scarf on a red bicycle with a blue fish peeking out of the basket, on a seaside promenade with a pale sun, captioned 40 input tokens, 17,158 output = 17.17 cents · 2m 29s; gemini-4-hydrogen draws a much simpler plain white pelican on a basic red bicycle against a pale blue sky with two clouds, speed lines and flat green ground, captioned 40 input tokens, 5,311 output = 3.99 cents · 19s. Row MEDIUM: gemini-4-carbon draws a pelican in a sailor cap and red striped scarf on a red bicycle with cream fenders and a basket, on a sandy beach with a rope fence and sea, captioned 40 input tokens, 11,020 output = 11.03 cents · 1m 53s; gemini-4-argon draws a pelican with an enormous orange beak, sailor cap and flowing red scarf on a teal bicycle with a basket, on a boardwalk under a purple and pink sunset sky with a large pink sun, captioned 40 input tokens, 11,090 output = 11.10 cents · 1m 32s; gemini-4-hydrogen draws a simple cream pelican on a plain red bicycle with sparse spokes, two clouds and flat green ground, captioned 40 input tokens, 3,964 output = 2.98 cents · 17s. Row LOW: gemini-4-carbon draws a pelican in a sailor cap and red and white striped scarf on a red bicycle with fenders and a basket, passing a white seaside railing on a grey road, captioned 40 input tokens, 9,153 output = 9.16 cents · 1m 34s; gemini-4-argon draws a large, chubby pelican with a sailor cap and huge orange beak on a red bicycle with a basket, gripping the handlebars with a dark blue wing, in front of an orange setting sun and a grey road, captioned 40 input tokens, 10,177 output = 10.18 cents · 1m 21s; gemini-4-hydrogen draws the simplest image, a plain white pelican on a thin red bicycle over a single green line with no scenery, captioned 40 input tokens, 2,996 output = 2.25 cents · 10s. Overall, carbon and argon produce rich, accessorised seaside scenes at every thinking level, while hydrogen produces far plainer pelicans at a fraction of the cost and time, and detail decreases for all three models as thinking drops from high to low." src="https://static.simonwillison.net/static/2026/gemini-4-pelicans.webp" /&gt;&lt;/p&gt;
+&lt;p&gt;Considering how close they are in price, the difference in pelican quality for Hydrogen is quite stark.&lt;/p&gt;
+&lt;p&gt;Here's &lt;a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen/"&gt;how Google describe&lt;/a&gt; Hydrogen's intended position in their mix of models:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In real-world software development, while teams rely on frontier models like Carbon and Argon for deep architectural judgment when designing systems or untangling subtle bugs, they still need a fast, disciplined execution model for writing code, running tests, and verifying changes. Hydrogen is built to stand on its own as a model for everyday work — or to pair with Carbon and Argon as the high-efficiency execution engine in multi-model workflows.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Most notably, Hydrogen is the new free tier model, and is the model that will power AI features in Google Search.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/gemini"&gt;gemini&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/google"&gt;google&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/pelican-riding-a-bicycle"&gt;pelican-riding-a-bicycle&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm-pricing"&gt;llm-pricing&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="gemini"/><category term="llm"/><category term="google"/><category term="pelican-riding-a-bicycle"/><category term="llm-pricing"/><category term="ai"/><category term="llms"/></entry><entry><title>Gemini Decisions API</title><link href="https://simonwillison.net/2026/Nov/11/gemini-decisions-api/" rel="alternate"/><published>2026-11-11T22:03:25+00:00</published><updated>2026-11-11T22:03:25+00:00</updated><id>https://simonwillison.net/2026/Nov/11/gemini-decisions-api/</id><summary type="html">
+    
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/"&gt;Gemini Decisions API&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+Google join &lt;a href="https://simonwillison.net/2026/Sep/21/jev/"&gt;Jev&lt;/a&gt; and &lt;a href="https://simonwillison.net/2026/Oct/6/llm-openai-decisions/"&gt;OpenAI&lt;/a&gt; in the decision model category with "Gemini Decision 1". This new model API is almost identical to Jev: it supports the same three types of questions (yes/no, choice, and rubric-scoring) and even reuses Jev's term "Noul" for a yes/no question.&lt;/p&gt;
+&lt;p&gt;It's priced the same as the GPT-6 Luna decision model: 10 cents per million input tokens, and output is free. Jev remains the cheapest of the three, at 4.2 cents per million.&lt;/p&gt;
+&lt;p&gt;Jev is text (and JSON) only. OpenAI can handle text and images. Gemini Decision 1 is fully multi-model: it covers text, images, audio, video, and PDFs.&lt;/p&gt;
+&lt;p&gt;I tested it against video by passing these questions to it along with my &lt;a href="https://simonwillison.net/2026/Nov/10/yonkers-rises/"&gt;Yonkers stomping robot&lt;/a&gt; video file:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;dragon: Does this video have a dragon in it?
+robot: Does this video have a robot in it?
+france: Is this video set in France?
+usa: Is this video set in the USA?
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Jev and OpenAI both return 1.0 or 0.0 for yes/no questions, but Gemini insists on being a little less confident than that:&lt;/p&gt;
+&lt;div class="highlight highlight-source-json"&gt;&lt;pre&gt;{
+  &lt;span class="pl-ent"&gt;"dragon"&lt;/span&gt;: {
+    &lt;span class="pl-ent"&gt;"type"&lt;/span&gt;: &lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;"&lt;/span&gt;yes_no&lt;span class="pl-pds"&gt;"&lt;/span&gt;&lt;/span&gt;,
+    &lt;span class="pl-ent"&gt;"probability"&lt;/span&gt;: &lt;span class="pl-c1"&gt;0.04976021841520312&lt;/span&gt;
+  },
+  &lt;span class="pl-ent"&gt;"robot"&lt;/span&gt;: {
+    &lt;span class="pl-ent"&gt;"type"&lt;/span&gt;: &lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;"&lt;/span&gt;yes_no&lt;span class="pl-pds"&gt;"&lt;/span&gt;&lt;/span&gt;,
+    &lt;span class="pl-ent"&gt;"probability"&lt;/span&gt;: &lt;span class="pl-c1"&gt;0.9234055387792485&lt;/span&gt;
+  },
+  &lt;span class="pl-ent"&gt;"france"&lt;/span&gt;: {
+    &lt;span class="pl-ent"&gt;"type"&lt;/span&gt;: &lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;"&lt;/span&gt;yes_no&lt;span class="pl-pds"&gt;"&lt;/span&gt;&lt;/span&gt;,
+    &lt;span class="pl-ent"&gt;"probability"&lt;/span&gt;: &lt;span class="pl-c1"&gt;0.08329171353166241&lt;/span&gt;
+  },
+  &lt;span class="pl-ent"&gt;"usa"&lt;/span&gt;: {
+    &lt;span class="pl-ent"&gt;"type"&lt;/span&gt;: &lt;span class="pl-s"&gt;&lt;span class="pl-pds"&gt;"&lt;/span&gt;yes_no&lt;span class="pl-pds"&gt;"&lt;/span&gt;&lt;/span&gt;,
+    &lt;span class="pl-ent"&gt;"probability"&lt;/span&gt;: &lt;span class="pl-c1"&gt;0.9230459995157706&lt;/span&gt;
+  }
+}&lt;/pre&gt;&lt;/div&gt;
+
+    &lt;p&gt;&lt;small&gt;&lt;/small&gt;Via &lt;a href="https://news.ycombinator.com/item?id=50456791"&gt;Hacker News&lt;/a&gt;&lt;/small&gt;&lt;/p&gt;
+
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/gemini"&gt;gemini&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm-release"&gt;llm-release&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/jev"&gt;jev&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/decision-models"&gt;decision-models&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="ai"/><category term="generative-ai"/><category term="gemini"/><category term="llm-release"/><category term="jev"/><category term="decision-models"/></entry><entry><title>aws-emulator</title><link href="https://simonwillison.net/2026/Nov/11/aws-emulator/" rel="alternate"/><published>2026-11-11T21:18:30+00:00</published><updated>2026-11-11T21:18:30+00:00</updated><id>https://simonwillison.net/2026/Nov/11/aws-emulator/</id><summary type="html">
+    
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://github.com/aws/aws-emulator"&gt;aws-emulator&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+Finally, an official emulator from AWS to run tests against a local clone of their many different services without having to provision a paid API key to do so.&lt;/p&gt;
+&lt;p&gt;It's written in Rust by a huge swarm of agents - 29,684 commits in the first three weeks of the project. Swaminathan (Swami) Sivasubramanian wrote about &lt;a href="https://www.allthingsdistributed.com/2026/11/aws-emulator-and-the-engineers-job-when-agents-write-the-code.html"&gt;how it came to be&lt;/a&gt; in a guest post on Werner Vogels' blog.&lt;/p&gt;
+&lt;p&gt;It currently requires Docker to run on macOS or Windows. I'm hoping they fix that in the future - it would be great if you could download a single binary and use that as part of a standard test suite in other languages and on other platforms.
+
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/amazon"&gt;amazon&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/amazon-web-services"&gt;amazon-web-services&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/testing"&gt;testing&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/werner-vogels"&gt;werner-vogels&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/rust"&gt;rust&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/docker"&gt;docker&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/agentic-engineering"&gt;agentic-engineering&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="amazon"/><category term="amazon-web-services"/><category term="testing"/><category term="werner-vogels"/><category term="ai"/><category term="rust"/><category term="docker"/><category term="generative-ai"/><category term="llms"/><category term="agentic-engineering"/></entry><entry><title>Browse tools.simonwillison.net by tag</title><link href="https://simonwillison.net/2026/Nov/11/tools-tags/" rel="alternate"/><published>2026-11-11T18:42:50+00:00</published><updated>2026-11-11T18:42:50+00:00</updated><id>https://simonwillison.net/2026/Nov/11/tools-tags/</id><summary type="html">
+    
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://tools.simonwillison.net/#tags"&gt;Browse tools.simonwillison.net by tag&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+I've been wanting a better way to browse my &lt;a href=""&gt;collection of vibe-coded tools&lt;/a&gt; (244 and counting) for a while. I had a few Fable 5.2 credits left over before my weekly reset so I set it to work using &lt;a href="https://github.com/tree-sitter/py-tree-sitter"&gt;tree-sitter&lt;/a&gt; to analyze the code for JavaScript APIs, libraries, and web API hosts used by each tool.&lt;/p&gt;
+&lt;p&gt;The homepage now features tag clouds for browsing by each of those categories of tag:&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://tools.simonwillison.net/#tags"&gt;&lt;img alt="Screenshot of two tag cloud sections where tags are sized by count. Browse by JavaScript libraries - Libraries loaded from a CDN by two or more tools. Select a tag to list its tools. @google/generative-ai 3, @jsquash/avif 3, @jsquash/webp 4, Babel 2, Chart.js 2, Cropper.js 2, D3 2, DOMPurify 7, js-yaml 3, JSZip 3, Leaflet 4, markdown-it 4, Marked 12, pako 2, PDF.js 3, Pyodide 11, React 3, Tesseract.js 2, three.js 3. Browse by browser APIs - Web platform features used by each tool's own code. Select a tag to list its tools. &amp;lt;dialog&amp;gt; 5, AbortController 6, Blob URLs 38, BroadcastChannel 1, Built-in AI 1, Camera / microphone 9, Canvas 2D 44, Clipboard API 69, Compression Streams 3, createImageBitmap 2, crypto random values 4, DOMParser 8, Drag and drop 30, Dynamic import() 12, ES modules 92" src="https://static.simonwillison.net/static/2026/tools-tag-cloud.webp" /&gt;&lt;/a&gt;
+
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/javascript"&gt;javascript&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/tools"&gt;tools&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude"&gt;claude&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/vibe-coding"&gt;vibe-coding&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="javascript"/><category term="tools"/><category term="ai"/><category term="generative-ai"/><category term="llms"/><category term="claude"/><category term="vibe-coding"/></entry><entry><title>llm 0.37.2</title><link href="https://simonwillison.net/2026/Nov/11/llm/" rel="alternate"/><published>2026-11-11T17:19:52+00:00</published><updated>2026-11-11T17:19:52+00:00</updated><id>https://simonwillison.net/2026/Nov/11/llm/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/llm/releases/tag/0.37.2"&gt;llm 0.37.2&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Fixes a security issue reported by &lt;a href="https://github.com/BluePlexus"&gt;Daniel de Araujo&lt;/a&gt; in &lt;a href="https://github.com/simonw/llm/security/advisories/GHSA-v9h7-jj4g-f862"&gt;GHSA-v9h7-jj4g-f862&lt;/a&gt; and &lt;a href="https://github.com/simonw/llm/security/advisories/GHSA-r639-rr7r-x72w"&gt;GHSA-r639-rr7r-x72w&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;LLM has a mechanism called &lt;a href="https://llm.datasette.io/en/stable/other-models.html#configure-an-openai-compatible-model"&gt;extra-openai-models.yaml&lt;/a&gt; - now managed by the new-in-0.37 &lt;a href="https://llm.datasette.io/en/stable/other-models.html#openai-endpoint-add"&gt;llm openai endpoint add&lt;/a&gt; command - for using LLM with OpenAI-compatible API endpoints from other providers.&lt;/p&gt;
+&lt;p&gt;Daniel reported two ways this could accidentally send your configured OpenAI API key to one of those providers: if the key named by &lt;code&gt;api_key_name&lt;/code&gt; had never been stored, or if a &lt;code&gt;responses: true&lt;/code&gt; model was run with &lt;code&gt;-o chat_completions 1&lt;/code&gt;.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/projects"&gt;projects&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/security"&gt;security&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/releases"&gt;releases&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="projects"/><category term="security"/><category term="llm"/><category term="releases"/></entry><entry><title>Anthropic's IPO roadshow video</title><link href="https://simonwillison.net/2026/Nov/11/anthropic-ipo-roadshow/" rel="alternate"/><published>2026-11-11T15:11:59+00:00</published><updated>2026-11-11T15:11:59+00:00</updated><id>https://simonwillison.net/2026/Nov/11/anthropic-ipo-roadshow/</id><summary type="html">
+    
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://ipo.anthropic.com/us/#roadshow-video"&gt;Anthropic&amp;#x27;s IPO roadshow video&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+Anthropic kicked off their IPO roadshow yesterday, and their roadshow video has some previously unreleased information about how their business works.&lt;/p&gt;
+&lt;p&gt;The section on "Approach to compute" with co-founder Tom Brown is particularly interesting, describing how Anthropic train and serve Claude across AWS Trainium, Google TPUs, NVIDIA GPUs, and AMD GPUs.&lt;/p&gt;
+&lt;p&gt;I'm not sure why there's no official video transcript, but here's &lt;a href="https://gist.github.com/simonw/9806757fe8acec6221cb0a5cce4d720d"&gt;one that I extracted&lt;/a&gt; using MacWhisper. Highlights below:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;We train and serve Claude now across all four major chip families. That's only possible because early on we made an unconventional bet on a multi-chip strategy. At the time, many people thought that running AI models on different chips wasn't worth the effort. Each chip needs its own tailored software stack and inference stack, which is expensive and difficult to build. We've now been doing it for years, and we've gotten incredibly good at it. [...]&lt;/p&gt;
+&lt;p&gt;As an example, this year, we started working with AMD GPUs for the first time. In the past, bringing on a new chip platform took dozens of engineers months of work &lt;strong&gt;This time, we had Mythos try it out. It got Claude running on AMD in just three days, with basically no human intervention&lt;/strong&gt;. Claude ported or wrote almost 100% of the kernels. [...]&lt;/p&gt;
+&lt;p&gt;The second driver of our compute advantage is our rate of discovery of compute multipliers. We focus on total effective compute, which is the multiplicative product of physical capacity times the compute multipliers that we discover. Each one we discover makes our pool of total effective compute bigger. For example, say you need 100 units of compute to train a model of a certain intelligence. A 4x compute multiplier means you can use 25 units of compute to train the exact same model. Or you can use those hundred physical units to train an even more intelligent model that would have previously required 400 units.&lt;/p&gt;
+&lt;p&gt;Compute multipliers create a competitive advantage for us that's hard to replicate. They build on each other. Each new multiplier we discover has a positive effect on the multipliers before it. They stack. &lt;strong&gt;We believe that this can accelerate even further as we approach recursive self-improvement. Claude will be able to discover compute multipliers entirely by itself&lt;/strong&gt;, allowing the number of compute multipliers to grow faster and faster.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;We got a hint at Anthropic's multi-chip strategy last September in their &lt;a href="https://www.anthropic.com/research/a-postmortem-of-three-recent-issues"&gt;postmortem of three recent issues&lt;/a&gt;, where they described bugs that affected just their TPU deployments.
+
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/anthropic"&gt;anthropic&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/gpus"&gt;gpus&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude-mythos-fable"&gt;claude-mythos-fable&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/recursive-self-improvement"&gt;recursive-self-improvement&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="ai"/><category term="generative-ai"/><category term="llms"/><category term="anthropic"/><category term="gpus"/><category term="claude-mythos-fable"/><category term="recursive-self-improvement"/></entry><entry><title>llm-gemini 0.36</title><link href="https://simonwillison.net/2026/Nov/10/llm-gemini/" rel="alternate"/><published>2026-11-10T20:09:44+00:00</published><updated>2026-11-10T20:09:44+00:00</updated><id>https://simonwillison.net/2026/Nov/10/llm-gemini/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/llm-gemini/releases/tag/0.36"&gt;llm-gemini 0.36&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Gemini 4 Carbon was announced &lt;a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/"&gt;two weeks ago&lt;/a&gt; for "a subset of cyber defenders", but today it's &lt;a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/"&gt;available to everyone else&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This is Google's best ever Gemini, priced at $2/million input and $10/million output at launch (that's GPT-6.1 Sol / Claude Sonnet 5.5 prices) but scheduled to double in price to $4/$20 on December 1st (same as Opus 5.5).&lt;/p&gt;
+&lt;p&gt;Here are &lt;a href="https://tools.simonwillison.net/markdown-svg-renderer?url=https%3A%2F%2Fgist.github.com%2Fsimonw%2Fe5bf860633fc12e8f926f305c4c3190c"&gt;three pelicans&lt;/a&gt; for the low, medium and high thinking efforts (it defaults to medium). This is the pelican I got for high:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="A lovely pelican. Looks like it has a monocle on. Nice elegant sailor hat with a blue bow. Basket and fish. Funky but workable bicycle design. Pleasing use of gradients." src="https://static.simonwillison.net/static/2026/carbon-pelican.webp" /&gt;&lt;/p&gt;
+&lt;p&gt;Gemini pelicans have all been great for a while now, so I also tested it out using Google's Antigravity IDE with a prompt I first tried &lt;a href="https://simonwillison.net/2026/Nov/10/yonkers-rises/"&gt;with Claude Fable 5.2 yesterday&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Make a three js animation where yonkers stands up as a big mech (cool stand up motion) and stomps around manhattan and queens and Brooklyn, use openstreetmap mapping data&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Here's &lt;a href="https://static.simonwillison.net/static/2026/yonkers-mech-standalone.html"&gt;the HTML result&lt;/a&gt; (I had to prompt "build that into a standalone HTML file" to get a version with no external dependencies). I then screen-captured that as a video:&lt;/p&gt;
+&lt;video controls playsinline preload="none" width="1028" height="720" poster="https://static.simonwillison.net/static/2026/yonkers-carbon.jpg"&gt;
+  &lt;source src="https://static.simonwillison.net/static/2026/yonkers-carbon.mp4" type="video/mp4"&gt;
+&lt;/video&gt;
+
+&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;: Huh, just saw this &lt;a href="https://www.youtube.com/watch?v=dNbkThtNzS8"&gt;on YouTube&lt;/a&gt; (and &lt;a href="https://twitter.com/sundarpichai/status/2120198811297694192"&gt;tweeted by Google CEO Sundar Pichai&lt;/a&gt;):&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Using Google Antigravity’s /swarm feature, Carbon built an open-world 3D game where you explore Google’s Mountain View campus as a pelican riding a GBike — coordinating subagents to model 3D assets in Blender from Omni and Nano Banana references, build the browser game in Three.js with WebGL shaders, and pair procedural Web Audio sound effects with Lyria music.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;lite-youtube videoid="dNbkThtNzS8" js-api="js-api"
+  title="Pelican Quest: Gemini 4 Carbon"
+  playlabel="Play: Pelican Quest: Gemini 4 Carbon"
+&gt; &lt;/lite-youtube&gt;&lt;/p&gt;
+
+&lt;p&gt;Here's &lt;a href="https://aistudio.google.com/apps/bundled/pelican-campus-quest?showAssistant=true&amp;amp;showPreview=true&amp;amp;fullscreenApplet=true"&gt;the playable version&lt;/a&gt; in AI Studio.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/llm-release"&gt;llm-release&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/gemini"&gt;gemini&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/google"&gt;google&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/pelican-riding-a-bicycle"&gt;pelican-riding-a-bicycle&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="llm-release"/><category term="gemini"/><category term="llm"/><category term="google"/><category term="generative-ai"/><category term="ai"/><category term="llms"/><category term="pelican-riding-a-bicycle"/></entry><entry><title>Introducing Our Smallest, Most Efficient Model: Muse Ember</title><link href="https://simonwillison.net/2026/Nov/10/muse-ember/" rel="alternate"/><published>2026-11-10T07:28:21+00:00</published><updated>2026-11-10T07:28:21+00:00</updated><id>https://simonwillison.net/2026/Nov/10/muse-ember/</id><summary type="html">
+    
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://research.meta.ai/blog/muse-ember"&gt;Introducing Our Smallest, Most Efficient Model: Muse Ember&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+Meta AI just launched their entry in the Claude Haiku/GPT Luna category: Muse Ember, which they describe as:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[...] our smallest and most efficient model designed for complex reasoning execution and the work agents repeat all day: tool calls, coding subtasks, routing, extraction, and long document parsing.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;For shorter prompts it's priced the same as GPT-6 Luna and Claude Haiku 5.5 - both are $0.10/million input tokens and $0.50/million output. Today's other big model release, Claude Fable 5.2, is &lt;em&gt;80x that price&lt;/em&gt; at $8/$40.&lt;/p&gt;
+&lt;p&gt;The pricing is a little less straightforward as prompts get longer, though. Luna, Ember, and Haiku all support up to a million input tokens, but they also all have a threshold after which the price goes up. Taking &lt;em&gt;that&lt;/em&gt; threshold into account Ember is priced between the two others:&lt;/p&gt;
+&lt;center&gt;&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Model&lt;/th&gt;
+      &lt;th&gt;Prompt size&lt;/th&gt;
+      &lt;th&gt;Input ($/M)&lt;/th&gt;
+      &lt;th&gt;Cached input&lt;/th&gt;
+      &lt;th&gt;Output&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td rowspan="2"&gt;GPT-6 Luna&lt;/td&gt;
+      &lt;td&gt;≤272k&lt;/td&gt;
+      &lt;td&gt;$0.10&lt;/td&gt;
+      &lt;td&gt;$0.01&lt;/td&gt;
+      &lt;td&gt;$0.50&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&amp;gt;272k&lt;/td&gt;
+      &lt;td&gt;$0.20&lt;/td&gt;
+      &lt;td&gt;$0.02&lt;/td&gt;
+      &lt;td&gt;$0.75&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td rowspan="2"&gt;Muse Ember 1.0&lt;/td&gt;
+      &lt;td&gt;≤200k&lt;/td&gt;
+      &lt;td&gt;$0.10&lt;/td&gt;
+      &lt;td&gt;$0.004&lt;/td&gt;
+      &lt;td&gt;$0.50&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&amp;gt;200k&lt;/td&gt;
+      &lt;td&gt;$0.30&lt;/td&gt;
+      &lt;td&gt;$0.012&lt;/td&gt;
+      &lt;td&gt;$1.50&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td rowspan="2"&gt;Claude Haiku 5.5&lt;/td&gt;
+      &lt;td&gt;≤100k&lt;/td&gt;
+      &lt;td&gt;$0.10&lt;/td&gt;
+      &lt;td&gt;$0.01&lt;/td&gt;
+      &lt;td&gt;$0.50&lt;/td&gt;
+    &lt;/tr&gt; 
+    &lt;tr&gt;
+      &lt;td&gt;&amp;gt;100k&lt;/td&gt;
+      &lt;td&gt;$0.50&lt;/td&gt;
+      &lt;td&gt;$0.05&lt;/td&gt;
+      &lt;td&gt;$2.50&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;&lt;/center&gt;
+
+&lt;p&gt;But comparing price-per-token doesn't really make sense these days, when reasoning tokens mean that different models might use dramatically different numbers of tokens to solve the same problem.&lt;/p&gt;
+&lt;p&gt;For that, one measure that's useful is the Artificial Analysis. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="Stacked bar chart from Artificial Analysis comparing a cost in dollars across six models, each bar split into four unlabeled stacked segments, sorted from lowest to highest total. Claude Haiku 5.5 (low): $0.04* total, bottom segment $0.02, three thin unlabeled segments above. GPT-6 Luna (non-reasoning): $0.07 total, bottom segment $0.06, thin unlabeled segments above. GPT-6 Luna (xhigh): $0.10 total, segments from bottom $0.07, $0.02, $0.02, plus a thin unlabeled top segment. Muse Ember (xhigh): $0.12 total, segments from bottom $0.06, $0.02, $0.02, plus a thin unlabeled top segment. Muse Ember (max): $0.14 total, segments from bottom $0.07, $0.03, $0.03, $0.02. Claude Haiku 5.5 (xhigh): $0.25* total, segments from bottom $0.14, $0.04, $0.05, $0.02. Anthropic bars are terracotta, OpenAI bars are dark gray, Meta bars are blue, each with the company logo beneath." src="https://static.simonwillison.net/static/2026/artificial-analysis-haiku-class.webp" /&gt;&lt;/p&gt;
+&lt;p&gt;And even more useful than that is their Intelligence Index vs. Cost per Task chart, which shows the following for those three models:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Scatter plot from Artificial Analysis titled &amp;quot;Intelligence Index vs. Cost per Task&amp;quot;, plotting Artificial Analysis Intelligence Index (y-axis, 5 to 40) against cost per task in USD on a log scale (x-axis, $0.04 to $0.3), with a green &amp;quot;most attractive quadrant&amp;quot; in the upper left and a dotted Pareto line. Claude Haiku 5.5 (low)* scores about 19 at roughly $0.044. GPT-6 Luna (non-reasoning) scores about 9.5 at roughly $0.07. GPT-6 Luna (xhigh) scores about 23.5 at roughly $0.10. Muse Ember (xhigh) scores about 34 at roughly $0.12 and Muse Ember (max) about 36 at roughly $0.14, both on the Pareto line. Claude Haiku 5.5 (xhigh)* scores about 34.5 at roughly $0.25, well to the right of the Pareto line. Three unlabeled gray dots also sit on the Pareto line." src="https://static.simonwillison.net/static/2026/artificial-analysis-pareto.webp" /&gt;&lt;/p&gt;
+&lt;p&gt;The Muse Ember models sit right on that Pareto line - the line at which you can only improve one dimension by giving up another. Meta call this out in their announcement:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;It also sits on the efficiency frontier of the full Artificial Analysis leaderboard: no model scores higher for less per task.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;(That grey dot on the Pareto line in the middle of the green area is GPT-6.1 Terra (low) - clearly I should be paying more attention to the Terra family!)&lt;/p&gt;
+&lt;p&gt;Muse Ember has six reasoning levels - minimal, low, medium, high, xhigh, and max - so I &lt;a href="https://tools.simonwillison.net/markdown-svg-renderer?url=https%3A%2F%2Fgist.github.com%2Fsimonw%2Fc7666e8a54d84f724ac8121f9fa6cc4d"&gt;rendered six pelicans riding bicycles&lt;/a&gt;. The "high" reasoning level failed to return a full SVG, and the other SVGs were surprising in that the reasoning level didn't cleanly map to the visual quality of the response.&lt;/p&gt;
+&lt;p&gt;Here's the "max" one, but the others are worth a look too:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Bicycle frame is OK, basket has fish, pelican has a weird blue hat on." src="https://static.simonwillison.net/static/2026/muse-ember.webp" /&gt;&lt;/p&gt;
+&lt;p&gt;The Ember pelicans are comparable in quality to those &lt;a href="https://tools.simonwillison.net/markdown-svg-renderer?url=https://gist.github.com/simonw/185cff7ff0b11379725abf7f78d5d2b2"&gt;I got from Muse Wonder&lt;/a&gt;, which is &lt;a href="https://www.llm-prices.com/#sel=muse-ember-1.0%2Cmuse-ember-1.0-200k%2Cmuse-wonder-1.0"&gt;40x the price&lt;/a&gt; of Muse Ember.
+
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/meta"&gt;meta&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm-pricing"&gt;llm-pricing&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm-release"&gt;llm-release&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/artificial-analysis"&gt;artificial-analysis&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/muse"&gt;muse&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="ai"/><category term="generative-ai"/><category term="llms"/><category term="meta"/><category term="llm-pricing"/><category term="llm-release"/><category term="artificial-analysis"/><category term="muse"/></entry><entry><title>Quoting Prompting Claude Fable 5.2</title><link href="https://simonwillison.net/2026/Nov/10/prompting-claude-fable-52/" rel="alternate"/><published>2026-11-10T05:34:14+00:00</published><updated>2026-11-10T05:34:14+00:00</updated><id>https://simonwillison.net/2026/Nov/10/prompting-claude-fable-52/</id><summary type="html">
+    &lt;blockquote cite="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2#say-who-owns-the-code"&gt;&lt;p&gt;Claude Fable 5.2 pays close attention to who owns the code it works on. In Anthropic’s testing on small coding tasks, the model tended to add to the existing structure when the prompt said nothing about ownership or presented the code base as someone else’s, even when that duplicated existing code. When the prompt said the code base was the model’s own, it often consolidated duplicated code and sometimes made related fixes without being asked.&lt;/p&gt;
+&lt;p&gt;If you want the model to improve the structure as it works, say that the code is its own:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;You are the owner and long-term maintainer of this codebase, and its design is up to you.&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The ownership sentence makes the model much more likely to consolidate duplicated code into one shared function. In Anthropic’s testing on small coding tasks, the model consolidated duplicated code in under 10 percent of runs without the sentence and in about 75 percent of runs with it.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p class="cite"&gt;&amp;mdash; &lt;a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2#say-who-owns-the-code"&gt;Prompting Claude Fable 5.2&lt;/a&gt;, Anthropic documentation&lt;/p&gt;
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/prompt-engineering"&gt;prompt-engineering&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/anthropic"&gt;anthropic&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude-mythos-fable"&gt;claude-mythos-fable&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="prompt-engineering"/><category term="anthropic"/><category term="generative-ai"/><category term="ai"/><category term="llms"/><category term="claude-mythos-fable"/></entry><entry><title>Yonkers Rises</title><link href="https://simonwillison.net/2026/Nov/10/yonkers-rises/" rel="alternate"/><published>2026-11-10T03:53:04+00:00</published><updated>2026-11-10T03:53:04+00:00</updated><id>https://simonwillison.net/2026/Nov/10/yonkers-rises/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Tool:&lt;/strong&gt; &lt;a href="https://tools.simonwillison.net/yonkers-rises"&gt;Yonkers Rises&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;I realized I didn't know where Yonkers was, so I looked it up on Google Maps and then, to help embed its location and shape in my head (and to try out Claude Fable 5.2's 3D modeling and animation skills), I &lt;a href="https://claude.ai/share/97443910-2e0a-4e17-9b9e-11d14d8ff65c"&gt;prompted Fable 5.2 Medium&lt;/a&gt; to:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Make a three js animation where yonkers stands up as a big mech (cool stand up motion) and átomos around manhattan and queens and Brooklyn, use openstreetmap mapping data&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It correctly deduced that "átomos" was a mobile keyboard typo for "stomps":&lt;/p&gt;
+&lt;video controls playsinline preload="none" width="572" height="360" poster="https://static.simonwillison.net/static/2026/yonkers.webp"&gt;
+  &lt;source src="https://static.simonwillison.net/static/2026/yonkers-large.mp4" type="video/mp4"&gt;
+&lt;/video&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/three-js"&gt;three-js&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude-mythos-fable"&gt;claude-mythos-fable&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="three-js"/><category term="llms"/><category term="ai"/><category term="generative-ai"/><category term="claude-mythos-fable"/></entry><entry><title>llm-anthropic 0.31</title><link href="https://simonwillison.net/2026/Nov/9/llm-anthropic/" rel="alternate"/><published>2026-11-09T23:58:46+00:00</published><updated>2026-11-09T23:58:46+00:00</updated><id>https://simonwillison.net/2026/Nov/9/llm-anthropic/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/simonw/llm-anthropic/releases/tag/0.31"&gt;llm-anthropic 0.31&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Anthropic &lt;a href="https://www.anthropic.com/claude-fable-and-mythos-5-2"&gt;released Fable 5.2 and Mythos 5.2&lt;/a&gt; today. Fable 5.2 is currently &lt;a href="https://artificialanalysis.ai/models/claude-fable-5-2"&gt;ranked first on Artificial Analysis&lt;/a&gt;. Anthropic say it "solved two open problems in the physics of black holes", so clearly their internal benchmarks have become more ambitious!&lt;/p&gt;
+&lt;p&gt;I've added the new models to &lt;code&gt;llm-anthropic&lt;/code&gt;, so you can now run prompts through Fable 5.2 like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;uv tool install llm
+llm install llm-anthropic
+llm keys set anthropic
+# paste key here
+llm -m claude-fable-5.2 "Generate an SVG of a pelican riding a bicycle"
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I ran pelicans at all five reasoning levels - &lt;code&gt;low&lt;/code&gt;, &lt;code&gt;medium&lt;/code&gt;, &lt;code&gt;high&lt;/code&gt;, &lt;code&gt;xhigh&lt;/code&gt;, and &lt;code&gt;max&lt;/code&gt;. You can &lt;a href="https://tools.simonwillison.net/markdown-svg-renderer?url=https%3A%2F%2Fgist.github.com%2Fsimonw%2Fbcd1a1bf38b929b0bbbae2e38b808e97"&gt;see them all here&lt;/a&gt; - here's the best result I got, from &lt;code&gt;xhigh&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="It's good - legs the right side of the bicycle, good frame, nice pouch, weird little fingers on the handlebars. The pouch looks slightly misaligned with the top of the beak." src="https://static.simonwillison.net/static/2026/fable-5.2-xhigh.avif" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;max&lt;/code&gt; failed to return an image at all, running out of tokens after spending 128,000 &lt;a href="https://tools.simonwillison.net/markdown-svg-renderer?url=https%3A%2F%2Fgist.github.com%2Fsimonw%2Fbcd1a1bf38b929b0bbbae2e38b808e97#reasoning-2"&gt;thinking about them&lt;/a&gt;. That's the same bug that I saw with &lt;a href="https://simonwillison.net/2026/Sep/22/opus-and-sol-and-luna/#claude-opus-5-5-max-over-thinks-to-the-point-of-breaking"&gt;Opus 5.5&lt;/a&gt; - but it's new for the Fable series, both &lt;a href="https://simonwillison.net/2026/Jun/9/claude-fable-5/#and-some-pelicans"&gt;Fable 5&lt;/a&gt; and &lt;a href="https://simonwillison.net/2026/Sep/1/claude-fable-5-1/#max"&gt;Fable 5.1&lt;/a&gt; returned max effort pelicans just fine.&lt;/p&gt;
+&lt;p&gt;It's priced at $8/million input and $40/million output, which is a 20% discount on the previous Fable 5.1 ($10/$50).&lt;/p&gt;
+&lt;p&gt;I also used Fable 5.2 to &lt;a href="https://simonwillison.net/2026/Nov/9/mysterious-beeps/"&gt;help identify the source of a mysterious beep&lt;/a&gt;.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/llm-release"&gt;llm-release&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/anthropic"&gt;anthropic&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude"&gt;claude&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/pelican-riding-a-bicycle"&gt;pelican-riding-a-bicycle&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude-mythos-fable"&gt;claude-mythos-fable&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="llm-release"/><category term="llm"/><category term="anthropic"/><category term="claude"/><category term="generative-ai"/><category term="pelican-riding-a-bicycle"/><category term="ai"/><category term="llms"/><category term="claude-mythos-fable"/></entry><entry><title>Locating the source of a mysterious beep with Claude</title><link href="https://simonwillison.net/2026/Nov/9/mysterious-beeps/" rel="alternate"/><published>2026-11-09T23:57:21+00:00</published><updated>2026-11-09T23:57:21+00:00</updated><id>https://simonwillison.net/2026/Nov/9/mysterious-beeps/</id><summary type="html">
+    &lt;p&gt;Our house has a box room, full of boxes that we still haven't unpacked from our last move. A couple of weeks ago something in that room started &lt;em&gt;intermittently beeping&lt;/em&gt;. The beeps were far enough apart that standing in the room and trying to determine the source of the noise was frustrating, and I really didn't want to dig through every one of those boxes. So I had Claude Code build &lt;a href="https://github.com/simonw/beep-locator"&gt;Beep Locator&lt;/a&gt;, a software system for triangulating the source of a mysterious beep using multiple devices scattered around the room.&lt;/p&gt;
+&lt;p&gt;Here's what Beep Locator looks like after it has been running for a while:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://static.simonwillison.net/static/2026/beep-locator-ui.webp" alt="Screenshot of a web app that uses several phones, tablets and laptops as microphones to locate a mystery beeping sound in a room. The left column has an &amp;quot;Add a listener&amp;quot; panel with a QR code and join link, a &amp;quot;Controls&amp;quot; panel with buttons including &amp;quot;Calibrate&amp;quot;, &amp;quot;Test beep&amp;quot; and &amp;quot;It just beeped!&amp;quot; plus a &amp;quot;Listen for beeps&amp;quot; checkbox, and a &amp;quot;Mystery beep&amp;quot; note reading &amp;quot;3345 Hz · 3 confirmed · remembered across sessions&amp;quot;. Below that, a &amp;quot;Devices&amp;quot; list shows five color-coded listeners (Simon iPhone, New iPad, Old iPad, MacBook Pro, Surface Ultra), each marked &amp;quot;✓ mic working · ✓ speaker working&amp;quot;. The main area is a gridded map with a 1 m scale bar that shows the five devices as colored dots and earlier sounds as small timestamped markers. A pink shaded circle near the MacBook Pro is labeled &amp;quot;mystery beep · 2 hearings · within ~41 cm&amp;quot;, and beside it a dashed plus marker suggests &amp;quot;add a listener here? could tighten the mystery beep's position by ~12%&amp;quot;. Below the map, a &amp;quot;Mystery beep loudness warmer / colder&amp;quot; panel shows a bar for each device: Surface Ultra is loudest at &amp;quot;-6.0 dB ▲ +11.6 dB warmer&amp;quot;, with the note &amp;quot;about 6 dB louder means roughly half the distance&amp;quot;. At the bottom, a &amp;quot;Sounds located&amp;quot; table lists recent claps and beeps with coordinates, or the warning &amp;quot;arrival times are not physically possible (echo or a different sound?)&amp;quot;." style="max-width: 100%;" /&gt;&lt;/p&gt;
+&lt;p&gt;You run Python web server to show the primary UI, and then use the QR code or URL to connect as many devices as you can spare to act as listeners - I was using two iPads, a phone, a MacBook Pro and a Surface Ultra.&lt;/p&gt;
+&lt;p&gt;The devices then play noises to each other to help estimate their locations. This didn't work particularly well, so I added a "Rough mode" where you can drag their icons around in the space to provide rough locations which are then adjusted based on those sounds.&lt;/p&gt;
+&lt;p&gt;Once that's set up, the devices all listen for the beep!&lt;/p&gt;
+&lt;p&gt;I added a clapping mode too so I could test it by clapping my hands in different locations around the room - displayed as diamonds on the map. This helped me gain confidence that it was capable of locating a sound.&lt;/p&gt;
+&lt;p&gt;Beeps show up on the map as an X, plus a line in the "Sounds located" log. You can replay these sounds (from each device in turn) to confirm they are the mysterious beep you are looking for, then click "This is the mystery beep" to mark them as such.&lt;/p&gt;
+&lt;p&gt;Once you've confirmed the mysterious beep frequency the system will listen out for it, measure the interval between beeps, and use the triangulated locations to lock down the most likely location on the map.&lt;/p&gt;
+&lt;p&gt;The system worked as intended. It gave me the position of the beep to within about 40cm, then I dug through that specific pile of boxes and found an ancient carbon monoxide detector that desperately wanted its batteries replaced.&lt;/p&gt;
+&lt;h4 id="how-it-works"&gt;How it works&lt;/h4&gt;
+&lt;p&gt;When I started working through this problem with Claude it quickly dug up &lt;a href="https://www.cs.purdue.edu/homes/chunyi/pubs/sensys106-beepbeep.pdf"&gt;BeepBeep: A High-Accuracy Acoustic-Based System for Ranging and Localization Using COTS Devices&lt;/a&gt;, a 2007 paper by Chunyi Peng, Guobin Shen, Yongguang Zhang, Yanlin Li, and Kun Tan. Here's that paper's abstract:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;We present the design, implementation, and evaluation of BeepBeep, a high-accuracy acoustic-based ranging system. It operates in a spontaneous, ad-hoc, and device-to-device context without leveraging any pre-planned infrastructure. It is a pure software-based solution and uses only the most basic set of commodity hardware – a speaker, a microphone, and some form of device-to-device communication – so that it is readily applicable to many low-cost sensor platforms and to most commercial-off-the-shelf mobile devices like cell phones and PDAs. It achieves high accuracy through a combination of three techniques: two-way sensing, self-recording, and sample counting.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That sounded exactly like what we needed to build!&lt;/p&gt;
+&lt;p&gt;Beep Locator runs a Python web application server that does most of the work. The listening devices then connect to that server via WebSockets and present a UI which requests browser microphone access. The listeners mainly work by recording a 60 second buffer of recent audio. They also run a simple beep detection algorithm (see &lt;a href="https://github.com/simonw/beep-locator/blob/main/beep_locator/modules/listener/detector.js"&gt;detector.js&lt;/a&gt;), which uses Fast Fourier Transform and a high-pass filter to identify potential beeps. It sends these events to the main server.&lt;/p&gt;
+&lt;p&gt;When a beep is reported, the server has a device play a short chirp (the device with the lowest round-trip time to the server), then asks every listener upload a clip from about 0.6s before the beep to 0.8s after that chirp. This chirp allows the clips to be aligned with each other, a crucial step in locating the beep.&lt;/p&gt;
+&lt;h4 id="how-i-built-it"&gt;How I built it&lt;/h4&gt;
+&lt;p&gt;I started this project using Claude Code Cloud via my iPhone, with Opus 5.5 running in Extra thinking effort mode. Here's &lt;a href="https://claude.ai/code/cshk_016BvfqAWf7MeGZKeYCrUnN2MmRfCSAX9Gu8DiptXMuH9P"&gt;that shared starter session&lt;/a&gt;, which began with this prompt against a newly created empty GitHub repository:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Write out a problem.md file describing the problem we want to solve&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;There is a device beeping in a room and I cannot find it&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;I want to set up several devices - laptops, phones, iPads - around the room all listening at the same time and have them help triangulate where the beep comes from&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;There needs to be a Python web app which coordinates it all - one device shows a web page for the app, other devices join a URL which turns them into listeners - all via browser WebAudio and WebSockets back to the Python server app&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Ideally I wouldn't need to manually input the relative locations of the devices - it would be amazing if they could play sounds to each other in order to locate each other in 2D space - is that even possible though?&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That got me &lt;a href="https://github.com/simonw/beep-locator/blob/main/problem.md"&gt;this problem.md file&lt;/a&gt;. As part of writing that up Claude found and read the BeepBeep paper, which is described in that file.&lt;/p&gt;
+&lt;p&gt;The research looked good, so I told it:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Ok try and build it, add a mechanism so you can send new code to the listeners which they will then run automatically - that way I can set everything up in the room and then leave you alone to continue hacking and experiment while I do something else&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That got me &lt;a href="https://github.com/simonw/beep-locator/commits/e36ac93a81091a246403c074e34c0041c6972fac"&gt;to this point&lt;/a&gt; - most of the system was built, but nothing had actually tried running it yet.&lt;/p&gt;
+&lt;p&gt;I cloned the new repository to my laptop and fired up Claude Code... and then &lt;a href="https://www.anthropic.com/claude-fable-and-mythos-5-2"&gt;Fable 5.2 was released&lt;/a&gt;, and this project seemed like an excellent opportunity to put that through its paces.&lt;/p&gt;
+&lt;p&gt;I had Claude Code on my laptop start the server running, then made sure it could both see what was happening &lt;em&gt;and&lt;/em&gt; make live changes to the software as it ran.&lt;/p&gt;
+&lt;p&gt;This was already baked into the software: Opus 5.5 had built an &lt;a href="https://github.com/simonw/beep-locator/blob/44fea65c918fb31a7d2c0e17797ee1a106860e23/beep_locator/static/runtime.js#L710"&gt;installModule()&lt;/a&gt; method on the listeners that could be triggered over the WebSocket connection, meaning the admin server could execute arbitrary new code on any of its clients.&lt;/p&gt;
+&lt;p&gt;On some devices, web pages that listen on the microphone request user permission any time the page reloads. The hot-swap module mechanism meant that we could deploy new code without having to manually interact with each of the listening devices in turn.&lt;/p&gt;
+&lt;p&gt;From that point on my involvement was mainly to sit by the laptop chatting with Fable 5.2 about what was going on, and occasionally requesting new features. Here are some of the feature prompts I ran:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;I think we need to make it so I can drag things around on the map in “rough mode”, where my job is just to put them roughly where they are, then switch out of rough mode and it attempts to get them accurate&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This gave me the ability to drag listeners around the map.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;what’s a good way for me to test this I wonder? Can we have it listen for claps, then I could clap and it could identify the location of the clap? [...]&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Claps should use a different symbol on the map than beeps&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That added the thing where any time I clapped it would show on the map as a different symbol from the beeps.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;each symbol on the map should include a HH:MM:SS timestamp&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That made it easier to spot which symbol likely reflected which real-world sound.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;The log should show beeps and claps with their timestamps AND have a little play button which, when clicked, replays the recorded noise from each of the listeners in sequence (with clear text on screen showing which listener recorded which snippet) while temporarily turning off microphone recording while that replay plays&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Now I could replay sounds, making it much easier to identify which recorded clip was the mysterious beep I was looking for.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;There should be a button next to a recording for “This is the mystery beep” - then I can hit replay to see and then confirm it was the mystery beep if that’s the one I am looking for&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Then the system can categorize noises in the future to see if they are likely that same mysterious beep and use that information to build a more accurate idea of where it is&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;At this point I was getting close - I had a solid idea of where the beep was coming from, but wouldn't it be neat if I could reposition the listeners around that point to get an even finer location?&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;I want a feature for this, I don’t want to have to restart each listening device etc, I want to be able to click a “Reposition the devices” button which lets me switch into repositioning, then I click “Repositioned” and it puts me into Rough mode and asks me to roughly locate them, then I do that and click, then it starts up again. The previous session can be read-only viewed through the app.&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;And since I had one spare device, I then said:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;add a feature where the map includes a spot that is a suggestion for a location that it would be useful to add a listener at - based on data collected so far&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="giving-claude-code-ears"&gt;Giving Claude Code ears&lt;/h4&gt;
+&lt;p&gt;I think the most interesting part of this project is that I demonstrated it's possible to &lt;em&gt;give Claude Code ears&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Claude doesn't have native audio input (yet), but it can run JavaScript and Python code that can analyze audio captured by a microphone.&lt;/p&gt;
+&lt;p&gt;I told it to run a web server with WebSocket connections to multiple listening devices, then had it both run a WebAudio microphone on those devices and hook them up so they could be sent fresh JavaScript code to execute via that WebSocket.&lt;/p&gt;
+&lt;p&gt;Then I could pretty much leave Claude alone, hacking away at the problem, querying the audio logs, and reconfiguring its ears to help it solve the problem.&lt;/p&gt;
+&lt;p&gt;I'm reminded of a similar hack I heard about at GitHub Universe a few weeks ago, where &lt;a href="https://github.com/martinwoodward"&gt;Martin Woodward&lt;/a&gt; told me he had been debugging the &lt;a href="https://simonwillison.net/2026/Oct/27/game-boy-color-on-my-conference-badge/"&gt;GitHub Universe Badge computers&lt;/a&gt; by plugging them into a computer via USB-C and then pointing a webcam at their screen, so his coding agent could tell if updates were working correctly or not.&lt;/p&gt;
+&lt;p&gt;Figuring out ways to let coding agents perceive the world around them is a whole lot of fun.&lt;/p&gt;
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/projects"&gt;projects&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude"&gt;claude&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/coding-agents"&gt;coding-agents&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude-code"&gt;claude-code&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude-mythos-fable"&gt;claude-mythos-fable&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="projects"/><category term="ai"/><category term="generative-ai"/><category term="llms"/><category term="claude"/><category term="coding-agents"/><category term="claude-code"/><category term="claude-mythos-fable"/></entry><entry><title>The Web Is More Than Enough, by Paul Ford</title><link href="https://simonwillison.net/2026/Nov/9/hn-50421091/" rel="alternate"/><published>2026-11-09T04:32:33+00:00</published><updated>2026-11-09T04:32:33+00:00</updated><id>https://simonwillison.net/2026/Nov/9/hn-50421091/</id><summary type="html">
+    
+        &lt;p&gt;&lt;a href="https://news.ycombinator.com/item?id=50416456#50421091"&gt;My comment&lt;/a&gt; on &lt;a href="https://news.ycombinator.com/item?id=50416456"&gt;The Web Is More Than Enough, by Paul Ford&lt;/a&gt; &amp;mdash; Hacker News.&lt;/p&gt;&lt;p&gt;OK, this comment convinced me to give that a shot.&lt;/p&gt;
+&lt;p&gt;Here's a thing I made in Three.js this morning - a Nudibranch themed Faberge Egg: &lt;a href="https://static.simonwillison.net/static/2026/Hidden-Reef-Egg-threejs.html"&gt;https://static.simonwillison.net/static/2026/Hidden-Reef-Egg...&lt;/a&gt; (77KB)&lt;/p&gt;
+&lt;p&gt;I just asked Claude (Opus 5.5 Medium running in regular Claude Chat) to port that to Vanilla JS, in the same thread where it had built it, and got this: &lt;a href="https://static.simonwillison.net/static/2026/Hidden-Reef-Egg-Vanilla-WebGL.html"&gt;https://static.simonwillison.net/static/2026/Hidden-Reef-Egg...&lt;/a&gt; (98KB)&lt;/p&gt;
+&lt;p&gt;They aren't identical - you can see what Claude said about that in the transcript (I don't fully understand why it differed): &lt;a href="https://claude.ai/share/e56d163e-2793-4677-aa11-191d5058b414"&gt;https://claude.ai/share/e56d163e-2793-4677-aa11-191d5058b414&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;But yeah, it turns out Claude Opus 5.5 is perfectly capable of 3D modeling in Vanilla JS + WebGL without Three.js.&lt;/p&gt;
+&lt;p&gt;In eyeballing the code I find the Three.js slightly easier to understand myself, but I rarely look at the code for these 3D projects so that isn't a particularly big deal.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/claude"&gt;claude&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/javascript"&gt;javascript&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/three-js"&gt;three-js&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/hacker-news"&gt;hacker-news&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="claude"/><category term="javascript"/><category term="three-js"/><category term="hacker-news"/><category term="generative-ai"/><category term="ai"/><category term="llms"/></entry><entry><title>Hide your slop PR descriptions behind &lt;details&gt;&lt;summary&gt;</title><link href="https://simonwillison.net/2026/Nov/9/details-summary/" rel="alternate"/><published>2026-11-09T04:25:05+00:00</published><updated>2026-11-09T04:25:05+00:00</updated><id>https://simonwillison.net/2026/Nov/9/details-summary/</id><summary type="html">
+    &lt;p&gt;Most of the changes I make to my projects these days come in the form of PRs opened for me by Claude Code or Codex. The PR is my unit of work - I use them to bundle commits together, iterating on them until a feature is complete, document decisions and then merge the finished result. Today's coding agents are great at writing PR descriptions.&lt;/p&gt;
+&lt;h4 id="they-re-too-good-at-describing-the-work"&gt;They're too good at describing the work&lt;/h4&gt;
+&lt;p&gt;The problem is that they are &lt;em&gt;too&lt;/em&gt; good. An agent-written PR description is accurate and comprehensive. It describes the problem, the detailed solution, and the steps taken to verify it. That's a lot of information to absorb.&lt;/p&gt;
+&lt;p&gt;It's not necessarily slop, but it &lt;em&gt;reads&lt;/em&gt; like slop!&lt;/p&gt;
+&lt;p&gt;It's very easy to spot an AI-written PR, and as with other forms of AI writing my instant reaction is best summarized as "I'm not reading all of that". It doesn't matter how accurate or useful the information is, I'm instantly put off by the thought that it will take me longer to read than it took the driving author to write... even when that driving author is me!&lt;/p&gt;
+&lt;p&gt;I want human editorial judgement. I want someone to have thought just long enough about the PR to give me a human-approved introduction that helps me understand, at a high level, what the PR is for and whether it deserves more of my attention.&lt;/p&gt;
+&lt;p&gt;I think I've found a low-effort way to do this that feels right.&lt;/p&gt;
+&lt;h4 id="hide-most-of-it-in-a-details-summary"&gt;Hide most of it in a details/summary&lt;/h4&gt;
+&lt;p&gt;The HTML &lt;code&gt;&amp;lt;details&amp;gt;&amp;lt;summary&amp;gt;&lt;/code&gt; elements render as a collapsed heading (the summary) that can be expanded to view the larger piece of text. The code looks like this:&lt;/p&gt;
+&lt;div class="highlight highlight-text-html-basic"&gt;&lt;pre&gt;&lt;span class="pl-kos"&gt;&amp;lt;&lt;/span&gt;&lt;span class="pl-ent"&gt;details&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class="pl-kos"&gt;&amp;lt;&lt;/span&gt;&lt;span class="pl-ent"&gt;summary&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;Claude Opus 5.5&lt;span class="pl-kos"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="pl-ent"&gt;summary&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class="pl-kos"&gt;&amp;lt;&lt;/span&gt;&lt;span class="pl-ent"&gt;h2&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;The hook&lt;span class="pl-kos"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="pl-ent"&gt;h2&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;
+  Plugins implement &lt;span class="pl-kos"&gt;&amp;lt;&lt;/span&gt;&lt;span class="pl-ent"&gt;code&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;register_agent_reference_types(datasette)&lt;span class="pl-kos"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="pl-ent"&gt;code&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;...
+&lt;span class="pl-kos"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="pl-ent"&gt;details&lt;/span&gt;&lt;span class="pl-kos"&gt;&amp;gt;&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;When rendered, it looks &lt;a href="https://github.com/datasette/datasette-agent/pull/51"&gt;like this&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://static.simonwillison.net/static/2026/details-summary-pr.gif" alt="Screenshot of a GitHub PR. The text &amp;quot;Claude Opus 5.5&amp;quot; sits next to a little black arrow. Clicking on that text expands a full description inside the PR body." style="max-width: 100%;" /&gt;&lt;/p&gt;
+&lt;p&gt;Crucially, &lt;code&gt;&amp;lt;details&amp;gt;&amp;lt;summary&amp;gt;&lt;/code&gt; &lt;em&gt;is supported in GitHub Markdown&lt;/em&gt;. You can drop those tags directly into an issue comment or PR description and GitHub will hide the details and display just the summary plus an expansion arrow.&lt;/p&gt;
+&lt;p&gt;I've started using this for my AI-generated pull requests.&lt;/p&gt;
+&lt;p&gt;The opening paragraph of my PRs will be carefully selected to act as a high-level explanation of what's going on - the shortest text a human can read that will help get them up to speed.&lt;/p&gt;
+&lt;p&gt;I'll sometimes throw in a screenshot as well, since images are often the best way to quickly illustrate a new feature.&lt;/p&gt;
+&lt;p&gt;The full agent-written essay then follows in a &lt;code&gt;&amp;lt;details&amp;gt;&amp;lt;summary&amp;gt;&lt;/code&gt;. I use the model name and often the effort level as that summary, to make it abundantly clear what is going on - "Claude Opus 5.5 Medium" for example.&lt;/p&gt;
+&lt;p&gt;My PRs don't feel nearly as sloppy now! The information is all still there, but a reader can glance at it and get the top, human-curated information without their eyes glazing over at multiple paragraphs of agent-written details.&lt;/p&gt;
+&lt;p&gt;I don't always write the introduction myself - sometimes the agent has given me what I need already, hidden away in the avalanche of other text. My promise to the reader is that the short opener will represent my human judgement as to what is definitely worth their time.&lt;/p&gt;
+&lt;p&gt;Here are some recent examples where I've used this pattern, including the opener I used:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;a href="https://github.com/simonw/datasette/pull/3052"&gt;datasette PR #3052: Redesign row page as a vertical list of fields&lt;/a&gt; - "The row page showed its single row as a one-row table. For wide tables, like a 46-column GitHub &lt;code&gt;repos&lt;/code&gt; table, that scrolled far off to the right and left most of the page blank." (then a screenshot)&lt;/li&gt;
+&lt;li&gt;
+&lt;a href="https://github.com/simonw/datasette/pull/3043"&gt;datasette PR #3043: Pagination bar showing which rows are on the current page&lt;/a&gt; - "Table pages that span more than one page now make it obvious where you are, and offer navigation at the top of the page as well as the bottom." (plus screenshot)&lt;/li&gt;
+&lt;li&gt;
+&lt;a href="https://github.com/simonw/datasette/pull/3042"&gt;datasette PR #3042: Load edit-tools.js on demand via a small loader&lt;/a&gt; - "&lt;code&gt;edit-tools.js&lt;/code&gt; (~220KB) was loaded on every table, row and database page, even for users who couldn't edit anything. Now only load it for users who can edit when they first interact with an edit feature (including mouse over an edit link)."&lt;/li&gt;
+&lt;li&gt;
+&lt;a href="https://github.com/datasette/datasette-agent/pull/51"&gt;datasette-agent PR #51: register_agent_reference_types plugin hook&lt;/a&gt; - "Lets plugins add their own kinds of item to the &lt;code&gt;#&lt;/code&gt; tagging in the chat composer using a new &lt;code&gt;register_agent_reference_types(datasette)&lt;/code&gt; plugin hook." - pictured above.&lt;/li&gt;
+&lt;li&gt;
+&lt;a href="https://github.com/simonw/llm/pull/1838"&gt;llm PR #1838: Add llm openai endpoint add/list/remove/path commands&lt;/a&gt; - "Adds commands for managing the records in &lt;code&gt;extra-openai-models.yaml&lt;/code&gt;, so OpenAI-compatible endpoints can be saved from the command line instead of by hand-editing YAML." - then copied &lt;code&gt;--help&lt;/code&gt; output.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="the-mnemonic"&gt;The mnemonic&lt;/h4&gt;
+&lt;p&gt;I used to have trouble remembering the order of the tags - is it &lt;code&gt;&amp;lt;details&amp;gt;&amp;lt;summary&amp;gt;&lt;/code&gt; or &lt;code&gt;&amp;lt;summary&amp;gt;&amp;lt;details&amp;gt;&lt;/code&gt;?&lt;/p&gt;
+&lt;p&gt;Here are two tricks that helped me.&lt;/p&gt;
+&lt;p&gt;First, and most obviously, the &lt;code&gt;&amp;lt;summary&amp;gt;&lt;/code&gt; is clearly the bit where you summarize the details. That's the tag for your line of text that can be clicked to expand - the &lt;code&gt;&amp;lt;details&amp;gt;&lt;/code&gt; element must then wrap everything else.&lt;/p&gt;
+&lt;p&gt;An even better trick is to always refer to these two tags as "details-summary".&lt;/p&gt;
+&lt;p&gt;"details-summary" is two syllables followed by three syllables. That rolls off the tongue more smoothly than the three-two punch of "summary-details".&lt;/p&gt;
+&lt;p&gt;Say "details-summary" out loud just a few times and you'll never forget the order of the tags again.&lt;/p&gt;
+&lt;p&gt;(I still wish GitHub would add a button to their Markdown editor for this - partly to save me painstakingly typing it on my mobile keyboard, and partly to help spread the word to more GitHub users that this feature exists.)&lt;/p&gt;
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/github"&gt;github&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/html"&gt;html&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/markdown"&gt;markdown&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llms"&gt;llms&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai-assisted-programming"&gt;ai-assisted-programming&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/coding-agents"&gt;coding-agents&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="github"/><category term="html"/><category term="markdown"/><category term="ai"/><category term="datasette"/><category term="generative-ai"/><category term="llms"/><category term="ai-assisted-programming"/><category term="llm"/><category term="coding-agents"/></entry><entry><title>parse_number() as a SQLite extension: C vs Rust</title><link href="https://simonwillison.net/2026/Nov/8/sqlite-parse-number-c-vs-rust/" rel="alternate"/><published>2026-11-08T22:26:00+00:00</published><updated>2026-11-08T22:26:00+00:00</updated><id>https://simonwillison.net/2026/Nov/8/sqlite-parse-number-c-vs-rust/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Research:&lt;/strong&gt; &lt;a href="https://github.com/simonw/research/tree/main/sqlite-parse-number-c-vs-rust#readme"&gt;parse_number() as a SQLite extension: C vs Rust&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;I was out walking the dog when I got curious about how easy/difficult it would be to write a SQLite C extension that adds a &lt;code&gt;parse_number()&lt;/code&gt; function for turning strings like &lt;code&gt;-$1,234.56&lt;/code&gt; or &lt;code&gt;'12.5%'&lt;/code&gt; into numeric values that could be summed and sorted.&lt;/p&gt;
+&lt;p&gt;I fired up regular Claude chat (Opus 5.5) &lt;a href="https://claude.ai/share/7f18f157-6c96-4d49-a1d4-f02403e3b261"&gt;and prompted&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;I'm thinking about a SQLite custom function 'parse_number(value)' that strips ',', '$', '£' and '%', handles a leading '-', and returns 'NULL' for anything it can’t parse&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Explore the difference between building this as a SQLite extension in C v.s. in Rust - I want to compare performance and code complexity and size of the resulting&lt;/code&gt;.so&lt;code&gt;(or whatever) file&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This gave me a solid starting point - the Rust extension was 321 KB (using &lt;a href="https://github.com/rusqlite/rusqlite"&gt;Rusqlite&lt;/a&gt;) and 298 KB (using &lt;a href="https://github.com/asg017/sqlite-loadable-rs"&gt;sqlite-loadable-rs&lt;/a&gt;), while the C extension was 14 KB. But the Rust extension was faster!&lt;/p&gt;
+&lt;p&gt;Turns out that's because the Rust equivalent of C's &lt;code&gt;strtod&lt;/code&gt; is "twice as fast". So I prompted:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Try writing your own C function for parsing text into a decimal number that catches up to or beats the Rust implementation&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;And it did, using "Clinger's fast path":&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Net cost per row over 2 million rows, lower is better:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;first C&lt;/th&gt;
+&lt;th&gt;new C&lt;/th&gt;
+&lt;th&gt;rusqlite&lt;/th&gt;
+&lt;th&gt;sqlite-loadable&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Mixed data&lt;/td&gt;
+&lt;td&gt;67 ns&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;19 ns&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;46 ns&lt;/td&gt;
+&lt;td&gt;41 ns&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Integers only&lt;/td&gt;
+&lt;td&gt;25 ns&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;16 ns&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;36 ns&lt;/td&gt;
+&lt;td&gt;32 ns&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Decimals only&lt;/td&gt;
+&lt;td&gt;106 ns&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;18 ns&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;55 ns&lt;/td&gt;
+&lt;td&gt;47 ns&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Finally, I had it rewrite the prototype as a research report to match the others in &lt;a href="https://github.com/simonw/research"&gt;simonw/research&lt;/a&gt; by prompting this:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Clone simonw/research from GitHub and turn your above investigation into a research report as seen in that repository - you can give me a zip file to download that contains your new folder&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Here's &lt;a href="https://github.com/simonw/research/tree/main/sqlite-parse-number-c-vs-rust#readme"&gt;the resulting report&lt;/a&gt;.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/research"&gt;research&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/c"&gt;c&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/rust"&gt;rust&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/sqlite"&gt;sqlite&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/claude"&gt;claude&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="research"/><category term="c"/><category term="rust"/><category term="sqlite"/><category term="claude"/></entry><entry><title>datasette #3046: Don't serve link: rel=next HTTP headers to Firefox for HTML pages</title><link href="https://simonwillison.net/2026/Nov/7/link-rel-next/" rel="alternate"/><published>2026-11-07T23:57:46+00:00</published><updated>2026-11-07T23:57:46+00:00</updated><id>https://simonwillison.net/2026/Nov/7/link-rel-next/</id><summary type="html">
+    
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://github.com/simonw/datasette/issues/3046"&gt;datasette #3046: Don&amp;#x27;t serve link: rel=next HTTP headers to Firefox for HTML pages&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+I was looking at the Firefox network panel today when I noticed that requests to a Datasette table page were triggering an &lt;a href="https://developer.mozilla.org/en-US/docs/Glossary/Prefetch"&gt;HTTP prefetch&lt;/a&gt; to the next page of rows in that table.&lt;/p&gt;
+&lt;p&gt;This was happening because Datasette pages serve an HTTP &lt;code&gt;link&lt;/code&gt; header like this:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;link: &amp;lt;https://latest.datasette.io/fixtures/compound_three_primary_keys?_next=a%2Cd%2Cv&amp;gt;; rel="next"&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;This is bad. A tiny fraction of the visitors to one of those pages will click the "next" link, which means for everyone else their browser is fetching unnecessary data and the Datasette server is having to render an entire page that then gets thrown away.&lt;/p&gt;
+&lt;p&gt;I dug in and learned that Firefox has &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=175418"&gt;an issue&lt;/a&gt; that has been open for 24 years about this behavior...&lt;/p&gt;
+&lt;p&gt;And one of the early comments on that issue links to &lt;a href="https://simonwillison.net/2002/Oct/17/mozillaPrefetching/"&gt;my blog post from 2002&lt;/a&gt; complaining about this feature. I hadn't just forgotten that I had written about it, I had forgotten the feature entirely!
+
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/firefox"&gt;firefox&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/html"&gt;html&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/mozilla"&gt;mozilla&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="firefox"/><category term="html"/><category term="mozilla"/><category term="datasette"/></entry><entry><title>Terry Pratchett's Study</title><link href="https://simonwillison.net/2026/Nov/7/hn-50407316/" rel="alternate"/><published>2026-11-07T19:34:24+00:00</published><updated>2026-11-07T19:34:24+00:00</updated><id>https://simonwillison.net/2026/Nov/7/hn-50407316/</id><summary type="html">
+    
+        &lt;p&gt;&lt;a href="https://news.ycombinator.com/item?id=50405674#50407316"&gt;My comment&lt;/a&gt; on &lt;a href="https://news.ycombinator.com/item?id=50405674"&gt;Terry Pratchett&amp;#x27;s Study&lt;/a&gt; &amp;mdash; Hacker News.&lt;/p&gt;&lt;p&gt;Terry Pratchett once wrote about the concept of "horizontal wealth". Vertical wealth is where you spend money on rich people stuff - yachts and suchlike. Horizontal wealth is where you spend more money on the things you liked before you got rich: &lt;a href="https://chibuikeani.blogspot.com/2017/02/the-price-of-happiness-horizontal-vs.html"&gt;https://chibuikeani.blogspot.com/2017/02/the-price-of-happin...&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;But horizontal wealth means not letting your increased income dictate your tastes. You like books and now you have money? Buy more books! Change those catenary bookshelves for good hardwood ones! In my case, build a library extension to your office. And, of course, you buy what will be useful for that most wonderful of pursuits, blind research, which is research without direction for the sheer joy of it.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;(Original source is his book A Slip of the Keyboard - this linked blog post quotes that bit.)&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/hacker-news"&gt;hacker-news&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/terry-pratchett"&gt;terry-pratchett&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="hacker-news"/><category term="terry-pratchett"/></entry><entry><title>Quoting Nilay Patel</title><link href="https://simonwillison.net/2026/Nov/6/nilay-patel/" rel="alternate"/><published>2026-11-06T17:13:12+00:00</published><updated>2026-11-06T17:13:12+00:00</updated><id>https://simonwillison.net/2026/Nov/6/nilay-patel/</id><summary type="html">
+    &lt;blockquote cite="https://www.youtube.com/watch?v=-U4thshDTL8&amp;amp;t=422s"&gt;&lt;p&gt;The products aren't good enough to sell people on the costs.&lt;/p&gt;
+&lt;p&gt;You cannot tell people that you have to listen to the whine of a data center in their backyard for AI overviews and some of the most hilarious deep fake slop in history.&lt;/p&gt;
+&lt;p&gt;It's not worth it. It just isn't worth it to anyone. And agents aren't real and they might not be being used the way that anyone wants them to yet. All these companies are spending more than they're making on these products. Refrigerators holding blood storage in Europe are being hacked.&lt;/p&gt;
+&lt;p&gt;The costs are too high. The benefits are not real. And if you connect that to corruption, you're like, in order to impose these costs on me, these CEOs are in the White House shaking Trump's hand, renaming it to the Gulf of America, paying for this ballroom that we don't want. It's obvious crypto-corruption, and it's still slop. &lt;/p&gt;
+&lt;p&gt;The AI industry will not get out of it until they make &lt;em&gt;better products&lt;/em&gt;. Until everyone can see without needing to be convinced, without needing an ad campaign, without any of this stuff that just using these products makes your life better.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p class="cite"&gt;&amp;mdash; &lt;a href="https://www.youtube.com/watch?v=-U4thshDTL8&amp;amp;t=422s"&gt;Nilay Patel&lt;/a&gt;, The Vergecast: Big Tech lost big in the 2026 election&lt;/p&gt;
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/nilay-patel"&gt;nilay-patel&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/slop"&gt;slop&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai"&gt;ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/generative-ai"&gt;generative-ai&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/ai-ethics"&gt;ai-ethics&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="nilay-patel"/><category term="slop"/><category term="ai"/><category term="generative-ai"/><category term="ai-ethics"/></entry><entry><title>Quoting Paul Ford</title><link href="https://simonwillison.net/2026/Nov/5/paul-ford/" rel="alternate"/><published>2026-11-05T17:34:03+00:00</published><updated>2026-11-05T17:34:03+00:00</updated><id>https://simonwillison.net/2026/Nov/5/paul-ford/</id><summary type="html">
+    &lt;blockquote cite="https://ftrain.com/aboard-the-web-is-more-than-enough"&gt;&lt;p&gt;The web browser is very, very, very powerful software for applications, &lt;em&gt;and the cost of accessing that power is going down seemingly every day&lt;/em&gt;.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p class="cite"&gt;&amp;mdash; &lt;a href="https://ftrain.com/aboard-the-web-is-more-than-enough"&gt;Paul Ford&lt;/a&gt;, The Web Is More Than Enough&lt;/p&gt;
+
+    &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/browsers"&gt;browsers&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/paul-ford"&gt;paul-ford&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/web-development"&gt;web-development&lt;/a&gt;&lt;/p&gt;
+
+
+
+</summary><category term="browsers"/><category term="paul-ford"/><category term="web-development"/></entry><entry><title>datasette-llm 0.1a10</title><link href="https://simonwillison.net/2026/Nov/4/datasette-llm/" rel="alternate"/><published>2026-11-04T15:26:02+00:00</published><updated>2026-11-04T15:26:02+00:00</updated><id>https://simonwillison.net/2026/Nov/4/datasette-llm/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/datasette/datasette-llm/releases/tag/0.1a10"&gt;datasette-llm 0.1a10&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Fixes a &lt;a href="https://github.com/datasette/datasette-llm/pull/11"&gt;bug&lt;/a&gt; that affected my &lt;a href="https://agent.datasette.io/"&gt;agent.datasette.io&lt;/a&gt; demo site, where the set of available LLM models was not correctly restricted to just those in the configuration.&lt;/p&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/llm"&gt;llm&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="llm"/><category term="datasette"/></entry><entry><title>datasette-apps 0.3a0</title><link href="https://simonwillison.net/2026/Nov/4/datasette-apps/" rel="alternate"/><published>2026-11-04T00:29:36+00:00</published><updated>2026-11-04T00:29:36+00:00</updated><id>https://simonwillison.net/2026/Nov/4/datasette-apps/</id><summary type="html">
+    
+        &lt;p&gt;&lt;strong&gt;Release:&lt;/strong&gt; &lt;a href="https://github.com/datasette/datasette-apps/releases/tag/0.3a0"&gt;datasette-apps 0.3a0&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;Datasette Apps adds support for hosting and editing custom HTML applications inside of Datasette.&lt;/p&gt;
+&lt;p&gt;These can be created by hand, but it's easier to create them using LLMs via &lt;a href="https://agent.datasette.io/"&gt;Datasette Agent&lt;/a&gt;. This release improves that integration:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;Apps can now be tagged in Datasette Agent chat messages by typing &lt;code&gt;#&lt;/code&gt;, which autocompletes from the apps the user has permission to view.&lt;/li&gt;
+&lt;li&gt;New &lt;code&gt;app_add_stored_queries()&lt;/code&gt; and &lt;code&gt;app_remove_stored_queries()&lt;/code&gt; tools let the agent manage which stored queries an app is allowed to call. Granting a write query requires approval from the user first.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;app_create()&lt;/code&gt; now checks that each requested stored query exists and that the user can view it, and asks the user to approve any write queries before the app is created.&lt;/li&gt;
+&lt;li&gt;The "View app" buttons shown by the agent tools, and the links on &lt;code&gt;#&lt;/code&gt; app references, now open the app full screen in the Datasette Agent panel.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+    
+    
+        &lt;p&gt;Tags: &lt;a href="https://simonwillison.net/tags/datasette-agent"&gt;datasette-agent&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette-apps"&gt;datasette-apps&lt;/a&gt;, &lt;a href="https://simonwillison.net/tags/datasette"&gt;datasette&lt;/a&gt;&lt;/p&gt;
+    
+
+</summary><category term="datasette-agent"/><category term="datasette-apps"/><category term="datasette"/></entry></feed>

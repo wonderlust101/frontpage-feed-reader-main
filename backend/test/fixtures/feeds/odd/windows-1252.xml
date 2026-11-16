@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<rss version="2.0"><channel>
+<title>“Smart” Quotes — Café</title>
+<link>https://cp1252.example/</link>
+<item>
+<title>It’s naïve – €5</title>
+<link>https://cp1252.example/post</link>
+<pubDate>Tue, 10 Jun 2025 09:00:00 GMT</pubDate>
+<description>Résumé …</description>
+</item>
+</channel></rss>

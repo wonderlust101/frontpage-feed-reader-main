@@ -1,0 +1,2061 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:admin="http://webns.net/mvcb/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+	<channel>
+		<title>
+			<![CDATA[A List Apart: The Full Feed]]>		</title>
+
+		<link>
+			https://alistapart.com		</link>
+
+		<description>Articles for people who make web sites.</description>
+
+		<dc:language>
+			en-US		</dc:language>
+
+		<dc:creator>The fine folks at A List Apart</dc:creator>
+
+		<dc:rights>Copyright 2026</dc:rights>
+
+		<dc:date>
+			2026-11-16T19:30:59+00:00		</dc:date>
+
+		
+			<item>
+				<title>
+					<![CDATA[Designed for a Dead Language]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/shrey-shah/">Shrey Shah</a>					</author>
+
+				<link>
+					https://alistapart.com/article/designed-for-a-dead-language/				</link>
+
+				<guid>
+					https://alistapart.com/article/designed-for-a-dead-language/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>Every language app in your pocket inherited a teaching method built for Latin. Understanding why that happened is a more useful design lesson than anything the apps themselves will teach you.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In 1788, Prussia introduced the Abitur, a standardized national examination required for entry into universities and the civil service. To pass it, students needed to demonstrate measurable, gradable knowledge. The system needed to teach language to large classrooms, produce consistent outcomes, and do it with one teacher and thirty students. The educators responsible for designing this system reached for the only teaching template they had, one that had been used in European schools for two centuries: the method developed to teach Latin.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Latin, by 1788, was a dead language. Nobody needed to speak it. The scholars who studied it were reading Cicero and Virgil, not conducting conversations. The method built around it, memorizing grammar rules, constructing translations, analyzing written texts, reflected that reality exactly. Oral skills were irrelevant. Comprehension of written form was everything. The method was not designed to produce speakers. It was designed to produce readers of texts in a language nobody spoke.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>When Prussia applied this template to French and German, living languages spoken by living people, the premise did not change. Johann Valentin Meidinger's textbook <em>Praktische Französische Grammatik</em>, published in 1804, ran to 37 editions across Europe by 1857. Karl Plotz formalized the approach into what became the dominant model for teaching modern languages across Europe and eventually the United States, where it became known simply as the Prussian Method [1]. Each institution that adopted it trained teachers in it, who trained students who became teachers. The constraint that created the method, how do you grade language at scale with limited resources, became invisible inside the method itself. What remained was the assumption: language is a body of rules to be learned consciously and measured. It was a design decision dressed up, over time, as a pedagogical truth.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The observation that should have ended it</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>There are people in the world who cannot read or write a language and speak it fluently. There are children who hold full conversations years before they can read a single word. There are immigrants who arrive in a country knowing nothing of its language and come out, years later, speaking it naturally, not because they studied it, but because they lived inside it. Literacy and fluency are separate things produced by entirely separate mechanisms. The Grammar-Translation method, as it became known, assumed they were the same thing. That assumption was inherited from a method designed for a language nobody needed to speak, and it was wrong the moment it was applied to a language people actually used.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The evidence against it accumulated slowly. In the mid to late nineteenth century, reformers including François Gouin in France and Maximilian Berlitz in the United States argued independently that language should be taught the way it is actually acquired, through immersive exposure to real communication in the target language, not through analysis of its rules. Berlitz built an entire school network around this principle. The reformers were correct. They were also largely ignored by mainstream education systems, because the Grammar-Translation method had one decisive advantage that direct immersion did not: it could be graded.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In 1982, the linguist Stephen Krashen gave the argument its most formal articulation in what he called the Monitor Model of second language acquisition. His distinction was precise: language acquisition, the unconscious process through which children absorb their native language and through which adults succeed in immersive environments, is categorically different from language learning, the conscious study of grammar rules and vocabulary that classrooms deliver [2]. Acquisition produces fluency. Learning, at best, produces the ability to pass a test. The evidence supporting this distinction, and the observation that immersive exposure to real native-speaker communication is the mechanism that produces genuine fluency, has only grown since.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>I went to Brazil without a word of Portuguese and came out speaking it. I studied French in a classroom for years and cannot hold a conversation in French today. This is not an unusual experience. It is the expected outcome, and it has been the expected outcome for as long as we have had formal language education.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The same decision, made again in a different medium</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Prussian educators faced the question: How do you deliver language learning at scale, measure progress, and retain users over time? The answer it arrived at was structurally identical to the one arrived at in 1788. Duolingo gamified the grammar drill into a streak. Anki formalized the translation exercise into a spaced-repetition flashcard. Babbel organized grammar lessons into structured modules. The interfaces were new. The underlying assumption, that language is a thing you study rather than an environment you inhabit, was not.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This was not a failure of design skill. The products that emerged from these decisions are, in many respects, genuinely well-crafted. Duolingo's retention mechanics are sophisticated. Anki's spaced repetition is grounded in real cognitive science. They are excellent at what they actually do. The problem is what they actually do: produce measurable engagement with a proxy for language rather than the conditions that produce language itself. A streak is measurable. A vocabulary score is measurable. The moment a user walks out of an app and holds a real conversation in another language, that happens in the world, outside the product, and cannot be instrumented.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>When the outcome a user needs is difficult to measure directly, the design process tends to reach for something that can be measured. The proxy becomes the goal. The interface optimizes for it. The gap between what the product delivers and what the user actually needed grows. This is not a pattern unique to language learning. It is a pattern that repeats across product categories whenever a design constraint—the need to measure, the need to scale, the need to produce a grade—gets built into a system so deeply that it stops being visible as a constraint and starts being mistaken for a truth about the problem itself.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>What happens when the constraint changes</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The constraint that made the Grammar-Translation method necessary in 1788 was real and rational. One teacher. Thirty students. A standardized exam. You cannot grade a conversation at scale. You can grade a translation exercise. The method was not chosen because it produced fluency. It was chosen because it produced a score.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>That constraint no longer exists in the same form. Technology has made it possible to deliver immersive, real-time conversation practice to anyone with a smartphone, at a cost that continues to fall. The design problem is no longer how to make language learning gradable at scale. It is how to make the conditions of genuine language acquisition accessible to people who cannot move to another country or afford a native-speaker tutor.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The products that are now closest to solving the actual problem are not the ones that invented a new pedagogy. They are the ones that removed the access barrier to an old one. Praktika builds AI conversation partners with distinct personalities, regional dialects, and cultural context, replicating the specificity of a real native speaker rather than a generic language-learning voice. Langua clones native speaker voices so that the interaction feels like a real conversation rather than a lesson. Rosetta Stone's foundational methodology, image association in the target language with no translation, was built on the same insight Berlitz arrived at in the nineteenth century: language is acquired through immersive exposure, not through analysis of its rules [3]. A 2025 meta-analysis of 31 studies found that AI conversation tools produced a statistically significant improvement in language learning outcomes, a result that no amount of flashcard optimization has consistently matched [4].</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>None of these products invented a new theory of language acquisition. They translated an existing one into something more people could reach.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The design question this leaves</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The Grammar-Translation method persisted not because educators were wrong about design, but because a design decision made under a specific constraint became, over two centuries, indistinguishable from the thing itself. The constraint, how do you grade language at scale, was forgotten. The method it produced was inherited as if it were a description of how language works, passed from Prussia to Europe to America to the App Store, from the grammar drill to the streak.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Every time a design team optimizes for a metric because the actual outcome is hard to measure, they are making a version of the same decision. It is often the right decision given real constraints. The question worth asking is whether the constraint that made it necessary still exists, or whether it has simply become invisible inside the system it originally produced.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Before reaching for what can be measured, it is worth asking what the user actually needs to do, and what stopped them from doing it before. Sometimes the answer is a new solution. More often it is an old one that was always out of reach.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[]]>				</dc:subject>
+
+				<dc:date>
+					2026-06-30T16:22:27+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[Good designers, bad websites: a proposal]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/alan-dalton/">Alan Dalton</a>					</author>
+
+				<link>
+					https://alistapart.com/article/good-designers-bad-websites-a-proposal/				</link>
+
+				<guid>
+					https://alistapart.com/article/good-designers-bad-websites-a-proposal/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>I want to discuss <a href="https://www.w3.org/WAI/fundamentals/accessibility-intro/#what">accessibility</a> because it is the most important thing for making websites. Other <a href="https://alistapart.com/articles/"><em>A List Apart </em>articles</a> give you innovation and insight. This article will give you homework. These are just my personal views, but they’re pretty good.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>I want to start off with a couple of statements, and you will agree:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Designers are good people.</strong> I have never heard a designer say, “I don’t care if somebody can’t read this text”, “Not my fault if somebody can’t use this device”, or “Who cares if this is confusing?”</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Some designs exclude people.</strong> You have seen people unable to read the text on a website or app that somebody designed. You’ve seen people unable to use a physical device that somebody has designed. You’ve seen people utterly bamboozled while trying to use a service that somebody designed.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">So what?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The first question is, “Is this life-or-death stuff?” The answer is, “Yes.” In my favorite essay, <a href="http://www.breakingthin.gs/this-is-all-there-is.html">This Is All There Is</a>, <a href="https://ar.al/bio/">Aral Balkan</a> makes the point that pretty much everything that we design can affect life events and death events. Aral gives the example of how even a straightforward bus timetable app can affect life and death events, if we design it badly:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>somebody might miss a life event, such as their daughter’s fifth birthday party; or</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>somebody might miss a death event, such as the chance to say goodbye to a dying grandmother.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>The next—and frustrating—question is, “Why do some designs still exclude people?” After all, we know that:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>not everybody can see perfectly;</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>not everybody can hear perfectly;</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>not everybody thinks the same way; and</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>not everybody moves the same way.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>I think the answer is that there’s too much to recall. Consider, if you will, the wide variety of <a href="https://alistapart.com/topics/">topics that <em>A List Apart</em> articles cover</a>. Designers are expected to remember all of that guidance, plus all of the accessibility guidance, plus so much more. It is too much.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Recognizing accessibility issues while designing</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>I’d like to point toward one possible solution, starting from <a href="https://www.uxtigers.com/about/people">Jakob Nielsen</a>’s <a href="https://www.nngroup.com/articles/ten-usability-heuristics/">10 Usability Heuristics for User Interface Design</a>. These are from the mid-1990s, and—although there’s a good chance that you, gentle reader, are a lot younger than that—please bear with me.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Seeing as the problem is that there’s too much to recall, I want to look at heuristic <a href="https://www.nngroup.com/articles/ten-usability-heuristics/#:~:text=Prevention-,6:%20Recognition%20Rather%20than%20Recall,-Minimize">№ 6, “Recognition rather than Recall.”</a> Jakob Nielsen said that for users, information required to use the design should be visible or easily retrievable when needed. I suggest we tweak that to make life easier for designers. Let’s say that the information required to <strong>produce</strong> the design should be visible or easily retrievable when needed. In other words, <em>let’s make it easier to recognise accessibility issues </em><strong><em>while</em></strong><em> we’re designing</em>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>How are we going to do that? I really like the book <a href="https://rosenfeldmedia.com/books/a-web-for-everyone/"><em>A Web for Everyone—Designing Accessible User Experiences</em></a> by <a href="https://sarahhortondesign.com/about-sarah-horton/">Sarah Horton</a> and <a href="https://www.wqusability.com/biography.html">Whitney Quesenbery</a>. I really like this book not only because it includes a quote from me—actually two quotes, but I don’t like to boast—but because it includes personas that are perfect for helping us to recognise accessibility issues. That’s the good news. The even better news is that these personas are available now for free on the companion website to the book <a href="https://www.routledge.com/What-Every-Engineer-Should-Know-About-Digital-Accessibility/Horton-Sloan/p/book/9781032263861">What Every Engineer Should Know About Digital Accessibility</a>, again by Sarah Horton, with <a href="https://58sound.com/about/">David Sloan</a> this time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Meet your users</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>I’m going to introduce you to these personas now:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/05/08/vishnu-engineer-global-citizen-with-low-vision/">Vishnu, an engineer and global citizen with low vision</a> says, “I want to be on the same level as everyone else”, “If I can adjust my screen, I can read comfortably”, and, “Translating in my head is easier with simpler sentences.”</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/05/08/trevor-high-school-student-with-autism/">Trevor, a high school student with autism</a>, says, “I like consistent, familiar places on the web”, “When I can learn the pattern, I can find my way”, and, “Reading is hard for me”.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/05/08/steven-deaf-graphic-artist-and-asl-speaker/">Steven, a deaf graphic artist and American Sign Language speaker</a>, says, “My only disability is that everyone doesn’t sign”, and, “Without captions, it’s meaningless to me”.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/04/28/maria-bilingual-community-health-worker/">Maria, a bilingual community health worker</a>, says, “I love this. It’s all here … when I can find it”, “When a site is confusing, I just leave”—fair enough, Maria!—and, “When I hear and see it, health information makes more sense”.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/04/28/lea-editor-living-with-fatigue-and-pain/">Lea, an editor living with fatigue and pain</a>, says, “No one gets that this really is a disability”, “Don’t make me work so hard”—please do not bombard this lady with drop-down lists—and, “Links at the top of the page make navigation easier for me”.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/04/28/jacob-blind-paralegal-and-a-bit-of-a-geek/">Jacob, a blind paralegal and a bit of a geek</a>, says, “The right technology lets me do anything”, and “This makes it possible to do my job”.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/04/28/emily-cerebral-palsy-living-independently/">Emily, who has cerebral palsy and is living independently</a>, says, “I want to do everything for myself”, “Simpler screens are easier screens”—hell yeah, Emily!—and, “Tell me what I need in advance”.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://knowaboutaccessibility.org/2025/04/21/carol-grandmother-with-macular-degeneration/">Carol, a grandmother with macular degeneration</a> which affects her sight, says, “My grandkids are dragging me into the world of technology”, “I don’t understand what the screen is saying”, and, “Why can’t the text be just a little bit larger?”</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>I want to throw one more persona at you now, because, well, <em>A List Apart</em> readers are overachievers. One of my favorite authors, <a href="https://cennydd.com/">Cennydd Bowles</a>—who literally wrote the book on <a href="https://cennydd.com/future-ethics"><em>Future Ethics</em></a>—says to create <a href="https://ethical.net/ethical/future-ethics-with-cennydd-bowles-at-sustainableux/#:~:text=persona%20non%20grata">Personas Non Grata</a>. In other words, every time we design something, we have to think about what a bad guy could do with that thing, and whom that might affect.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>To actually use these personas while designing, I like what <a href="https://meyerweb.com/eric/">Eric Meyer</a> and <a href="https://www.sarawb.com/#about">Sara Wachter-Boettcher</a> in <a href="https://dfrlbook.com/"><em>Design for Real Life</em></a> call <a href="https://dfrlbook.com/chapter7#:~:text=The%20Designated%20Dissenter">the Designated Dissenter</a>: for each project that you work on, one of your teams should be responsible for asking, “Will this work for Vishnu?”, “How’s Trevor going to get on with this?”, and so on.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Then, once you’ve used the personas to recognise the accessibility issues, you can look up the guidelines for whichever platforms you’re designing for: </p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><a href="https://www.w3.org/TR/WCAG22/">Web Content Accessibility Guidelines (WCAG) 2.2</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://m3.material.io/foundations/designing/overview">Accessibility designing — Material Design 3</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessibility">Accessibility — Windows apps</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://developer.apple.com/design/human-interface-guidelines/accessibility">Accessibility | Apple Developer Documentation</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://documentation.ubuntu.com/project/contributors/check-accessibility/">Check your interface for accessibility (Ubuntu)</a></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Your mission, should you choose to accept it</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>I told you in the introduction of this article that I would give you homework. You thought I was joking. So, here’s your homework: I want you to grab <a href="https://knowaboutaccessibility.org/tag/personas/">the personas from the Know About Accessibility website</a>, and use them throughout every design project to help you recognise accessibility issues while you work—and reclaim design for everyone.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><br><em>NOTE: This article is based on “<a href="https://youtube.com/watch?v=rm5Ag6x-dRo&amp;list=PLsaoWzR87FsUvLEI7xjThSdIB5TqMrOc0&amp;index=3">Recognise</a>,” my five-minute presentation from <a href="https://ixda.ie/">Interaction Design Association (IxDA) Dublin</a>’s <a href="https://defuse.ixd.ie/2025/">Defuse (Design for Use) event in 2025</a>.</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[Accessibility, Community, User Experience, User Research, Workflow &amp; Tools]]>				</dc:subject>
+
+				<dc:date>
+					2026-04-23T12:57:21+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[Design for Amiability: Lessons from Vienna]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/markbernstein/">Mark Bernstein</a>					</author>
+
+				<link>
+					https://alistapart.com/article/design-for-amiability-lessons-from-vienna/				</link>
+
+				<guid>
+					https://alistapart.com/article/design-for-amiability-lessons-from-vienna/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>Today’s web is not always an amiable place. Sites greet you with a popover that demands assent to their cookie policy, and leave you with Taboola ads promising “One Weird Trick!” to cure your ailments. Social media sites are tuned for engagement, and few things are more engaging than a fight. Today it seems that people want to quarrel; I have seen flame wars among birders. &nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>These tensions are often at odds with a site’s goals. If we are providing support and advice to customers, we don’t want those customers to wrangle with each other. If we offer news about the latest research, we want readers to feel at ease; if we promote upcoming marches, we want our core supporters to feel comfortable and we want curious newcomers to feel welcome.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In a study for a conference on the History of the Web, I looked to the origins of Computer Science in Vienna <a href="tel:19281934">(1928-1934</a>)  for a case study of the importance of amiability in a research community and the disastrous consequences of its loss. That story has interesting implications for web environments that promote amiable interaction among disparate, difficult (and sometimes disagreeable) people.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Vienna Circle</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Though people had been thinking about calculating engines and thinking machines from antiquity, Computing really got going in Depression-era Vienna. &nbsp;The people who worked out the theory had no interest in building machines; they wanted to puzzle out the limits of reason in the absence of divine authority. If we could not rely on God or Aristotle to tell us how to think, could we instead build arguments that were self-contained and demonstrably correct? Can we be sure that mathematics is consistent? Are there things that are true but that cannot be expressed in language?&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The core ideas were worked out in the weekly meetings (Thursdays at 6) of a group remembered as the Vienna Circle. They got together in the office of Professor Moritz Schlick at the University of Vienna to discuss problems in philosophy, math, and language. The intersection of physics and philosophy had long been a specialty of this Vienna department, and this work had placed them among the world leaders. &nbsp;Schlick’s colleague Hans Hahn was a central participant, and by 1928 Hahn brought along his graduate students Karl Menger and Kurt Gödel. Other frequent participants included philosopher Rudolf Carnap, psychologist Karl Popper, economist Ludwig von Mises (brought by his brother Frederick, a physicist), &nbsp;graphic designer Otto Neurath (inventor of infographics), and architect Josef Frank (brought by his physicist brother, Phillip). &nbsp;Out-of-town visitors often joined, including the young Johnny von Neumann, Alfred Tarski, and the irascible Ludwig Wittgenstein.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>When Schlick’s office grew too dim, participants adjourned to a nearby café for additional discussion with an even larger circle of participants. &nbsp;This convivial circle was far from unique. &nbsp;An intersecting circle–Neurath, von Mises, Oskar Morgenstern–established the Austrian School of free-market economics. There were theatrical circles (Peter Lorre, Hedy Lamarr, Max Reinhardt), and literary circles. The café was where things happened.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The interdisciplinarity of the group posed real challenges of temperament and understanding. Personalities were often a challenge. Gödel was convinced people were trying to poison him. Architect Josef Frank depended on contracts for public housing, which Mises opposed as wasteful. Wittgenstein’s temper had lost him his job as a secondary school teacher, and for some of these years he maintained a detailed list of whom he was willing to meet. Neurath was eager to detect muddled thinking and would interrupt a speaker with a shouted “Metaphysics!” The continuing amity of these meetings was facilitated by the personality of their leader, Moritz Schlick, who would be remembered as notably adept in keeping disagreements from becoming quarrels.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">In the Café</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The Viennese café of this era was long remembered as a particularly good place to argue with your friends, to read, and to write. Built to serve an imperial capital, the cafés found themselves with too much space and too few customers now that the Empire was gone. There was no need to turn tables: a café could only survive by coaxing customers to linger. Perhaps they would order another coffee, or one of their friends might drop by. One could play chess, or billiards, or read newspapers from abroad. Coffee was invariably served with a glass of purified spring water, still a novelty in an era in which most water was still unsafe to drink. That water glass would be refilled indefinitely.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In the basement of one café, the poet Jura Soyfer staged “The End Of The World,” a musical comedy in which Professor Peep has discovered a comet heading for earth.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:quote -->
+<blockquote class="wp-block-quote"><!-- wp:quote -->
+<blockquote class="wp-block-quote"><!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph --></blockquote>
+<!-- /wp:quote --></blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:quote -->
+<blockquote class="wp-block-quote"><!-- wp:quote -->
+<blockquote class="wp-block-quote"><!-- wp:paragraph -->
+<p>Prof. Peep: The comet is going to destroy everybody!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Hitler: &nbsp;Destroying everybody is my business.</p>
+<!-- /wp:paragraph --></blockquote>
+<!-- /wp:quote --></blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:paragraph -->
+<p>Of course, coffee can be prepared in many ways, and the Viennese café developed a broad vocabulary to represent precisely how one preferred to drink it: melange, Einspänner, Brauner, Schwarzer, Kapuziner. This extensive customization, with correspondingly esoteric conventions of service, established the café as a comfortable and personal third space, a neutral ground in which anyone who could afford a coffee would be welcome. Viennese of this era were fastidious in their use of personal titles, of which an abundance were in common use. Café waiters greeted regular customers with titles too, but were careful to address their patrons with titles a notch or two greater than they deserved. A graduate student would be Doktor, an unpaid postdoc Professor. &nbsp;This assurance mattered all the more because so many members of the Circle (and so many other Viennese) came from elsewhere: Carnap from Wuppertal, Gödel from Brno, von Neumann from Budapest. No one was going to make fun of your clothes, mannerisms, or accent. Your friends wouldn’t be bothered by the pram in the hall. Everyone shared a Germanic Austrian literary and philosophical culture, not least those whose ancestors had been Eastern European Jews who knew that culture well, having read all about it in books.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The amiability of the café circle was enhanced by its openness. Because the circle sometimes extended to architects and actors, people could feel less constrained to admit shortfalls in their understanding. It was soon discovered that marble tabletops made a useful surface for pencil sketches, serving all as an improvised and accessible blackboard.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Comedies like “The End Of The World” and fictional newspaper sketches or feuilletons of writers like Joseph Roth and Stefan Zweig served as a second defense against disagreeable or churlish behavior. The knowledge that, if one got carried away, a parody of one’s remarks might shortly appear in Neue Freie Presse surely helped Professor Schlick keep matters in hand.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The End Of Red Vienna</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Though Austria’s government drifted to the right after the War, Vienna’s city council had been Socialist, dedicated to public housing based on user-centered design, and embracing  ambitious programs of public outreach and adult education. In 1934 the Socialists lost a local election, and this era soon came to its end as the new administration focused on the imagined threat of the International Jewish Conspiracy. Most members of the Circle fled within months: von Neumann to Princeton, Neurath to Holland and Oxford, Popper to New Zealand, Carnap to Chicago. Prof. Schlick was murdered on the steps of the University by a student outraged by his former association with Jews.  Jura Soyfer, who wrote “The End Of The World,” died in Buchenwald.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In 1939, von Neumann finally convinced Gödel to accept a job in Princeton. Gödel was required to pay large fines to emigrate. The officer in charge of these fees would look back on this as the best posting of his career; his name was Eichmann.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Design for Amiability</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>An impressive literature recounts those discussions and the environment that facilitated the development of computing. How can we design for amiability? &nbsp;This is not just a matter of choosing rounded typefaces and a cheerful pastel palette. I believe we may identify eight distinct issues that exert design forces in usefully amiable directions.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Seriousness</strong>: The Vienna Circle was wrestling with a notoriously difficult book—Wittgenstein’s Tractus Logico-Philosophicus—and a catalog of outstanding open questions in mathematics. They were concerned with consequential problems, not merely scoring points for debating. Constant reminders that the questions you are considering matter—not only that they are consequential or that those opposing you are scoundrels—help promote amity.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Empiricism</strong>: The characteristic approach of the Vienna Circle demanded that knowledge be grounded either in direct observation or in rigorous reasoning. Disagreement, when it arose, could be settled by observation or by proof. If neither seemed ready to hand, the matter could not be settled. On these terms, one can seldom if ever demolish an opposing argument, and trolling is pointless.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Abstraction</strong>: Disputes grow worse when losing the argument entails lost face or lost jobs. The Vienna Circle’s focus on theory—the limits of mathematics, the capability of language—promoted amity. Without seriousness, abstraction could have been merely academic, but the limits of reason and the consistency of mathematics were clearly serious.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Formality</strong>: The punctilious demeanor of waiters and the elaborated rituals of coffee service helped to establish orderly attitudes amongst the argumentative participants. This stands in contrast to the contemptuous sneer that now dominates social media. &nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Schlamperei</strong>: Members of the Vienna Circle maintained a global correspondence, and they knew their work was at the frontier of research. Still, this was Vienna, at the margins of Europe: old-fashioned, frumpy, and dingy. Many participants came from even more obscure backwaters. Most or all harbored the suspicion that they were really schleppers, and a tinge of the ridiculous helped to moderate tempers. The director of “The End Of The World” had to pass the hat for money to purchase a moon for the set, and thought it was funny enough to write up for publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Openness</strong>: All sorts of people were involved in discussion, anyone might join in. Each week would bring different participants. Fluid borders reduce tension, and provide opportunities to broaden the range of discussion and the terms of engagement. Low entrance friction was characteristic of the café: anyone could come, and if you came twice you were virtually a regular. Permeable boundaries and café culture made it easier for moderating influences to draw in raconteurs and storytellers to defuse awkward moments, and Vienna’s cafés had no shortage of humorists. Openness counteracts the suspicion that promoters of amiability are exerting censorship.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Parody</strong>: The environs of the Circle—the university office and the café—were unmistakably public. There were writers about, some of them renowned humorists. The prospect that one’s bad taste or bad behavior might be ridiculed in print kept discussion within bounds. The sanction of public humiliation, however, was itself made mild by the veneer of fiction; even if you got a little carried away and a character based on you made a splash in some newspaper fiction, it wasn’t the end of the world.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Engagement</strong>: The subject matter was important to the participants, but it was esoteric: it did not matter very much to their mothers or their siblings. A small stumble or a minor humiliation could be shrugged off in ways that major media confrontations cannot.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>I believe it is notable that this environment was designed to promote amiability through several different voices. &nbsp;The café waiter flattered each newcomer and served everyone, and also kept out local pickpockets and drunks who would be mere disruptions. Schlick and other regulars kept discussion moving and on track. The fiction writers and raconteurs—perhaps the most peripheral of the participants—kept people in a good mood and reminded them that bad behavior could make anyone ridiculous. &nbsp;Crucially, each of these voices were human: you could reason with them. Algorithmic or AI moderators, however clever, are seldom perceived as reasonable. The café circles had no central authority or Moderator against whom everyone’s resentments might be focused. Even after the disaster of 1934, what people remembered were those cheerful arguments.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[Community, Industry, State of the Web, Web Strategy]]>				</dc:subject>
+
+				<dc:date>
+					2025-10-15T15:35:00+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[Design Dialects: Breaking the Rules, Not the System]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/michel-ferreira/">Michel Ferreira</a>					</author>
+
+				<link>
+					https://alistapart.com/article/design-dialects-breaking-the-rules-not-the-system/				</link>
+
+				<guid>
+					https://alistapart.com/article/design-dialects-breaking-the-rules-not-the-system/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p><em>"Language is not merely a set of unrelated sounds, clauses, rules, and meanings; it is a totally coherent system bound to context and behavior."</em> — Kenneth L. Pike</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The web has accents. So should our design systems.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Design Systems as Living Languages</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Design systems aren't component libraries—they’re living languages. <a href="https://m3.material.io/foundations/design-tokens/overview"><strong>Tokens</strong></a> are phonemes, <a href="https://atlassian.design/components"><strong>components</strong></a> are words, <a href="https://designsystem.university/glossary#pattern"><strong>patterns</strong></a> are phrases, <a href="https://www.figma.com/blog/design-systems-102-how-to-build-your-design-system/#use-layout-grids-and-spacing-to-create-visual"><strong>layouts</strong></a> are sentences. The conversations we build with users become the stories our products tell.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>But here’s what we've forgotten: the more fluently a language is spoken, the more accents it can support without losing meaning. English in Scotland differs from English in Sydney, yet both are unmistakably English. The language adapts to context while preserving core meaning. This couldn’t be more obvious to me, a Brazilian Portuguese speaker, who learned English with an American accent, and lives in Sydney.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Our design systems must work the same way. Rigid adherence to visual rules creates brittle systems that break under contextual pressure. Fluent systems bend without breaking.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Consistency becomes a prison</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The promise of design systems was simple: consistent components would accelerate development and unify experiences. But as systems matured and products grew more complex, that promise has become a prison. <a href="https://adobe.design/stories/design-for-scale/designing-design-systems-supporting-implementation-and-adoption">Teams file “exception” requests by the hundreds</a>. Products launch with workarounds instead of system components. Designers spend more time defending consistency than solving user problems.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Our design systems must learn to speak <strong>dialects</strong>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>A design dialect is a systematic adaptation of a design system that maintains core principles while developing new patterns for specific contexts.</strong> Unlike one-off customizations or brand themes, dialects preserve the system’s essential grammar while expanding its vocabulary to serve different users, environments, or constraints.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>When Perfect Consistency Fails</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>At <a href="https://booking.com">Booking.com</a>, I learned this lesson the hard way. We A/B-tested everything—color, copy, button shapes, even logo colors. As a professional with a graphic design education and experience building brand style guides, I found this shocking. While everyone fell in love with Airbnb’s pristine design system, Booking grew into a giant without ever considering visual consistency.&nbsp;&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The chaos taught me something profound: <strong>consistency isn’t ROI; solved problems are.</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>At Shopify. Polaris (<a href="https://polaris-react.shopify.com/">https://polaris-react.shopify.com/</a>) was our crown jewel—a mature design language perfect for merchants on laptops. As a product team, we were expected to adopt Polaris as-is. Then my fulfillment team hit an “Oh, Ship!” moment, as we faced the challenge of building an app for warehouse pickers using our interface on shared, battered Android scanners in dim aisles, wearing thick gloves, scanning dozens of items per minute, many with limited levels of English understanding.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Task completion with standard Polaris: <strong>0%</strong>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Every component that worked beautifully for merchants failed completely for pickers. White backgrounds created glare. 44px tap targets were invisible to gloved fingers. Sentence-case labels took too long to parse. Multi-step flows confused non-native speakers.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We faced a choice: abandon Polaris entirely, or <em>teach it to speak warehouse</em>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The Birth of a Dialect</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We chose evolution over revolution. Working within Polaris’s core principles—clarity, efficiency, consistency—we developed what we now call a <strong>design dialect</strong>:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><tbody><tr><td><strong>Constraint</strong></td><td><strong>Fluent Move</strong></td><td><strong>Rationale</strong></td></tr><tr><td>Glare &amp; low light</td><td>Dark surfaces + light text</td><td>Reduce glare on low-DPI screens</td></tr><tr><td>Gloves &amp; haste</td><td>90px tap targets (~2cm)</td><td>Accommodate thick gloves</td></tr><tr><td>Multilingual</td><td>Single-task screens, plain language</td><td>Reduce cognitive load</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p><strong>Result:</strong> Task completion jumped from <strong>0% to 100%</strong>. Onboarding time dropped from three weeks to one shift.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This wasn’t customization or theming—this was a <strong>dialect</strong>: a systematic adaptation that maintained Polaris’s core grammar while developing new vocabulary for a specific context. Polaris hadn’t failed; it had learned to speak warehouse.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The Flexibility Framework</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>At <a href="http://www.atlassian.com">Atlassian</a>, working on the Jira platform—itself a system within the larger Atlassian system—I pushed for formalizing this insight. With dozens of products sharing a design language across different codebases, we needed systematic flexibility so we built directly into our ways of working. The old model—exception requests and special approvals—was failing at scale.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We developed the <strong>Flexibility Framework</strong> to help designers define how flexible they wanted their components to be:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><tbody><tr><td><strong>Tier</strong></td><td><strong>Action</strong></td><td><strong>Ownership</strong></td></tr><tr><td><strong>Consistent</strong></td><td>Adopt unchanged</td><td>Platform locks design + code</td></tr><tr><td><strong>Opinionated</strong></td><td>Adapt within bounds</td><td>Platform provides smart defaults, products customize</td></tr><tr><td><strong>Flexible</strong></td><td>Extend freely</td><td>Platform defines behavior, products own presentation</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>During a navigation redesign, we tiered every element. Logo and global search stayed Consistent. Breadcrumbs and contextual actions became Flexible. Product teams could immediately see where innovation was welcome and where consistency mattered.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The Decision Ladder</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Flexibility needs boundaries. We created a simple ladder for evaluating when rules should bend:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Good:</strong> Ship with existing system components. Fast, consistent, proven.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Better:</strong> Stretch a component slightly. Document the change. Contribute improvements back to the system for all to use.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Best:</strong> Prototype the ideal experience first. If user testing validates the benefit, update the system to support it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The key question: “Which option lets users succeed fastest?”</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Rules are tools, not relics.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Unity Beats Uniformity</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Gmail, Drive, and Maps are unmistakably Google—yet each speaks with its own accent. They achieve unity through shared principles, not cloned components. One extra week of debate over button color costs roughly $30K in engineer time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Unity is a brand outcome; <strong>fluency is a user outcome.</strong> When the two clash, side with the user.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Governance Without Gates</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>How do you maintain coherence while enabling dialects? Treat your system like a living vocabulary:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Document every deviation</strong> – e.g., dialects/warehouse.md with before/after screenshots and rationale.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Promote shared patterns</strong> – when three teams adopt a dialect independently, review it for core inclusion.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Deprecate with context</strong> – retire old idioms via flags and migration notes, never a big-bang purge.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>A living dictionary scales better than a frozen rulebook.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Start Small: Your First Dialect</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Ready to introduce dialects? Start with one broken experience:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>This week:</strong> Find one user flow where perfect consistency blocks task completion. Could be mobile users struggling with desktop-sized components, or accessibility needs your standard patterns don’t address.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Document the context:</strong> What makes standard patterns fail here? Environmental constraints? User capabilities? Task urgency?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Design one systematic change:</strong> Focus on behavior over aesthetics. If gloves are the problem, bigger targets aren’t “"breaking the system”"—they’re serving the user. Earn the variations and make them intentional.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Test and measure:</strong> Does the change improve task completion? Time to productivity? User satisfaction?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Show the savings:</strong> If that dialect frees even half a sprint, fluency has paid for itself.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Beyond the Component Library</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We’re not managing design systems anymore—<strong>we’re cultivating design languages.</strong> Languages that grow with their speakers. Languages that develop accents without losing meaning. Languages that serve human needs over aesthetic ideals.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The warehouse workers who went from 0% to 100% task completion didn’t care that our buttons broke the style guide. They cared that the buttons finally worked.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Your users feel the same way. Give your system permission to speak their language.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[Design, Design Systems, Web Strategy, Workflow &amp; Tools]]>				</dc:subject>
+
+				<dc:date>
+					2025-09-26T16:48:12+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[An Holistic Framework for Shared Design Leadership]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/michelferreira/">Michel Ferreira</a>					</author>
+
+				<link>
+					https://alistapart.com/article/an-holistic-framework-for-shared-design-leadership/				</link>
+
+				<guid>
+					https://alistapart.com/article/an-holistic-framework-for-shared-design-leadership/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>Picture this: You’re in a meeting room at your tech company, and two people are having what looks like the same conversation about the same design problem. One is talking about whether the team has the right skills to tackle it. The other is diving deep into whether the solution actually solves the user’s problem. Same room, same problem, completely different lenses.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is the beautiful, sometimes messy reality of having both a Design Manager and a Lead Designer on the same team. And if you’re wondering how to make this work without creating confusion, overlap, or the dreaded “too many cooks” scenario, you’re asking the right question.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The traditional answer has been to draw clean lines on an org chart. The Design Manager handles people, the Lead Designer handles craft. Problem solved, right? Except clean org charts are fantasy. In reality, both roles care deeply about team health, design quality, and shipping great work.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The magic happens when you embrace the overlap instead of fighting it—when you start thinking of your design org as a design organism.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The Anatomy of a Healthy Design Team</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Here's what I’ve learned from years of being on both sides of this equation: think of your design team as a living organism. The Design Manager tends to the mind (the psychological safety, the career growth, the team dynamics). The Lead Designer tends to the body (the craft skills, the design standards, the hands-on work that ships to users).</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>But just like mind and body aren’t completely separate systems, so, too, do these roles overlap in important ways. You can’t have a healthy person without both working in harmony. The trick is knowing where those overlaps are and how to navigate them gracefully.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>When we look at how healthy teams actually function, three critical systems emerge. Each requires both roles to work together, but with one taking primary responsibility for keeping that system strong.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>The Nervous System: People &amp; Psychology</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><strong>Primary caretaker: Design Manager</strong><strong><br></strong><strong>Supporting role: Lead Designer</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The nervous system is all about signals, feedback, and psychological safety. When this system is healthy, information flows freely, people feel safe to take risks, and the team can adapt quickly to new challenges.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The Design Manager is the primary caretaker here. They’re monitoring the team’s psychological pulse, ensuring feedback loops are healthy, and creating the conditions for people to grow. They’re hosting career conversations, managing workload, and making sure no one burns out.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>But the Lead Designer plays a crucial supporting role. They’re providing sensory input about craft development needs, spotting when someone’s design skills are stagnating, and helping identify growth opportunities that the Design Manager might miss.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Design Manager tends to:</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Career conversations and growth planning</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Team psychological safety and dynamics</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Workload management and resource allocation</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Performance reviews and feedback systems</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Creating learning opportunities</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p><strong>Lead Designer supports by:</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Providing craft-specific feedback on team member development</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Identifying design skill gaps and growth opportunities</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Offering design mentorship and guidance</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Signaling when team members are ready for more complex challenges</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>The Muscular System: Craft &amp; Execution</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><strong>Primary caretaker: Lead Designer</strong><strong><br></strong><strong>Supporting role: Design Manager</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The muscular system is about strength, coordination, and skill development. When this system is healthy, the team can execute complex design work with precision, maintain consistent quality, and adapt their craft to new challenges.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The Lead Designer is the primary caretaker here. They’re setting design standards, providing craft coaching, and ensuring that shipping work meets the quality bar. They’re the ones who can tell you if a design decision is sound or if we’re solving the right problem.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>But the Design Manager plays a crucial supporting role. They’re ensuring the team has the resources and support to do their best craft work, like proper nutrition and recovery time for an athlete.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Lead Designer tends to:</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Definition of design standards and system usage</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Feedback on what design work meets the standard</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Experience direction for the product</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Design decisions and product-wide alignment</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Innovation and craft advancement</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p><strong>Design Manager supports by:</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Ensuring design standards are understood and adopted across the team</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Confirming experience direction is being followed</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Supporting practices and systems that scale without bottlenecking</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Facilitating design alignment across teams</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Providing resources and removing obstacles to great craft work</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>The Circulatory System: Strategy &amp; Flow</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><strong>Shared caretakers: Both Design Manager and Lead Designer</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The circulatory system is about how information, decisions, and energy flow through the team. When this system is healthy, strategic direction is clear, priorities are aligned, and the team can respond quickly to new opportunities or challenges.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is where true partnership happens. Both roles are responsible for keeping the circulation strong, but they’re bringing different perspectives to the table.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Lead Designer contributes:</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>User needs are met by the product</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Overall product quality and experience</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Strategic design initiatives</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Research-based user needs for each initiative</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p><strong>Design Manager contributes:</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Communication to team and stakeholders</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Stakeholder management and alignment</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Cross-functional team accountability</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Strategic business initiatives</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p><strong>Both collaborate on:</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>Co-creation of strategy with leadership</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Team goals and prioritization approach</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Organizational structure decisions</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Success measures and frameworks</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Keeping the Organism Healthy</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The key to making this partnership sing is understanding that all three systems need to work together. A team with great craft skills but poor psychological safety will burn out. A team with great culture but weak craft execution will ship mediocre work. A team with both but poor strategic circulation will work hard on the wrong things. </p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Be Explicit About Which System You’re Tending</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>When you’re in a meeting about a design problem, it helps to acknowledge which system you’re primarily focused on. “I’m thinking about this from a team capacity perspective” (nervous system) or “I’m looking at this through the lens of user needs” (muscular system) gives everyone context for your input.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This isn’t about staying in your lane. It’s about being transparent as to which lens you’re using, so the other person knows how to best add their perspective.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Create Healthy Feedback Loops</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The most successful partnerships I’ve seen establish clear feedback loops between the systems:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Nervous system signals to muscular system:</strong> “The team is struggling with confidence in their design skills” → Lead Designer provides more craft coaching and clearer standards.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Muscular system signals to nervous system:</strong> “The team’s craft skills are advancing faster than their project complexity” → Design Manager finds more challenging growth opportunities.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Both systems signal to circulatory system:</strong> “We’re seeing patterns in team health and craft development that suggest we need to adjust our strategic priorities.”</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Handle Handoffs Gracefully</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The most critical moments in this partnership are when something moves from one system to another. This might be when a design standard (muscular system) needs to be rolled out across the team (nervous system), or when a strategic initiative (circulatory system) needs specific craft execution (muscular system).</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Make these transitions explicit. “I’ve defined the new component standards. Can you help me think through how to get the team up to speed?” or “We’ve agreed on this strategic direction. I'm going to focus on the specific user experience approach from here.”</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Stay Curious, Not Territorial</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The Design Manager who never thinks about craft, or the Lead Designer who never considers team dynamics, is like a doctor who only looks at one body system. Great design leadership requires both people to care about the whole organism, even when they’re not the primary caretaker.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This means asking questions rather than making assumptions. “What do you think about the team’s craft development in this area?” or “How do you see this impacting team morale and workload?” keeps both perspectives active in every decision.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>When the Organism Gets Sick</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Even with clear roles, this partnership can go sideways. Here are the most common failure modes I’ve seen:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>System Isolation</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The Design Manager focuses only on the nervous system and ignores craft development. The Lead Designer focuses only on the muscular system and ignores team dynamics. Both people retreat to their comfort zones and stop collaborating.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>The symptoms:</strong> Team members get mixed messages, work quality suffers, morale drops.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>The treatment:</strong> Reconnect around shared outcomes. What are you both trying to achieve? Usually it’s great design work that ships on time from a healthy team. Figure out how both systems serve that goal.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Poor Circulation</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Strategic direction is unclear, priorities keep shifting, and neither role is taking responsibility for keeping information flowing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>The symptoms:</strong> Team members are confused about priorities, work gets duplicated or dropped, deadlines are missed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>The treatment:</strong> Explicitly assign responsibility for circulation. Who’s communicating what to whom? How often? What’s the feedback loop?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Autoimmune Response</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>One person feels threatened by the other’s expertise. The Design Manager thinks the Lead Designer is undermining their authority. The Lead Designer thinks the Design Manager doesn’t understand craft.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>The symptoms:</strong> Defensive behavior, territorial disputes, team members caught in the middle.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>The treatment:</strong> Remember that you’re both caretakers of the same organism. When one system fails, the whole team suffers. When both systems are healthy, the team thrives.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The Payoff</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Yes, this model requires more communication. Yes, it requires both people to be secure enough to share responsibility for team health. But the payoff is worth it: better decisions, stronger teams, and design work that’s both excellent and sustainable.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>When both roles are healthy and working well together, you get the best of both worlds: deep craft expertise and strong people leadership. When one person is out sick, on vacation, or overwhelmed, the other can help maintain the team’s health. When a decision requires both the people perspective and the craft perspective, you’ve got both right there in the room.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Most importantly, the framework scales. As your team grows, you can apply the same system thinking to new challenges. Need to launch a design system? Lead Designer tends to the muscular system (standards and implementation), Design Manager tends to the nervous system (team adoption and change management), and both tend to circulation (communication and stakeholder alignment).</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The Bottom Line</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The relationship between a Design Manager and Lead Designer isn’t about dividing territories. It’s about multiplying impact. When both roles understand they’re tending to different aspects of the same healthy organism, magic happens.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The mind and body work together. The team gets both the strategic thinking and the craft excellence they need. And most importantly, the work that ships to users benefits from both perspectives.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>So the next time you’re in that meeting room, wondering why two people are talking about the same problem from different angles, remember: you’re watching shared leadership in action. And if it’s working well, both the mind and body of your design team are getting stronger.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[Business, Career, Design, Industry, Project Management]]>				</dc:subject>
+
+				<dc:date>
+					2025-07-23T14:10:22+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[From Beta to Bedrock: Build Products that Stick.]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/liam-nugent/">Liam Nugent</a>					</author>
+
+				<link>
+					https://alistapart.com/article/from-beta-to-bedrock-build-products-that-stick/				</link>
+
+				<guid>
+					https://alistapart.com/article/from-beta-to-bedrock-build-products-that-stick/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>As a product builder over too many years to mention, I've lost count of the number of times I've seen promising ideas go from zero to hero in a few weeks, only to fizzle out within months.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Financial products, which is the field I work in, are no exception. With people’s real hard-earned money on the line, user expectations running high, and a crowded market, it's tempting to throw as many features at the wall as possible and hope something sticks. But this approach is a recipe for disaster. Here's why:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The pitfalls of feature-first development</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>When you start building a financial product from the ground up, or are migrating existing customer journeys from paper or telephony channels onto online banking or mobile apps, it's easy to get caught up in the excitement of creating new features. You might think, "If I can just add one more thing that solves this particular user problem, they'll love me!" But what happens when you inevitably hit a roadblock because the narcs (your security team!) don’t like it? When a hard-fought feature isn't as popular as you thought, or it breaks due to unforeseen complexity?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is where the concept of Minimum Viable Product (MVP) comes in. Jason Fried's book <a href="https://basecamp.com/gettingreal"><em>Getting Real</em></a> and his podcast <a href="https://37signals.com/podcast/">Rework</a> often touch on this idea, even if he doesn’t always call it that. An MVP is a product that provides just enough value to your users to keep them engaged, but not so much that it becomes overwhelming or difficult to maintain. It sounds like an easy concept but it requires a razor sharp eye, a ruthless edge and having the courage to stick by your opinion because it is easy to be seduced by “the Columbo Effect”… when there’s always “<a href="https://www.youtube.com/watch?v=vYgUPD2khtw">just one more thing…</a>” that someone wants to add.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The problem with most finance apps, however, is that they often become a reflection of the internal politics of the business rather than an experience solely designed around the customer. This means that the focus is on delivering as many features and functionalities as possible to satisfy the needs and desires of competing internal departments, rather than providing a clear value proposition that is focused on what the people out there in the real world want. As a result, these products can very easily bloat to become a mixed bag of confusing, unrelated and ultimately unlovable customer experiences—a feature salad, you might say.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The importance of bedrock</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>So what's a better approach? How can we build products that are stable, user-friendly, and—most importantly—stick?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>That's where the concept of "bedrock" comes in. Bedrock is the core element of your product that truly matters to users. It's the fundamental building block that provides value and stays relevant over time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In the world of retail banking, which is where I work, the bedrock has got to be in and around the regular servicing journeys. People open their current account once in a blue moon but they look at it every day. They sign up for a credit card every year or two, but they check their balance and pay their bill at least once a month.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Identifying the core tasks that people want to do and then relentlessly striving to make them easy to do, dependable, and trustworthy is where the gravy’s at.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>But how do you get to bedrock? By focusing on the "MVP" approach, prioritizing simplicity, and iterating towards a clear value proposition. This means cutting out unnecessary features and focusing on delivering real value to your users.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>It also means having some guts, because your colleagues might not always instantly share your vision to start with. And controversially, sometimes it can even mean making it clear to customers that you’re not going to come to their house and make their dinner. The occasional “opinionated user interface design” (i.e. clunky workaround for edge cases) might sometimes be what you need to use to test a concept or buy you space to work on something more important.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Practical strategies for building financial products that stick</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>So what are the key strategies I've learned from my own experience and research?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Start with a clear "why": What problem are you trying to solve? For whom? Make sure your mission is crystal clear before building anything. Make sure it aligns with your company’s objectives, too.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Focus on a single, core feature and obsess on getting that right before moving on to something else: Resist the temptation to add too many features at once. Instead, choose one that delivers real value and iterate from there.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Prioritize simplicity over complexity: Less is often more when it comes to financial products. Cut out unnecessary bells and whistles and keep the focus on what matters most.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Embrace continuous iteration: Bedrock isn't a fixed destination—it's a dynamic process. Continuously gather user feedback, refine your product, and iterate towards that bedrock state.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Stop, look and listen: Don't just test your product as part of your delivery process—test it repeatedly in the field. Use it yourself. Run A/B tests. Gather user feedback. Talk to people who use it, and refine accordingly.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The bedrock paradox</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>There's an interesting paradox at play here: building towards bedrock means sacrificing some short-term growth potential in favour of long-term stability. But the payoff is worth it—products built with a focus on bedrock will outlast and outperform their competitors, and deliver sustained value to users over time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>So, how do you start your journey towards bedrock? Take it one step at a time. Start by identifying those core elements that truly matter to your users. Focus on building and refining a single, powerful feature that delivers real value. And above all, test obsessively—for, in the words of Abraham Lincoln, Alan Kay, or Peter Drucker (whomever you believe!!), “The best way to predict the future is to create it.”</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[Business, Industry, Usability, User Experience, User Research, Web Strategy]]>				</dc:subject>
+
+				<dc:date>
+					2025-04-23T18:04:31+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[User Research Is Storytelling]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/gerry-duffy/">Gerry Duffy</a>					</author>
+
+				<link>
+					https://alistapart.com/article/user-research-is-storytelling/				</link>
+
+				<guid>
+					https://alistapart.com/article/user-research-is-storytelling/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>Ever since I was a boy, I’ve been fascinated with movies. I loved the characters and the excitement—but most of all the stories. I wanted to be an actor. And I believed that I’d get to do the things that Indiana Jones did and go on exciting adventures. I even dreamed up ideas for movies that my friends and I could make and star in. But they never went any further. I did, however, end up working in user experience (UX). Now, I realize that there’s an element of theater to UX—I hadn’t really considered it before, but user research is storytelling. And to get the most out of user research, you need to tell a good story where you bring stakeholders—the product team and decision makers—along and get them interested in learning more.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Think of your favorite movie. More than likely it follows a <a href="https://www.studiobinder.com/blog/three-act-structure/">three-act structure</a> that’s commonly seen in storytelling: the setup, the conflict, and the resolution. The first act shows what exists today, and it helps you get to know the characters and the challenges and problems that they face. Act two introduces the conflict, where the action is. Here, problems grow or get worse. And the third and final act is the resolution. This is where the issues are resolved and the characters learn and change. I believe that this structure is also a great way to think about user research, and I think that it can be especially helpful in explaining user research to others.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":7174425,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/05/user-research-is-storytelling-1-1024x391.png" alt="A detailed graph that shows the narrative structure of The Godfather and The Dark Knight across three acts. The graph is divided into segments labeled “Act 1,” “Act 2,” and “Act 3” for each film. The purple line represents narrative elements, pacing, and rise in tension and excitement within the movies. For The Godfather, in Act 1, the line rises and then dips slightly before entering Act 2. Act 2 sees the line rise, before reaching a crescendo in Act 3. The line then declines steadily until the end of Act 3. For The Dark Knight, in Act 1, the line rises and then dips slightly before entering Act 2. Act 2 the line rises and dips slightly before entering Act 3. The line then rises again and peaks, which is followed by decline until the end of Act 3." class="wp-image-7174425"/><figcaption class="wp-element-caption">Three-act structure in movies (© 2024 <a href="https://www.studiobinder.com/">StudioBinder</a>. Image used with permission from StudioBinder.).</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Use storytelling as a structure to do research</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>It’s sad to say, but many have come to see research as being expendable. If budgets or timelines are tight, research tends to be one of the first things to go. Instead of investing in research, some product managers rely on designers or—worse—their own opinion to make the “right” choices for users based on their experience or accepted best practices. That may get teams some of the way, but that approach can so easily miss out on solving users’ real problems. To remain user-centered, this is something we should avoid. User research elevates design. It keeps it on track, pointing to problems and opportunities. Being aware of the issues with your product and reacting to them can help you stay ahead of your competitors.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In the three-act structure, each act corresponds to a part of the process, and each part is critical to telling the whole story. Let’s look at the different acts and how they align with user research.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Act one: setup</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The setup is all about understanding the background, and that’s where foundational research comes in. <em>Foundational research</em> (also called <em>generative</em>, <em>discovery</em>, or <em>initial</em> research) helps you understand users and identify their problems. You’re learning about what exists today, the challenges users have, and how the challenges affect them—just like in the movies. To do foundational research, you can conduct <a href="https://www.nngroup.com/videos/what-are-contextual-inquiries/">contextual inquiries</a> or <a href="https://uxdesign.cc/diary-studies-cd65a61a4f89">diary studies </a>(or both!), which can help you start to identify problems as well as opportunities. It doesn’t need to be a huge investment in time or money.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Erika Hall writes about<a href="https://medium.com/mule-design/minimum-viable-ethnography-a047e9358df0"> minimum viable ethnography</a>, which can be as simple as spending 15 minutes with a user and asking them one thing: “‘Walk me through your day yesterday.’ That’s it. Present that one request. Shut up and listen to them for 15 minutes. Do your damndest to keep yourself and your interests out of it. Bam, you’re doing ethnography.” According to Hall, <em>“</em>[This] will probably prove quite illuminating. In the highly unlikely case that you didn’t learn anything new or useful, carry on with enhanced confidence in your direction.”&nbsp;&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This makes total sense to me. And I love that this makes user research so accessible. You don’t need to prepare a lot of documentation; you can just recruit participants and do it! This can yield a wealth of information about your users, and it’ll help you better understand them and what’s going on in their lives. That’s really what act one is all about: understanding where users are coming from.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://www.looppanel.com/blog/strategic-ux-research-is-the-future-with-jared-spool">Jared Spool talks about the importance of foundational research</a> and how it should form the bulk of your research. If you can draw from any additional user data that you can get your hands on, such as surveys or analytics, that can supplement what you’ve heard in the foundational studies or even point to areas that need further investigation. Together, all this data paints a clearer picture of the state of things and all its shortcomings. And that’s the beginning of a compelling story. It’s the point in the plot where you realize that the main characters—or the users in this case—are facing challenges that they need to overcome. Like in the movies, this is where you start to build empathy for the characters and root for them to succeed. And hopefully stakeholders are now doing the same. Their sympathy may be with their business, which could be losing money because users can’t complete certain tasks. Or maybe they do empathize with users’ struggles. Either way, act one is your initial hook to get the stakeholders interested and invested.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Once stakeholders begin to understand the value of foundational research, that can open doors to more opportunities that involve users in the decision-making process. And that can guide product teams toward being more user-centered. This benefits everyone—users, the product, and stakeholders. It’s like winning an Oscar in movie terms—it often leads to your product being well received and successful. And this can be an incentive for stakeholders to repeat this process with other products. Storytelling is the key to this process, and knowing how to tell a good story is the only way to get stakeholders to really care about doing more research.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This brings us to act two, where you iteratively evaluate a design or concept to see whether it addresses the issues.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Act two: conflict</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Act two is all about digging deeper into the problems that you identified in act one. This usually involves <em>directional research</em>, such as usability tests, where you assess a potential solution (such as a design) to see whether it addresses the issues that you found. The issues could include unmet needs or problems with a flow or process that’s tripping users up. Like act two in a movie, more issues will crop up along the way. It’s here that you learn more about the characters as they grow and develop through this act.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Usability tests <a href="https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/">should typically include around five participants</a> according to Jakob Nielsen, who found that that number of users can usually identify most of the problems: “As you add more and more users, you learn less and less because you will keep seeing the same things again and again… After the fifth user, you are wasting your time by observing the same findings repeatedly but not learning much new.”&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>There are parallels with storytelling here too; if you try to tell a story with too many characters, the plot may get lost. Having fewer participants means that each user’s struggles will be more memorable and easier to relay to other stakeholders when talking about the research. This can help convey the issues that need to be addressed while also highlighting the value of doing the research in the first place.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Researchers have run usability tests in person for decades, but you can also <a href="https://www.nngroup.com/articles/moderated-remote-usability-test/">conduct usability tests remotely</a> using tools like Microsoft Teams, Zoom, or other teleconferencing software. This approach has become increasingly popular since the beginning of the pandemic, and it works well. You can think of in-person usability tests like going to a play and remote sessions as more like watching a movie. There are advantages and disadvantages to each. In-person usability research is a much richer experience. Stakeholders can experience the sessions with other stakeholders. You also get real-time reactions—including surprise, agreement, disagreement, and discussions about what they’re seeing. Much like going to a play, where audiences get to take in the stage, the costumes, the lighting, and the actors’ interactions, in-person research lets you see users up close, including their body language, how they interact with the moderator, and how the scene is set up.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>If in-person usability testing is like watching a play—staged and controlled—then conducting usability testing in the field is like <a href="https://en.wikipedia.org/wiki/Immersive_theater">immersive theater</a> where any two sessions might be very different from one another. You can take usability testing into the field by <a href="https://boxesandarrows.com/taking-research-out-of-the-lab/">creating a replica of the space where users interact</a> with the product and then conduct your research there. Or you can go out to meet users at their location to do your research. With either option, you get to see how things work in context, things come up that wouldn’t have in a lab environment—and conversion can shift in entirely different directions. As researchers, you have less control over how these sessions go, but this can sometimes help you understand users even better. Meeting users where they are can provide clues to the external forces that could be affecting how they use your product. In-person usability tests provide another level of detail that’s often missing from remote usability tests.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>That’s not to say that the “movies”—remote sessions—aren’t a good option. Remote sessions can reach a wider audience. They allow a lot more stakeholders to be involved in the research and to see what’s going on. And they open the doors to a much wider geographical pool of users. But with any remote session there is the potential of time wasted if participants can’t log in or get their microphone working.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The benefit of <a href="https://boxesandarrows.com/usability-testing-guide/">usability testing, whether remote or in person</a>, is that you get to see real users interact with the designs in real time, and you can ask them questions to understand their thought processes and grasp of the solution. This can help you not only identify problems but also glean why they’re problems in the first place. Furthermore, you can test hypotheses and gauge whether your thinking is correct. By the end of the sessions, you’ll have a much clearer picture of how usable the designs are and whether they work for their intended purposes. Act two is the heart of the story—where the excitement is—but there can be surprises too. This is equally true of usability tests. <a href="https://articles.centercentre.com/three_hund_million_button/">Often, participants will say unexpected things</a>, which change the way that you look at things—and these twists in the story can move things in new directions.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Unfortunately, user research is sometimes seen as expendable. And too often usability testing is the only research process that some stakeholders think that they ever need. In fact, if the designs that you’re evaluating in the usability test aren’t grounded in a solid understanding of your users (foundational research), there’s not much to be gained by doing usability testing in the first place. That’s because you’re narrowing the focus of what you’re getting feedback on, without understanding the users' needs. As a result, there’s no way of knowing whether the designs might solve a problem that users have. It’s only feedback on a particular design in the context of a usability test.&nbsp;&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>On the other hand, if you only do foundational research, while you might have set out to solve the right problem, you won’t know whether the thing that you’re building will actually solve that. This illustrates the importance of doing both foundational and directional research.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In act two, stakeholders will—hopefully—get to watch the story unfold in the user sessions, which creates the conflict and tension in the current design by surfacing their highs and lows. And in turn, this can help motivate stakeholders to address the issues that come up.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Act three: resolution</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>While the first two acts are about understanding the background and the tensions that can propel stakeholders into action, the third part is about resolving the problems from the first two acts. While it’s important to have an audience for the first two acts, it’s crucial that they stick around for the final act. That means the whole product team, including developers, UX practitioners, business analysts, delivery managers, product managers, and any other stakeholders that have a say in the next steps. It allows the whole team to hear users’ feedback together, ask questions, and discuss what’s possible within the project’s constraints. And it lets the UX research and design teams clarify, suggest alternatives, or give more context behind their decisions. So you can get everyone on the same page and get agreement on the way forward.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This act is mostly told in voiceover with some audience participation. The researcher is the narrator, who paints a picture of the issues and what the future of the product could look like given the things that the team has learned. They give the stakeholders their recommendations and their guidance on creating this vision.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Nancy Duarte in the <em>Harvard Business Review</em> offers an approach to <a href="https://hbr.org/2012/10/structure-your-presentation-li">structuring presentations that follow a persuasive story</a>. “The <a href="http://en.wikipedia.org/wiki/I_Have_a_Dream">most effective presenters </a>use the same techniques as great storytellers: By reminding people of the status quo and then revealing the path to a better way, they set up a conflict that needs to be resolved,” writes Duarte. “That tension helps them persuade the audience to adopt a new mindset or behave differently.”</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":7174426,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/05/user-research-is-storytelling-2-1024x280.jpg" alt="A diagram, depicting a persuasive story pattern, segmented into distinct sections that outline a narrative flow. Starting with “Beginning,” followed by “Middle,” and concluding with “End.” The “Beginning” starts with a box labeled “What is.” A line rises up to the box labeled “What could be.” A line goes from this box into “Middle” and back down to “What is” and then back up to “What could be.” This repeats one more time in “Middle,” before a line goes from “What could be” up to a box labeled “Vision of the future” in “End.” “'Call to action” is written below the “Vision of the future” box to signify that the vision is a call to action." class="wp-image-7174426"/><figcaption class="wp-element-caption">A persuasive story pattern.</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>This type of structure aligns well with research results, and particularly results from usability tests. It provides evidence for “what is”—the problems that you’ve identified. And “what could be”—your recommendations on how to address them. And so on and so forth.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can reinforce your recommendations with examples of things that competitors are doing that could address these issues or with examples where competitors are gaining an edge. Or they can be visual, like quick mockups of how a new design could look that solves a problem. These can help generate conversation and momentum. And this continues until the end of the session when you’ve wrapped everything up in the conclusion by summarizing the main issues and suggesting a way forward. This is the part where you reiterate the main themes or problems and what they mean for the product—the denouement of the story. This stage gives stakeholders the next steps and hopefully the momentum to take those steps!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>While we are nearly at the end of this story, let’s reflect on the idea that user research is storytelling. All the elements of a good story are there in the three-act structure of user research:&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul><!-- wp:list-item -->
+<li><strong>Act one</strong>: You meet the protagonists (the users) and the antagonists (the problems affecting users). This is the beginning of the plot. In act one, researchers might use methods including contextual inquiry, ethnography, diary studies, surveys, and analytics. The output of these methods can include personas, empathy maps, user journeys, and analytics dashboards.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:list -->
+<ul><!-- wp:list-item -->
+<li><strong>Act two</strong>: Next, there’s character development. There’s conflict and tension as the protagonists encounter problems and challenges, which they must overcome. In act two, researchers might use methods including usability testing, competitive benchmarking, and heuristics evaluation. The output of these can include usability findings reports, UX strategy documents, usability guidelines, and best practices.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:list -->
+<ul><!-- wp:list-item -->
+<li><strong>Act three</strong>: The protagonists triumph and you see what a better future looks like. In act three, researchers may use methods including presentation decks, storytelling, and digital media. The output of these can be: presentation decks, video clips, audio clips, and pictures. </li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>The researcher has multiple roles: they’re the storyteller, the director, and the producer. The participants have a small role, but they are significant characters (in the research). And the stakeholders are the audience. But the most important thing is to get the story right and to use storytelling to tell users’ stories through research. By the end, the stakeholders should walk away with a purpose and an eagerness to resolve the product’s ills.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>So the next time that you’re planning research with clients or you’re speaking to stakeholders about research that you’ve done, think about how you can weave in some storytelling. Ultimately, user research is a win-win for everyone, and you just need to get stakeholders interested in how the story ends.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[User Experience, User Research]]>				</dc:subject>
+
+				<dc:date>
+					2024-05-30T18:04:43+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[To Ignite a Personalization Practice, Run this Prepersonalization Workshop]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/colineagan/">Colin Eagan</a>, <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/jeffmacintyre/">Jeffrey MacIntyre</a>					</author>
+
+				<link>
+					https://alistapart.com/article/prepersonalization-workshop/				</link>
+
+				<guid>
+					https://alistapart.com/article/prepersonalization-workshop/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>Picture this. You’ve joined a squad at your company that’s designing new product features with an emphasis on automation or AI. Or your company has just implemented a <a href="https://en.wikipedia.org/wiki/Personalization_management_system">personalization engine</a>. Either way, you’re designing with data. Now what? When it comes to <a href="https://alistapart.com/article/personalization-pyramid/">designing for personalization</a>, there are many cautionary tales, no overnight successes, and few guides for the perplexed.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Between the fantasy of getting it right and the fear of it going wrong—like when we encounter “<a href="https://visit.bucketbriga.de/c/personalization-failure-persofail/">persofails</a>” in the vein of a company <a href="https://twitter.com/jeffmacintyre/status/1505878250937061378">repeatedly imploring everyday consumers to buy additional toilet seats</a>—the personalization gap is real. It’s an especially confounding place to be a digital professional without a map, a compass, or a plan.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For those of you venturing into personalization, there’s no <em>Lonely Planet</em> and few tour guides because effective personalization is so specific to each organization’s talent, technology, and market position.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>But you can ensure that your team has packed its bags sensibly.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":7174341,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/suggested-vistas-1024x684.jpg" alt="A sign at a mountain scene says “People who liked this also liked,” which is followed by photographs of other scenic landscapes. Satirical art installation by Scott Kelly and Ben Polkinghome." class="wp-image-7174341"/><figcaption class="wp-element-caption"><em>Designing for personalization makes for strange bedfellows. A savvy art-installation satire on the challenges of humane design in the era of the algorithm. Credit:</em><a href="https://www.scottconradkelly.com/signs-of-the-times"><em> Signs of the Times</em></a><em>,</em> <em>Scott Kelly and Ben Polkinghome.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>There’s a DIY formula to increase your chances for success. At minimum, you’ll defuse your boss’s irrational exuberance. Before the party you’ll need to effectively prepare.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We call it <strong>prepersonalization</strong>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Behind the music</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Consider Spotify’s DJ feature, which debuted this past year.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:embed {"url":"https://www.youtube.com/watch?v=ok-aNnc0Dko","type":"video","providerNameSlug":"youtube","responsive":true,"className":"wp-embed-aspect-16-9 wp-has-aspect-ratio"} -->
+<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper">
+https://www.youtube.com/watch?v=ok-aNnc0Dko
+</div></figure>
+<!-- /wp:embed -->
+
+<!-- wp:paragraph -->
+<p>We’re used to seeing the polished final result of a personalization feature. Before <a href="https://www.linkedin.com/posts/daniel-ek-1b52093a_spotify-dj-the-200-best-inventions-of-2023-activity-7122612194923483137-rRNc/">the year-end award</a>, the <a href="https://newsroom.spotify.com/2023-10-18/how-spotify-uses-design-to-make-personalization-features-delightful/">making-of backstory</a>, or the behind-the-scenes <a href="https://newsroom.spotify.com/2023-03-08/spotify-new-personalized-ai-dj-how-it-works/">victory lap</a>, a personalized feature had to be conceived, budgeted, and prioritized. Before any personalization feature goes live in your product or service, it lives amid a backlog of worthy ideas for expressing customer experiences more dynamically.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>So how do you know where to place your personalization bets? How do you design consistent interactions that won’t trip up users or—worse—breed mistrust? We’ve found that for many budgeted programs to justify their ongoing investments, they first needed one or more workshops to convene key stakeholders and internal customers of the technology. Make yours count.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>​From <a href="https://en.wikipedia.org/wiki/Big_Tech#:~:text=Alphabet%2C%20the%20parent%20company%20of,Amazon%2C%20Netflix%2C%20and%20Google.">Big Tech</a> to fledgling startups, we’ve seen the same evolution up close with our clients. In our experiences with working on small and large personalization efforts, a program’s ultimate track record—and its ability to weather tough questions, work steadily toward shared answers, and organize its design and technology efforts—turns on how effectively these prepersonalization activities play out.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Time and again, we’ve seen effective workshops separate future success stories from unsuccessful efforts, saving countless time, resources, and collective well-being in the process.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>A personalization practice involves a multiyear effort of testing and feature development. It’s not a switch-flip moment in your tech stack. It’s best managed as a backlog that often evolves through three steps:&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol><!-- wp:list-item -->
+<li>customer experience optimization (CXO, also known as A/B testing or experimentation)</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>always-on automations (whether rules-based or machine-generated)</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>mature features or standalone product development (such as Spotify’s DJ experience)</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>This is why we created our progressive personalization framework and why we’re field-testing an accompanying <a href="http://progressivepersonalization.com/">deck of cards</a>: we believe that <em>there’s a base grammar, a set of “nouns and verbs” that your organization can use to design experiences that are customized, personalized, or automated</em>. You won’t need these cards. But we strongly recommend that you create something similar, whether that might be digital or physical.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Set your kitchen timer</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>How long does it take to cook up a prepersonalization workshop? The surrounding assessment activities that we recommend including can (and often do) span weeks. For the core workshop, we recommend aiming for two to three days. Here’s a summary of our broader approach along with details on the essential first-day activities.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The full arc of the wider workshop is threefold:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol><!-- wp:list-item -->
+<li><strong>Kickstart:</strong> This sets the terms of engagement as you focus on the opportunity as well as the readiness and drive of your team and your leadership. .</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Plan your work:</strong> This is the heart of the card-based workshop activities where you specify a plan of attack and the scope of work.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Work your plan:</strong> This phase is all about creating a competitive environment for team participants to individually pitch their own pilots that each contain a proof-of-concept project, its business case, and its operating model.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>Give yourself at least a day, split into two large time blocks, to power through a concentrated version of those first two phases.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Kickstart: Whet your appetite</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We call the first lesson the “landscape of connected experience.” It explores the personalization possibilities in your organization. A <strong>connected experience</strong>, in our parlance, is <em>any UX requiring the orchestration of multiple systems of record</em> on the backend. This could be a content-management system combined with a marketing-automation platform. It could be a digital-asset manager combined with a customer-data platform.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Spark conversation by naming consumer examples and business-to-business examples of connected experience interactions that you admire, find familiar, or even dislike. This should cover a representative range of personalization patterns, including automated app-based interactions (such as onboarding sequences or wizards), notifications, and recommenders. We have a catalog of these in the cards. Here’s a list of <a href="https://www.dynamicyield.com/personalization-examples/">142 different interactions</a> to jog your thinking.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is all about setting the table. What are the possible paths for the practice in your organization? If you want a broader view, here’s a <a href="https://visit.bucketbriga.de/c/field-notes/navigating-the-personalization-gap-a-field-guide">long-form primer</a> and a <a href="https://visit.bucketbriga.de/c/field-notes/progressive-personalization-a-decisionmaking-model-for-better-outcomes-in-personalized-ux">strategic framework</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Assess each example that you discuss for its complexity and the level of effort that you estimate that it would take for your team to deliver that feature (or something similar). In our cards, we divide connected experiences into five levels: functions, features, experiences, complete products, and portfolios. Size your own build here. This will help to focus the conversation on the merits of ongoing investment as well as the gap between what you deliver today and what you want to deliver in the future.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next, have your team plot each idea on the following 2×2 grid, which lays out the <strong>four enduring arguments</strong> for a personalized experience. This is critical because it emphasizes how personalization can not only help your external customers but also affect your own ways of working. It’s also a reminder (which is why we used the word <em>argument</em> earlier) of the broader effort beyond these tactical interventions.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":7174342,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/arguments-for-personalization-1024x575.jpg" alt="A two-by-two grid shows the four areas of emphasis for a personalization program in an organization: Business efficiency, customer experience, business orchestration, and customer understanding. The focus varies from front-stage to back-stage and from business-focused to customer-focused outcomes." class="wp-image-7174342"/><figcaption class="wp-element-caption"><em>Getting intentional about the desired outcomes is an important component to a large-scale personalization program. Credit: </em><a href="https://bucket.studio/"><em>Bucket Studio</em></a><em>.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Each team member should vote on where they see your product or service putting its emphasis. Naturally, you can’t prioritize all of them. The intention here is to flesh out how different departments may view their own upsides to the effort, which can vary from one to the next. Documenting your desired outcomes lets you know how the team internally aligns across representatives from different departments or functional areas.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The third and final kickstart activity is about naming your <strong>personalization gap</strong>. Is your customer journey well documented? Will data and privacy compliance be too big of a challenge? Do you have <a href="https://aws.amazon.com/blogs/machine-learning/selecting-the-right-metadata-to-build-high-performing-recommendation-models-with-amazon-personalize/">content metadata needs</a> that you have to address? (We’re pretty sure that you do: it’s just a matter of recognizing the relative size of that need and its remedy.) In our cards, we’ve noted a number of program risks, including common team dispositions. Our Detractor card, for example, lists six stakeholder behaviors that hinder progress.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Effectively collaborating and managing expectations is critical to your success. Consider the potential barriers to your future progress. Press the participants to name specific steps to overcome or mitigate those barriers in your organization. As studies have shown, personalization efforts face many common barriers.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":7174343,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/barriers-to-personalization-1024x483.jpg" alt="Barriers to personalization according to a Boston Consulting Group 2016 research study. The top items include “too few personnel dedicated to personalization,” “lack of a clear roadmap,” and “inadequate cross-functional coordination and project management.”" class="wp-image-7174343"/><figcaption class="wp-element-caption"><em>The largest management consultancies have established practice areas in personalization, and they regularly research program risks and challenges. Credit: </em><a href="https://www.bcg.com/publications/2017/retail-marketing-sales-profiting-personalization"><em>Boston Consulting Group</em></a><em>.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>At this point, you’ve hopefully discussed sample interactions, emphasized a key area of benefit, and flagged key gaps? Good—you’re ready to continue.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Hit that test kitchen</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Next, let’s look at what you’ll need to bring your personalization recipes to life. Personalization engines, which are robust software suites for automating and expressing dynamic content, can intimidate new customers. Their capabilities are sweeping and powerful, and they present broad options for how your organization can conduct its activities. This presents the question: Where do you begin when you’re configuring a connected experience?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>What’s important here is to avoid treating the installed software like it were a dream kitchen from some fantasy remodeling project (as one of our client executives memorably put it). These software engines are more like <strong>test kitchens</strong> where your team can begin devising, tasting, and refining the snacks and meals that will become a part of your personalization program’s regularly evolving menu.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":7174344,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/personalization-pyramid-1024x576.jpg" alt="The Progressive Personalization Model v2: A pyramid with the following layers, starting at the base and working up: Raw Data (millions), Actionable Data (hundreds of thousands), Segments (thousands), Customer Experience Patterns (many), Interactions (dozens), and Goals (handful)." class="wp-image-7174344"/><figcaption class="wp-element-caption"><em>Progressive personalization, a framework for designing connected experiences. Credit: </em><a href="https://bucket.studio/"><em>Bucket Studio</em></a><em> and Colin Eagan.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The ultimate menu of the prioritized backlog will come together over the course of the workshop. And creating “dishes” is the way that you’ll have individual team stakeholders construct personalized interactions that serve their needs or the needs of others.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The dishes will come from recipes, and those recipes have set ingredients.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":7174345,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/personalization-poker-deck-1024x576.jpg" alt="A photo of the Progressive Personalization deck of cards with accompanying text reading: Align on key terms and tactics. Draft and groom a full backlog, designing with data." class="wp-image-7174345"/></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"id":7174346,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/poker-deck-cards-1024x660.jpg" alt="A zoomed out view of many of the cards in the deck. Cards have colors corresponding to the layers of the personalization pyramid and include actionable details." class="wp-image-7174346"/></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"id":7174347,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/poker-deck-recipes-1024x572.jpg" alt="Progressive personalization is a model of designing for personalized interactions that uses playing cards to assemble the typical parts for such features and functionality." class="wp-image-7174347"/><figcaption class="wp-element-caption"><em>In the same way that ingredients form a recipe, you can also create </em><a href="http://progressivepersonalization.com/"><em>cards</em></a><em> to break down a personalized interaction into its constituent parts. Credit: </em><a href="https://bucket.studio/"><em>Bucket Studio</em></a><em> and Colin Eagan.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Verify your ingredients</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Like a good product manager, you’ll make sure—andyou’ll validate with the right stakeholders present—that you have all the ingredients on hand to cook up your desired interaction (or that you can work out what needs to be added to your pantry). These ingredients include the audience that you’re targeting, content and design elements, the context for the interaction, and your measure for how it’ll come together.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This isn’t just about discovering requirements. Documenting your personalizations as a series of if-then statements lets the team:&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol><!-- wp:list-item -->
+<li>compare findings toward a unified approach for developing features, not unlike when artists paint with the same palette;&nbsp;</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>specify a consistent set of interactions that users find uniform or familiar;&nbsp;</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>and develop parity across performance measurements and key performance indicators too.&nbsp;</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>This helps you streamline your designs and your technical efforts while you deliver a shared palette of core motifs of your personalized or automated experience.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Compose your recipe</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>What ingredients are important to you? Think of a who-what-when-why <a href="https://en.wikipedia.org/wiki/Five_Ws">construct</a>:&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul><!-- wp:list-item -->
+<li>Who are your key audience segments or groups?</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>What kind of content will you give them, in what design elements, and under what circumstances?</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>And for which business and user benefits?</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>We first developed these <a href="https://alistapart.com/article/personalization-pyramid/">cards and card categories</a> five years ago. We regularly play-test their fit with conference audiences and clients. And we still encounter new possibilities. But they all follow an underlying who-what-when-why logic.<br><br>Here are three examples for a subscription-based reading app, which you can generally follow along with right to left in the cards in the accompanying photo below.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol><!-- wp:list-item -->
+<li>Nurture personalization: When a guest or an unknown visitor interacts with&nbsp; a product title, a banner or alert bar appears that makes it easier for them to encounter a related title they may want to read, saving them time.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Welcome automation: When there’s a newly registered user, an email is generated to call out the breadth of the content catalog and to make them a happier subscriber.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Winback automation: Before their subscription lapses or after a recent failed renewal, a user is sent an email that gives them a promotional offer to suggest that they reconsider renewing or to remind them to renew.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:image {"id":7174348,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/recipe-nurture-1024x573.jpg" alt="A selection of prompt cards assembled to represent the key parameters of a “nurture” user flow." class="wp-image-7174348"/><figcaption class="wp-element-caption"><em>A “nurture” automation may trigger a banner or alert box that promotes content that makes it easier for users to complete a common task, based on behavioral profiling of two user types. Credit: </em><a href="https://bucket.studio/"><em>Bucket Studio</em></a><em>.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"id":7174349,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/recipe-welcome-1024x574.jpg" alt="A selection of prompt cards assembled to represent the key parameters of a “welcome”, or onboarding, user flow." class="wp-image-7174349"/><figcaption class="wp-element-caption"><em>A “welcome” automation may be triggered for any user that sends an email to help familiarize them with the breadth of a content library, and this email ideally helps them consider selecting various titles (no matter how much time they devote to reviewing the email’s content itself). Credit: </em><a href="https://bucket.studio/"><em>Bucket Studio</em></a><em>.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"id":7174350,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://alistapart.com/wp-content/uploads/2024/04/recipe-winback-1024x573.jpg" alt="A selection of prompt cards assembled to represent the key parameters of a “winback”, or customer-churn risk, user flow." class="wp-image-7174350"/><figcaption class="wp-element-caption"><em>A “winback” automation may be triggered for a specific group, such as users with recently failed credit-card transactions or users at risk of churning out of active usage, that present them with a specific offer to mitigate near-future inactivity. Credit: </em><a href="https://bucket.studio/"><em>Bucket Studio</em></a><em>.</em></figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>A useful preworkshop activity may be to think through a first draft of what these cards might be for your organization, although we’ve also found that this process sometimes flows best through cocreating the recipes themselves. Start with a set of blank cards, and begin labeling and grouping them through the design process, eventually distilling them to a refined subset of highly useful candidate cards.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can think of the later stages of the workshop as <a href="https://visit.bucketbriga.de/c/field-notes/pre-personalization-workshop">moving from recipes toward a cookbook</a> in focus—like a more nuanced customer-journey mapping. Individual “cooks” will pitch their recipes to the team, using a common <a href="https://hbr.org/2016/09/know-your-customers-jobs-to-be-done">jobs-to-be-done</a> format so that measurability and results are baked in, and from there, the resulting collection will be prioritized for finished design and delivery to production.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Better kitchens require better architecture</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Simplifying a customer experience is a complicated effort for those who are inside delivering it. Beware anyone who says otherwise. With that being said,&nbsp; “Complicated problems can be hard to solve, but <a href="https://sloanreview.mit.edu/article/the-critical-difference-between-complex-and-complicated/">they are addressable with rules and recipes</a>.”</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>When personalization becomes a laugh line, it’s because a team is <a href="https://aws.amazon.com/what-is/overfitting/">overfitting</a>: they aren’t designing with their best data. Like a sparse pantry, every organization has metadata debt to go along with its technical debt, and this creates a drag on personalization effectiveness. Your AI’s output quality, for example, is indeed limited by your <a href="https://en.wikipedia.org/wiki/Information_architecture">IA</a>. Spotify’s poster-child prowess today was unfathomable before they <a href="https://www.theguardian.com/technology/2014/mar/06/spotify-echo-nest-streaming-music-deal">acquired</a> a seemingly modest <a href="https://en.wikipedia.org/wiki/The_Echo_Nest">metadata startup</a> that now <a href="https://techcrunch.com/2014/10/19/the-sonic-mad-scientists/">powers</a> its underlying information architecture.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">You can definitely stand the heat…</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Personalization technology opens a doorway into a confounding ocean of possible designs. Only a disciplined and highly collaborative approach will bring about the necessary focus and intention to succeed. So banish the dream kitchen. Instead, hit the test kitchen to save time, preserve job satisfaction and security, and safely dispense with the fanciful ideas that originate upstairs of the doers in your organization. There are meals to serve and mouths to feed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This workshop framework gives you a fighting shot at lasting success as well as sound beginnings. Wiring up your information layer isn’t an overnight affair. But if you use the same cookbook and shared recipes, you’ll have solid footing for success. We designed these activities to make your organization’s needs concrete and clear, long before the hazards pile up.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>While there are associated costs toward investing in this kind of technology and product design, your ability to size up and confront your unique situation and your digital capabilities is time well spent. Don’t squander it. The proof, as they say, is in the pudding.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[Content Strategy, Information Architecture, User Experience]]>				</dc:subject>
+
+				<dc:date>
+					2024-04-16T19:51:34+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[The Wax and the Wane of the Web]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/stegrainer/">Ste Grainer</a>					</author>
+
+				<link>
+					https://alistapart.com/article/the-wax-and-the-wane-of-the-web/				</link>
+
+				<guid>
+					https://alistapart.com/article/the-wax-and-the-wane-of-the-web/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>I offer a single bit of advice to friends and family when they become new parents: <strong>When you start to think that you’ve got everything figured out, everything will change.</strong> Just as you start to get the hang of feedings, diapers, and regular naps, it’s time for solid food, potty training, and overnight sleeping. When you figure those out, it’s time for preschool and rare naps. The cycle goes on and on.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The same applies for those of us working in design and development these days. Having worked on the web for almost three decades at this point, I’ve seen the regular wax and wane of ideas, techniques, and technologies. Each time that we as developers and designers get into a regular rhythm, some new idea or technology comes along to shake things up and remake our world.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>How we got here</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>I built my first website in the mid-’90s. Design and development on the web back then was a free-for-all, with few established norms. For any layout aside from a single column, we used <code>table</code> elements, often with empty cells containing a single pixel spacer GIF to add empty space. We styled text with numerous <code>font</code> tags, nesting the tags every time we wanted to vary the font style. And we had only three or four typefaces to choose from: Arial, Courier, or Times New Roman. When Verdana and Georgia came out in 1996, we rejoiced because our options had nearly doubled. The only safe colors to choose from were the 216 “web safe” colors known to work across platforms. The few interactive elements (like contact forms, guest books, and counters) were mostly powered by CGI scripts (predominantly written in Perl at the time). Achieving any kind of unique look involved a pile of hacks all the way down. Interaction was often limited to specific pages in a site.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>The birth of web standards</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>At the turn of the century, a new cycle started. Crufty code littered with <code>table</code> layouts and <code>font</code> tags waned, and a push for web standards waxed. <a href="https://alistapart.com/article/fear/">Newer technologies like CSS</a> got more widespread adoption by browsers makers, developers, and designers. This shift toward standards didn’t happen accidentally or overnight. It took active engagement between the <a href="https://www.w3.org/">W3C</a> and browser vendors and heavy evangelism from folks like the <a href="https://www.webstandards.org/"><em>Web Standards Project</em> </a>to build standards. <a href="https://alistapart.com/"><em>A List Apart</em></a> and books like <em>Designing with Web Standards</em> by Jeffrey Zeldman played key roles in teaching developers and designers why standards are important, how to implement them, and how to sell them to their organizations. And approaches like <a href="http://hesketh.com/publications/progressive_enhancement_and_the_future_of_web_design.html">progressive enhancement</a> introduced the idea that content should be available for all browsers—with additional enhancements available for more advanced browsers. Meanwhile, sites like the <a href="https://csszengarden.com/"><em>CSS Zen Garden</em></a> showcased just how powerful and versatile CSS can be when combined with a solid semantic HTML structure.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Server-side languages like PHP, Java, and .NET overtook Perl as the predominant back-end processors, and the cgi-bin was tossed in the trash bin. With these better server-side tools came the first era of web applications, starting with content-management systems (particularly in the blogging space with tools like <a href="https://web.archive.org/web/19991012022531/http://blogger.com/">Blogger</a>, <a href="https://web.archive.org/web/20010124065100/http://noahgrey.com/greysoft/">Grey Matter</a>, <a href="https://web.archive.org/web/20101206044705/http://www.movabletype.com/blog/2001/10/please-read-before-downloading.html">Movable Type</a>, and <a href="https://wordpress.org/news/2003/05/wordpress-now-available/">WordPress</a>). In the mid-2000s, <a href="https://alistapart.com/article/gettingstartedwithajax/">AJAX</a> opened doors for asynchronous interaction between the front end and back end. Suddenly, pages could update their content without needing to reload. A crop of JavaScript frameworks like <a href="http://prototypejs.org/">Prototype</a>, <a href="https://web.archive.org/web/20080611093629/http://yuiblog.com/blog/2006/02/13/the-yahoo-user-interface-library/">YUI</a>, and <a href="https://web.archive.org/web/20060204064635/https://jquery.com/">jQuery</a> arose to help developers build more reliable client-side interaction across browsers that had wildly varying levels of standards support. Techniques like <a href="https://alistapart.com/article/dynatext/">image replacement</a> let crafty designers and developers display fonts of their choosing. And technologies like Flash made it possible to add animations, games, and even more interactivity.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>These new technologies, standards, and techniques reinvigorated the industry in many ways. Web design flourished as designers and developers explored more diverse styles and layouts. But we still relied on tons of hacks. Early CSS was a huge improvement over table-based layouts when it came to basic layout and text styling, but its limitations at the time meant that designers and developers still relied heavily on images for <a href="https://alistapart.com/article/slidingdoors/">complex shapes (such as rounded or angled corners)</a> and tiled backgrounds for <a href="https://alistapart.com/article/fauxcolumns/">the appearance of full-length columns</a> (among other hacks). Complicated layouts required all manner of nested floats or absolute positioning (or both). Flash and image replacement for custom fonts was a great start toward varying the typefaces from the big five, but both hacks introduced accessibility and performance problems. And JavaScript libraries made it easy for anyone to add a dash of interaction to pages, although at the cost of doubling or even quadrupling the download size of simple websites.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>The web as software platform</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The symbiosis between the front end and back end continued to improve, and that led to the current era of modern web applications. Between expanded server-side programming languages (which kept growing to include Ruby, Python, Go, and others) and newer front-end tools like React, Vue, and Angular, we could build fully capable software on the web. Alongside these tools came others, including collaborative version control, build automation, and shared package libraries. What was once primarily an environment for linked documents became a realm of infinite possibilities.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>At the same time, mobile devices became more capable, and they gave us internet access in our pockets. <a href="https://abookapart.com/products/mobile-first">Mobile apps</a> and <a href="https://alistapart.com/article/responsive-web-design/">responsive design</a> opened up opportunities for new interactions anywhere and any time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This combination of capable mobile devices and powerful development tools contributed to the waxing of social media and other centralized tools for people to connect and consume. As it became easier and more common to connect with others directly on Twitter, Facebook, and even Slack, the desire for hosted personal sites waned. Social media offered connections on a global scale, with both the good and bad that that entails.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Want a much more extensive history of how we got here, with some other takes on ways that we can improve? Jeremy Keith wrote “<a href="https://adactio.com/articles/20638">Of Time and the Web</a>.” Or check out the “<a href="https://www.webdesignmuseum.org/web-design-history">Web Design History Timeline</a>” at the <a href="https://www.webdesignmuseum.org/">Web Design Museum</a>. Neal Agarwal also has a fun tour through “<a href="https://neal.fun/internet-artifacts/">Internet Artifacts</a>.”</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Where we are now</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the last couple of years, it’s felt like we’ve begun to reach another major inflection point. As <a href="https://techcrunch.com/2024/02/07/how-twitters-descent-into-chaos-is-paving-the-way-for-a-new-web/">social-media platforms fracture</a> and wane, there’s been a <a href="https://matthiasott.com/articles/into-the-personal-website-verse">growing interest in owning our own content</a> again. There are many different ways to make a website, from the tried-and-true classic of hosting plain HTML files to <a href="https://www.cloudflare.com/learning/performance/static-site-generator/">static site generators</a> to content management systems of all flavors. The fracturing of social media also comes with a cost: we lose crucial infrastructure for discovery and connection. <a href="https://indieweb.org/Webmention">Webmentions</a>, <a href="https://www.rssboard.org/rss-specification">RSS</a>, <a href="https://activitypub.rocks/">ActivityPub</a>, and other tools of the <a href="https://indieweb.org/">IndieWeb</a> can help with this, but they’re still relatively underimplemented and <a href="https://mxb.dev/blog/the-indieweb-for-everyone/#h-lowering-the-barrier">hard to use for the less nerdy</a>. We can build amazing personal websites and add to them regularly, but without discovery and connection, it can sometimes feel like we may as well be shouting into the void.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Browser support for CSS, JavaScript, and other standards like web components has accelerated, especially through efforts like <a href="https://github.com/web-platform-tests/interop">Interop</a>. New technologies gain support across the board in a fraction of the time that they used to. I often learn about a new feature and <a href="https://caniuse.com/">check its browser support</a> only to find that its coverage is already above 80 percent. Nowadays, the barrier to using newer techniques often isn’t browser support but simply the limits of how quickly designers and developers can learn what’s available and how to adopt it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Today, with <a href="https://daverupert.com/2024/01/time-to-unmaintainable/">a few commands and a couple of lines of code</a>, we can prototype almost any idea. All the tools that we now have available make it easier than ever to start something new. But the upfront cost that these frameworks may save in initial delivery eventually comes due as upgrading and maintaining them becomes a part of our technical debt.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>If we rely on third-party frameworks, adopting new standards can sometimes take longer since we may have to wait for those frameworks to adopt those standards. These frameworks—which used to let us adopt new techniques sooner—have now become hindrances instead. These same frameworks often come with <a href="https://tonsky.me/blog/js-bloat/">performance costs</a> too, forcing users to wait for scripts to load before they can read or interact with pages. And when <a href="https://www.kryogenix.org/code/browser/everyonehasjs.html">scripts fail</a> (whether through poor code, network issues, or other environmental factors), there’s often no alternative, leaving users with blank or broken pages.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Where do we go from here?</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Today’s hacks help to shape tomorrow’s standards. And there’s nothing inherently wrong with embracing hacks—for now—to move the present forward. Problems only arise when we’re unwilling to admit that they’re hacks or we hesitate to replace them. So what can we do to create the future we want for the web?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Build for the long haul.</strong> Optimize for performance, for accessibility, and for the user. Weigh the costs of those developer-friendly tools. They may make your job a little easier today, but how do they affect everything else? What’s the cost to users? To future developers? To standards adoption? Sometimes the convenience may be worth it. Sometimes it’s just a hack that you’ve grown accustomed to. And sometimes it’s holding you back from even better options.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Start from standards.</strong> Standards continue to evolve over time, but browsers have done a remarkably good job of continuing to support older standards. The same isn’t always true of third-party frameworks. Sites built with even the hackiest of HTML from the ’90s still <a href="https://www.vortex.com/">work</a><a href="https://www.spacejam.com/1996/"> just fine</a> today. The same can’t always be said of sites built with frameworks even after just a couple years.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Design with care.</strong> Whether your craft is code, pixels, or processes, consider the impacts of each decision. The convenience of many a modern tool comes at the cost of not always understanding the underlying decisions that have led to its design and not always considering the impact that those decisions can have. Rather than rushing headlong to “move fast and break things,” use the time saved by modern tools to consider more carefully and design with deliberation.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Always be learning.</strong> If you’re always learning, you’re also growing. Sometimes it may be hard to pinpoint what’s worth learning and what’s just today’s hack. You might end up focusing on something that won’t matter next year, even if you were to focus solely on learning standards. (<a href="https://alistapart.com/article/webstandards2008/">Remember XHTML?</a>) But constant learning opens up new connections in your brain, and the hacks that you learn one day may help to inform different experiments another day.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Play, experiment, and be weird!</strong> This web that we’ve built is the ultimate experiment. It’s the single largest human endeavor in history, and yet each of us can create our own pocket within it. <a href="https://www.rollingstone.com/culture/culture-commentary/internet-future-about-to-get-weird-1234938403/">Be courageous and try new things</a>. Build a <a href="https://lynnandtonic.com/work/">playground</a> for ideas. Make <a href="https://a-k-apart.com/">goofy experiments</a> in your own mad <a href="https://neal.fun/">science</a> <a href="https://labs.jensimmons.com/">lab</a>. Start your own <a href="https://www.zeldman.com/2023/11/28/fly-my-designers-fly/">small business</a>. There has never been a more empowering place to be creative, take risks, and explore what we’re capable of.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Share and amplify.</strong> As you experiment, play, and learn, share what’s worked for you. Write on your own website, post on whichever social media site you prefer, or shout it from a TikTok. <a href="https://alistapart.com/about/contribute/">Write something for <em>A List Apart</em></a>! But take the time to <a href="https://hidde.blog/sharing-links/">amplify others</a> too: find new voices, learn from them, and share what they’ve taught you.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><strong>Go forth and make</strong></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>As designers and developers for the web (and beyond), we’re responsible for building the future every day, whether that may take the shape of personal websites, social media tools used by billions, or anything in between. Let’s imbue our values into the things that we create, and let’s make the web a better place for everyone. Create that thing that only you are uniquely qualified to make. Then share it, make it better, make it again, or make something new. Learn. Make. Share. Grow. Rinse and repeat. Every time you think that you’ve mastered the web, everything will change.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[State of the Web, Web Strategy]]>				</dc:subject>
+
+				<dc:date>
+					2024-02-29T14:45:00+00:00				</dc:date>
+			</item>
+
+			
+			<item>
+				<title>
+					<![CDATA[Opportunities for AI in Accessibility]]>				</title>
+
+				<author>
+				by <a itemprop="url" class="author" rel="author" href="https://alistapart.com/author/agustafson/">Aaron Gustafson</a>					</author>
+
+				<link>
+					https://alistapart.com/article/opportunities-for-ai-in-accessibility/				</link>
+
+				<guid>
+					https://alistapart.com/article/opportunities-for-ai-in-accessibility/				</guid>
+
+				<description>
+					<![CDATA[<!-- wp:paragraph -->
+<p>In reading <a href="https://www.joedolson.com/2023/06/accessibility-and-artificial-intelligence/">Joe Dolson’s recent piece on the intersection of AI and accessibility</a>, I absolutely appreciated the skepticism that he has for AI in general as well as for the ways that many have been using it. In fact, I’m very skeptical of AI myself, despite my role at Microsoft as an accessibility innovation strategist who helps run the AI for Accessibility grant program. As with any tool, AI can be used in very constructive, inclusive, and accessible ways; and it can also be used in destructive, exclusive, and harmful ones. And there are a ton of uses somewhere in the mediocre middle as well.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>I’d like you to consider this a “yes… and” piece to complement Joe’s post. I’m not trying to refute any of what he’s saying but rather provide some visibility to projects and opportunities where AI can make meaningful differences for people with disabilities. To be clear, I’m not saying that there aren’t real risks or pressing issues with AI that need to be addressed—there are, and we’ve needed to address them, like, yesterday—but I want to take a little time to talk about what’s possible in hopes that we’ll get there one day.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Alternative text</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Joe’s piece spends a lot of time talking about computer-vision models generating alternative text. He highlights a ton of valid issues with the current state of things. And while computer-vision models continue to improve in the quality and richness of detail in their descriptions, their results aren’t great. As he rightly points out, the current state of image analysis is pretty poor—especially for certain image types—in large part because current AI systems examine images in isolation rather than within the contexts that they’re in (which is a consequence of having separate “foundation” models for text analysis and image analysis). Today’s models aren’t trained to distinguish between images that are contextually relevant (that should probably have descriptions) and those that are purely decorative (which might not need a description) either. Still, I still think there’s potential in this space.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>As Joe mentions, human-in-the-loop authoring of alt text should absolutely be a thing. And if AI can pop in to offer a starting point for alt text—even if that starting point might be a prompt saying <em>What is this BS? That’s not right at all… Let me try to offer a starting point</em>—I think that’s a win.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Taking things a step further, if we can specifically train a model to analyze image usage in context, it could help us more quickly identify which images are likely to be decorative and which ones likely require a description. That will help reinforce which contexts call for image descriptions <em>and</em> it’ll improve authors’ efficiency toward making their pages more accessible.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>While complex images—like graphs and charts—are challenging to describe in any sort of succinct way (even for humans), <a href="https://openai.com/research/gpt-4#:~:text=Visual%20inputs:%20VGA%20charger">the image example shared in the GPT4 announcement</a> points to an interesting opportunity as well. Let’s suppose that you came across a chart whose description was simply the title of the chart and the kind of visualization it was, such as: <em>Pie chart comparing smartphone usage to feature phone usage among US households making under $30,000 a year.</em> (That would be a pretty awful alt text for a chart since that would tend to leave many questions about the data unanswered, but then again, let’s suppose that that was the description that was in place.) If your browser knew that that image was a pie chart (because an onboard model concluded this), imagine a world where users could ask questions like these about the graphic:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul><!-- wp:list-item -->
+<li><em>Do more people use smartphones or feature phones?</em></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><em>How many more?</em></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><em>Is there a group of people that don’t fall into either of these buckets?</em></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><em>How many is that?</em></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>Setting aside the realities of <a href="https://machinelearningmastery.com/a-gentle-introduction-to-hallucinations-in-large-language-models/">large language model (LLM) hallucinations</a>—where a model just makes up plausible-sounding “facts”—for a moment, the opportunity to learn more about images and data in this way could be revolutionary for blind and low-vision folks as well as for people with various forms of color blindness, cognitive disabilities, and so on. It could also be useful in educational contexts to help people who <em>can</em> see these charts, as is, to understand the data in the charts.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Taking things a step further: What if you could ask your browser to simplify a complex chart? What if you could ask it to isolate a single line on a line graph? What if you could ask your browser to transpose the colors of the different lines to work better for form of color blindness you have? What if you could ask it to swap colors for patterns? Given these tools’ chat-based interfaces and our existing ability to manipulate images in today’s AI tools, that seems like a possibility.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Now imagine a purpose-built model that could extract the information from that chart and convert it to another format. For example, perhaps it could turn that pie chart (or better yet, a series of pie charts) into more accessible (and useful) formats, like spreadsheets. That would be amazing!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Matching algorithms</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Safiya Umoja Noble absolutely hit the nail on the head when she titled her book <a href="http://algorithmsofoppression.com/"><em>Algorithms of Oppression</em></a>. While her book was focused on the ways that search engines reinforce racism, I think that it’s equally true that all computer models have the potential to amplify conflict, bias, and intolerance. Whether it’s Twitter always showing you the latest tweet from a bored billionaire, YouTube sending us into a Q-hole, or Instagram warping our ideas of what natural bodies look like, we know that poorly authored and maintained algorithms are incredibly harmful. A lot of this stems from a lack of diversity among the people who shape and build them. When these platforms are built with inclusively baked in, however, there’s real potential for algorithm development to help people with disabilities.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Take <a href="https://www.mentra.com/">Mentra</a>, for example. They are an employment network for neurodivergent people. They use an algorithm to match job seekers with potential employers based on over 75 data points. On the job-seeker side of things, it considers each candidate’s strengths, their necessary and preferred workplace accommodations, environmental sensitivities, and so on. On the employer side, it considers each work environment, communication factors related to each job, and the like. As a company run by neurodivergent folks, Mentra made the decision to flip the script when it came to typical employment sites. They use their algorithm to propose available candidates to companies, who can then connect with job seekers that they are interested in; reducing the emotional and physical labor on the job-seeker side of things.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>When more people with disabilities are involved in the creation of algorithms, that can reduce the chances that these algorithms will inflict harm on their communities. That’s why diverse teams are so important.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Imagine that a social media company’s recommendation engine was tuned to analyze who you’re following and if it was tuned to prioritize follow recommendations for people who talked about similar things but who were different in some key ways from your existing sphere of influence. For example, if you were to follow a bunch of nondisabled white male academics who talk about AI, it could suggest that you follow academics who are disabled or aren’t white or aren’t male who also talk about AI. If you took its recommendations, perhaps you’d get a more holistic and nuanced understanding of what’s happening in the AI field. These same systems should also use their understanding of biases about particular communities—including, for instance, the disability community—to make sure that they aren’t recommending any of their users follow accounts that perpetuate biases against (or, worse, spewing hate toward) those groups.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>Other ways that AI can helps people with disabilities</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>If I weren’t trying to put this together between other tasks, I’m sure that I could go on and on, providing all kinds of examples of how AI could be used to help people with disabilities, but I’m going to make this last section into a bit of a lightning round. In no particular order:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul><!-- wp:list-item -->
+<li>Voice preservation. You may have seen <a href="https://arxiv.org/abs/2301.02111">the VALL-E paper</a> or <a href="https://www.apple.com/newsroom/2023/05/apple-previews-live-speech-personal-voice-and-more-new-accessibility-features/">Apple’s Global Accessibility Awareness Day announcement</a> or you may be familiar with the voice-preservation offerings from <a href="https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/custom-neural-voice">Microsoft</a>, <a href="https://www.acapela-group.com/voices/voice-banking/">Acapela</a>, or others. It’s possible to train an AI model to replicate your voice, which can be a tremendous boon for people who have ALS (Lou Gehrig’s disease) or motor-neuron disease or other medical conditions that can lead to an inability to talk. This is, of course, the same tech that can also be used to create audio deepfakes, so it’s something that we need to approach <a href="https://www.microsoft.com/en-us/ai/responsible-ai"><em>responsibly</em></a>, but the tech has truly transformative potential.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Voice recognition. Researchers like those in the <a href="https://speechaccessibilityproject.beckman.illinois.edu/">Speech Accessibility Project</a> are paying people with disabilities for their help in collecting recordings of people with atypical speech. As I type, they are actively recruiting people with Parkinson’s and related conditions, and they have plans to expand this to other conditions as the project progresses. This research will result in more inclusive data sets that will let more people with disabilities use voice assistants, dictation software, and voice-response services as well as control their computers and other devices more easily, using only their voice.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Text transformation. The current generation of LLMs is quite capable of adjusting existing text content without injecting hallucinations. This is hugely empowering for people with cognitive disabilities who may benefit from text summaries or simplified versions of text or even text that’s prepped for <a href="https://bionic-reading.com/">Bionic Reading</a>.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><strong>The importance of diverse teams and data</strong></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We need to recognize that our differences matter. Our lived experiences are influenced by the intersections of the identities that we exist in. These lived experiences—with all their complexities (and joys and pain)—are valuable inputs to the software, services, and societies that we shape. Our differences need to be represented in the data that we use to train new models, and the folks who contribute that valuable information need to be compensated for sharing it with us. Inclusive data sets yield more robust models that foster more equitable outcomes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Want a model that doesn’t demean or patronize or objectify people with disabilities? Make sure that you have content about disabilities that’s authored by people with a range of disabilities, and make sure that that’s well represented in the training data.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Want a model that doesn’t use ableist language? You may be able to use <a href="https://www.selfdefined.app/">existing data sets</a> to build a filter that can intercept and remediate ableist language before it reaches readers. That being said, when it comes to sensitivity reading, AI models won’t be replacing human copy editors anytime soon.&nbsp;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Want a coding copilot that gives you accessible recommendations from the jump? Train it on code that you know to be accessible.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:separator {"className":"is-style-dots"} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
+<!-- /wp:separator -->
+
+<!-- wp:paragraph -->
+<p>I have no doubt that AI can and will harm people… today, tomorrow, and well into the future. But I also believe that we can acknowledge that and, with an eye towards accessibility (and, more broadly, inclusion), make thoughtful, considerate, and intentional changes in our approaches to AI that will reduce harm over time as well. Today, tomorrow, and well into the future.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:separator {"className":"is-style-dots"} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
+<!-- /wp:separator -->
+
+<!-- wp:paragraph -->
+<p>Many thanks to Kartik Sawhney for helping me with the development of this piece, Ashley Bischoff for her invaluable editorial assistance, and, of course, Joe Dolson for the prompt.</p>
+<!-- /wp:paragraph -->]]>				</description>
+
+				<dc:subject>
+					<![CDATA[Accessibility, Code, Content, Workflow &amp; Tools]]>				</dc:subject>
+
+				<dc:date>
+					2024-02-07T14:00:00+00:00				</dc:date>
+			</item>
+</channel>
+</rss>
