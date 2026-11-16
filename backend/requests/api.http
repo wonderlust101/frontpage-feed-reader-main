@@ -25,3 +25,24 @@ POST {{baseUrl}}/api/health
 Content-Type: application/json
 
 { not json
+
+### Fetch a feed (RSS 2.0) → normalized JSON
+GET {{baseUrl}}/api/fetch?url=https://css-tricks.com/feed/
+Accept: application/json
+
+### Fetch an Atom feed
+GET {{baseUrl}}/api/fetch?url=https://vercel.com/atom
+Accept: application/json
+
+### Conditional fetch → 304 when the feed is unchanged (paste the ETag from the previous response)
+GET {{baseUrl}}/api/fetch?url=https://vercel.com/atom
+If-None-Match: "paste-etag-here"
+
+### Dead feed → 502 { error: { code: "http_4xx", retryable: false } }
+GET {{baseUrl}}/api/fetch?url=https://example.com/this-feed-does-not-exist.xml
+
+### Not a feed → 422 { error: { code: "not_a_feed" } }
+GET {{baseUrl}}/api/fetch?url=https://example.com/
+
+### Missing url → 400 { error: { code: "invalid_url" } }
+GET {{baseUrl}}/api/fetch
