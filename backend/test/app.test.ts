@@ -32,7 +32,9 @@ describe('error handling', () => {
     test('unknown routes return a JSON 404', async () => {
         const res = await fetch(`${server.url}/api/does-not-exist`);
         expect(res.status).toBe(404);
-        expect(await res.json()).toEqual({ error: 'Not found' });
+        expect(await res.json()).toEqual({
+            error: { code: 'not_found', message: 'Not found', retryable: false },
+        });
     });
 
     test('malformed JSON bodies return a JSON 400', async () => {
@@ -42,6 +44,8 @@ describe('error handling', () => {
             body: '{ not json',
         });
         expect(res.status).toBe(400);
-        expect(await res.json()).toHaveProperty('error');
+        expect(await res.json()).toEqual({
+            error: { code: 'invalid_json', message: 'The request body is not valid JSON', retryable: false },
+        });
     });
 });

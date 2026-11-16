@@ -72,6 +72,16 @@ Each feature lives in `backend/src/modules/<feature>/`, with files named after t
 
 Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, service and its table.
 
+**Errors.** Every API error has the same shape, whatever the status:
+
+```json
+{ "error": { "code": "not_found", "message": "Feed not found", "retryable": false } }
+```
+
+- Services **throw**: an `AppError` (`src/lib/errors.ts`), a helper (`notFound()`, `badRequest()`), or a module subclass like `FeedError`.
+- Controllers **don't catch**. Express 5 forwards thrown errors to `src/middleware/error-handler.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
+- A new kind of error is one table entry, not new controller code: add `code → { httpStatus, retryable }` to the module's errors file (see `FEED_ERRORS` in `src/lib/feed/errors.ts`), and add the code to `ApiErrorCode` in `packages/shared/src/api.ts`.
+
 The sample feeds live in `backend/data/` because only the backend reads them.
 
 ## Getting started

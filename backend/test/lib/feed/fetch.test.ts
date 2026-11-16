@@ -94,7 +94,7 @@ describe('fetchFeed', () => {
         ['/error', 'http_5xx', 500, true],
     ] as const)('maps %s to %s', async (path, code, status, retryable) => {
         const err = await expectError(fetchFeed(`${upstream.url}${path}`, opts), code, retryable);
-        expect(err.status).toBe(status);
+        expect(err.upstreamStatus).toBe(status);
     });
 
     test('caps the body size', async () => {

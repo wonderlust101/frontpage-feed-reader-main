@@ -178,7 +178,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
                 const code = res.status >= 500 ? 'http_5xx' : 'http_4xx';
                 const retryable = res.status >= 500 || res.status === 429 || res.status === 408;
                 throw new FeedError(code, `The feed server responded with ${res.status}`, {
-                    status: res.status,
+                    upstreamStatus: res.status,
                     retryable,
                 });
             }

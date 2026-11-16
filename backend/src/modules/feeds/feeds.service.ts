@@ -51,7 +51,9 @@ export async function getFeed(
         if (!entry) {
             // Upstream says "unchanged" for validators we have no feed for; refetch unconditionally.
             if (clientSent) return getFeed(input, {});
-            throw new FeedError('http_5xx', 'The feed server answered 304 without a cached copy', { status: 304 });
+            throw new FeedError('http_5xx', 'The feed server answered 304 without a cached copy', {
+                upstreamStatus: 304,
+            });
         }
         const merged: FeedCacheValidators = {
             etag: result.validators.etag ?? entry.validators.etag,

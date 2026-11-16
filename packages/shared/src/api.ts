@@ -80,13 +80,19 @@ export type FeedErrorCode =
     | 'parse_error'
     | 'too_large';
 
-export type FeedErrorResponse = {
+/** Every error code the API can return. Add new module codes here. */
+export type ApiErrorCode = FeedErrorCode | 'not_found' | 'bad_request' | 'invalid_json' | 'internal_error';
+
+/** The one shape every API error uses, whatever the status code. */
+export type ApiErrorResponse<C extends string = ApiErrorCode> = {
     error: {
-        code: FeedErrorCode;
+        code: C;
         message: string;
-        /** Upstream HTTP status, when there was one. */
-        status?: number;
-        /** True for temporary failures worth retrying; false for dead/invalid feeds. */
+        /** True for temporary failures worth retrying; false for permanent ones (dead feed, bad input). */
         retryable: boolean;
+        /** Upstream HTTP status, for errors caused by a third-party server. */
+        status?: number;
     };
 };
+
+export type FeedErrorResponse = ApiErrorResponse<FeedErrorCode>;
