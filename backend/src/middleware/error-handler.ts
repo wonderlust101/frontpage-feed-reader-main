@@ -1,4 +1,4 @@
-import type { ErrorRequestHandler } from "express";
+import type { ErrorRequestHandler } from 'express';
 
 /**
  * Errors → JSON. Client errors (e.g. malformed JSON body) keep their status and message;
@@ -6,7 +6,7 @@ import type { ErrorRequestHandler } from "express";
  * Must be registered last, after all routes.
  */
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-  const status: number = err?.status ?? err?.statusCode ?? 500;
-  if (status >= 500) console.error(err);
-  res.status(status).json({ error: status < 500 ? err.message : "Internal server error" });
+    const status: number = err?.status ?? err?.statusCode ?? 500;
+    if (status >= 500) console.error(err);
+    res.status(status).json({ error: status < 500 ? err.message : 'Internal server error' });
 };
