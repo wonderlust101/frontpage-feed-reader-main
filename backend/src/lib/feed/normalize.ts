@@ -3,7 +3,7 @@ import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import { FeedError } from './errors';
 import { parseFeedDate } from './dates';
-import { cleanText, htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
+import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 
 type ParsedFeed = ReturnType<typeof parseFeed>;
 type ParsedItem = ParsedFeed['items'][number];
@@ -132,14 +132,14 @@ function normalizeItem(
     const summary = truncate(descriptionText || contentText, SUMMARY_MAX);
 
     const title =
-        truncate(cleanText(item.title), TITLE_MAX) ||
+        truncate(htmlToText(item.title), TITLE_MAX) ||
         (summary ? truncate(summary, FALLBACK_TITLE_MAX) : '') ||
         'Untitled';
 
     const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), ctx.now);
     const updatedAt = firstDate(rawText(item, UPDATED_TAGS), ctx.now) ?? publishedAt;
 
-    const authors = item.authors.map((a) => (cleanText(a.name) || cleanText(a.email)).replace(/^by\s+/i, ''));
+    const authors = item.authors.map((a) => (htmlToText(a.name) || htmlToText(a.email)).replace(/^by\s+/i, ''));
     const author = truncate(authors.filter(Boolean).join(', '), AUTHOR_MAX) || ctx.feedAuthor;
 
     const imageUrl =
@@ -148,7 +148,7 @@ function normalizeItem(
         safeUrl(item.mediaImages[0]?.image, base) ??
         safeUrl(firstImageInHtml(contentHtml), base);
 
-    const categoryNames = item.categories.map((c) => truncate(cleanText(c.label || c.term), CATEGORY_MAX));
+    const categoryNames = item.categories.map((c) => truncate(htmlToText(c.label || c.term), CATEGORY_MAX));
     const categories = [...new Set(categoryNames.filter(Boolean))].slice(0, CATEGORIES_MAX);
 
     // guid → link → hash of title/date/position. Overlong ids are hashed so they stay usable as keys.
@@ -212,7 +212,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     const feedAuthor =
         truncate(
             feed.authors
-                .map((a) => cleanText(a.name))
+                .map((a) => htmlToText(a.name))
                 .filter(Boolean)
                 .join(', '),
             AUTHOR_MAX,
@@ -280,7 +280,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
         url: feedUrl,
         requestedUrl: opts.requestedUrl ?? feedUrl,
         format,
-        title: truncate(cleanText(feed.title), TITLE_MAX) || hostname,
+        title: truncate(htmlToText(feed.title), TITLE_MAX) || hostname,
         description: htmlToText(feed.description, DESCRIPTION_MAX) || null,
         siteUrl,
         imageUrl: safeUrl(feed.image?.url, siteUrl),

@@ -259,8 +259,3 @@ export function truncate(text: string, max: number): string {
     const space = cut.lastIndexOf(' ');
     return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, '')}…`;
 }
-
-/** Plain-text cleanup for titles/names: strips tags, decodes entities, collapses whitespace. */
-export function cleanText(value: string | null | undefined): string {
-    return htmlToText(value);
-}
