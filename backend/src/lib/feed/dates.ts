@@ -1,7 +1,7 @@
 // Feed dates in practice: RSS uses RFC 822 (`Wed, 02 Oct 2024 15:00:00 GMT`), Atom uses ISO 8601
 // (`2024-10-02T15:00:00Z`). Those two, plus the variants RFC 822 itself allows and ISO dates
 // without a zone, cover every date in the curated feeds. Anything else returns null: we never
-// guess or invent a date. Temporal does the calendar math, so impossible dates (Feb 31) are rejected.
+// guess or invent a date, and impossible calendar dates (Feb 31) are rejected.
 
 /** Builds one regex from commented pieces, so each part of the format can be read on its own line. */
 const pattern = (...parts: RegExp[]) => new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
@@ -25,20 +25,30 @@ const RFC822 = pattern(
 
 const MONTHS = 'january february march april may june july august september october november december'.split(' ');
 
-/** Zone names RFC 822 defines, plus UTC. Ambiguous abbreviations (IST, CST in China…) are deliberately absent. */
-const ZONES: Record<string, string> = {
-    UT: '+00:00',
-    UTC: '+00:00',
-    GMT: '+00:00',
-    Z: '+00:00',
-    EST: '-05:00',
-    EDT: '-04:00',
-    CST: '-06:00',
-    CDT: '-05:00',
-    MST: '-07:00',
-    MDT: '-06:00',
-    PST: '-08:00',
-    PDT: '-07:00',
+/** Hours from UTC for the zone names RFC 822 defines, plus UTC. Ambiguous ones (IST, CST in China…) are deliberately absent. */
+const ZONES: Record<string, number> = {
+    UT: 0,
+    UTC: 0,
+    GMT: 0,
+    Z: 0,
+    EST: -5,
+    EDT: -4,
+    CST: -6,
+    CDT: -5,
+    MST: -7,
+    MDT: -6,
+    PST: -8,
+    PDT: -7,
+};
+
+type DateParts = {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
 };
 
 const MIN_TIME = Date.UTC(1995, 0, 1);
@@ -59,23 +69,31 @@ function toFullYear(value: string): number {
     return year < 70 ? 2000 + year : 1900 + year;
 }
 
-/** "+0530" / "+05:30" / "GMT" / "PDT" → "+05:30". No zone means UTC; an unknown name → undefined. */
-function toOffset(zone: string | undefined): string | undefined {
-    if (!zone) return '+00:00';
+/** Minutes from UTC: "GMT" → 0, "PDT" → -420, "+0530" / "+05:30" → 330. No zone means UTC; an unknown name → undefined. */
+function toOffsetMinutes(zone: string | undefined): number | undefined {
+    if (!zone) return 0;
     const named = ZONES[zone.toUpperCase()];
-    if (named) return named;
+    if (named !== undefined) return named * 60;
     const numeric = zone.match(/^([+-])(\d{2}):?(\d{2})$/);
-    return numeric ? `${numeric[1]}${numeric[2]}:${numeric[3]}` : undefined;
+    if (!numeric) return undefined;
+    const minutes = Number(numeric[2]) * 60 + Number(numeric[3]);
+    return numeric[1] === '-' ? -minutes : minutes;
 }
 
 /** Calendar parts + offset → epoch ms, or null if the date can't exist (Feb 31, 25:00…). */
-function toEpochMs(parts: Temporal.PlainDateTimeLike, offset: string): number | null {
-    try {
-        const local = Temporal.PlainDateTime.from(parts, { overflow: 'reject' });
-        return local.toZonedDateTime(offset).toInstant().epochMilliseconds;
-    } catch {
-        return null;
-    }
+function toEpochMs(p: DateParts, offsetMinutes: number): number | null {
+    const utc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second, p.millisecond);
+    // Date.UTC silently rolls impossible values over (Feb 31 → Mar 2), so read the date back:
+    // if any field changed, the input wasn't a real date.
+    const d = new Date(utc);
+    const real =
+        d.getUTCFullYear() === p.year &&
+        d.getUTCMonth() === p.month - 1 &&
+        d.getUTCDate() === p.day &&
+        d.getUTCHours() === p.hour &&
+        d.getUTCMinutes() === p.minute &&
+        d.getUTCSeconds() === p.second;
+    return real ? utc - offsetMinutes * 60_000 : null;
 }
 
 /**
@@ -89,8 +107,8 @@ export function parseFeedDate(value: string | null | undefined, now: number = Da
     if (!groups) return null;
 
     const month = toMonth(groups.month!);
-    const offset = toOffset(groups.zone);
-    if (!month || !offset) return null;
+    const offset = toOffsetMinutes(groups.zone);
+    if (!month || offset === undefined) return null;
 
     const time = toEpochMs(
         {
