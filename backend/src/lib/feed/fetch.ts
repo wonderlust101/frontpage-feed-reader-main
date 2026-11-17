@@ -174,6 +174,10 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
                 if (next.protocol !== 'http:' && next.protocol !== 'https:') {
                     throw new FeedError('blocked_url', 'Redirected to an unsupported protocol');
                 }
+                // Same rule as the first URL: no user:pass@ (node:http would send it as an Authorization header).
+                if (next.username || next.password)
+                    throw new FeedError('blocked_url', 'Redirected to a URL with credentials');
+                next.hash = '';
                 if (status !== 301 && status !== 308) permanent = false;
                 url = next;
                 continue;

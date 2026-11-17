@@ -1,73 +1,16 @@
 import sanitize from 'sanitize-html';
 import { decode } from 'html-entities';
 
+// Semantic HTML only. Anything not listed (script, style, form, svg, object, …) is removed.
 const ALLOWED_TAGS = [
-    'p',
-    'br',
-    'hr',
-    'a',
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'ul',
-    'ol',
-    'li',
-    'dl',
-    'dt',
-    'dd',
-    'blockquote',
-    'q',
-    'cite',
-    'pre',
-    'code',
-    'kbd',
-    'samp',
-    'var',
-    'em',
-    'strong',
-    'b',
-    'i',
-    'u',
-    's',
-    'del',
-    'ins',
-    'mark',
-    'small',
-    'sub',
-    'sup',
-    'abbr',
-    'time',
-    'span',
-    'div',
-    'section',
-    'article',
-    'aside',
-    'details',
-    'summary',
-    'figure',
-    'figcaption',
-    'picture',
-    'source',
-    'img',
-    'video',
-    'audio',
-    'track',
-    'iframe',
-    'table',
-    'caption',
-    'thead',
-    'tbody',
-    'tfoot',
-    'tr',
-    'th',
-    'td',
-    'colgroup',
-    'col',
+    ...'p br hr div span section article aside details summary'.split(' '), // structure
+    ...'h1 h2 h3 h4 h5 h6 a ul ol li dl dt dd blockquote q cite abbr time'.split(' '), // text
+    ...'em strong b i u s del ins mark small sub sup pre code kbd samp var'.split(' '), // inline
+    ...'figure figcaption picture source img video audio track iframe'.split(' '), // media
+    ...'table caption thead tbody tfoot tr th td colgroup col'.split(' '), // tables
 ];
 
+/** iframes are only kept for these video/code-demo hosts, and always sandboxed (see IFRAME_SANDBOX). */
 const EMBED_HOSTS = [
     'www.youtube.com',
     'youtube.com',
@@ -76,6 +19,12 @@ const EMBED_HOSTS = [
     'codepen.io',
     'codesandbox.io',
 ];
+
+/**
+ * What an embed may do: run its own player scripts and open links in a new tab. Not granted:
+ * navigating our page (allow-top-navigation), forms, or downloads.
+ */
+const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 
 function absolute(value: string | undefined, base: string | undefined): string | undefined {
     if (!value) return value;
@@ -117,7 +66,7 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
             video: ['src', 'poster', 'controls', 'width', 'height'],
             audio: ['src', 'controls'],
             track: ['src', 'kind', 'srclang', 'label'],
-            iframe: ['src', 'width', 'height', 'title', 'allowfullscreen'],
+            iframe: ['src', 'width', 'height', 'title', 'allowfullscreen', 'sandbox', 'loading', 'referrerpolicy'],
             abbr: ['title'],
             time: ['datetime'],
             td: ['colspan', 'rowspan'],
@@ -129,7 +78,6 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
         },
         allowedClasses: { code: [/^language-/], pre: [/^language-/] },
         allowedSchemes: ['http', 'https', 'mailto'],
-        allowedSchemesByTag: { img: ['http', 'https', 'data'] },
         allowedIframeHostnames: EMBED_HOSTS,
         allowProtocolRelative: true,
         disallowedTagsMode: 'discard',
@@ -162,6 +110,15 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
                     ...attribs,
                     ...(attribs.src && { src: absolute(attribs.src, baseUrl) ?? '' }),
                     ...(attribs.srcset && { srcset: absoluteSrcset(attribs.srcset, baseUrl) ?? '' }),
+                },
+            }),
+            iframe: (tagName, attribs) => ({
+                tagName,
+                attribs: {
+                    ...attribs,
+                    sandbox: IFRAME_SANDBOX,
+                    loading: 'lazy',
+                    referrerpolicy: 'strict-origin-when-cross-origin',
                 },
             }),
             video: (tagName, attribs) => ({
@@ -201,10 +158,11 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
     return max ? truncate(text, max) : text;
 }
 
-/** Truncates at a word boundary, adding an ellipsis. Result length is ≤ max. */
+/** Truncates at a word boundary, adding an ellipsis. Result length is ≤ max. Never splits an emoji in half. */
 export function truncate(text: string, max: number): string {
     if (text.length <= max) return text;
-    const cut = text.slice(0, max - 1);
+    // Emoji and other astral characters are two UTF-16 units; don't keep only the first half.
+    const cut = text.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '');
     const space = cut.lastIndexOf(' ');
     return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, '')}…`;
 }

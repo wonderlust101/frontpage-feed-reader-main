@@ -72,6 +72,11 @@ export function startFeedServer() {
                     return new Response(zlib.gzipSync(new Uint8Array(8 * 1024 * 1024).fill(32)), {
                         headers: { ...xml, 'Content-Encoding': 'gzip' },
                     });
+                case '/redirect-with-credentials':
+                    return new Response(null, {
+                        status: 302,
+                        headers: { Location: 'http://user:pw@127.0.0.1/feed.xml' },
+                    });
                 case '/redirect-to-private':
                     return Response.redirect('http://10.0.0.1/feed.xml', 302);
                 case '/huge':

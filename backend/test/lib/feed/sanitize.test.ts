@@ -34,9 +34,24 @@ describe('sanitizeFeedHtml', () => {
         expect(out).toContain('alt="A"');
     });
 
-    test('keeps YouTube embeds', () => {
+    test('keeps YouTube embeds, sandboxed so they cannot navigate our page', () => {
         const out = sanitizeFeedHtml('<iframe src="https://www.youtube.com/embed/abc"></iframe>', BASE);
         expect(out).toContain('src="https://www.youtube.com/embed/abc"');
+        expect(out).toContain('sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"');
+        expect(out).not.toContain('allow-top-navigation');
+    });
+
+    test('a feed cannot loosen the iframe sandbox', () => {
+        const out = sanitizeFeedHtml(
+            '<iframe src="https://www.youtube.com/embed/abc" sandbox="allow-top-navigation allow-forms"></iframe>',
+            BASE,
+        );
+        expect(out).not.toContain('allow-top-navigation');
+        expect(out).not.toContain('allow-forms');
+    });
+
+    test('drops data: images', () => {
+        expect(sanitizeFeedHtml('<img src="data:image/svg+xml;base64,PHN2Zz4=">', BASE)).toBe('');
     });
 
     test('resolves relative links, images and srcsets against the base URL', () => {
@@ -80,5 +95,11 @@ describe('htmlToText', () => {
 describe('truncate', () => {
     test('leaves short text alone', () => {
         expect(truncate('short', 10)).toBe('short');
+    });
+
+    test('never splits an emoji in half', () => {
+        const out = truncate('ab😀😀😀😀😀😀', 4);
+        expect(out).toBe('ab…');
+        expect(out).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
     });
 });

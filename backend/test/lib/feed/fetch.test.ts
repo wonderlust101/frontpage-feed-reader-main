@@ -62,6 +62,10 @@ describe('fetchFeed', () => {
         await expectError(fetchFeed(`${upstream.url}/loop`, opts), 'network', false);
     });
 
+    test('refuses redirects to URLs with credentials', async () => {
+        await expectError(fetchFeed(`${upstream.url}/redirect-with-credentials`, opts), 'blocked_url', false);
+    });
+
     test('refuses redirects to non-http protocols', async () => {
         await expectError(fetchFeed(`${upstream.url}/redirect-to-file`, opts), 'blocked_url');
     });
