@@ -23,6 +23,7 @@
         "@rowanmanning/feed-parser": "^2.1.5",
         "cors": "^2.8.6",
         "drizzle-orm": "^0.45.4",
+        "encoding-sniffer": "^1.0.2",
         "express": "^5.3.0",
         "html-entities": "^2.6.0",
         "pg": "^8.23.1",
