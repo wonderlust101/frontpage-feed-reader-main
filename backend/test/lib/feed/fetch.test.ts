@@ -129,6 +129,13 @@ describe('SSRF protection', () => {
         ['::ffff:127.0.0.1', true],
         ['8.8.8.8', false],
         ['2606:4700::1111', false],
+        // Ranges the old hand-written check missed:
+        ['192.0.2.1', true], // documentation (TEST-NET-1)
+        ['198.51.100.1', true], // documentation (TEST-NET-2)
+        ['2001:db8::1', true], // IPv6 documentation
+        ['64:ff9b::7f00:1', true], // NAT64 form of 127.0.0.1
+        ['::ffff:10.0.0.1', true], // IPv4-mapped private
+        ['not-an-ip', true], // unparseable fails closed
     ])('isPrivateAddress(%s) is %p', (ip, expected) => {
         expect(isPrivateAddress(ip)).toBe(expected);
     });

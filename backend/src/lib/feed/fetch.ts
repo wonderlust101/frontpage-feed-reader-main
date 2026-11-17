@@ -1,5 +1,6 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
+import ipaddr from 'ipaddr.js';
 import type { FeedCacheValidators, FeedRedirect } from '@frontpage/shared';
 import { FeedError } from './errors';
 
@@ -45,27 +46,14 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     return url;
 }
 
-/** True for loopback, private, link-local, CGNAT, multicast and other non-public addresses. */
+/**
+ * True for anything that isn't an ordinary public address: loopback, private, link-local, CGNAT,
+ * multicast, reserved/documentation ranges, NAT64 and IPv4-mapped forms of all of these.
+ * Ranges come from ipaddr.js, so there's no hand-maintained list. Unparseable input fails closed.
+ */
 export function isPrivateAddress(ip: string): boolean {
-    if (isIP(ip) === 4) {
-        const [a = 0, b = 0] = ip.split('.').map(Number);
-        return (
-            a === 0 ||
-            a === 10 ||
-            a === 127 ||
-            (a === 100 && b >= 64 && b <= 127) ||
-            (a === 169 && b === 254) ||
-            (a === 172 && b >= 16 && b <= 31) ||
-            (a === 192 && b === 168) ||
-            (a === 198 && (b === 18 || b === 19)) ||
-            a >= 224
-        );
-    }
-    const v6 = ip.toLowerCase();
-    if (v6 === '::' || v6 === '::1') return true;
-    const mapped = v6.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-    if (mapped?.[1]) return isPrivateAddress(mapped[1]);
-    return /^(fc|fd|fe[89ab]|ff)/.test(v6);
+    if (!ipaddr.isValid(ip)) return true;
+    return ipaddr.process(ip).range() !== 'unicast';
 }
 
 async function assertPublicHost(url: URL): Promise<void> {
