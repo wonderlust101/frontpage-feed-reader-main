@@ -1,10 +1,8 @@
+// HTTP in/out for /api/fetch: read the request, call the service, shape the response.
+// No error handling here: thrown errors become JSON in middleware/error-handler.ts.
 import type { Request, Response } from 'express';
 import type { FeedCacheValidators, FetchFeedResponse } from '@frontpage/shared';
 import { getFeed } from './feeds.service';
-
-// Controllers translate between HTTP and the service: read the request, call the service,
-// shape the response. No business logic, and no error handling: errors thrown by the service
-// (FeedError extends AppError) are turned into JSON by src/middleware/error-handler.ts.
 
 /** How long browsers/CDNs may reuse a fetched feed before asking again. */
 const CACHE_CONTROL = 'public, max-age=300';

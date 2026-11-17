@@ -1,4 +1,4 @@
-// Central, typed access to environment variables. See apps/api/.env.example.
+// Typed access to environment variables. Each one is documented in backend/.env.example.
 
 const optional = (value: string | undefined) => value?.trim() || undefined;
 const int = (value: string | undefined, fallback: number) => {
@@ -26,8 +26,7 @@ export const env = {
     FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? 'Frontpage/0.1 (RSS reader)',
     FEED_MAX_CONCURRENCY: int(process.env.FEED_MAX_CONCURRENCY, 5),
     FEED_MIN_REFETCH_MINUTES: int(process.env.FEED_MIN_REFETCH_MINUTES, 15),
-    // SSRF guard: feeds on loopback (127.0.0.1, ::1) are refused unless this is true (tests only).
-    // Other private/reserved ranges are always refused.
+    // Tests only: allow feeds on 127.0.0.1 / ::1. Other private ranges are always refused (SSRF guard).
     FEED_ALLOW_LOOPBACK: process.env.FEED_ALLOW_LOOPBACK === 'true',
 
     // Background refresh of all feeds; 0 disables it.

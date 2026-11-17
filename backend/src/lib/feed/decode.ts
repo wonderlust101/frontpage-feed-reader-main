@@ -1,8 +1,6 @@
+// Turns raw feed bytes into text. XML may use any encoding (res.text() always assumes UTF-8), so it's
+// detected the way browsers do it: BOM → Content-Type charset → <?xml encoding="…"?> → UTF-8.
 import { decodeBuffer, getEncoding, type SnifferOptions } from 'encoding-sniffer';
-
-// HTTP bodies are bytes, and XML (unlike JSON) may use any encoding, so `res.text()` (always UTF-8)
-// isn't enough. encoding-sniffer applies the HTML/XML standard's sniffing order, the same one
-// browsers use: BOM → Content-Type charset → <?xml encoding="…"?> → UTF-8.
 
 /** The sniffer takes a bare charset label, so pull `charset=…` out of the Content-Type header. */
 function snifferOptions(contentType: string | null | undefined): SnifferOptions {

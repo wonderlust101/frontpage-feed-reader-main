@@ -5,8 +5,8 @@ export const ETAG = '"v1"';
 export const LAST_MODIFIED = 'Tue, 10 Jun 2025 09:00:00 GMT';
 
 /**
- * A local upstream "feed server" for fetch/route tests. Each path exercises one HTTP behaviour.
- * `hits` counts requests per path and `lastHeaders` records what the client sent.
+ * A fake feed server for tests: each path acts out one HTTP behaviour (redirect, 304, timeout, 500…).
+ * `hits` counts requests per path; `lastHeaders` records what the client sent.
  */
 export function startFeedServer() {
     const hits: Record<string, number> = {};

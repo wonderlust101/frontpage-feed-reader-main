@@ -1,3 +1,6 @@
+// Downloads one feed safely: 10s timeout, manual redirects, ETag/Last-Modified, decompression, size cap.
+// SSRF: request-filtering-agent checks the IP of every connection actually opened (each redirect hop too),
+// so a hostname can't pass a check and then connect to a private address (DNS rebinding).
 import http, { type IncomingMessage } from 'node:http';
 import https from 'node:https';
 import { pipeline, type Readable } from 'node:stream';
@@ -11,7 +14,7 @@ export type FetchFeedOptions = Partial<FeedCacheValidators> & {
     userAgent?: string;
     maxRedirects?: number;
     maxBytes?: number;
-    /** Allow loopback addresses (127.0.0.1, ::1) so tests can reach a local server. Every other non-public range stays blocked. */
+    /** Tests only: allow 127.0.0.1 and ::1. Every other private range stays blocked. */
     allowLoopback?: boolean;
 };
 
@@ -53,12 +56,7 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     return url;
 }
 
-// ── SSRF protection ─────────────────────────────────────────────
-// request-filtering-agent validates the IP inside the DNS lookup of the socket that is actually
-// opened (and IP literals before connecting), so a hostname can't pass a check and then connect
-// somewhere else (DNS rebinding). Only ordinary public ("unicast") addresses are allowed, using
-// ipaddr.js's range list. Every redirect hop is a new request through the same agent.
-// Agents keep connections alive and are reused across fetches.
+// SSRF-safe agents, created once and reused across fetches (keep-alive).
 
 type Agents = { http: http.Agent; https: https.Agent };
 const LOOPBACK = ['127.0.0.1', '::1'];
@@ -135,11 +133,7 @@ function isAbort(err: unknown): boolean {
     return err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
 }
 
-/**
- * Fetches a feed with a hard timeout (covering redirects and the body), manual redirect following
- * (so permanent moves are reported), SSRF protection on every connection, conditional request
- * headers, decompression and a body size cap.
- */
+/** Fetches one feed, following redirects itself so permanent moves can be reported. */
 export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const {
         timeoutMs = 10_000,

@@ -1,3 +1,4 @@
+// Postgres access through Drizzle. Without DATABASE_URL, `db` is null and the API runs without a database.
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
@@ -5,10 +6,10 @@ import { env } from '../env';
 import * as schema from './schema';
 import type { DbStatus } from '@frontpage/shared';
 
-/** The backend is a long-running server, so it keeps one node-postgres pool
- for its whole lifetime and reuses connections across requests. DATABASE_URL is Neon's
- *pooled* connection string (PgBouncer, host contains "-pooler"); migrations use the
- direct string instead (see drizzle.config.ts). **/
+/**
+ * One connection pool, reused for the server's whole lifetime. DATABASE_URL is Neon's pooled URL
+ * (host contains "-pooler"); migrations use the direct URL instead (see drizzle.config.ts).
+ */
 export const pool = env.DATABASE_URL
     ? new Pool({
           connectionString: env.DATABASE_URL,
@@ -18,8 +19,7 @@ export const pool = env.DATABASE_URL
       })
     : null;
 
-/** The server can drop an idle pooled connection (e.g. compute suspended);
- log it instead of crashing the process. The pool replaces the connection. **/
+/** Neon can drop an idle connection (e.g. when compute suspends): log it instead of crashing; the pool reconnects. */
 pool?.on('error', (err) => {
     console.error('Postgres pool error:', err.message);
 });

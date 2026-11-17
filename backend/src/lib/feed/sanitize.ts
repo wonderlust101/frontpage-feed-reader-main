@@ -1,3 +1,5 @@
+// Makes untrusted feed HTML safe to render (allowlisted tags, attributes and URL schemes),
+// and turns HTML into plain text for titles and summaries.
 import sanitize from 'sanitize-html';
 import { decode } from 'html-entities';
 import { parseSrcset, stringifySrcset } from 'srcset';
@@ -85,25 +87,20 @@ const EMBED_HOSTS = [
     'codesandbox.io',
 ];
 
-/**
- * What an embed may do: run its own player scripts and open links in a new tab. Not granted:
- * navigating our page (allow-top-navigation), forms, or downloads.
- */
+/** Embeds may run their own scripts and open new tabs, but never navigate our page or submit forms. */
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 
 /** The only URL schemes kept in links and media. Everything else is dropped. */
 const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
 /**
- * Resolves a URL against the page it came from and keeps it only if it is http(s) or mailto.
- * Anything else returns undefined: javascript:, data:, file:, unknown schemes, invalid URLs.
- * `new URL()` parses like a browser does, so tricks like "java\nscript:" are caught too.
- * (sanitize-html also checks schemes; this is a second, allowlist-based layer.)
+ * Resolves a URL against the page and keeps it only if it is http(s) or mailto; anything else → undefined.
+ * new URL() parses like a browser does, so tricks like "java\nscript:" are caught too.
  */
 function resolveUrl(value: string, base?: string): string | undefined {
     const trimmed = value.trim();
     if (!trimmed) {
-        return undefined; // new URL('', base) would silently become a link to the page itself
+        return undefined;
     }
 
     try {
@@ -115,8 +112,8 @@ function resolveUrl(value: string, base?: string): string | undefined {
 }
 
 /**
- * Resolves every URL in a srcset ("a.png 1x, b.png 2x"), dropping unsafe ones. Parsed with the
- * `srcset` package because URLs may contain commas (".../w_400,c_fill/cat.jpg 400w").
+ * Resolves every URL in a srcset ("a.png 1x, b.png 2x"), dropping unsafe ones.
+ * Uses the `srcset` package because URLs may contain commas (".../w_400,c_fill/cat.jpg 400w").
  */
 function resolveSrcset(value: string, base?: string): string | undefined {
     const candidates = parseSrcset(value).flatMap((candidate) => {
@@ -143,10 +140,7 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
     return result;
 }
 
-/**
- * Sanitizes untrusted feed HTML: keeps semantic structure, drops scripts, styles, event handlers
- * and dangerous URLs, resolves relative links and images against `baseUrl`.
- */
+/** Sanitizes untrusted feed HTML and resolves relative links and images against `baseUrl`. */
 export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: string): string {
     if (!html) {
         return '';

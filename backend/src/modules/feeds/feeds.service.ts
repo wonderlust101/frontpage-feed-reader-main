@@ -29,8 +29,8 @@ export function clearFeedCache() {
 }
 
 /**
- * Fetches, decodes and normalizes one feed. Sends conditional headers (the caller's, or the ones
- * remembered from the last fetch) and answers upstream 304s from the in-memory cache.
+ * Fetches, decodes and normalizes one feed. Sends ETag/Last-Modified (the client's, or the last ones we
+ * saw) and answers an upstream 304 from the in-memory cache.
  */
 export async function getFeed(
     input: string | undefined,

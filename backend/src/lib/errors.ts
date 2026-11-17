@@ -1,8 +1,5 @@
-// Base class for every error the API reports to clients on purpose.
-// Throw an AppError (or a subclass) from a service; the central error handler
-// (src/middleware/error-handler.ts) turns it into the standard JSON response:
-//   { error: { code, message, retryable, ...details } }  with status `httpStatus`.
-// Controllers never catch these. Framework-free: the status is just a number.
+// Errors we report to API clients on purpose. Services throw an AppError (or a subclass), and
+// middleware/error-handler.ts sends it as { error: { code, message, retryable } } with status `httpStatus`.
 
 export type AppErrorOptions = {
     retryable?: boolean;

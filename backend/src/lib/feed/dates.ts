@@ -1,7 +1,7 @@
-// Feed dates in practice: RSS uses RFC 822 (`Wed, 02 Oct 2024 15:00:00 GMT`), Atom uses ISO 8601
-// (`2024-10-02T15:00:00Z`). Those two, plus the variants RFC 822 itself allows and ISO dates
-// without a zone, cover every date in the curated feeds. Anything else returns null: we never
-// guess or invent a date, and impossible calendar dates (Feb 31) are rejected.
+// Parses feed dates (RFC 822 for RSS, ISO 8601 for Atom) into ISO 8601 UTC strings.
+// Unrecognized formats or zones return null: we never guess a date.
+
+/** Date Patterns **/
 
 /** Builds one regex from commented pieces, so each part of the format can be read on its own line. */
 const pattern = (...parts: RegExp[]) => new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
@@ -39,10 +39,8 @@ const MONTHS = [
 ];
 
 /**
- * Hours from UTC for zone abbreviations that mean only one thing. Numeric offsets (+0530) need no
- * table and cover every zone. Ambiguous names are deliberately absent so they return null instead
- * of a wrong time: IST (India/Ireland/Israel), BST (Britain/Bangladesh), AST (Atlantic/Arabia),
- * GST, SST… CST and MST are the US zones, as RFC 822 defines them.
+ * Hours from UTC for zone names with only one meaning. Ambiguous ones (IST, BST, AST…) are left out,
+ * so they return null instead of a wrong time. CST and MST are the US zones, as RFC 822 defines them.
  */
 // prettier-ignore
 const ZONES: Record<string, number> = {
@@ -76,13 +74,17 @@ type DateParts = {
 const MIN_TIME = Date.UTC(1995, 0, 1);
 const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
 
+/** Date Parsing **/
+
 /** "10" → 10; "Oct", "Sept", "October" → 10/9/10. Needs at least 3 letters of a real month name ("Octopus" fails). */
 function toMonth(value: string): number | undefined {
     if (/^\d+$/.test(value)) {
         return Number(value);
     }
+
     const name = value.toLowerCase().replace(/\.$/, '');
     const index = MONTHS.findIndex((month) => name.length >= 3 && month.startsWith(name));
+
     return index >= 0 ? index + 1 : undefined;
 }
 
@@ -92,6 +94,7 @@ function toFullYear(value: string): number {
     if (year >= 100) {
         return year;
     }
+
     return year < 70 ? 2000 + year : 1900 + year;
 }
 
@@ -103,14 +106,17 @@ function toOffsetMinutes(zone: string | undefined): number | undefined {
     if (!zone) {
         return 0;
     }
+
     const named = ZONES[zone.toUpperCase()];
     if (named !== undefined) {
         return named * 60;
     }
+
     const numeric = zone.match(/^(?:GMT|UTC|UT)?([+-])(\d{1,2})(?::?(\d{2}))?$/i);
     if (!numeric) {
         return undefined;
     }
+
     const hours = Number(numeric[2]);
     const extraMinutes = Number(numeric[3] ?? 0);
     if (hours > 14 || extraMinutes > 59) {
@@ -124,33 +130,35 @@ function toOffsetMinutes(zone: string | undefined): number | undefined {
 /** Calendar parts + offset → epoch ms, or null if the date can't exist (Feb 31, 25:00…). */
 function toEpochMs(p: DateParts, offsetMinutes: number): number | null {
     const utc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second, p.millisecond);
-    // Date.UTC silently rolls impossible values over (Feb 31 → Mar 2), so read the date back:
-    // if any field changed, the input wasn't a real date.
     const d = new Date(utc);
-    const real =
+
+    // Date.UTC silently turns impossible dates like Feb 31 into Mar 2, so check every part is unchanged.
+    const validDateCheck =
         d.getUTCFullYear() === p.year &&
         d.getUTCMonth() === p.month - 1 &&
         d.getUTCDate() === p.day &&
         d.getUTCHours() === p.hour &&
         d.getUTCMinutes() === p.minute &&
         d.getUTCSeconds() === p.second;
-    return real ? utc - offsetMinutes * 60_000 : null;
+
+    return validDateCheck ? utc - offsetMinutes * 60_000 : null;
 }
 
 /**
- * Parses an RSS/Atom date into an ISO 8601 UTC string.
- * Returns null for empty, unrecognized or impossible dates, unknown zones, dates before 1995 and
- * dates more than a day in the future.
+ * Parses a feed date into an ISO 8601 UTC string.
+ * Returns null for unrecognized or impossible dates, unknown zones, and dates before 1995 or over a day ahead.
  */
 export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
     const input = value?.replace(/\s+/g, ' ').trim() ?? '';
     const groups = input.match(ISO)?.groups ?? input.match(RFC822)?.groups;
+
     if (!groups) {
         return null;
     }
 
     const month = toMonth(groups.month!);
     const offset = toOffsetMinutes(groups.zone);
+
     if (!month || offset === undefined) {
         return null;
     }
@@ -167,8 +175,10 @@ export function parseFeedDate(value: string | null | undefined, now: number = Da
         },
         offset,
     );
+
     if (time === null || time < MIN_TIME || time > now + FUTURE_SLACK_MS) {
         return null;
     }
+
     return new Date(time).toISOString();
 }

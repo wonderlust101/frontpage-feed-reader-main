@@ -1,3 +1,5 @@
+// Turns parsed RSS/Atom into one NormalizedFeed shape: fills missing fields, normalizes dates,
+// sanitizes HTML, and caps sizes so a huge or hostile feed can't slow the server.
 import { createHash } from 'node:crypto';
 import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
@@ -8,10 +10,9 @@ import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 type ParsedFeed = ReturnType<typeof parseFeed>;
 type ParsedItem = ParsedFeed['items'][number];
 
-// Limits that keep one hostile or huge feed from slowing the server or bloating responses/the DB.
-// MAX_ITEMS matters most: the parser library re-scans the whole feed for every item it reads
-// (its getters aren't cached), so parse time grows with items² — 20k items took ~2 minutes.
+// The parser re-scans the whole feed for every item, so time grows with items² (20k items took ~2 min).
 export const MAX_ITEMS = 500;
+// Field length limits, so one feed can't bloat API responses or the database.
 export const SUMMARY_MAX = 300;
 const FALLBACK_TITLE_MAX = 80;
 const TITLE_MAX = 300;
@@ -30,9 +31,8 @@ export type NormalizeOptions = {
     now?: number;
 };
 
-// Item date elements, in order of preference. Dates are read from the raw XML and parsed by
-// parseFeedDate alone (not the library's `new Date()`), so one set of rules decides every date.
-// RSS 2.0: pubDate · RSS 1.0: dc:date · Atom: published/updated (+ legacy issued/created/modified).
+// Date tags in order of preference (RSS 2.0 pubDate, RSS 1.0 dc:date, Atom published/updated).
+// Read from the raw XML and parsed by parseFeedDate, not the library's new Date(), so one set of rules applies.
 const PUBLISHED_TAGS = ['pubdate', 'published', 'issued', 'created', 'date', 'updated', 'modified'];
 const UPDATED_TAGS = ['updated', 'modified', 'date'];
 
@@ -71,10 +71,7 @@ function safeUrl(value: string | null | undefined, base?: string): string | null
 /** Stable short id from any string: the same input always gives the same id. */
 const hashedId = (input: string) => `urn:frontpage:${createHash('sha256').update(input).digest('hex').slice(0, 32)}`;
 
-/**
- * Keeps the first `max` items/entries and closes the document again, so parse time stays bounded.
- * A cheap string scan, done before the (slow-per-item) parser runs.
- */
+/** Keeps the first `max` items and closes the document again: a cheap scan before the slow parser runs. */
 export function limitItems(xml: string, max: number): { xml: string; limited: boolean } {
     const closingTag = /<\/(item|entry)\s*>/gi;
     let last: RegExpExecArray | null = null;
@@ -175,9 +172,8 @@ function normalizeItem(
 }
 
 /**
- * Parses an RSS 2.0, RSS 1.0 (RDF) or Atom document and normalizes it into a `NormalizedFeed`,
- * filling missing fields, normalizing dates and sanitizing HTML.
- * Throws `not_a_feed` for HTML pages and non-feed XML, `parse_error` when nothing can be recovered.
+ * Parses RSS 2.0, RSS 1.0 or Atom into a NormalizedFeed.
+ * Throws `not_a_feed` for web pages and other XML, `parse_error` when nothing can be read.
  */
 export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFeed {
     const now = opts.now ?? Date.now();

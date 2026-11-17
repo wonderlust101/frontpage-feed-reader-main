@@ -8,12 +8,8 @@ export function sendError(res: Response, status: number, error: ApiErrorResponse
 }
 
 /**
- * Every error ends up here (Express 5 also forwards errors thrown in async handlers), so controllers
- * never catch. Three cases:
- * - AppError (and subclasses like FeedError): its own status, code and details.
- * - Express/body-parser client errors (e.g. malformed JSON): status kept, generic code.
- * - Anything else is a bug: logged, and answered with a generic 500 so internals don't leak.
- * Must be registered last, after all routes.
+ * Turns every thrown error into the standard JSON body, so controllers never catch. AppErrors and client
+ * errors (e.g. bad JSON) keep their status; anything else is a bug, so it's logged and hidden behind a 500.
  */
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     if (err instanceof AppError) {

@@ -8,8 +8,7 @@ export default defineConfig([
         files: ['**/*.ts'],
         languageOptions: { parser: tseslint.parser },
         rules: {
-            // Every if/else/for/while body gets braces, so Prettier always puts it on its own line:
-            //   if (!zone) { return 0; }  →  if (!zone) {\n    return 0;\n}
+            // Every if/else/for/while body needs braces, so Prettier always puts it on its own line.
             curly: ['error', 'all'],
         },
     },
