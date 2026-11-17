@@ -16,6 +16,15 @@ describe('sanitizeFeedHtml', () => {
         ['object/embed', '<object data="x.swf"></object><embed src="x.swf">', /<object|<embed/],
         ['iframes from unknown hosts', '<iframe src="https://evil.example/frame"></iframe>', /<iframe/],
         ['inline styles', '<p style="position:fixed">ok</p>', /style=/],
+        ['unknown schemes', '<a href="ms-msdt:/id PCWDiagnostic">x</a>', /ms-msdt/],
+        ['file: links', '<a href="file:///etc/passwd">x</a>', /file:/],
+        ['javascript: split by a newline', '<a href="java&#10;script:alert(1)">x</a>', /script:/],
+        [
+            'javascript: in a video poster',
+            '<video src="v.mp4" poster="javascript:alert(1)"></video>',
+            /poster|javascript/,
+        ],
+        ['unsafe srcset candidates', '<img src="a.png" srcset="javascript:alert(1) 1x, b.png 2x">', /javascript/],
     ])('removes %s', (_label, html, forbidden) => {
         expect(sanitizeFeedHtml(html, BASE)).not.toMatch(forbidden);
     });
@@ -64,9 +73,26 @@ describe('sanitizeFeedHtml', () => {
         expect(out).toContain('srcset="https://blog.example/posts/img/a.png 1x, https://blog.example/img/a@2x.png 2x"');
     });
 
+    test('keeps commas inside srcset URLs (Cloudinary / Substack style)', () => {
+        const cdn = 'https://res.cloudinary.com/demo/image/upload';
+        const out = sanitizeFeedHtml(
+            `<img src="a.png" srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w">`,
+            BASE,
+        );
+        expect(out).toContain(`srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w"`);
+    });
+
+    test('drops links that are not valid URLs', () => {
+        expect(sanitizeFeedHtml('<a href="http://[bad">x</a>', BASE)).not.toContain('href');
+    });
+
+    test('drops relative links when there is no base URL to resolve them against', () => {
+        expect(sanitizeFeedHtml('<a href="/about">x</a>')).not.toContain('href');
+    });
+
     test('adds safe rel/target to links', () => {
         expect(sanitizeFeedHtml('<a href="https://x.example">x</a>')).toBe(
-            '<a href="https://x.example" rel="noopener noreferrer nofollow" target="_blank">x</a>',
+            '<a href="https://x.example/" rel="noopener noreferrer nofollow" target="_blank">x</a>',
         );
     });
 

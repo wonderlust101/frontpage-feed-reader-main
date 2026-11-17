@@ -1,5 +1,6 @@
 import sanitize from 'sanitize-html';
 import { decode } from 'html-entities';
+import { parseSrcset, stringifySrcset } from 'srcset';
 
 // Semantic HTML only. Anything not listed (script, style, form, svg, object, …) is removed.
 const ALLOWED_TAGS = [
@@ -90,37 +91,72 @@ const EMBED_HOSTS = [
  */
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 
-function absolute(value: string | undefined, base: string | undefined): string | undefined {
-    if (!value) {
-        return value;
-    }
-    const trimmed = value.trim();
-    if (/^(?:javascript|vbscript|data):/i.test(trimmed.replace(/[\s\u0000-\u001f]/g, ''))) {
+/** The only URL schemes kept in links and media. Everything else is dropped. */
+const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
+
+/**
+ * Resolves a URL against the page it came from and keeps it only if it is http(s) or mailto.
+ * Everything else returns undefined, so the attribute is dropped: javascript:, data:, file:, unknown
+ * schemes and anything that isn't a valid URL. `new URL()` follows the same standard as browsers,
+ * so tricks like "java\nscript:" are seen exactly as a browser would see them.
+ * (sanitize-html also checks schemes; this is a second, allowlist-based layer.)
+ */
+function resolveUrl(value: string | undefined, base: string | undefined): string | undefined {
+    const trimmed = value?.trim();
+    if (!trimmed) {
         return undefined;
     }
-    if (!base) {
-        return trimmed;
-    }
+
     try {
-        return new URL(trimmed, base).href;
+        const url = new URL(trimmed, base);
+        return SAFE_PROTOCOLS.has(url.protocol) ? url.href : undefined;
     } catch {
-        return trimmed;
+        return undefined; // not a URL, or a relative URL with no base to resolve it against
     }
 }
 
-function absoluteSrcset(value: string | undefined, base: string | undefined): string | undefined {
+/**
+ * Resolves every URL in a srcset ("a.png 1x, b.png 2x"). Parsed with the `srcset` package because
+ * URLs may contain commas (Cloudinary/Substack: ".../w_400,c_fill/cat.jpg 400w"), so splitting on
+ * "," would cut them apart. Unsafe candidates are dropped; if none are left, so is the attribute.
+ */
+function resolveSrcset(value: string | undefined, base: string | undefined): string | undefined {
     if (!value) {
-        return value;
+        return undefined;
     }
-    return value
-        .split(',')
-        .map((part) => {
-            const [url, ...rest] = part.trim().split(/\s+/);
-            const abs = absolute(url, base);
-            return abs ? [abs, ...rest].join(' ') : '';
-        })
-        .filter(Boolean)
-        .join(', ');
+
+    const candidates = parseSrcset(value).flatMap((candidate) => {
+        const url = resolveUrl(candidate.url, base);
+        return url ? [{ ...candidate, url }] : [];
+    });
+
+    return candidates.length > 0 ? stringifySrcset(candidates) : undefined;
+}
+
+/**
+ * Copies a tag's attributes with the given URL attributes resolved. An attribute whose URL is unsafe
+ * or invalid is removed, never kept in its original form.
+ */
+function withResolvedUrls(
+    attribs: Record<string, string>,
+    names: string[],
+    base: string | undefined,
+): Record<string, string> {
+    const result = { ...attribs };
+    for (const name of names) {
+        if (result[name] === undefined) {
+            continue;
+        }
+
+        const resolved = name === 'srcset' ? resolveSrcset(result[name], base) : resolveUrl(result[name], base);
+        if (resolved) {
+            result[name] = resolved;
+        } else {
+            delete result[name];
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -157,35 +193,22 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
         disallowedTagsMode: 'discard',
         nonTextTags: ['script', 'style', 'textarea', 'option', 'noscript', 'template', 'title', 'head'],
         transformTags: {
-            a: (tagName, attribs) => {
-                const href = absolute(attribs.href, baseUrl);
-                return {
-                    tagName,
-                    attribs: {
-                        ...attribs,
-                        ...(href ? { href } : {}),
-                        rel: 'noopener noreferrer nofollow',
-                        target: '_blank',
-                    },
-                };
-            },
+            a: (tagName, attribs) => ({
+                tagName,
+                attribs: {
+                    ...withResolvedUrls(attribs, ['href'], baseUrl),
+                    rel: 'noopener noreferrer nofollow',
+                    target: '_blank',
+                },
+            }),
             img: (tagName, attribs) => ({
                 tagName,
-                attribs: {
-                    ...attribs,
-                    ...(attribs.src && { src: absolute(attribs.src, baseUrl) ?? '' }),
-                    ...(attribs.srcset && { srcset: absoluteSrcset(attribs.srcset, baseUrl) ?? '' }),
-                    loading: 'lazy',
-                },
+                attribs: { ...withResolvedUrls(attribs, ['src', 'srcset'], baseUrl), loading: 'lazy' },
             }),
-            source: (tagName, attribs) => ({
-                tagName,
-                attribs: {
-                    ...attribs,
-                    ...(attribs.src && { src: absolute(attribs.src, baseUrl) ?? '' }),
-                    ...(attribs.srcset && { srcset: absoluteSrcset(attribs.srcset, baseUrl) ?? '' }),
-                },
-            }),
+            source: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src', 'srcset'], baseUrl) }),
+            video: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src', 'poster'], baseUrl) }),
+            audio: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src'], baseUrl) }),
+            track: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src'], baseUrl) }),
             iframe: (tagName, attribs) => ({
                 tagName,
                 attribs: {
@@ -193,14 +216,6 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
                     sandbox: IFRAME_SANDBOX,
                     loading: 'lazy',
                     referrerpolicy: 'strict-origin-when-cross-origin',
-                },
-            }),
-            video: (tagName, attribs) => ({
-                tagName,
-                attribs: {
-                    ...attribs,
-                    ...(attribs.src && { src: absolute(attribs.src, baseUrl) ?? '' }),
-                    ...(attribs.poster && { poster: absolute(attribs.poster, baseUrl) ?? '' }),
                 },
             }),
         },

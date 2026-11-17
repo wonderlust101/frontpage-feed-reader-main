@@ -29,7 +29,8 @@
         "html-entities": "^2.6.0",
         "pg": "^8.23.1",
         "request-filtering-agent": "^3.2.1",
-        "sanitize-html": "^2.18.2"
+        "sanitize-html": "^2.18.2",
+        "srcset": "^5.0.3"
     },
     "devDependencies": {
         "@types/bun": "^1.4.4",
