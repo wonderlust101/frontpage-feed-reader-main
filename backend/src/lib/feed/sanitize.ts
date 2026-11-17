@@ -3,11 +3,75 @@ import { decode } from 'html-entities';
 
 // Semantic HTML only. Anything not listed (script, style, form, svg, object, …) is removed.
 const ALLOWED_TAGS = [
-    ...'p br hr div span section article aside details summary'.split(' '), // structure
-    ...'h1 h2 h3 h4 h5 h6 a ul ol li dl dt dd blockquote q cite abbr time'.split(' '), // text
-    ...'em strong b i u s del ins mark small sub sup pre code kbd samp var'.split(' '), // inline
-    ...'figure figcaption picture source img video audio track iframe'.split(' '), // media
-    ...'table caption thead tbody tfoot tr th td colgroup col'.split(' '), // tables
+    // Structure
+    'p',
+    'br',
+    'hr',
+    'div',
+    'span',
+    'section',
+    'article',
+    'aside',
+    'details',
+    'summary',
+    // Text
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'a',
+    'ul',
+    'ol',
+    'li',
+    'dl',
+    'dt',
+    'dd',
+    'blockquote',
+    'q',
+    'cite',
+    'abbr',
+    'time',
+    // Inline
+    'em',
+    'strong',
+    'b',
+    'i',
+    'u',
+    's',
+    'del',
+    'ins',
+    'mark',
+    'small',
+    'sub',
+    'sup',
+    'pre',
+    'code',
+    'kbd',
+    'samp',
+    'var',
+    // Media
+    'figure',
+    'figcaption',
+    'picture',
+    'source',
+    'img',
+    'video',
+    'audio',
+    'track',
+    'iframe',
+    // Tables
+    'table',
+    'caption',
+    'thead',
+    'tbody',
+    'tfoot',
+    'tr',
+    'th',
+    'td',
+    'colgroup',
+    'col',
 ];
 
 /** iframes are only kept for these video/code-demo hosts, and always sandboxed (see IFRAME_SANDBOX). */

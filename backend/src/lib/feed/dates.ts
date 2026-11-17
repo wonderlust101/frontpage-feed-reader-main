@@ -23,7 +23,20 @@ const RFC822 = pattern(
     /\s*(?<zone>[a-z]*[+-]\d{1,2}(?::?\d{2})?|[a-z]+)?/, // GMT / CET / +0000 / GMT+0530 (optional)
 );
 
-const MONTHS = 'january february march april may june july august september october november december'.split(' ');
+const MONTHS = [
+    'january',
+    'february',
+    'march',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+];
 
 /**
  * Hours from UTC for zone abbreviations that mean only one thing. Numeric offsets (+0530) need no
