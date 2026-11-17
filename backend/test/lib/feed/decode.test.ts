@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { decodeFeed, detectCharset } from '../../../src/lib/feed';
 import { readFixture } from '../../helpers/fixtures';
 
-/** The UTF-8 bytes of a string, for building test input. */
+// The UTF-8 bytes of a string, for building test input.
 const enc = (s: string) => new TextEncoder().encode(s);
 
 describe('detectCharset', () => {

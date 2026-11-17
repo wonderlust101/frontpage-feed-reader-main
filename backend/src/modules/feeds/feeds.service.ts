@@ -10,10 +10,8 @@ type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
 const CACHE_LIMIT = 200;
 const cache = new Map<string, CacheEntry>();
 
-/**
- * Saves an entry as the most recently used. A Map keeps insertion order, so its first key is the
- * least recently used one; that one is evicted once there are more than CACHE_LIMIT entries.
- */
+// Saves an entry as the most recently used. A Map keeps insertion order, so its first key is the
+// least recently used one; that one is evicted once there are more than CACHE_LIMIT entries.
 function remember(key: string, entry: CacheEntry) {
     cache.delete(key);
     cache.set(key, entry);
@@ -22,7 +20,7 @@ function remember(key: string, entry: CacheEntry) {
     }
 }
 
-/** The cached entry for a URL (or undefined); reading it also marks it as most recently used. */
+// The cached entry for a URL (or undefined); reading it also marks it as most recently used.
 function recall(key: string): CacheEntry | undefined {
     const entry = cache.get(key);
     if (entry) {
@@ -31,16 +29,14 @@ function recall(key: string): CacheEntry | undefined {
     return entry;
 }
 
-/** Empties the feed cache; tests call it so one test's cached feed can't affect the next. */
+// Empties the feed cache; tests call it so one test's cached feed can't affect the next.
 export function clearFeedCache() {
     cache.clear();
 }
 
-/**
- * Fetches, decodes and normalizes one feed for the API. Sends the client's ETag/Last-Modified, or
- * the ones we saw last time, so an unchanged feed costs only a 304, answered from the cache.
- * Results are cached under both the requested and the final (after redirects) URL.
- */
+// Fetches, decodes and normalizes one feed for the API. Sends the client's ETag/Last-Modified, or
+// the ones we saw last time, so an unchanged feed costs only a 304, answered from the cache.
+// Results are cached under both the requested and the final (after redirects) URL.
 export async function getFeed(
     input: string | undefined,
     clientValidators: Partial<FeedCacheValidators> = {},

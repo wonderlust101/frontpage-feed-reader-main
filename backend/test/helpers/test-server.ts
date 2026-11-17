@@ -2,10 +2,8 @@ import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { app } from '../../src/app';
 
-/**
- * Starts the real Express app on a random free port and returns its base URL.
- * Call `close()` in afterAll so the test process can exit.
- */
+// Starts the real Express app on a random free port and returns its base URL.
+// Call `close()` in afterAll so the test process can exit.
 export async function startTestServer() {
     const server: Server = await new Promise((resolve) => {
         const s = app.listen(0, () => resolve(s));

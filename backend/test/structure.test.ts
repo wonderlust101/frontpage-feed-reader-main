@@ -12,7 +12,7 @@ const FIXTURES_DIR = join(TEST_DIR, 'fixtures/feeds');
 const ROOT_EXCEPTIONS = new Set(['setup.ts', 'README.md', 'structure.test.ts']);
 const SPECIAL_DIRS = new Set(['helpers', 'fixtures', 'live']);
 
-/** Every file under `dir`, at any depth. */
+// Every file under `dir`, at any depth.
 function walk(dir: string): string[] {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
         const full = join(dir, entry.name);
@@ -20,7 +20,7 @@ function walk(dir: string): string[] {
     });
 }
 
-/** A path relative to the test folder, always with forward slashes (also on Windows). */
+// A path relative to the test folder, always with forward slashes (also on Windows).
 const rel = (path: string) => relative(TEST_DIR, path).split(sep).join('/');
 const allFiles = walk(TEST_DIR).map(rel);
 const codeFiles = allFiles.filter((f) => !f.startsWith('fixtures/'));

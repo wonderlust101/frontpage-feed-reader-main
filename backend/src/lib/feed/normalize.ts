@@ -33,10 +33,8 @@ export type NormalizeOptions = {
 const PUBLISHED_TAGS = ['pubdate', 'published', 'issued', 'created', 'date', 'updated', 'modified'];
 const UPDATED_TAGS = ['updated', 'modified', 'date'];
 
-/**
- * The text of every child element with one of these tag names, in the order the tags are listed.
- * E.g. ['pubdate', 'date'] → every <pubDate> value first, then every <dc:date>.
- */
+// The text of every child element with one of these tag names, in the order the tags are listed.
+// E.g. ['pubdate', 'date'] → every <pubDate> value first, then every <dc:date>.
 function rawText(item: ParsedItem, tags: string[]): string[] {
     const out: string[] = [];
 
@@ -49,7 +47,7 @@ function rawText(item: ParsedItem, tags: string[]): string[] {
     return out;
 }
 
-/** Tries each candidate with parseFeedDate and returns the first valid one as an ISO string, or null. */
+// Tries each candidate with parseFeedDate and returns the first valid one as an ISO string, or null.
 function firstDate(candidates: Array<string | Date | null | undefined>, now: number): string | null {
     for (const c of candidates) {
         const iso = c instanceof Date ? parseFeedDate(c.toISOString(), now) : parseFeedDate(c, now);
@@ -61,10 +59,8 @@ function firstDate(candidates: Array<string | Date | null | undefined>, now: num
     return null;
 }
 
-/**
- * Resolves a possibly relative URL against `base`. Returns null unless the result is http(s) and
- * at most URL_MAX characters, so javascript: links and absurdly long URLs never get through.
- */
+// Resolves a possibly relative URL against `base`. Returns null unless the result is http(s) and
+// at most URL_MAX characters, so javascript: links and absurdly long URLs never get through.
 function safeUrl(value: string | null | undefined, base?: string): string | null {
     if (!value || value.length > URL_MAX) {
         return null;
@@ -78,17 +74,13 @@ function safeUrl(value: string | null | undefined, base?: string): string | null
     }
 }
 
-/**
- * A stable id made from any text: the same input always gives the same "urn:frontpage:…" id.
- * Used when a feed item has no usable guid or link, or one that is too long.
- */
+// A stable id made from any text: the same input always gives the same "urn:frontpage:…" id.
+// Used when a feed item has no usable guid or link, or one that is too long.
 const hashedId = (input: string) => `urn:frontpage:${createHash('sha256').update(input).digest('hex').slice(0, 32)}`;
 
-/**
- * Keeps only the first `max` items (RSS) or entries (Atom) and re-closes the document so it stays
- * valid XML. A quick text scan that runs before the parser, which slows down badly on huge feeds.
- * `limited` is true when anything was cut.
- */
+// Keeps only the first `max` items (RSS) or entries (Atom) and re-closes the document so it stays
+// valid XML. A quick text scan that runs before the parser, which slows down badly on huge feeds.
+// `limited` is true when anything was cut.
 export function limitItems(xml: string, max: number): { xml: string; limited: boolean } {
     const closingTag = /<\/(item|entry)\s*>/gi;
     let lastKeptItem: RegExpExecArray | null = null;
@@ -111,16 +103,14 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
     return { xml: `${keptXml}\n${closingRootTag}\n`, limited: true };
 }
 
-/**
- * True when the response is a normal web page (it starts like HTML and has no <rss> or <feed>),
- * e.g. someone entered a blog's homepage instead of its feed URL.
- */
+// True when the response is a normal web page (it starts like HTML and has no <rss> or <feed>),
+// e.g. someone entered a blog's homepage instead of its feed URL.
 function looksLikeHtmlPage(xml: string): boolean {
     const head = xml.slice(0, 2048).toLowerCase();
     return /<!doctype html|<html[\s>]/.test(head) && !/<(rss|feed|rdf:rdf)[\s>]/.test(head);
 }
 
-/** Which feed standard the document uses: 'atom', 'rss1' (the older RDF-based RSS 1.0) or 'rss2'. */
+// Which feed standard the document uses: 'atom', 'rss1' (the older RDF-based RSS 1.0) or 'rss2'.
 function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
     if (feed.meta.type === 'atom') {
         return 'atom';
@@ -131,16 +121,14 @@ function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
     return 'rss2';
 }
 
-/** The src of the first <img> in already-sanitized HTML, or null; used as a fallback thumbnail. */
+// The src of the first <img> in already-sanitized HTML, or null; used as a fallback thumbnail.
 function firstImageInHtml(html: string): string | null {
     return html.match(/<img\b[^>]*\bsrc="([^"]+)"/i)?.[1] ?? null;
 }
 
-/**
- * Turns one parsed feed item into a NormalizedItem: sanitizes its HTML, builds a plain-text summary
- * and parses its dates. Gaps are filled with fallbacks (title from the summary, author from the feed,
- * thumbnail from the first image, id from a hash) and long fields are cut to their limits.
- */
+// Turns one parsed feed item into a NormalizedItem: sanitizes its HTML, builds a plain-text summary
+// and parses its dates. Gaps are filled with fallbacks (title from the summary, author from the feed,
+// thumbnail from the first image, id from a hash) and long fields are cut to their limits.
 function normalizeItem(
     item: ParsedItem,
     ctx: { siteUrl: string; feedAuthor: string | null; now: number; index: number },
@@ -199,11 +187,9 @@ function normalizeItem(
     };
 }
 
-/**
- * Parses an RSS 2.0, RSS 1.0 or Atom document into one NormalizedFeed, items newest first and
- * duplicates removed. Problems that aren't fatal (missing dates, too many items…) go into `warnings`.
- * Throws `not_a_feed` for empty responses, web pages and other XML, `parse_error` if nothing can be read.
- */
+// Parses an RSS 2.0, RSS 1.0 or Atom document into one NormalizedFeed, items newest first and
+// duplicates removed. Problems that aren't fatal (missing dates, too many items…) go into `warnings`.
+// Throws `not_a_feed` for empty responses, web pages and other XML, `parse_error` if nothing can be read.
 export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFeed {
     const now = opts.now ?? Date.now();
     const feedXml = xml.replace(BYTE_ORDER_MARK, '');
@@ -316,10 +302,8 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     };
 }
 
-/**
- * True when the XML never closes its root element (</rss>, </feed> or </rdf:RDF>), meaning the
- * feed was cut off or malformed and could only be partly parsed.
- */
+// True when the XML never closes its root element (</rss>, </feed> or </rdf:RDF>), meaning the
+// feed was cut off or malformed and could only be partly parsed.
 function looksTruncated(xml: string): boolean {
     // Ignore trailing comments/processing instructions (e.g. cache stats some CMSs append).
     const tail = xml

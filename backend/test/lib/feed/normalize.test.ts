@@ -6,12 +6,12 @@ import { curatedFixtures, readFixture } from '../../helpers/fixtures';
 const NOW = Date.parse('2026-01-01T00:00:00Z');
 const FEED_URL = 'https://odd.example/feed.xml';
 
-/** Reads a fixture file, decodes it and normalizes it, as the API would. */
+// Reads a fixture file, decodes it and normalizes it, as the API would.
 function load(path: string, contentType?: string, now = NOW): NormalizedFeed {
     return normalizeFeed(decodeFeed(readFixture(path), contentType), { url: FEED_URL, now });
 }
 
-/** Asserts `fn` throws a FeedError with this `code`. */
+// Asserts `fn` throws a FeedError with this `code`.
 function expectFeedError(fn: () => unknown, code: string) {
     try {
         fn();
@@ -23,10 +23,8 @@ function expectFeedError(fn: () => unknown, code: string) {
     throw new Error(`expected FeedError(${code})`);
 }
 
-/**
- * Asserts a feed is complete and safe: a title, items with id/title/url and valid ISO dates, short
- * plain-text summaries, no scripts or event handlers in the HTML, and items sorted newest first.
- */
+// Asserts a feed is complete and safe: a title, items with id/title/url and valid ISO dates, short
+// plain-text summaries, no scripts or event handlers in the HTML, and items sorted newest first.
 function expectCleanFeed(feed: NormalizedFeed) {
     expect(feed.title.trim()).not.toBe('');
     expect(['rss2', 'atom', 'rss1']).toContain(feed.format);
@@ -250,9 +248,9 @@ describe('broken and odd feeds', () => {
 });
 
 describe('limits against hostile or huge feeds', () => {
-    /** An RSS 2.0 document with the given item XML inside its channel. */
+    // An RSS 2.0 document with the given item XML inside its channel.
     const rss = (items: string) => `<rss version="2.0"><channel><title>t</title>${items}</channel></rss>`;
-    /** An RSS 2.0 document with `n` minimal items, titled t0, t1, t2… */
+    // An RSS 2.0 document with `n` minimal items, titled t0, t1, t2…
     const rssItems = (n: number) =>
         rss(
             Array.from({ length: n }, (_, i) => `<item><title>t${i}</title><link>https://e.x/${i}</link></item>`).join(

@@ -14,7 +14,7 @@ const OUT_DIR = join(import.meta.dir, '../../test/fixtures/feeds/curated');
 const MAX_BYTES = 150 * 1024;
 const MAX_ITEMS = 10;
 
-/** Turns a feed title into a file-safe name: "Simon Willison's Weblog" → "simon-willison-s-weblog". */
+// Turns a feed title into a file-safe name: "Simon Willison's Weblog" → "simon-willison-s-weblog".
 function slugify(title: string): string {
     return title
         .toLowerCase()

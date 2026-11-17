@@ -34,10 +34,8 @@ const ACCEPT_ENCODING = 'gzip, deflate, br';
 const ACCEPT =
     'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 
-/**
- * Checks a user-typed feed URL and returns it as a URL object, adding "https://" if there's no scheme.
- * Throws `invalid_url` when it's empty, not a URL, not http(s), or contains a username/password.
- */
+// Checks a user-typed feed URL and returns it as a URL object, adding "https://" if there's no scheme.
+// Throws `invalid_url` when it's empty, not a URL, not http(s), or contains a username/password.
 export function parseFeedUrl(input: string | undefined | null): URL {
     const raw = input?.trim();
     if (!raw) {
@@ -64,10 +62,8 @@ const LOOPBACK = ['127.0.0.1', '::1'];
 let publicAgents: Agents | undefined;
 let loopbackAgents: Agents | undefined;
 
-/**
- * Creates http/https agents that refuse to connect to private or reserved IPs, except the exact
- * addresses in `allowIPAddressList`. Connections are kept alive so later fetches can reuse them.
- */
+// Creates http/https agents that refuse to connect to private or reserved IPs, except the exact
+// addresses in `allowIPAddressList`. Connections are kept alive so later fetches can reuse them.
 function createAgents(allowIPAddressList: string[]): Agents {
     return {
         http: new RequestFilteringHttpAgent({ keepAlive: true, allowIPAddressList }),
@@ -75,23 +71,19 @@ function createAgents(allowIPAddressList: string[]): Agents {
     };
 }
 
-/** The shared agents, created on first use: public addresses only, or loopback allowed too for tests. */
+// The shared agents, created on first use: public addresses only, or loopback allowed too for tests.
 function agentsFor(allowLoopback: boolean): Agents {
     return allowLoopback ? (loopbackAgents ??= createAgents(LOOPBACK)) : (publicAgents ??= createAgents([]));
 }
 
-/**
- * True when request-filtering-agent refused the address. It throws a plain Error, so it's
- * recognised by its "DNS lookup … is not allowed" message.
- */
+// True when request-filtering-agent refused the address. It throws a plain Error, so it's
+// recognised by its "DNS lookup … is not allowed" message.
 function isBlockedAddressError(err: unknown): boolean {
     return err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message);
 }
 
-/**
- * Sends one GET request and resolves as soon as the response headers arrive (the body is read later).
- * Redirects are not followed here; fetchFeed handles them.
- */
+// Sends one GET request and resolves as soon as the response headers arrive (the body is read later).
+// Redirects are not followed here; fetchFeed handles them.
 function request(url: URL, headers: Record<string, string>, agents: Agents, signal: AbortSignal) {
     const [client, agent] = url.protocol === 'https:' ? [https, agents.https] : [http, agents.http];
     return new Promise<IncomingMessage>((resolve, reject) => {
@@ -99,16 +91,14 @@ function request(url: URL, headers: Record<string, string>, agents: Agents, sign
     });
 }
 
-/** Reads one response header as a string, or null if it's missing (Node gives repeated headers as an array). */
+// Reads one response header as a string, or null if it's missing (Node gives repeated headers as an array).
 const header = (res: IncomingMessage, name: string): string | null => {
     const value = res.headers[name];
     return (Array.isArray(value) ? value[0] : value) ?? null;
 };
 
-/**
- * The response body, decompressed. Unlike fetch, node:http leaves gzip, deflate and brotli bodies
- * compressed, so the matching zlib decoder is piped in here.
- */
+// The response body, decompressed. Unlike fetch, node:http leaves gzip, deflate and brotli bodies
+// compressed, so the matching zlib decoder is piped in here.
 function decompress(res: IncomingMessage): Readable {
     const encoding = header(res, 'content-encoding')?.trim().toLowerCase();
     const decoder =
@@ -123,10 +113,8 @@ function decompress(res: IncomingMessage): Readable {
     return decoder ? pipeline(res, decoder, () => {}) : res;
 }
 
-/**
- * Reads the whole (decompressed) body into bytes. Throws `too_large` as soon as it passes `maxBytes`,
- * so a huge response or a zip bomb can't fill up memory.
- */
+// Reads the whole (decompressed) body into bytes. Throws `too_large` as soon as it passes `maxBytes`,
+// so a huge response or a zip bomb can't fill up memory.
 async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Array> {
     const declared = Number(header(res, 'content-length'));
     if (Number.isFinite(declared) && declared > maxBytes) {
@@ -148,16 +136,14 @@ async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Ar
     return new Uint8Array(Buffer.concat(chunks, total));
 }
 
-/** True when the request was cancelled by our timeout, rather than failing on the network. */
+// True when the request was cancelled by our timeout, rather than failing on the network.
 function isAbort(err: unknown): boolean {
     return err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
 }
 
-/**
- * Downloads one feed. Follows up to 5 redirects itself (to report permanent moves), sends ETag /
- * Last-Modified so an unchanged feed comes back as a 304, and enforces the timeout and size cap.
- * Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
- */
+// Downloads one feed. Follows up to 5 redirects itself (to report permanent moves), sends ETag /
+// Last-Modified so an unchanged feed comes back as a 304, and enforces the timeout and size cap.
+// Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
 export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const {
         timeoutMs = 10_000,
