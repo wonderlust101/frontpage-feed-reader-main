@@ -10,8 +10,7 @@ type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
 const CACHE_LIMIT = 200;
 const cache = new Map<string, CacheEntry>();
 
-// Saves an entry as the most recently used. A Map keeps insertion order, so its first key is the
-// least recently used one; that one is evicted once there are more than CACHE_LIMIT entries.
+// Saves an entry as most recently used and evicts the oldest past CACHE_LIMIT (a Map keeps insertion order, so the first key is the oldest).
 function remember(key: string, entry: CacheEntry) {
     cache.delete(key);
     cache.set(key, entry);
@@ -34,9 +33,8 @@ export function clearFeedCache() {
     cache.clear();
 }
 
-// Fetches, decodes and normalizes one feed for the API. Sends the client's ETag/Last-Modified, or
-// the ones we saw last time, so an unchanged feed costs only a 304, answered from the cache.
-// Results are cached under both the requested and the final (after redirects) URL.
+// Fetches, decodes and normalizes one feed for the API, caching it under both the requested and the final (after redirects) URL.
+// Sends the client's ETag/Last-Modified, or the last ones we saw, so an unchanged feed is just a 304 answered from the cache.
 export async function getFeed(
     input: string | undefined,
     clientValidators: Partial<FeedCacheValidators> = {},

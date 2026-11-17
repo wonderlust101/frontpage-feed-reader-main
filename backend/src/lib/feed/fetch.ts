@@ -34,25 +34,28 @@ const ACCEPT_ENCODING = 'gzip, deflate, br';
 const ACCEPT =
     'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 
-// Checks a user-typed feed URL and returns it as a URL object, adding "https://" if there's no scheme.
-// Throws `invalid_url` when it's empty, not a URL, not http(s), or contains a username/password.
+// Turns a user-typed feed URL into a URL (adding "https://" if needed); throws `invalid_url` if it's empty, invalid, not http(s) or has a password.
 export function parseFeedUrl(input: string | undefined | null): URL {
     const raw = input?.trim();
     if (!raw) {
         throw new FeedError('invalid_url', 'A feed URL is required');
     }
+
     let url: URL;
     try {
         url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`);
     } catch {
         throw new FeedError('invalid_url', `Not a valid URL: ${raw}`);
     }
+
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
         throw new FeedError('invalid_url', 'Only http and https URLs are supported');
     }
+
     if (url.username || url.password) {
         throw new FeedError('invalid_url', 'URLs with credentials are not allowed');
     }
+
     url.hash = '';
     return url;
 }
@@ -62,8 +65,7 @@ const LOOPBACK = ['127.0.0.1', '::1'];
 let publicAgents: Agents | undefined;
 let loopbackAgents: Agents | undefined;
 
-// Creates http/https agents that refuse to connect to private or reserved IPs, except the exact
-// addresses in `allowIPAddressList`. Connections are kept alive so later fetches can reuse them.
+// Creates keep-alive http/https agents that refuse private or reserved IPs, except the exact addresses in `allowIPAddressList`.
 function createAgents(allowIPAddressList: string[]): Agents {
     return {
         http: new RequestFilteringHttpAgent({ keepAlive: true, allowIPAddressList }),
@@ -76,14 +78,12 @@ function agentsFor(allowLoopback: boolean): Agents {
     return allowLoopback ? (loopbackAgents ??= createAgents(LOOPBACK)) : (publicAgents ??= createAgents([]));
 }
 
-// True when request-filtering-agent refused the address. It throws a plain Error, so it's
-// recognised by its "DNS lookup … is not allowed" message.
+// True when request-filtering-agent refused the address (it throws a plain Error saying "DNS lookup … is not allowed").
 function isBlockedAddressError(err: unknown): boolean {
     return err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message);
 }
 
-// Sends one GET request and resolves as soon as the response headers arrive (the body is read later).
-// Redirects are not followed here; fetchFeed handles them.
+// Sends one GET and resolves once the response headers arrive; doesn't follow redirects (fetchFeed does that).
 function request(url: URL, headers: Record<string, string>, agents: Agents, signal: AbortSignal) {
     const [client, agent] = url.protocol === 'https:' ? [https, agents.https] : [http, agents.http];
     return new Promise<IncomingMessage>((resolve, reject) => {
@@ -97,8 +97,7 @@ const header = (res: IncomingMessage, name: string): string | null => {
     return (Array.isArray(value) ? value[0] : value) ?? null;
 };
 
-// The response body, decompressed. Unlike fetch, node:http leaves gzip, deflate and brotli bodies
-// compressed, so the matching zlib decoder is piped in here.
+// The response body, decompressed: unlike fetch, node:http leaves gzip, deflate and brotli bodies compressed.
 function decompress(res: IncomingMessage): Readable {
     const encoding = header(res, 'content-encoding')?.trim().toLowerCase();
     const decoder =
@@ -113,8 +112,7 @@ function decompress(res: IncomingMessage): Readable {
     return decoder ? pipeline(res, decoder, () => {}) : res;
 }
 
-// Reads the whole (decompressed) body into bytes. Throws `too_large` as soon as it passes `maxBytes`,
-// so a huge response or a zip bomb can't fill up memory.
+// Reads the whole decompressed body; throws `too_large` as soon as it passes `maxBytes`, so huge responses and zip bombs can't fill memory.
 async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Array> {
     const declared = Number(header(res, 'content-length'));
     if (Number.isFinite(declared) && declared > maxBytes) {
@@ -141,9 +139,8 @@ function isAbort(err: unknown): boolean {
     return err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
 }
 
-// Downloads one feed. Follows up to 5 redirects itself (to report permanent moves), sends ETag /
-// Last-Modified so an unchanged feed comes back as a 304, and enforces the timeout and size cap.
-// Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
+// Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
+// and enforces the timeout and size cap. Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
 export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const {
         timeoutMs = 10_000,

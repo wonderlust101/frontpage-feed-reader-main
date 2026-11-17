@@ -7,14 +7,12 @@ import { getFeed } from './feeds.service';
 
 const CACHE_CONTROL = 'public, max-age=300';
 
-// The `?url=` query value. Anything but a single string (missing, or given twice) becomes undefined,
-// which the service rejects as `invalid_url`.
+// The `?url=` query value; undefined when it's missing or given twice, which the service rejects as `invalid_url`.
 function readUrl(req: Request): string | undefined {
     return typeof req.query.url === 'string' ? req.query.url : undefined;
 }
 
-// The client's If-None-Match / If-Modified-Since headers, passed upstream so an unchanged feed
-// can be answered with a 304.
+// The client's If-None-Match / If-Modified-Since headers, passed upstream so an unchanged feed can be answered with a 304.
 function readValidators(req: Request): FeedCacheValidators {
     return {
         etag: req.get('if-none-match') ?? null,

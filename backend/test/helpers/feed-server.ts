@@ -4,8 +4,7 @@ import { readFixture } from './fixtures';
 export const ETAG = '"v1"';
 export const LAST_MODIFIED = 'Tue, 10 Jun 2025 09:00:00 GMT';
 
-// Starts a fake feed server where each path acts out one HTTP behaviour (redirects, 304, timeouts,
-// 404/500…). `hits` counts requests per path and `lastHeaders` records what the client sent.
+// A fake feed server where each path acts out one HTTP behaviour (redirect, 304, timeout, 500…); `hits` and `lastHeaders` record requests.
 export function startFeedServer() {
     const hits: Record<string, number> = {};
     const lastHeaders: Record<string, Headers> = {};

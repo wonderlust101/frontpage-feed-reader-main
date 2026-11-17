@@ -23,8 +23,7 @@ function expectFeedError(fn: () => unknown, code: string) {
     throw new Error(`expected FeedError(${code})`);
 }
 
-// Asserts a feed is complete and safe: a title, items with id/title/url and valid ISO dates, short
-// plain-text summaries, no scripts or event handlers in the HTML, and items sorted newest first.
+// Asserts a feed is complete and safe: titled items with ids, URLs and valid ISO dates, short summaries, no scripts, newest first.
 function expectCleanFeed(feed: NormalizedFeed) {
     expect(feed.title.trim()).not.toBe('');
     expect(['rss2', 'atom', 'rss1']).toContain(feed.format);

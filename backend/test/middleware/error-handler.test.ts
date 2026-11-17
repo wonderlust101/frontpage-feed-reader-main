@@ -4,8 +4,7 @@ import { AppError, badRequest, notFound } from '../../src/lib/errors';
 import { FeedError } from '../../src/lib/feed';
 import { errorHandler } from '../../src/middleware/error-handler';
 
-// A minimal stand-in for Express's Response that records the status and JSON body it's given,
-// so the error handler can be tested without starting a server.
+// A minimal fake Express Response that records the status and JSON body, so the error handler can be tested without a server.
 function fakeRes() {
     const sent: { status?: number; body?: unknown } = {};
     const res = {

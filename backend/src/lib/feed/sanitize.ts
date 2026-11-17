@@ -85,8 +85,7 @@ const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-prese
 
 const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
-// Resolves a URL against the page it came from; undefined unless it's http(s) or mailto, so
-// javascript:, data:, file: and invalid URLs are dropped. new URL() reads tricky input like a browser does.
+// Resolves a URL against the page it came from; undefined unless it's http(s) or mailto, so javascript:, data:, file: and invalid URLs are dropped.
 function resolveUrl(value: string, base?: string): string | undefined {
     const trimmed = value.trim();
     if (!trimmed) {
@@ -101,8 +100,7 @@ function resolveUrl(value: string, base?: string): string | undefined {
     }
 }
 
-// Resolves every URL in a srcset ("a.png 1x, b.png 2x") and drops unsafe ones; undefined if none are left.
-// Uses the `srcset` package because URLs may contain commas (".../w_400,c_fill/cat.jpg 400w").
+// Resolves every URL in a srcset and drops unsafe ones (undefined if none are left); a package parses it, as URLs may contain commas.
 function resolveSrcset(value: string, base?: string): string | undefined {
     const candidates = parseSrcset(value).flatMap((candidate) => {
         const url = resolveUrl(candidate.url, base);
@@ -112,8 +110,7 @@ function resolveSrcset(value: string, base?: string): string | undefined {
     return candidates.length > 0 ? stringifySrcset(candidates) : undefined;
 }
 
-// A copy of a tag's attributes with the named URL attributes (href, src, srcset, poster) resolved.
-// An unsafe or invalid URL attribute is removed, never kept as it was.
+// A copy of a tag's attributes with its URL attributes (href, src, srcset, poster) resolved; unsafe or invalid ones are removed.
 function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
     const result = { ...attribs };
 
@@ -131,8 +128,7 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
     return result;
 }
 
-// Makes untrusted feed HTML safe to render: keeps semantic tags, removes scripts, styles, event
-// handlers and unsafe URLs, sandboxes embeds, and makes relative links and images absolute using `baseUrl`.
+// Makes feed HTML safe to render: keeps semantic tags, removes scripts, styles, event handlers and unsafe URLs, and makes links absolute.
 export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: string): string {
     if (!html) {
         return '';
@@ -195,8 +191,7 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
         .trim();
 }
 
-// Turns HTML into plain text for titles and summaries: removes tags (and script/style contents),
-// decodes entities like &amp;, collapses whitespace, and cuts to `max` characters if given.
+// Turns HTML into plain text: removes tags and script/style contents, decodes entities like &amp;, collapses spaces, and cuts to `max`.
 export function htmlToText(html: string | null | undefined, max?: number): string {
     if (!html) {
         return '';
@@ -224,8 +219,7 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
     return max ? truncate(text, max) : text;
 }
 
-// Shortens text to at most `max` characters, cutting at a word boundary and adding "…".
-// Never splits an emoji in half.
+// Shortens text to at most `max` characters at a word boundary, adding "…", without splitting an emoji in half.
 export function truncate(text: string, max: number): string {
     if (text.length <= max) {
         return text;

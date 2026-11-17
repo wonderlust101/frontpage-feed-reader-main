@@ -24,8 +24,7 @@ pool?.on('error', (err) => {
 
 export const db = pool ? drizzle({ client: pool, schema }) : null;
 
-// Checks the database with a `select 1` for /api/health. Returns 'connected', 'skipped' when
-// no DATABASE_URL is set, or 'error' with the driver's message.
+// Checks the database with `select 1` for /api/health: 'connected', 'skipped' (no DATABASE_URL) or 'error' with the driver's message.
 export async function checkDatabase(): Promise<{ status: DbStatus; error?: string }> {
     if (!db) {
         return { status: 'skipped' };

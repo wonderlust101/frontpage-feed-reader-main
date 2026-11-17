@@ -16,8 +16,7 @@ export const FEED_ERRORS: Record<FeedErrorCode, { httpStatus: number; retryable:
     timeout: { httpStatus: 504, retryable: true },
 };
 
-// A feed failure. Its `code` decides the HTTP status and retryability (see FEED_ERRORS); pass
-// `upstreamStatus` when the feed's own server answered with an error, e.g. 404.
+// A feed failure whose `code` decides the HTTP status and retryability; `upstreamStatus` is the feed server's own error status, e.g. 404.
 export class FeedError extends AppError {
     declare readonly code: FeedErrorCode;
     readonly upstreamStatus: number | undefined;
