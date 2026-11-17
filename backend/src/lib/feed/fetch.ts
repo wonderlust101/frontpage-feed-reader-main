@@ -1,6 +1,8 @@
-import { lookup } from 'node:dns/promises';
-import { isIP } from 'node:net';
-import ipaddr from 'ipaddr.js';
+import http, { type IncomingMessage } from 'node:http';
+import https from 'node:https';
+import { pipeline, type Readable } from 'node:stream';
+import zlib from 'node:zlib';
+import { RequestFilteringHttpAgent, RequestFilteringHttpsAgent } from 'request-filtering-agent';
 import type { FeedCacheValidators, FeedRedirect } from '@frontpage/shared';
 import { FeedError } from './errors';
 
@@ -9,8 +11,8 @@ export type FetchFeedOptions = Partial<FeedCacheValidators> & {
     userAgent?: string;
     maxRedirects?: number;
     maxBytes?: number;
-    /** Allow loopback/private addresses. Only for tests. */
-    allowPrivate?: boolean;
+    /** Allow loopback addresses (127.0.0.1, ::1) so tests can reach a local server. Every other non-public range stays blocked. */
+    allowLoopback?: boolean;
 };
 
 export type FetchFeedResult =
@@ -25,6 +27,7 @@ export type FetchFeedResult =
       };
 
 export const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
+const ACCEPT_ENCODING = 'gzip, deflate, br';
 const ACCEPT =
     'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 
@@ -46,61 +49,82 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     return url;
 }
 
-/**
- * True for anything that isn't an ordinary public address: loopback, private, link-local, CGNAT,
- * multicast, reserved/documentation ranges, NAT64 and IPv4-mapped forms of all of these.
- * Ranges come from ipaddr.js, so there's no hand-maintained list. Unparseable input fails closed.
- */
-export function isPrivateAddress(ip: string): boolean {
-    if (!ipaddr.isValid(ip)) return true;
-    return ipaddr.process(ip).range() !== 'unicast';
+// ── SSRF protection ─────────────────────────────────────────────
+// request-filtering-agent validates the IP inside the DNS lookup of the socket that is actually
+// opened (and IP literals before connecting), so a hostname can't pass a check and then connect
+// somewhere else (DNS rebinding). Only ordinary public ("unicast") addresses are allowed, using
+// ipaddr.js's range list. Every redirect hop is a new request through the same agent.
+// Agents keep connections alive and are reused across fetches.
+
+type Agents = { http: http.Agent; https: https.Agent };
+const LOOPBACK = ['127.0.0.1', '::1'];
+let publicAgents: Agents | undefined;
+let loopbackAgents: Agents | undefined;
+
+function createAgents(allowIPAddressList: string[]): Agents {
+    return {
+        http: new RequestFilteringHttpAgent({ keepAlive: true, allowIPAddressList }),
+        https: new RequestFilteringHttpsAgent({ keepAlive: true, allowIPAddressList }),
+    };
 }
 
-async function assertPublicHost(url: URL): Promise<void> {
-    const host = url.hostname.replace(/^\[|\]$/g, '');
-    if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.internal')) {
-        throw new FeedError('blocked_url', 'That host is not allowed');
-    }
-    let addresses: string[];
-    if (isIP(host)) {
-        addresses = [host];
-    } else {
-        try {
-            addresses = (await lookup(host, { all: true })).map((a) => a.address);
-        } catch {
-            throw new FeedError('network', `Could not resolve host ${host}`, { retryable: false });
-        }
-    }
-    if (addresses.some(isPrivateAddress)) throw new FeedError('blocked_url', 'That host is not allowed');
+function agentsFor(allowLoopback: boolean): Agents {
+    return allowLoopback ? (loopbackAgents ??= createAgents(LOOPBACK)) : (publicAgents ??= createAgents([]));
 }
 
-async function readBody(res: Response, maxBytes: number): Promise<Uint8Array> {
-    const declared = Number(res.headers.get('content-length'));
+/** request-filtering-agent rejects with a plain Error whose message says the address "is not allowed". */
+function isBlockedAddressError(err: unknown): boolean {
+    return err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message);
+}
+
+/** One GET request (no redirect following), resolved once response headers arrive. */
+function request(url: URL, headers: Record<string, string>, agents: Agents, signal: AbortSignal) {
+    const [client, agent] = url.protocol === 'https:' ? [https, agents.https] : [http, agents.http];
+    return new Promise<IncomingMessage>((resolve, reject) => {
+        client.get(url, { headers, agent, signal }, resolve).on('error', reject);
+    });
+}
+
+const header = (res: IncomingMessage, name: string): string | null => {
+    const value = res.headers[name];
+    return (Array.isArray(value) ? value[0] : value) ?? null;
+};
+
+/** node:http doesn't decompress like fetch does, so undo Content-Encoding here. */
+function decompress(res: IncomingMessage): Readable {
+    const encoding = header(res, 'content-encoding')?.trim().toLowerCase();
+    const decoder =
+        encoding === 'gzip' || encoding === 'x-gzip'
+            ? zlib.createGunzip()
+            : encoding === 'deflate'
+              ? zlib.createInflate()
+              : encoding === 'br'
+                ? zlib.createBrotliDecompress()
+                : null;
+    // pipeline() forwards errors and aborts from the response into the decoder.
+    return decoder ? pipeline(res, decoder, () => {}) : res;
+}
+
+/** Reads the (decompressed) body, failing as soon as it exceeds maxBytes — which also stops zip bombs. */
+async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Array> {
+    const declared = Number(header(res, 'content-length'));
     if (Number.isFinite(declared) && declared > maxBytes) {
-        await res.body?.cancel();
+        res.destroy();
         throw new FeedError('too_large', `Feed is larger than ${maxBytes} bytes`);
     }
-    if (!res.body) return new Uint8Array();
-    const chunks: Uint8Array[] = [];
+    const body = decompress(res);
+    const chunks: Buffer[] = [];
     let total = 0;
-    const reader = res.body.getReader();
-    for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        total += value.byteLength;
+    for await (const chunk of body as AsyncIterable<Buffer>) {
+        total += chunk.byteLength;
         if (total > maxBytes) {
-            await reader.cancel();
+            body.destroy();
+            res.destroy();
             throw new FeedError('too_large', `Feed is larger than ${maxBytes} bytes`);
         }
-        chunks.push(value);
+        chunks.push(chunk);
     }
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-        out.set(chunk, offset);
-        offset += chunk.byteLength;
-    }
-    return out;
+    return new Uint8Array(Buffer.concat(chunks, total));
 }
 
 function isAbort(err: unknown): boolean {
@@ -109,8 +133,8 @@ function isAbort(err: unknown): boolean {
 
 /**
  * Fetches a feed with a hard timeout (covering redirects and the body), manual redirect following
- * (so permanent moves are reported and every hop is SSRF-checked), conditional request headers
- * and a body size cap.
+ * (so permanent moves are reported), SSRF protection on every connection, conditional request
+ * headers, decompression and a body size cap.
  */
 export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const {
@@ -118,9 +142,10 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
         userAgent = 'Frontpage/0.1 (RSS reader)',
         maxRedirects = 5,
         maxBytes = DEFAULT_MAX_BYTES,
-        allowPrivate = false,
+        allowLoopback = false,
     } = opts;
     const signal = AbortSignal.timeout(timeoutMs);
+    const agents = agentsFor(allowLoopback);
     const startUrl = typeof input === 'string' ? parseFeedUrl(input) : input;
 
     let url = startUrl;
@@ -129,44 +154,47 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
 
     try {
         for (;;) {
-            if (!allowPrivate) await assertPublicHost(url);
-
-            const headers: Record<string, string> = { 'User-Agent': userAgent, Accept: ACCEPT };
+            const headers: Record<string, string> = {
+                'User-Agent': userAgent,
+                Accept: ACCEPT,
+                'Accept-Encoding': ACCEPT_ENCODING,
+            };
             if (opts.etag) headers['If-None-Match'] = opts.etag;
             if (opts.lastModified) headers['If-Modified-Since'] = opts.lastModified;
 
-            const res = await fetch(url, { headers, redirect: 'manual', signal });
+            const res = await request(url, headers, agents, signal);
+            const status = res.statusCode ?? 0;
 
-            if ([301, 302, 303, 307, 308].includes(res.status)) {
-                await res.body?.cancel();
-                const location = res.headers.get('location');
-                if (!location) throw new FeedError('network', `Redirect (${res.status}) without a Location header`);
+            if ([301, 302, 303, 307, 308].includes(status)) {
+                res.destroy();
+                const location = header(res, 'location');
+                if (!location) throw new FeedError('network', `Redirect (${status}) without a Location header`);
                 if (++hops > maxRedirects) throw new FeedError('network', 'Too many redirects', { retryable: false });
                 const next = new URL(location, url);
                 if (next.protocol !== 'http:' && next.protocol !== 'https:') {
                     throw new FeedError('blocked_url', 'Redirected to an unsupported protocol');
                 }
-                if (res.status !== 301 && res.status !== 308) permanent = false;
+                if (status !== 301 && status !== 308) permanent = false;
                 url = next;
                 continue;
             }
 
             const redirect: FeedRedirect | null = hops > 0 ? { permanent, from: startUrl.href, to: url.href } : null;
             const validators: FeedCacheValidators = {
-                etag: res.headers.get('etag'),
-                lastModified: res.headers.get('last-modified'),
+                etag: header(res, 'etag'),
+                lastModified: header(res, 'last-modified'),
             };
 
-            if (res.status === 304) {
-                await res.body?.cancel();
+            if (status === 304) {
+                res.destroy();
                 return { notModified: true, finalUrl: url.href, redirect, validators };
             }
-            if (!res.ok) {
-                await res.body?.cancel();
-                const code = res.status >= 500 ? 'http_5xx' : 'http_4xx';
-                const retryable = res.status >= 500 || res.status === 429 || res.status === 408;
-                throw new FeedError(code, `The feed server responded with ${res.status}`, {
-                    upstreamStatus: res.status,
+            if (status < 200 || status >= 300) {
+                res.destroy();
+                const code = status >= 500 ? 'http_5xx' : 'http_4xx';
+                const retryable = status >= 500 || status === 429 || status === 408;
+                throw new FeedError(code, `The feed server responded with ${status}`, {
+                    upstreamStatus: status,
                     retryable,
                 });
             }
@@ -175,7 +203,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
             return {
                 notModified: false,
                 bytes,
-                contentType: res.headers.get('content-type'),
+                contentType: header(res, 'content-type'),
                 finalUrl: url.href,
                 redirect,
                 validators,
@@ -183,9 +211,13 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
         }
     } catch (err) {
         if (err instanceof FeedError) throw err;
+        if (isBlockedAddressError(err)) throw new FeedError('blocked_url', 'That host is not allowed');
         if (isAbort(err) || signal.aborted) {
             throw new FeedError('timeout', `The feed took longer than ${timeoutMs / 1000}s to respond`);
         }
+        const code = (err as NodeJS.ErrnoException)?.code;
+        if (code === 'ENOTFOUND')
+            throw new FeedError('network', `Could not resolve host ${url.hostname}`, { retryable: false });
         throw new FeedError('network', `Could not reach the feed: ${(err as Error)?.message ?? 'unknown error'}`);
     }
 }

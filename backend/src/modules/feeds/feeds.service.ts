@@ -42,7 +42,7 @@ export async function getFeed(
         ...validators,
         timeoutMs: env.FEED_FETCH_TIMEOUT_MS,
         userAgent: env.FEED_USER_AGENT,
-        allowPrivate: env.FEED_ALLOW_PRIVATE_HOSTS,
+        allowLoopback: env.FEED_ALLOW_LOOPBACK,
     });
     const fetchedAt = new Date().toISOString();
 

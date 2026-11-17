@@ -1,3 +1,4 @@
+import zlib from 'node:zlib';
 import { readFixture } from './fixtures';
 
 export const ETAG = '"v1"';
@@ -58,6 +59,21 @@ export function startFeedServer() {
                     return new Response('<!doctype html><html><body>Hi</body></html>', {
                         headers: { 'Content-Type': 'text/html' },
                     });
+                case '/gzip':
+                    return new Response(zlib.gzipSync(rss), { headers: { ...xml, 'Content-Encoding': 'gzip' } });
+                case '/deflate':
+                    return new Response(zlib.deflateSync(rss), { headers: { ...xml, 'Content-Encoding': 'deflate' } });
+                case '/brotli':
+                    return new Response(zlib.brotliCompressSync(rss), {
+                        headers: { ...xml, 'Content-Encoding': 'br' },
+                    });
+                case '/zip-bomb':
+                    // ~2 KB on the wire, 8 MB once decompressed.
+                    return new Response(zlib.gzipSync(new Uint8Array(8 * 1024 * 1024).fill(32)), {
+                        headers: { ...xml, 'Content-Encoding': 'gzip' },
+                    });
+                case '/redirect-to-private':
+                    return Response.redirect('http://10.0.0.1/feed.xml', 302);
                 case '/huge':
                     return new Response(new Uint8Array(2_048).fill(32), { headers: xml });
                 case '/gone':

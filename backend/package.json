@@ -25,8 +25,8 @@
         "drizzle-orm": "^0.45.4",
         "express": "^5.3.0",
         "html-entities": "^2.6.0",
-        "ipaddr.js": "^2.5.0",
         "pg": "^8.23.1",
+        "request-filtering-agent": "^3.2.1",
         "sanitize-html": "^2.18.2"
     },
     "devDependencies": {

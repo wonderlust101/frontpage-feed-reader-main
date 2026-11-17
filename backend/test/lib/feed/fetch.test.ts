@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { FeedError, fetchFeed, isPrivateAddress, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed';
+import { FeedError, fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 
 let upstream: ReturnType<typeof startFeedServer>;
-const opts: FetchFeedOptions = { allowPrivate: true, timeoutMs: 2_000 };
+const opts: FetchFeedOptions = { allowLoopback: true, timeoutMs: 2_000 };
 
 beforeAll(() => {
     upstream = startFeedServer();
@@ -97,6 +97,17 @@ describe('fetchFeed', () => {
         expect(err.upstreamStatus).toBe(status);
     });
 
+    test.each(['/gzip', '/deflate', '/brotli'])('decompresses %s responses', async (path) => {
+        const res = await fetchFeed(`${upstream.url}${path}`, opts);
+        if (res.notModified) throw new Error('unexpected 304');
+        expect(new TextDecoder().decode(res.bytes)).toStartWith('<?xml');
+        expect(upstream.lastHeaders[path]?.get('accept-encoding')).toContain('gzip');
+    });
+
+    test('caps the decompressed size (zip bombs)', async () => {
+        await expectError(fetchFeed(`${upstream.url}/zip-bomb`, opts), 'too_large');
+    });
+
     test('caps the body size', async () => {
         await expectError(fetchFeed(`${upstream.url}/huge`, { ...opts, maxBytes: 1_024 }), 'too_large');
     });
@@ -114,30 +125,38 @@ describe('SSRF protection', () => {
         await expectError(fetchFeed('http://169.254.169.254/latest/meta-data'), 'blocked_url');
     });
 
+    // Each address is rejected by request-filtering-agent before any connection is attempted,
+    // so these run offline and instantly. (Public addresses are covered by the live tests.)
     test.each([
-        ['127.0.0.1', true],
-        ['10.1.2.3', true],
-        ['172.16.0.1', true],
-        ['172.32.0.1', false],
-        ['192.168.1.1', true],
-        ['169.254.169.254', true],
-        ['100.64.0.1', true],
-        ['0.0.0.0', true],
-        ['::1', true],
-        ['fd00::1', true],
-        ['fe80::1', true],
-        ['::ffff:127.0.0.1', true],
-        ['8.8.8.8', false],
-        ['2606:4700::1111', false],
-        // Ranges the old hand-written check missed:
-        ['192.0.2.1', true], // documentation (TEST-NET-1)
-        ['198.51.100.1', true], // documentation (TEST-NET-2)
-        ['2001:db8::1', true], // IPv6 documentation
-        ['64:ff9b::7f00:1', true], // NAT64 form of 127.0.0.1
-        ['::ffff:10.0.0.1', true], // IPv4-mapped private
-        ['not-an-ip', true], // unparseable fails closed
-    ])('isPrivateAddress(%s) is %p', (ip, expected) => {
-        expect(isPrivateAddress(ip)).toBe(expected);
+        '127.0.0.1',
+        '10.1.2.3',
+        '172.16.0.1',
+        '192.168.1.1',
+        '169.254.169.254', // cloud metadata
+        '100.64.0.1', // CGNAT
+        '0.0.0.0',
+        '224.0.0.1', // multicast
+        '192.0.2.1', // documentation (TEST-NET-1)
+        '198.51.100.1', // documentation (TEST-NET-2)
+        '[::1]',
+        '[fd00::1]',
+        '[fe80::1]',
+        '[::ffff:127.0.0.1]', // IPv4-mapped loopback
+        '[::ffff:10.0.0.1]', // IPv4-mapped private
+        '[2001:db8::1]', // IPv6 documentation
+        '[64:ff9b::7f00:1]', // NAT64 form of 127.0.0.1
+    ])('blocks %s', async (host) => {
+        await expectError(fetchFeed(`http://${host}/feed.xml`, { timeoutMs: 2_000 }), 'blocked_url', false);
+    });
+
+    test('checks every redirect hop, not just the first URL', async () => {
+        // Loopback is allowed for the test server, but its redirect to 10.0.0.1 must still be refused.
+        await expectError(fetchFeed(`${upstream.url}/redirect-to-private`, opts), 'blocked_url', false);
+    });
+
+    test('allowLoopback only opens loopback, not other private ranges', async () => {
+        await expectError(fetchFeed('http://10.1.2.3/feed.xml', opts), 'blocked_url');
+        await expectError(fetchFeed('http://169.254.169.254/latest/meta-data', opts), 'blocked_url');
     });
 });
 
