@@ -57,4 +57,9 @@
 <link>https://dates.example/garbage</link>
 <pubDate>sometime last week</pubDate>
 </item>
+<item>
+<title>Date impossible</title>
+<link>https://dates.example/impossible</link>
+<pubDate>Sat, 31 Feb 2024 10:00:00 GMT</pubDate>
+</item>
 </channel></rss>

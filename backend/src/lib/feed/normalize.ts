@@ -18,8 +18,10 @@ export type NormalizeOptions = {
     now?: number;
 };
 
-const RSS_DATE_TAGS = ['pubdate', 'date', 'published', 'issued', 'updated', 'modified'];
-const ATOM_PUBLISHED_TAGS = ['published', 'issued', 'created', 'date', 'pubdate'];
+// Item date elements, in order of preference. Dates are read from the raw XML and parsed by
+// parseFeedDate alone (not the library's `new Date()`), so one set of rules decides every date.
+// RSS 2.0: pubDate · RSS 1.0: dc:date · Atom: published/updated (+ legacy issued/created/modified).
+const PUBLISHED_TAGS = ['pubdate', 'published', 'issued', 'created', 'date', 'updated', 'modified'];
 const UPDATED_TAGS = ['updated', 'modified', 'date'];
 
 function rawText(item: ParsedItem, tags: string[]): string[] {
@@ -75,7 +77,7 @@ function firstImageInHtml(html: string): string | null {
 
 function normalizeItem(
     item: ParsedItem,
-    ctx: { format: FeedFormat; siteUrl: string; feedAuthor: string | null; now: number; index: number },
+    ctx: { siteUrl: string; feedAuthor: string | null; now: number; index: number },
 ): NormalizedItem {
     const url = safeUrl(item.url, ctx.siteUrl);
     const base = url ?? ctx.siteUrl;
@@ -92,9 +94,8 @@ function normalizeItem(
 
     const title = cleanText(item.title) || (summary ? truncate(summary, FALLBACK_TITLE_MAX) : '') || 'Untitled';
 
-    const publishedTags = ctx.format === 'atom' ? ATOM_PUBLISHED_TAGS : RSS_DATE_TAGS;
-    const publishedAt = firstDate([...rawText(item, publishedTags), item.published, item.updated], ctx.now);
-    const updatedAt = firstDate([...rawText(item, UPDATED_TAGS), item.updated], ctx.now) ?? publishedAt;
+    const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), ctx.now);
+    const updatedAt = firstDate(rawText(item, UPDATED_TAGS), ctx.now) ?? publishedAt;
 
     const author =
         item.authors
@@ -173,7 +174,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     feed.items.forEach((raw, index) => {
         let item: NormalizedItem;
         try {
-            item = normalizeItem(raw, { format, siteUrl, feedAuthor, now, index });
+            item = normalizeItem(raw, { siteUrl, feedAuthor, now, index });
         } catch {
             dropped++;
             return;

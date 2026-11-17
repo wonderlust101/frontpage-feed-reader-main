@@ -140,7 +140,7 @@ describe('broken and odd feeds', () => {
         expect(feed.warnings).toContain('2 item(s) have no usable date');
     });
 
-    test('non-standard dates are normalized; unparseable ones become null', () => {
+    test('RFC 822 / ISO variants are normalized; anything else becomes null', () => {
         const feed = load('odd/weird-dates.xml');
         const byKey = Object.fromEntries(feed.items.map((i) => [i.url!.split('/').pop(), i.publishedAt]));
         for (const key of [
@@ -152,13 +152,19 @@ describe('broken and odd feeds', () => {
             'two-digit-year',
             'iso-no-zone',
             'iso-offset',
-            'month-first',
             'full-month',
         ]) {
             expect(byKey[key]).toBe('2024-10-02T15:00:00.000Z');
         }
-        expect(byKey.garbage).toBeNull();
-        expect(feed.items.at(-1)?.title).toBe('Date garbage');
+        // Not guessed: unsupported format, nonsense, and an impossible calendar date.
+        for (const key of ['month-first', 'garbage', 'impossible']) expect(byKey[key]).toBeNull();
+        // Undated items go last, in feed order.
+        expect(feed.items.slice(-3).map((i) => i.title)).toEqual([
+            'Date month-first',
+            'Date garbage',
+            'Date impossible',
+        ]);
+        expect(feed.warnings).toContain('3 item(s) have no usable date');
     });
 
     test('missing fields are filled in', () => {
