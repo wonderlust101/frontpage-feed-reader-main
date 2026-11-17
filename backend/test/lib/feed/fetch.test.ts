@@ -13,6 +13,10 @@ afterAll(() => {
     upstream.stop();
 });
 
+/**
+ * Asserts the promise rejects with a FeedError of this `code` (and `retryable`, when given),
+ * then returns the error so the test can check more.
+ */
 async function expectError(promise: Promise<unknown>, code: FeedError['code'], retryable?: boolean) {
     const err = await promise.then(
         () => null,

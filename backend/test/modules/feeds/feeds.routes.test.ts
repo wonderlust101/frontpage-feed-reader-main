@@ -21,6 +21,7 @@ beforeEach(() => {
     clearFeedCache();
 });
 
+/** Calls GET /api/fetch for `feedUrl` (or with no `?url=` at all when it's null). */
 const fetchApi = (feedUrl: string | null, init?: RequestInit) =>
     fetch(`${api.url}/api/fetch${feedUrl === null ? '' : `?url=${encodeURIComponent(feedUrl)}`}`, init);
 

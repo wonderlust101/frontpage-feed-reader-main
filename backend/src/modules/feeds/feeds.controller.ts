@@ -7,12 +7,18 @@ import { getFeed } from './feeds.service';
 
 const CACHE_CONTROL = 'public, max-age=300';
 
-/** Reads `?url=`; anything but a single string (missing, repeated) becomes undefined → 400 in the service. */
+/**
+ * The `?url=` query value. Anything but a single string (missing, or given twice) becomes undefined,
+ * which the service rejects as `invalid_url`.
+ */
 function readUrl(req: Request): string | undefined {
     return typeof req.query.url === 'string' ? req.query.url : undefined;
 }
 
-/** The client's conditional-request headers, forwarded upstream. */
+/**
+ * The client's If-None-Match / If-Modified-Since headers, passed upstream so an unchanged feed
+ * can be answered with a 304.
+ */
 function readValidators(req: Request): FeedCacheValidators {
     return {
         etag: req.get('if-none-match') ?? null,
@@ -20,7 +26,7 @@ function readValidators(req: Request): FeedCacheValidators {
     };
 }
 
-/** Sends the feed with its caching headers. */
+/** Sends the feed as JSON with its ETag / Last-Modified and a 5-minute Cache-Control header. */
 function sendFeed(res: Response, result: FetchFeedResponse) {
     if (result.cache.etag) {
         res.set('ETag', result.cache.etag);
@@ -33,7 +39,7 @@ function sendFeed(res: Response, result: FetchFeedResponse) {
     res.json(result);
 }
 
-/** GET /api/fetch?url=… — fetch and normalize one feed. */
+/** GET /api/fetch?url=… fetches and normalizes one feed; any error is thrown to the error handler. */
 export async function fetchFeedController(req: Request, res: Response) {
     sendFeed(res, await getFeed(readUrl(req), readValidators(req)));
 }

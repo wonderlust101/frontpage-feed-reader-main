@@ -6,6 +6,10 @@ export type AppErrorOptions = {
     details?: Record<string, unknown>;
 };
 
+/**
+ * An error that is safe to show API clients: a machine-readable `code`, a message, the HTTP status
+ * to answer with, and whether retrying might help. Throw it (or a subclass) from services.
+ */
 export class AppError extends Error {
     readonly code: string;
     readonly httpStatus: number;
@@ -22,8 +26,11 @@ export class AppError extends Error {
     }
 }
 
-/** 404 for a resource that doesn't exist, e.g. `throw notFound('Feed not found')`. */
+/** Error for a resource that doesn't exist, sent as a 404, e.g. `throw notFound('Feed not found')`. */
 export const notFound = (message = 'Not found') => new AppError('not_found', message, 404);
 
-/** 400 for invalid input, e.g. `throw badRequest('Title is required')`. */
+/**
+ * Error for invalid client input, sent as a 400, e.g. `throw badRequest('Title is required')`.
+ * Pass `code` to use a more specific error code than 'bad_request'.
+ */
 export const badRequest = (message: string, code = 'bad_request') => new AppError(code, message, 400);

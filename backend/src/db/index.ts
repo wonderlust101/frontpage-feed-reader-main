@@ -24,7 +24,10 @@ pool?.on('error', (err) => {
 
 export const db = pool ? drizzle({ client: pool, schema }) : null;
 
-/** Runs a trivial query to report whether the database is reachable. */
+/**
+ * Checks the database with a `select 1` for /api/health. Returns 'connected', 'skipped' when
+ * no DATABASE_URL is set, or 'error' with the driver's message.
+ */
 export async function checkDatabase(): Promise<{ status: DbStatus; error?: string }> {
     if (!db) {
         return { status: 'skipped' };
@@ -39,7 +42,7 @@ export async function checkDatabase(): Promise<{ status: DbStatus; error?: strin
     }
 }
 
-/** Closes all pooled connections. Called on shutdown. */
+/** Closes every pooled connection so the process can exit cleanly; called on shutdown. */
 export async function closeDatabase() {
     await pool?.end();
 }

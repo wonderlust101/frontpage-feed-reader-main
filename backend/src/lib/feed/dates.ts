@@ -1,7 +1,10 @@
 // Parses feed dates (RFC 822 for RSS, ISO 8601 for Atom) into ISO 8601 UTC strings.
 // Unknown formats and ambiguous zone names (IST, BST, AST…) return null: we never guess a date.
 
-/** Builds one regex from commented pieces, so each part of the format can be read on its own line. */
+/**
+ * Joins regex pieces into one case-insensitive regex that must match the whole string.
+ * Lets each part of a date format sit on its own line with an example next to it.
+ */
 const pattern = (...parts: RegExp[]) => new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
 
 const ISO = pattern(
@@ -60,7 +63,10 @@ const MAX_OFFSET_HOURS = 14;
 const MIN_TIME = Date.UTC(1995, 0, 1);
 const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
 
-/** "10" → 10; "Oct", "Sept", "October" → 10/9/10. Needs at least 3 letters of a real month name ("Octopus" fails). */
+/**
+ * Month number (1–12) from "10", "Oct", "Sept" or "October"; undefined for anything else.
+ * Names need at least 3 letters and must be the start of a real month, so "Octopus" fails.
+ */
 function toMonth(value: string): number | undefined {
     if (/^\d+$/.test(value)) {
         return Number(value);
@@ -72,7 +78,7 @@ function toMonth(value: string): number | undefined {
     return index >= 0 ? index + 1 : undefined;
 }
 
-/** "24" → 2024, "99" → 1999; four-digit years pass through. */
+/** Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through. */
 function toFullYear(value: string): number {
     const year = Number(value);
     if (year >= 100) {
@@ -83,8 +89,9 @@ function toFullYear(value: string): number {
 }
 
 /**
- * Minutes from UTC: "GMT" → 0, "PDT" → -420, "+0530" / "+05:30" / "+05" / "GMT+0530" → 330.
- * No zone means UTC; an unknown name or an impossible offset (+2500) → undefined.
+ * Offset from UTC in minutes: "GMT" → 0, "PDT" → -420, "+0530", "+05:30", "+05" or "GMT+0530" → 330.
+ * No zone at all means UTC (0). Returns undefined for unknown or ambiguous names ("IST") and for
+ * offsets that can't exist ("+2500").
  */
 function toOffsetMinutes(zone: string | undefined): number | undefined {
     if (!zone) {
@@ -111,7 +118,10 @@ function toOffsetMinutes(zone: string | undefined): number | undefined {
     return numeric[1] === '-' ? -minutes : minutes;
 }
 
-/** Calendar parts + offset → epoch ms, or null if the date can't exist (Feb 31, 25:00…). */
+/**
+ * Converts date parts written in a given time zone into a UTC timestamp (milliseconds since 1970).
+ * Returns null for dates that can't exist, like Feb 31 or 25:00.
+ */
 function toEpochMs(p: DateParts, offsetMinutes: number): number | null {
     const utc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second, p.millisecond);
     const d = new Date(utc);
@@ -129,8 +139,9 @@ function toEpochMs(p: DateParts, offsetMinutes: number): number | null {
 }
 
 /**
- * Parses a feed date into an ISO 8601 UTC string.
- * Returns null for unrecognized or impossible dates, unknown zones, and dates before 1995 or over a day ahead.
+ * Turns a feed date ("Wed, 02 Oct 2024 15:00:00 GMT" or "2024-10-02T15:00:00Z") into an ISO 8601
+ * UTC string such as "2024-10-02T15:00:00.000Z". Returns null rather than guessing: for unknown formats or
+ * zones, impossible dates, dates before 1995, or more than a day in the future (`now` is for tests).
  */
 export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
     const input = value?.replace(/\s+/g, ' ').trim() ?? '';
