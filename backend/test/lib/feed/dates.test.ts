@@ -11,6 +11,7 @@ describe('parseFeedDate', () => {
             ['lowercase z', '2024-10-02t15:00:00z'],
             ['an offset', '2024-10-02T17:00:00+02:00'],
             ['a compact offset', '2024-10-02T17:00:00+0200'],
+            ['an hours-only offset', '2024-10-02T20:00:00+05'],
             ['no seconds', '2024-10-02T15:00Z'],
             ['no zone (read as UTC)', '2024-10-02T15:00:00'],
             ['a space instead of T', '2024-10-02 15:00:00'],
@@ -51,6 +52,23 @@ describe('parseFeedDate', () => {
             expect(parseFeedDate('Wed, 02 Oct 2024 20:30:00 +0530', NOW)).toBe(EXPECTED);
         });
 
+        test.each([
+            ['CET (Central Europe)', 'Wed, 02 Oct 2024 16:00:00 CET'],
+            ['CEST (Central Europe, summer)', 'Wed, 02 Oct 2024 17:00:00 CEST'],
+            ['JST (Japan)', 'Thu, 03 Oct 2024 00:00:00 JST'],
+            ['AEST (Australia East)', 'Thu, 03 Oct 2024 01:00:00 AEST'],
+            ['ACST (Australia Central, +9:30)', 'Thu, 03 Oct 2024 00:30:00 ACST'],
+            ['NPT (Nepal, +5:45)', 'Wed, 02 Oct 2024 20:45:00 NPT'],
+            ['NST (Newfoundland, -3:30)', 'Wed, 02 Oct 2024 11:30:00 NST'],
+            ['HST (Hawaii)', 'Wed, 02 Oct 2024 05:00:00 HST'],
+            ['GMT+offset', 'Wed, 02 Oct 2024 20:30:00 GMT+0530'],
+            ['UTC with an hours-only offset', 'Wed, 02 Oct 2024 07:00:00 UTC-8'],
+            ['an hours-only offset', 'Wed, 02 Oct 2024 20:00:00 +05'],
+            ['a far offset (Chatham, +13:45)', 'Thu, 03 Oct 2024 04:45:00 +1345'],
+        ])('parses %s', (_label, input) => {
+            expect(parseFeedDate(input, NOW)).toBe(EXPECTED);
+        });
+
         test('accepts "Sept"', () => {
             expect(parseFeedDate('Mon, 02 Sept 2024 15:00:00 GMT', NOW)).toBe('2024-09-02T15:00:00.000Z');
         });
@@ -70,6 +88,10 @@ describe('parseFeedDate', () => {
             ['a word that merely starts like a month', 'Wed, 02 Octopus 2024 15:00:00 GMT'],
             ['an unknown zone', 'Wed, 02 Oct 2024 15:00:00 XYZT'],
             ['an ambiguous zone (IST: India, Ireland or Israel)', 'Wed, 02 Oct 2024 15:00:00 IST'],
+            ['an ambiguous zone (BST: Britain or Bangladesh)', 'Wed, 02 Oct 2024 15:00:00 BST'],
+            ['an ambiguous zone (AST: Atlantic or Arabia)', 'Wed, 02 Oct 2024 15:00:00 AST'],
+            ['an impossible offset (+25:00)', 'Wed, 02 Oct 2024 15:00:00 +2500'],
+            ['an impossible offset (+05:75)', 'Wed, 02 Oct 2024 15:00:00 +0575'],
             ['month-first dates', 'October 2, 2024 3:00 PM GMT'],
             ['slash dates (dd/mm or mm/dd?)', '02/10/2024'],
             ['epoch numbers', '1727881200'],
