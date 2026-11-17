@@ -96,15 +96,14 @@ const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
 /**
  * Resolves a URL against the page it came from and keeps it only if it is http(s) or mailto.
- * Everything else returns undefined, so the attribute is dropped: javascript:, data:, file:, unknown
- * schemes and anything that isn't a valid URL. `new URL()` follows the same standard as browsers,
- * so tricks like "java\nscript:" are seen exactly as a browser would see them.
+ * Anything else returns undefined: javascript:, data:, file:, unknown schemes, invalid URLs.
+ * `new URL()` parses like a browser does, so tricks like "java\nscript:" are caught too.
  * (sanitize-html also checks schemes; this is a second, allowlist-based layer.)
  */
-function resolveUrl(value: string | undefined, base: string | undefined): string | undefined {
-    const trimmed = value?.trim();
+function resolveUrl(value: string, base?: string): string | undefined {
+    const trimmed = value.trim();
     if (!trimmed) {
-        return undefined;
+        return undefined; // new URL('', base) would silently become a link to the page itself
     }
 
     try {
@@ -116,15 +115,10 @@ function resolveUrl(value: string | undefined, base: string | undefined): string
 }
 
 /**
- * Resolves every URL in a srcset ("a.png 1x, b.png 2x"). Parsed with the `srcset` package because
- * URLs may contain commas (Cloudinary/Substack: ".../w_400,c_fill/cat.jpg 400w"), so splitting on
- * "," would cut them apart. Unsafe candidates are dropped; if none are left, so is the attribute.
+ * Resolves every URL in a srcset ("a.png 1x, b.png 2x"), dropping unsafe ones. Parsed with the
+ * `srcset` package because URLs may contain commas (".../w_400,c_fill/cat.jpg 400w").
  */
-function resolveSrcset(value: string | undefined, base: string | undefined): string | undefined {
-    if (!value) {
-        return undefined;
-    }
-
+function resolveSrcset(value: string, base?: string): string | undefined {
     const candidates = parseSrcset(value).flatMap((candidate) => {
         const url = resolveUrl(candidate.url, base);
         return url ? [{ ...candidate, url }] : [];
@@ -133,22 +127,12 @@ function resolveSrcset(value: string | undefined, base: string | undefined): str
     return candidates.length > 0 ? stringifySrcset(candidates) : undefined;
 }
 
-/**
- * Copies a tag's attributes with the given URL attributes resolved. An attribute whose URL is unsafe
- * or invalid is removed, never kept in its original form.
- */
-function withResolvedUrls(
-    attribs: Record<string, string>,
-    names: string[],
-    base: string | undefined,
-): Record<string, string> {
+/** Copies a tag's attributes with its URL attributes resolved; unsafe or invalid ones are removed. */
+function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
     const result = { ...attribs };
-    for (const name of names) {
-        if (result[name] === undefined) {
-            continue;
-        }
-
-        const resolved = name === 'srcset' ? resolveSrcset(result[name], base) : resolveUrl(result[name], base);
+    for (const name of names.filter((n) => n in result)) {
+        const resolve = name === 'srcset' ? resolveSrcset : resolveUrl;
+        const resolved = resolve(result[name]!, base);
         if (resolved) {
             result[name] = resolved;
         } else {

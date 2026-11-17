@@ -82,6 +82,10 @@ describe('sanitizeFeedHtml', () => {
         expect(out).toContain(`srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w"`);
     });
 
+    test('drops empty links instead of turning them into a link to the page itself', () => {
+        expect(sanitizeFeedHtml('<a href="">x</a><a href="   ">y</a>', BASE)).not.toContain('href');
+    });
+
     test('drops links that are not valid URLs', () => {
         expect(sanitizeFeedHtml('<a href="http://[bad">x</a>', BASE)).not.toContain('href');
     });
