@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import { FeedError } from './errors';
@@ -7,8 +8,19 @@ import { cleanText, htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 type ParsedFeed = ReturnType<typeof parseFeed>;
 type ParsedItem = ParsedFeed['items'][number];
 
+// Limits that keep one hostile or huge feed from slowing the server or bloating responses/the DB.
+// MAX_ITEMS matters most: the parser library re-scans the whole feed for every item it reads
+// (its getters aren't cached), so parse time grows with items² — 20k items took ~2 minutes.
+export const MAX_ITEMS = 500;
 export const SUMMARY_MAX = 300;
 const FALLBACK_TITLE_MAX = 80;
+const TITLE_MAX = 300;
+const AUTHOR_MAX = 200;
+const DESCRIPTION_MAX = 1_000;
+const CATEGORIES_MAX = 20;
+const CATEGORY_MAX = 100;
+const ID_MAX = 512;
+const URL_MAX = 2_048;
 
 export type NormalizeOptions = {
     /** The final URL the feed was fetched from; used for fallbacks and resolving relative links. */
@@ -41,7 +53,7 @@ function firstDate(candidates: Array<string | Date | null | undefined>, now: num
 }
 
 function safeUrl(value: string | null | undefined, base?: string): string | null {
-    if (!value) return null;
+    if (!value || value.length > URL_MAX) return null;
     try {
         const url = new URL(value.trim(), base);
         return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null;
@@ -50,14 +62,27 @@ function safeUrl(value: string | null | undefined, base?: string): string | null
     }
 }
 
-/** Small stable hash (FNV-1a, 32-bit) for synthesizing ids. */
-function hash(input: string): string {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < input.length; i++) {
-        h ^= input.charCodeAt(i);
-        h = Math.imul(h, 0x01000193);
+/** Stable short id from any string: the same input always gives the same id. */
+const hashedId = (input: string) => `urn:frontpage:${createHash('sha256').update(input).digest('hex').slice(0, 32)}`;
+
+/**
+ * Keeps the first `max` items/entries and closes the document again, so parse time stays bounded.
+ * A cheap string scan, done before the (slow-per-item) parser runs.
+ */
+export function limitItems(xml: string, max: number): { xml: string; limited: boolean } {
+    const closingTag = /<\/(item|entry)\s*>/gi;
+    let last: RegExpExecArray | null = null;
+    for (let i = 0; i < max; i++) {
+        last = closingTag.exec(xml);
+        if (!last) return { xml, limited: false };
     }
-    return (h >>> 0).toString(16).padStart(8, '0');
+    const rest = xml.slice(closingTag.lastIndex);
+    if (!last || !/<(item|entry)[\s>]/i.test(rest)) return { xml, limited: false };
+
+    const isAtom = last[1]!.toLowerCase() === 'entry';
+    const isRdf = /<rdf:RDF[\s>]/i.test(xml.slice(0, 4096));
+    const close = isAtom ? '</feed>' : isRdf ? '</rdf:RDF>' : '</channel></rss>';
+    return { xml: `${xml.slice(0, closingTag.lastIndex)}\n${close}\n`, limited: true };
 }
 
 function looksLikeHtmlPage(xml: string): boolean {
@@ -92,16 +117,16 @@ function normalizeItem(
     const contentHtml = contentHtmlRaw || descriptionHtml;
     const summary = truncate(descriptionText || contentText, SUMMARY_MAX);
 
-    const title = cleanText(item.title) || (summary ? truncate(summary, FALLBACK_TITLE_MAX) : '') || 'Untitled';
+    const title =
+        truncate(cleanText(item.title), TITLE_MAX) ||
+        (summary ? truncate(summary, FALLBACK_TITLE_MAX) : '') ||
+        'Untitled';
 
     const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), ctx.now);
     const updatedAt = firstDate(rawText(item, UPDATED_TAGS), ctx.now) ?? publishedAt;
 
-    const author =
-        item.authors
-            .map((a) => (cleanText(a.name) || cleanText(a.email)).replace(/^by\s+/i, ''))
-            .filter(Boolean)
-            .join(', ') || ctx.feedAuthor;
+    const authors = item.authors.map((a) => (cleanText(a.name) || cleanText(a.email)).replace(/^by\s+/i, ''));
+    const author = truncate(authors.filter(Boolean).join(', '), AUTHOR_MAX) || ctx.feedAuthor;
 
     const imageUrl =
         safeUrl(item.image?.url, base) ??
@@ -109,12 +134,16 @@ function normalizeItem(
         safeUrl(item.mediaImages[0]?.image, base) ??
         safeUrl(firstImageInHtml(contentHtml), base);
 
-    const categories = [
-        ...new Set(item.categories.map((c) => cleanText(c.label || c.term)).filter((c): c is string => Boolean(c))),
-    ];
+    const categoryNames = item.categories.map((c) => truncate(cleanText(c.label || c.term), CATEGORY_MAX));
+    const categories = [...new Set(categoryNames.filter(Boolean))].slice(0, CATEGORIES_MAX);
 
-    const guid = item.id?.trim();
-    const id = guid || url || `urn:frontpage:${hash(`${title}|${publishedAt ?? ''}|${ctx.index}`)}`;
+    // guid → link → hash of title/date/position. Overlong ids are hashed so they stay usable as keys.
+    const natural = item.id?.trim() || url;
+    const id = natural
+        ? natural.length <= ID_MAX
+            ? natural
+            : hashedId(natural)
+        : hashedId(`${title}|${publishedAt ?? ''}|${ctx.index}`);
 
     return {
         id,
@@ -146,9 +175,13 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
         throw new FeedError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
     }
 
+    const limited = limitItems(text, MAX_ITEMS);
+    if (limited.limited)
+        warnings.push(`The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`);
+
     let feed: ParsedFeed;
     try {
-        feed = parseFeed(text);
+        feed = parseFeed(limited.xml);
     } catch (err) {
         if ((err as { code?: string })?.code === 'INVALID_FEED') {
             throw new FeedError('not_a_feed', 'No RSS or Atom feed was found at this URL');
@@ -160,10 +193,13 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     const feedUrl = opts.url;
     const siteUrl = safeUrl(feed.url, feedUrl) ?? new URL('/', feedUrl).href;
     const feedAuthor =
-        feed.authors
-            .map((a) => cleanText(a.name))
-            .filter(Boolean)
-            .join(', ') || null;
+        truncate(
+            feed.authors
+                .map((a) => cleanText(a.name))
+                .filter(Boolean)
+                .join(', '),
+            AUTHOR_MAX,
+        ) || null;
 
     const seen = new Set<string>();
     const items: NormalizedItem[] = [];
@@ -209,8 +245,8 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
         url: feedUrl,
         requestedUrl: opts.requestedUrl ?? feedUrl,
         format,
-        title: cleanText(feed.title) || hostname,
-        description: htmlToText(feed.description) || null,
+        title: truncate(cleanText(feed.title), TITLE_MAX) || hostname,
+        description: htmlToText(feed.description, DESCRIPTION_MAX) || null,
         siteUrl,
         imageUrl: safeUrl(feed.image?.url, siteUrl),
         language: feed.language?.trim() || null,

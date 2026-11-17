@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { NormalizedFeed } from '@frontpage/shared';
-import { FeedError, decodeFeed, normalizeFeed } from '../../../src/lib/feed';
+import { FeedError, MAX_ITEMS, decodeFeed, limitItems, normalizeFeed } from '../../../src/lib/feed';
 import { curatedFixtures, readFixture } from '../../helpers/fixtures';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');
@@ -241,6 +241,72 @@ describe('broken and odd feeds', () => {
         expect(normalizeFeed(xml, { url: FEED_URL }).requestedUrl).toBe(FEED_URL);
         expect(normalizeFeed(xml, { url: FEED_URL, requestedUrl: 'http://old.example/rss' }).requestedUrl).toBe(
             'http://old.example/rss',
+        );
+    });
+});
+
+describe('limits against hostile or huge feeds', () => {
+    const rss = (items: string) => `<rss version="2.0"><channel><title>t</title>${items}</channel></rss>`;
+    const rssItems = (n: number) =>
+        rss(
+            Array.from({ length: n }, (_, i) => `<item><title>t${i}</title><link>https://e.x/${i}</link></item>`).join(
+                '',
+            ),
+        );
+
+    test('a feed with thousands of items is cut to MAX_ITEMS quickly', () => {
+        // Without the cap this took ~5 s for 4,000 items and ~2 min for 20,000 (the parser is O(items²)).
+        const started = performance.now();
+        const feed = normalizeFeed(rssItems(20_000), { url: FEED_URL, now: NOW });
+        expect(performance.now() - started).toBeLessThan(2_000);
+        expect(feed.items).toHaveLength(MAX_ITEMS);
+        expect(feed.items[0]?.title).toBe('t0');
+        expect(feed.warnings).toContain(
+            `The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`,
+        );
+        expect(feed.warnings.join(' ')).not.toContain('malformed');
+    });
+
+    test('feeds at or under the limit are untouched', () => {
+        const xml = rssItems(MAX_ITEMS);
+        expect(limitItems(xml, MAX_ITEMS)).toEqual({ xml, limited: false });
+    });
+
+    test.each([
+        ['RSS 2.0', rss('<item>1</item><item>2</item><item>3</item>'), '</channel></rss>'],
+        [
+            'Atom',
+            '<feed xmlns="http://www.w3.org/2005/Atom"><entry>1</entry><entry>2</entry><entry>3</entry></feed>',
+            '</feed>',
+        ],
+        ['RSS 1.0', '<rdf:RDF><channel/><item>1</item><item>2</item><item>3</item></rdf:RDF>', '</rdf:RDF>'],
+    ])('limitItems keeps the first items of %s and closes the document', (_format, xml, closing) => {
+        const result = limitItems(xml, 2);
+        expect(result.limited).toBe(true);
+        expect(result.xml).toContain('2</');
+        expect(result.xml).not.toContain('>3<');
+        expect(result.xml.trim().endsWith(closing)).toBe(true);
+    });
+
+    test('oversized fields are capped and overlong ids are hashed', () => {
+        const categories = Array.from({ length: 50 }, (_, i) => `<category>${i} ${'c'.repeat(500)}</category>`).join(
+            '',
+        );
+        const feed = normalizeFeed(
+            rss(`<item><title>${'A'.repeat(1e6)}</title><guid>${'g'.repeat(1e6)}</guid>${categories}</item>`),
+            { url: FEED_URL, now: NOW },
+        );
+        const item = feed.items[0]!;
+        expect(item.title.length).toBeLessThanOrEqual(300);
+        expect(item.id).toMatch(/^urn:frontpage:[0-9a-f]{32}$/);
+        expect(item.categories).toHaveLength(20);
+        expect(item.categories.every((c) => c.length <= 100)).toBe(true);
+    });
+
+    test('hashed ids are stable across fetches', () => {
+        const xml = rss(`<item><guid>${'g'.repeat(1_000)}</guid></item>`);
+        expect(normalizeFeed(xml, { url: FEED_URL }).items[0]?.id).toBe(
+            normalizeFeed(xml, { url: FEED_URL }).items[0]?.id,
         );
     });
 });
