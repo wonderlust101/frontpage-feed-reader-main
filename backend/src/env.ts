@@ -1,6 +1,7 @@
 // Typed access to environment variables. Each one is documented in backend/.env.example.
 
 const optional = (value: string | undefined) => value?.trim() || undefined;
+/** Parses an integer env var, falling back when it's missing or not a number. */
 const int = (value: string | undefined, fallback: number) => {
     const n = Number.parseInt(value ?? '', 10);
     return Number.isFinite(n) ? n : fallback;
@@ -26,9 +27,7 @@ export const env = {
     FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? 'Frontpage/0.1 (RSS reader)',
     FEED_MAX_CONCURRENCY: int(process.env.FEED_MAX_CONCURRENCY, 5),
     FEED_MIN_REFETCH_MINUTES: int(process.env.FEED_MIN_REFETCH_MINUTES, 15),
-    // Tests only: allow feeds on 127.0.0.1 / ::1. Other private ranges are always refused (SSRF guard).
     FEED_ALLOW_LOOPBACK: process.env.FEED_ALLOW_LOOPBACK === 'true',
 
-    // Background refresh of all feeds; 0 disables it.
     FEED_REFRESH_INTERVAL_MINUTES: int(process.env.FEED_REFRESH_INTERVAL_MINUTES, 30),
 };

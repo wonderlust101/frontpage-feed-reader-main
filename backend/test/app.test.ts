@@ -1,4 +1,5 @@
 // App-wide middleware (CORS, JSON 404, error handler). Route-specific tests live under modules/.
+
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { startTestServer } from './helpers/test-server';
 

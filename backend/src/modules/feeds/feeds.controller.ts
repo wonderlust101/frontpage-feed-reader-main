@@ -1,10 +1,10 @@
 // HTTP in/out for /api/fetch: read the request, call the service, shape the response.
 // No error handling here: thrown errors become JSON in middleware/error-handler.ts.
+
 import type { Request, Response } from 'express';
 import type { FeedCacheValidators, FetchFeedResponse } from '@frontpage/shared';
 import { getFeed } from './feeds.service';
 
-/** How long browsers/CDNs may reuse a fetched feed before asking again. */
 const CACHE_CONTROL = 'public, max-age=300';
 
 /** Reads `?url=`; anything but a single string (missing, repeated) becomes undefined → 400 in the service. */
@@ -20,6 +20,7 @@ function readValidators(req: Request): FeedCacheValidators {
     };
 }
 
+/** Sends the feed with its caching headers. */
 function sendFeed(res: Response, result: FetchFeedResponse) {
     if (result.cache.etag) {
         res.set('ETag', result.cache.etag);

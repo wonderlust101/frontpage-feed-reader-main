@@ -70,7 +70,6 @@ export function startFeedServer() {
                         headers: { ...xml, 'Content-Encoding': 'br' },
                     });
                 case '/zip-bomb':
-                    // ~2 KB on the wire, 8 MB once decompressed.
                     return new Response(zlib.gzipSync(new Uint8Array(8 * 1024 * 1024).fill(32)), {
                         headers: { ...xml, 'Content-Encoding': 'gzip' },
                     });

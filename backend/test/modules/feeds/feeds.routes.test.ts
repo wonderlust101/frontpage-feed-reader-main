@@ -63,7 +63,6 @@ describe('GET /api/fetch', () => {
         const firstBody = (await first.json()) as FetchFeedResponse;
         expect(firstBody.cache).toEqual({ etag: ETAG, lastModified: LAST_MODIFIED });
 
-        // No client validators: the server sends the remembered ones and serves the cached feed on 304.
         const second = await fetchApi(`${upstream.url}/cached.xml`);
         expect(second.status).toBe(200);
         const secondBody = (await second.json()) as FetchFeedResponse;
@@ -90,7 +89,6 @@ describe('GET /api/fetch', () => {
         const res = await fetchApi(`${upstream.url}/cached.xml`, { headers: { 'If-None-Match': ETAG } });
         // Two upstream requests: the conditional one (304) and the full refetch.
         expect((upstream.hits['/cached.xml'] ?? 0) - before).toBe(2);
-        // The client's copy is still current, so it gets a 304 itself.
         expect(res.status).toBe(304);
     });
 

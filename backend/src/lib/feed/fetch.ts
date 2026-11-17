@@ -1,6 +1,7 @@
 // Downloads one feed safely: 10s timeout, manual redirects, ETag/Last-Modified, decompression, size cap.
 // SSRF: request-filtering-agent checks the IP of every connection actually opened (each redirect hop too),
 // so a hostname can't pass a check and then connect to a private address (DNS rebinding).
+
 import http, { type IncomingMessage } from 'node:http';
 import https from 'node:https';
 import { pipeline, type Readable } from 'node:stream';
@@ -14,7 +15,6 @@ export type FetchFeedOptions = Partial<FeedCacheValidators> & {
     userAgent?: string;
     maxRedirects?: number;
     maxBytes?: number;
-    /** Tests only: allow 127.0.0.1 and ::1. Every other private range stays blocked. */
     allowLoopback?: boolean;
 };
 
@@ -56,13 +56,12 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     return url;
 }
 
-// SSRF-safe agents, created once and reused across fetches (keep-alive).
-
 type Agents = { http: http.Agent; https: https.Agent };
 const LOOPBACK = ['127.0.0.1', '::1'];
 let publicAgents: Agents | undefined;
 let loopbackAgents: Agents | undefined;
 
+/** Agents that refuse private IPs, except the ones in `allowIPAddressList`. */
 function createAgents(allowIPAddressList: string[]): Agents {
     return {
         http: new RequestFilteringHttpAgent({ keepAlive: true, allowIPAddressList }),
@@ -70,6 +69,7 @@ function createAgents(allowIPAddressList: string[]): Agents {
     };
 }
 
+/** SSRF-safe agents, created once and reused across fetches (keep-alive). */
 function agentsFor(allowLoopback: boolean): Agents {
     return allowLoopback ? (loopbackAgents ??= createAgents(LOOPBACK)) : (publicAgents ??= createAgents([]));
 }
@@ -87,6 +87,7 @@ function request(url: URL, headers: Record<string, string>, agents: Agents, sign
     });
 }
 
+/** A response header as one string (Node returns some as arrays). */
 const header = (res: IncomingMessage, name: string): string | null => {
     const value = res.headers[name];
     return (Array.isArray(value) ? value[0] : value) ?? null;
@@ -129,6 +130,7 @@ async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Ar
     return new Uint8Array(Buffer.concat(chunks, total));
 }
 
+/** True when the request was cancelled by our timeout. */
 function isAbort(err: unknown): boolean {
     return err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
 }
@@ -180,7 +182,6 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
                 if (next.protocol !== 'http:' && next.protocol !== 'https:') {
                     throw new FeedError('blocked_url', 'Redirected to an unsupported protocol');
                 }
-                // Same rule as the first URL: no user:pass@ (node:http would send it as an Authorization header).
                 if (next.username || next.password) {
                     throw new FeedError('blocked_url', 'Redirected to a URL with credentials');
                 }

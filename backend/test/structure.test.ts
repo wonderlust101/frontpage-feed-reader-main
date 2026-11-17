@@ -1,5 +1,6 @@
 // Guards the layout described in test/README.md so the test folder can't quietly drift.
 // If this fails, move/rename the file it names (or update the README and this test together).
+
 import { describe, expect, test } from 'bun:test';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -8,9 +9,7 @@ const TEST_DIR = import.meta.dir;
 const SRC_DIR = join(TEST_DIR, '../src');
 const FIXTURES_DIR = join(TEST_DIR, 'fixtures/feeds');
 
-/** Root-level files that are allowed even though they don't mirror a src file. */
 const ROOT_EXCEPTIONS = new Set(['setup.ts', 'README.md', 'structure.test.ts']);
-/** Top-level folders with a special role (everything else must mirror src/). */
 const SPECIAL_DIRS = new Set(['helpers', 'fixtures', 'live']);
 
 function walk(dir: string): string[] {

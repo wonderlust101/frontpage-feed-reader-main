@@ -60,7 +60,6 @@ function expectCleanFeed(feed: NormalizedFeed) {
         expect(Array.isArray(item.categories)).toBe(true);
     }
 
-    // Newest first.
     const dates = feed.items.map((i) => i.publishedAt!);
     expect([...dates].sort().reverse()).toEqual(dates);
 }
@@ -156,11 +155,9 @@ describe('broken and odd feeds', () => {
         ]) {
             expect(byKey[key]).toBe('2024-10-02T15:00:00.000Z');
         }
-        // Not guessed: unsupported format, nonsense, and an impossible calendar date.
         for (const key of ['month-first', 'garbage', 'impossible']) {
             expect(byKey[key]).toBeNull();
         }
-        // Undated items go last, in feed order.
         expect(feed.items.slice(-3).map((i) => i.title)).toEqual([
             'Date month-first',
             'Date garbage',
@@ -257,7 +254,6 @@ describe('limits against hostile or huge feeds', () => {
         );
 
     test('a feed with thousands of items is cut to MAX_ITEMS quickly', () => {
-        // Without the cap this took ~5 s for 4,000 items and ~2 min for 20,000 (the parser is O(items²)).
         const started = performance.now();
         const feed = normalizeFeed(rssItems(20_000), { url: FEED_URL, now: NOW });
         expect(performance.now() - started).toBeLessThan(2_000);

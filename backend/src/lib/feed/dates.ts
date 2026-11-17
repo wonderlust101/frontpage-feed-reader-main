@@ -1,19 +1,15 @@
 // Parses feed dates (RFC 822 for RSS, ISO 8601 for Atom) into ISO 8601 UTC strings.
-// Unrecognized formats or zones return null: we never guess a date.
-
-/** Date Patterns **/
+// Unknown formats and ambiguous zone names (IST, BST, AST…) return null: we never guess a date.
 
 /** Builds one regex from commented pieces, so each part of the format can be read on its own line. */
 const pattern = (...parts: RegExp[]) => new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
 
-/** ISO 8601 / RFC 3339: `2024-10-02T15:00:00.123Z`, `2024-10-02 15:00:00`, `2024-10-02`. */
 const ISO = pattern(
     /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/, // 2024-10-02
     /(?:[T ](?<hour>\d{2}):(?<minute>\d{2})(?::(?<second>\d{2})(?:\.(?<fraction>\d+))?)?)?/, // T15:00:00.123 (optional; seconds optional)
     /\s*(?<zone>Z|[+-]\d{2}(?::?\d{2})?)?/, // Z / +02:00 / +05 (optional)
 );
 
-/** RFC 822 / 2822: `Wed, 02 Oct 2024 15:00:00 GMT`, plus the variants the RFC allows. */
 const RFC822 = pattern(
     /(?:[a-z]+,?\s*)?/, // Wed, (optional day name)
     /(?<day>\d{1,2})\s+/, // 2 / 02
@@ -38,26 +34,15 @@ const MONTHS = [
     'december',
 ];
 
-/**
- * Hours from UTC for zone names with only one meaning. Ambiguous ones (IST, BST, AST…) are left out,
- * so they return null instead of a wrong time. CST and MST are the US zones, as RFC 822 defines them.
- */
 // prettier-ignore
 const ZONES: Record<string, number> = {
-    // RFC 822 and universal
     UT: 0, UTC: 0, GMT: 0, Z: 0,
-    // North America (EST…PDT are RFC 822's own)
     EST: -5, EDT: -4, CST: -6, CDT: -5, MST: -7, MDT: -6, PST: -8, PDT: -7,
     AKST: -9, AKDT: -8, HST: -10, NST: -3.5, NDT: -2.5,
-    // South America
     BRT: -3, ART: -3,
-    // Europe
     WET: 0, WEST: 1, CET: 1, CEST: 2, EET: 2, EEST: 3, MSK: 3,
-    // Africa
     WAT: 1, CAT: 2, SAST: 2, EAT: 3,
-    // Asia
     PKT: 5, NPT: 5.75, WIB: 7, HKT: 8, SGT: 8, JST: 9, KST: 9,
-    // Australia and New Zealand
     AWST: 8, ACST: 9.5, ACDT: 10.5, AEST: 10, AEDT: 11, NZST: 12, NZDT: 13,
 };
 
@@ -71,10 +56,9 @@ type DateParts = {
     millisecond: number;
 };
 
+const MAX_OFFSET_HOURS = 14;
 const MIN_TIME = Date.UTC(1995, 0, 1);
 const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
-
-/** Date Parsing **/
 
 /** "10" → 10; "Oct", "Sept", "October" → 10/9/10. Needs at least 3 letters of a real month name ("Octopus" fails). */
 function toMonth(value: string): number | undefined {
@@ -119,8 +103,8 @@ function toOffsetMinutes(zone: string | undefined): number | undefined {
 
     const hours = Number(numeric[2]);
     const extraMinutes = Number(numeric[3] ?? 0);
-    if (hours > 14 || extraMinutes > 59) {
-        return undefined; // real offsets run from -12:00 to +14:00
+    if (hours > MAX_OFFSET_HOURS || extraMinutes > 59) {
+        return undefined;
     }
 
     const minutes = hours * 60 + extraMinutes;

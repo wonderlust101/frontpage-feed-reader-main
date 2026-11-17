@@ -1,6 +1,7 @@
 // Downloads the curated feeds from data/sample-feeds.json into test/fixtures/feeds/curated/
 // so tests run offline. Large feeds are trimmed to their first 10 items.
 // Usage: bun run fixtures:feeds
+
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { env } from '../env';
@@ -13,6 +14,7 @@ const OUT_DIR = join(import.meta.dir, '../../test/fixtures/feeds/curated');
 const MAX_BYTES = 150 * 1024;
 const MAX_ITEMS = 10;
 
+/** "Simon Willison's Weblog" → "simon-willison-s-weblog" (used as the fixture file name). */
 function slugify(title: string): string {
     return title
         .toLowerCase()
@@ -34,8 +36,7 @@ for (const feed of feeds) {
         }
         let bytes = res.bytes;
         if (bytes.byteLength > MAX_BYTES) {
-            // Node's latin1 round-trips bytes 1:1 (TextDecoder's "latin1" is really windows-1252 and
-            // does not), so trimming never corrupts multibyte characters.
+            // Node's latin1 maps bytes 1:1 (TextDecoder's "latin1" doesn't), so trimming can't corrupt characters.
             const latin1 = Buffer.from(bytes).toString('latin1');
             bytes = new Uint8Array(Buffer.from(limitItems(latin1, MAX_ITEMS).xml, 'latin1'));
         }

@@ -3,7 +3,6 @@
 
 export type AppErrorOptions = {
     retryable?: boolean;
-    /** Extra fields merged into the JSON `error` object (must be JSON-safe). */
     details?: Record<string, unknown>;
 };
 

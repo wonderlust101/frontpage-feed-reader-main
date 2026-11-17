@@ -1,4 +1,6 @@
-// Postgres access through Drizzle. Without DATABASE_URL, `db` is null and the API runs without a database.
+// Postgres through Drizzle: one connection pool for the server's lifetime, using Neon's pooled DATABASE_URL.
+// Without DATABASE_URL, `db` is null and the API runs without a database.
+
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
@@ -6,10 +8,6 @@ import { env } from '../env';
 import * as schema from './schema';
 import type { DbStatus } from '@frontpage/shared';
 
-/**
- * One connection pool, reused for the server's whole lifetime. DATABASE_URL is Neon's pooled URL
- * (host contains "-pooler"); migrations use the direct URL instead (see drizzle.config.ts).
- */
 export const pool = env.DATABASE_URL
     ? new Pool({
           connectionString: env.DATABASE_URL,
@@ -19,14 +17,14 @@ export const pool = env.DATABASE_URL
       })
     : null;
 
-/** Neon can drop an idle connection (e.g. when compute suspends): log it instead of crashing; the pool reconnects. */
+// Neon can drop idle connections (e.g. when compute suspends): log it instead of crashing; the pool reconnects.
 pool?.on('error', (err) => {
     console.error('Postgres pool error:', err.message);
 });
 
-/** `null` when DATABASE_URL isn't configured — the API still runs without a DB. */
 export const db = pool ? drizzle({ client: pool, schema }) : null;
 
+/** Runs a trivial query to report whether the database is reachable. */
 export async function checkDatabase(): Promise<{ status: DbStatus; error?: string }> {
     if (!db) {
         return { status: 'skipped' };

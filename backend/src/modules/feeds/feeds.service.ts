@@ -1,3 +1,6 @@
+// Fetches feeds for the API. Keeps the last good result per URL in a small LRU cache (a Map in use order),
+// so an upstream 304 "not modified" can still be answered with a feed.
+
 import type { FeedCacheValidators, FetchFeedResponse, NormalizedFeed } from '@frontpage/shared';
 import { env } from '../../env';
 import { FeedError, decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl } from '../../lib/feed';
@@ -5,9 +8,9 @@ import { FeedError, decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl } from '.
 type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
 
 const CACHE_LIMIT = 200;
-/** Last good result per URL, so a 304 from upstream can still be answered with a feed. LRU via Map order. */
 const cache = new Map<string, CacheEntry>();
 
+/** Stores an entry as the most recently used, evicting the oldest past CACHE_LIMIT. */
 function remember(key: string, entry: CacheEntry) {
     cache.delete(key);
     cache.set(key, entry);
@@ -16,6 +19,7 @@ function remember(key: string, entry: CacheEntry) {
     }
 }
 
+/** Reads an entry and marks it as recently used. */
 function recall(key: string): CacheEntry | undefined {
     const entry = cache.get(key);
     if (entry) {
@@ -24,6 +28,7 @@ function recall(key: string): CacheEntry | undefined {
     return entry;
 }
 
+/** Empties the cache (used between tests). */
 export function clearFeedCache() {
     cache.clear();
 }

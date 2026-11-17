@@ -1,12 +1,11 @@
-// Makes untrusted feed HTML safe to render (allowlisted tags, attributes and URL schemes),
-// and turns HTML into plain text for titles and summaries.
+// Makes untrusted feed HTML safe to render: allowlisted tags, attributes and URL schemes, and sandboxed
+// embeds that can't navigate our page. Also turns HTML into plain text for titles and summaries.
+
 import sanitize from 'sanitize-html';
 import { decode } from 'html-entities';
 import { parseSrcset, stringifySrcset } from 'srcset';
 
-// Semantic HTML only. Anything not listed (script, style, form, svg, object, …) is removed.
 const ALLOWED_TAGS = [
-    // Structure
     'p',
     'br',
     'hr',
@@ -17,7 +16,6 @@ const ALLOWED_TAGS = [
     'aside',
     'details',
     'summary',
-    // Text
     'h1',
     'h2',
     'h3',
@@ -36,7 +34,6 @@ const ALLOWED_TAGS = [
     'cite',
     'abbr',
     'time',
-    // Inline
     'em',
     'strong',
     'b',
@@ -54,7 +51,6 @@ const ALLOWED_TAGS = [
     'kbd',
     'samp',
     'var',
-    // Media
     'figure',
     'figcaption',
     'picture',
@@ -64,7 +60,6 @@ const ALLOWED_TAGS = [
     'audio',
     'track',
     'iframe',
-    // Tables
     'table',
     'caption',
     'thead',
@@ -77,7 +72,6 @@ const ALLOWED_TAGS = [
     'col',
 ];
 
-/** iframes are only kept for these video/code-demo hosts, and always sandboxed (see IFRAME_SANDBOX). */
 const EMBED_HOSTS = [
     'www.youtube.com',
     'youtube.com',
@@ -87,10 +81,8 @@ const EMBED_HOSTS = [
     'codesandbox.io',
 ];
 
-/** Embeds may run their own scripts and open new tabs, but never navigate our page or submit forms. */
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 
-/** The only URL schemes kept in links and media. Everything else is dropped. */
 const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
 /**
@@ -107,7 +99,7 @@ function resolveUrl(value: string, base?: string): string | undefined {
         const url = new URL(trimmed, base);
         return SAFE_PROTOCOLS.has(url.protocol) ? url.href : undefined;
     } catch {
-        return undefined; // not a URL, or a relative URL with no base to resolve it against
+        return undefined;
     }
 }
 
@@ -127,9 +119,11 @@ function resolveSrcset(value: string, base?: string): string | undefined {
 /** Copies a tag's attributes with its URL attributes resolved; unsafe or invalid ones are removed. */
 function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
     const result = { ...attribs };
+
     for (const name of names.filter((n) => n in result)) {
         const resolve = name === 'srcset' ? resolveSrcset : resolveUrl;
         const resolved = resolve(result[name]!, base);
+
         if (resolved) {
             result[name] = resolved;
         } else {
@@ -208,22 +202,26 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
     if (!html) {
         return '';
     }
+
     // Block-level boundaries become spaces so "<p>a</p><p>b</p>" reads "a b", not "ab".
     const spaced = html.replace(
         /<(?:br|hr)\b[^>]*>|<\/(?:p|div|li|h[1-6]|blockquote|tr|td|th|dd|dt|pre|figure)>/gi,
         '$& ',
     );
+
     const stripped = sanitize(spaced, {
         allowedTags: [],
         allowedAttributes: {},
         nonTextTags: ['script', 'style', 'textarea', 'option', 'noscript', 'template', 'title', 'head', 'figcaption'],
     });
+
     // Decode twice to fix double-encoded entities like "&amp;amp;" that some feeds emit.
     let text = decode(decode(stripped));
     text = text
         .replace(/\s+/g, ' ')
         .replace(/\s+([.,;:!?)])/g, '$1')
         .trim();
+
     return max ? truncate(text, max) : text;
 }
 
@@ -232,8 +230,10 @@ export function truncate(text: string, max: number): string {
     if (text.length <= max) {
         return text;
     }
+
     // Emoji and other astral characters are two UTF-16 units; don't keep only the first half.
     const cut = text.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '');
     const space = cut.lastIndexOf(' ');
+
     return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, '')}…`;
 }

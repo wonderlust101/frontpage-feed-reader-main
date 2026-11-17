@@ -1,7 +1,9 @@
+// Feed error codes, with the HTTP status and retryability each is reported with.
+// 502/504 mean the feed's own server failed, not our API.
+
 import type { FeedErrorCode } from '@frontpage/shared';
 import { AppError } from '../errors';
 
-/** How each feed error is reported. 502/504 mean the feed's own server failed, not our API. */
 export const FEED_ERRORS: Record<FeedErrorCode, { httpStatus: number; retryable: boolean }> = {
     invalid_url: { httpStatus: 400, retryable: false },
     blocked_url: { httpStatus: 400, retryable: false },
@@ -17,7 +19,6 @@ export const FEED_ERRORS: Record<FeedErrorCode, { httpStatus: number; retryable:
 /** A feed failure: its code, the HTTP status to answer with, and whether a retry might help. */
 export class FeedError extends AppError {
     declare readonly code: FeedErrorCode;
-    /** The status the feed's own server returned, when there was one (sent to clients as `status`). */
     readonly upstreamStatus: number | undefined;
 
     constructor(code: FeedErrorCode, message: string, opts: { upstreamStatus?: number; retryable?: boolean } = {}) {

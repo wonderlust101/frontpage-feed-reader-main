@@ -135,32 +135,29 @@ describe('SSRF protection', () => {
         await expectError(fetchFeed('http://169.254.169.254/latest/meta-data'), 'blocked_url');
     });
 
-    // Each address is rejected by request-filtering-agent before any connection is attempted,
-    // so these run offline and instantly. (Public addresses are covered by the live tests.)
     test.each([
-        '127.0.0.1',
-        '10.1.2.3',
-        '172.16.0.1',
-        '192.168.1.1',
-        '169.254.169.254', // cloud metadata
-        '100.64.0.1', // CGNAT
-        '0.0.0.0',
-        '224.0.0.1', // multicast
-        '192.0.2.1', // documentation (TEST-NET-1)
-        '198.51.100.1', // documentation (TEST-NET-2)
-        '[::1]',
-        '[fd00::1]',
-        '[fe80::1]',
-        '[::ffff:127.0.0.1]', // IPv4-mapped loopback
-        '[::ffff:10.0.0.1]', // IPv4-mapped private
-        '[2001:db8::1]', // IPv6 documentation
-        '[64:ff9b::7f00:1]', // NAT64 form of 127.0.0.1
-    ])('blocks %s', async (host) => {
+        ['loopback', '127.0.0.1'],
+        ['private 10.x', '10.1.2.3'],
+        ['private 172.16.x', '172.16.0.1'],
+        ['private 192.168.x', '192.168.1.1'],
+        ['cloud metadata', '169.254.169.254'],
+        ['carrier-grade NAT', '100.64.0.1'],
+        ['unspecified', '0.0.0.0'],
+        ['multicast', '224.0.0.1'],
+        ['documentation range 1', '192.0.2.1'],
+        ['documentation range 2', '198.51.100.1'],
+        ['IPv6 loopback', '[::1]'],
+        ['IPv6 private', '[fd00::1]'],
+        ['IPv6 link-local', '[fe80::1]'],
+        ['IPv4-mapped loopback', '[::ffff:127.0.0.1]'],
+        ['IPv4-mapped private', '[::ffff:10.0.0.1]'],
+        ['IPv6 documentation range', '[2001:db8::1]'],
+        ['NAT64 form of 127.0.0.1', '[64:ff9b::7f00:1]'],
+    ])('blocks %s (%s)', async (_label, host) => {
         await expectError(fetchFeed(`http://${host}/feed.xml`, { timeoutMs: 2_000 }), 'blocked_url', false);
     });
 
     test('checks every redirect hop, not just the first URL', async () => {
-        // Loopback is allowed for the test server, but its redirect to 10.0.0.1 must still be refused.
         await expectError(fetchFeed(`${upstream.url}/redirect-to-private`, opts), 'blocked_url', false);
     });
 

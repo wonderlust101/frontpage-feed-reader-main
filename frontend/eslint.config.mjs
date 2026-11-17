@@ -1,3 +1,5 @@
+// ESLint for the frontend: Next.js rules plus `curly` (every if/else/loop body needs braces).
+
 import { defineConfig, globalIgnores } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
@@ -7,18 +9,10 @@ const eslintConfig = defineConfig([
     ...nextTs,
     {
         rules: {
-            // Every if/else/for/while body gets braces, so Prettier always puts it on its own line.
             curly: ['error', 'all'],
         },
     },
-    // Override default ignores of eslint-config-next.
-    globalIgnores([
-        // Default ignores of eslint-config-next:
-        '.next/**',
-        'out/**',
-        'build/**',
-        'next-env.d.ts',
-    ]),
+    globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
 ]);
 
 export default eslintConfig;

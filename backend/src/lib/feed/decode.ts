@@ -1,5 +1,6 @@
 // Turns raw feed bytes into text. XML may use any encoding (res.text() always assumes UTF-8), so it's
 // detected the way browsers do it: BOM → Content-Type charset → <?xml encoding="…"?> → UTF-8.
+
 import { decodeBuffer, getEncoding, type SnifferOptions } from 'encoding-sniffer';
 
 /** The sniffer takes a bare charset label, so pull `charset=…` out of the Content-Type header. */
