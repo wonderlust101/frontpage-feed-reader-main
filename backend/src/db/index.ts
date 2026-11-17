@@ -28,7 +28,9 @@ pool?.on('error', (err) => {
 export const db = pool ? drizzle({ client: pool, schema }) : null;
 
 export async function checkDatabase(): Promise<{ status: DbStatus; error?: string }> {
-    if (!db) return { status: 'skipped' };
+    if (!db) {
+        return { status: 'skipped' };
+    }
     try {
         await db.execute(sql`select 1`);
         return { status: 'connected' };

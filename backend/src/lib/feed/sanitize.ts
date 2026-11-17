@@ -27,10 +27,16 @@ const EMBED_HOSTS = [
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 
 function absolute(value: string | undefined, base: string | undefined): string | undefined {
-    if (!value) return value;
+    if (!value) {
+        return value;
+    }
     const trimmed = value.trim();
-    if (/^(?:javascript|vbscript|data):/i.test(trimmed.replace(/[\s\u0000-\u001f]/g, ''))) return undefined;
-    if (!base) return trimmed;
+    if (/^(?:javascript|vbscript|data):/i.test(trimmed.replace(/[\s\u0000-\u001f]/g, ''))) {
+        return undefined;
+    }
+    if (!base) {
+        return trimmed;
+    }
     try {
         return new URL(trimmed, base).href;
     } catch {
@@ -39,7 +45,9 @@ function absolute(value: string | undefined, base: string | undefined): string |
 }
 
 function absoluteSrcset(value: string | undefined, base: string | undefined): string | undefined {
-    if (!value) return value;
+    if (!value) {
+        return value;
+    }
     return value
         .split(',')
         .map((part) => {
@@ -56,7 +64,9 @@ function absoluteSrcset(value: string | undefined, base: string | undefined): st
  * and dangerous URLs, resolves relative links and images against `baseUrl`.
  */
 export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: string): string {
-    if (!html) return '';
+    if (!html) {
+        return '';
+    }
     return sanitize(html, {
         allowedTags: ALLOWED_TAGS,
         allowedAttributes: {
@@ -138,7 +148,9 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
 
 /** Converts (possibly unsafe) HTML to plain text, decoding entities and collapsing whitespace. */
 export function htmlToText(html: string | null | undefined, max?: number): string {
-    if (!html) return '';
+    if (!html) {
+        return '';
+    }
     // Block-level boundaries become spaces so "<p>a</p><p>b</p>" reads "a b", not "ab".
     const spaced = html.replace(
         /<(?:br|hr)\b[^>]*>|<\/(?:p|div|li|h[1-6]|blockquote|tr|td|th|dd|dt|pre|figure)>/gi,
@@ -160,7 +172,9 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
 
 /** Truncates at a word boundary, adding an ellipsis. Result length is ≤ max. Never splits an emoji in half. */
 export function truncate(text: string, max: number): string {
-    if (text.length <= max) return text;
+    if (text.length <= max) {
+        return text;
+    }
     // Emoji and other astral characters are two UTF-16 units; don't keep only the first half.
     const cut = text.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '');
     const space = cut.lastIndexOf(' ');

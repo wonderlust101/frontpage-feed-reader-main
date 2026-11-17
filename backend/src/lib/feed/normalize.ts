@@ -39,7 +39,9 @@ const UPDATED_TAGS = ['updated', 'modified', 'date'];
 function rawText(item: ParsedItem, tags: string[]): string[] {
     const out: string[] = [];
     for (const tag of tags) {
-        for (const el of item.element.findElementsWithName(tag)) out.push(el.textContent);
+        for (const el of item.element.findElementsWithName(tag)) {
+            out.push(el.textContent);
+        }
     }
     return out;
 }
@@ -47,13 +49,17 @@ function rawText(item: ParsedItem, tags: string[]): string[] {
 function firstDate(candidates: Array<string | Date | null | undefined>, now: number): string | null {
     for (const c of candidates) {
         const iso = c instanceof Date ? parseFeedDate(c.toISOString(), now) : parseFeedDate(c, now);
-        if (iso) return iso;
+        if (iso) {
+            return iso;
+        }
     }
     return null;
 }
 
 function safeUrl(value: string | null | undefined, base?: string): string | null {
-    if (!value || value.length > URL_MAX) return null;
+    if (!value || value.length > URL_MAX) {
+        return null;
+    }
     try {
         const url = new URL(value.trim(), base);
         return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null;
@@ -74,10 +80,14 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
     let last: RegExpExecArray | null = null;
     for (let i = 0; i < max; i++) {
         last = closingTag.exec(xml);
-        if (!last) return { xml, limited: false };
+        if (!last) {
+            return { xml, limited: false };
+        }
     }
     const rest = xml.slice(closingTag.lastIndex);
-    if (!last || !/<(item|entry)[\s>]/i.test(rest)) return { xml, limited: false };
+    if (!last || !/<(item|entry)[\s>]/i.test(rest)) {
+        return { xml, limited: false };
+    }
 
     const isAtom = last[1]!.toLowerCase() === 'entry';
     const isRdf = /<rdf:RDF[\s>]/i.test(xml.slice(0, 4096));
@@ -91,8 +101,12 @@ function looksLikeHtmlPage(xml: string): boolean {
 }
 
 function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
-    if (feed.meta.type === 'atom') return 'atom';
-    if (feed.meta.version?.startsWith('1') || /<rdf:rdf[\s>]/i.test(xml.slice(0, 4096))) return 'rss1';
+    if (feed.meta.type === 'atom') {
+        return 'atom';
+    }
+    if (feed.meta.version?.startsWith('1') || /<rdf:rdf[\s>]/i.test(xml.slice(0, 4096))) {
+        return 'rss1';
+    }
     return 'rss2';
 }
 
@@ -170,14 +184,17 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     const text = xml.replace(/^﻿/, '');
     const warnings: string[] = [];
 
-    if (!text.trim()) throw new FeedError('not_a_feed', 'The response was empty');
+    if (!text.trim()) {
+        throw new FeedError('not_a_feed', 'The response was empty');
+    }
     if (looksLikeHtmlPage(text)) {
         throw new FeedError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
     }
 
     const limited = limitItems(text, MAX_ITEMS);
-    if (limited.limited)
+    if (limited.limited) {
         warnings.push(`The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`);
+    }
 
     let feed: ParsedFeed;
     try {
@@ -220,23 +237,41 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
             return;
         }
         seen.add(item.id);
-        if (!item.publishedAt) missingDates++;
+        if (!item.publishedAt) {
+            missingDates++;
+        }
         items.push(item);
     });
 
     // Newest first; undated items keep their feed order at the end.
     items.sort((a, b) => {
-        if (a.publishedAt && b.publishedAt) return b.publishedAt.localeCompare(a.publishedAt);
-        if (a.publishedAt) return -1;
-        if (b.publishedAt) return 1;
+        if (a.publishedAt && b.publishedAt) {
+            return b.publishedAt.localeCompare(a.publishedAt);
+        }
+        if (a.publishedAt) {
+            return -1;
+        }
+        if (b.publishedAt) {
+            return 1;
+        }
         return 0;
     });
 
-    if (missingDates) warnings.push(`${missingDates} item(s) have no usable date`);
-    if (duplicates) warnings.push(`${duplicates} duplicate item(s) were removed`);
-    if (dropped) warnings.push(`${dropped} item(s) could not be read and were skipped`);
-    if (feed.items.length === 0) warnings.push('The feed has no items');
-    if (looksTruncated(text)) warnings.push('The feed XML is malformed; it was parsed partially');
+    if (missingDates) {
+        warnings.push(`${missingDates} item(s) have no usable date`);
+    }
+    if (duplicates) {
+        warnings.push(`${duplicates} duplicate item(s) were removed`);
+    }
+    if (dropped) {
+        warnings.push(`${dropped} item(s) could not be read and were skipped`);
+    }
+    if (feed.items.length === 0) {
+        warnings.push('The feed has no items');
+    }
+    if (looksTruncated(text)) {
+        warnings.push('The feed XML is malformed; it was parsed partially');
+    }
 
     const hostname = new URL(siteUrl).hostname.replace(/^www\./, '');
     const latestItem = items.find((i) => i.publishedAt)?.publishedAt ?? null;

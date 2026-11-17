@@ -36,7 +36,9 @@ describe.skipIf(!process.env.LIVE_FEEDS)('live curated feeds via GET /api/fetch'
                 expect(item.title).not.toBe('');
                 expect(item.url).toMatch(/^https?:\/\//);
                 expect(item.contentHtml).not.toMatch(/<script|\son[a-z]+=|javascript:/i);
-                if (item.publishedAt) expect(new Date(item.publishedAt).toISOString()).toBe(item.publishedAt);
+                if (item.publishedAt) {
+                    expect(new Date(item.publishedAt).toISOString()).toBe(item.publishedAt);
+                }
             }
         },
         30_000,

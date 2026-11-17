@@ -27,7 +27,9 @@ export function startFeedServer() {
                 case '/feed.xml':
                     return new Response(rss, { headers: xml });
                 case '/cached.xml':
-                    if (req.headers.get('if-none-match') === ETAG) return new Response(null, { status: 304 });
+                    if (req.headers.get('if-none-match') === ETAG) {
+                        return new Response(null, { status: 304 });
+                    }
                     return new Response(rss, { headers: { ...xml, ETag: ETAG, 'Last-Modified': LAST_MODIFIED } });
                 case '/latin1.xml':
                     return new Response(latin1, { headers: { 'Content-Type': 'text/xml; charset=ISO-8859-1' } });

@@ -5,6 +5,12 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
     ...nextVitals,
     ...nextTs,
+    {
+        rules: {
+            // Every if/else/for/while body gets braces, so Prettier always puts it on its own line.
+            curly: ['error', 'all'],
+        },
+    },
     // Override default ignores of eslint-config-next.
     globalIgnores([
         // Default ignores of eslint-config-next:

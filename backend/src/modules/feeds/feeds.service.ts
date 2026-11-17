@@ -11,12 +11,16 @@ const cache = new Map<string, CacheEntry>();
 function remember(key: string, entry: CacheEntry) {
     cache.delete(key);
     cache.set(key, entry);
-    if (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+    if (cache.size > CACHE_LIMIT) {
+        cache.delete(cache.keys().next().value!);
+    }
 }
 
 function recall(key: string): CacheEntry | undefined {
     const entry = cache.get(key);
-    if (entry) remember(key, entry);
+    if (entry) {
+        remember(key, entry);
+    }
     return entry;
 }
 
@@ -50,7 +54,9 @@ export async function getFeed(
         const entry = cached ?? recall(result.finalUrl);
         if (!entry) {
             // Upstream says "unchanged" for validators we have no feed for; refetch unconditionally.
-            if (clientSent) return getFeed(input, {});
+            if (clientSent) {
+                return getFeed(input, {});
+            }
             throw new FeedError('http_5xx', 'The feed server answered 304 without a cached copy', {
                 upstreamStatus: 304,
             });
@@ -66,7 +72,9 @@ export async function getFeed(
     const feed = normalizeFeed(xml, { url: result.finalUrl, requestedUrl: url.href });
     const entry = { validators: result.validators, feed };
     remember(key, entry);
-    if (result.finalUrl !== key) remember(result.finalUrl, entry);
+    if (result.finalUrl !== key) {
+        remember(result.finalUrl, entry);
+    }
 
     return { feed, fetchedAt, notModified: false, cache: result.validators, redirect: result.redirect };
 }

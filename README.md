@@ -128,7 +128,7 @@ docker compose run --rm migrate     # re-sync the Drizzle schema after editing *
 | `bun run start:frontend` / `start:backend`                     | Production servers                                                          |
 | `bun run typecheck`                                            | Type-check both projects                                                    |
 | `bun run test` / `test:watch`                                  | Backend API tests (`bun test`)                                              |
-| `bun run lint`                                                 | Lint the frontend                                                           |
+| `bun run lint`                                                 | Lint frontend and backend (ESLint; Prettier handles formatting)             |
 | `bun run db:generate` / `db:migrate` / `db:push` / `db:studio` | Drizzle Kit (backend)                                                       |
 | `bun run docker:up` / `docker:down` / `docker:logs`            | Local Docker stack (see above)                                              |
 

@@ -157,7 +157,9 @@ describe('broken and odd feeds', () => {
             expect(byKey[key]).toBe('2024-10-02T15:00:00.000Z');
         }
         // Not guessed: unsupported format, nonsense, and an impossible calendar date.
-        for (const key of ['month-first', 'garbage', 'impossible']) expect(byKey[key]).toBeNull();
+        for (const key of ['month-first', 'garbage', 'impossible']) {
+            expect(byKey[key]).toBeNull();
+        }
         // Undated items go last, in feed order.
         expect(feed.items.slice(-3).map((i) => i.title)).toEqual([
             'Date month-first',

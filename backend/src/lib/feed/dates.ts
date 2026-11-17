@@ -56,7 +56,9 @@ const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
 
 /** "10" → 10; "Oct", "Sept", "October" → 10/9/10. Needs at least 3 letters of a real month name ("Octopus" fails). */
 function toMonth(value: string): number | undefined {
-    if (/^\d+$/.test(value)) return Number(value);
+    if (/^\d+$/.test(value)) {
+        return Number(value);
+    }
     const name = value.toLowerCase().replace(/\.$/, '');
     const index = MONTHS.findIndex((month) => name.length >= 3 && month.startsWith(name));
     return index >= 0 ? index + 1 : undefined;
@@ -65,17 +67,25 @@ function toMonth(value: string): number | undefined {
 /** "24" → 2024, "99" → 1999; four-digit years pass through. */
 function toFullYear(value: string): number {
     const year = Number(value);
-    if (year >= 100) return year;
+    if (year >= 100) {
+        return year;
+    }
     return year < 70 ? 2000 + year : 1900 + year;
 }
 
 /** Minutes from UTC: "GMT" → 0, "PDT" → -420, "+0530" / "+05:30" → 330. No zone means UTC; an unknown name → undefined. */
 function toOffsetMinutes(zone: string | undefined): number | undefined {
-    if (!zone) return 0;
+    if (!zone) {
+        return 0;
+    }
     const named = ZONES[zone.toUpperCase()];
-    if (named !== undefined) return named * 60;
+    if (named !== undefined) {
+        return named * 60;
+    }
     const numeric = zone.match(/^([+-])(\d{2}):?(\d{2})$/);
-    if (!numeric) return undefined;
+    if (!numeric) {
+        return undefined;
+    }
     const minutes = Number(numeric[2]) * 60 + Number(numeric[3]);
     return numeric[1] === '-' ? -minutes : minutes;
 }
@@ -104,11 +114,15 @@ function toEpochMs(p: DateParts, offsetMinutes: number): number | null {
 export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
     const input = value?.replace(/\s+/g, ' ').trim() ?? '';
     const groups = input.match(ISO)?.groups ?? input.match(RFC822)?.groups;
-    if (!groups) return null;
+    if (!groups) {
+        return null;
+    }
 
     const month = toMonth(groups.month!);
     const offset = toOffsetMinutes(groups.zone);
-    if (!month || offset === undefined) return null;
+    if (!month || offset === undefined) {
+        return null;
+    }
 
     const time = toEpochMs(
         {
@@ -122,6 +136,8 @@ export function parseFeedDate(value: string | null | undefined, now: number = Da
         },
         offset,
     );
-    if (time === null || time < MIN_TIME || time > now + FUTURE_SLACK_MS) return null;
+    if (time === null || time < MIN_TIME || time > now + FUTURE_SLACK_MS) {
+        return null;
+    }
     return new Date(time).toISOString();
 }

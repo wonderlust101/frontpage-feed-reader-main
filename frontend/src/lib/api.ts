@@ -10,7 +10,9 @@ export async function getHealth(): Promise<HealthResponse | null> {
             cache: 'no-store',
             signal: AbortSignal.timeout(5000),
         });
-        if (!res.ok) return null;
+        if (!res.ok) {
+            return null;
+        }
         return (await res.json()) as HealthResponse;
     } catch {
         return null;

@@ -23,8 +23,12 @@ function readValidators(req: Request): FeedCacheValidators {
 }
 
 function sendFeed(res: Response, result: FetchFeedResponse) {
-    if (result.cache.etag) res.set('ETag', result.cache.etag);
-    if (result.cache.lastModified) res.set('Last-Modified', result.cache.lastModified);
+    if (result.cache.etag) {
+        res.set('ETag', result.cache.etag);
+    }
+    if (result.cache.lastModified) {
+        res.set('Last-Modified', result.cache.lastModified);
+    }
     res.set('Cache-Control', CACHE_CONTROL);
     // Express answers 304 itself when the ETag above matches the request's If-None-Match.
     res.json(result);

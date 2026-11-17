@@ -29,7 +29,9 @@ for (const feed of feeds) {
     const file = `${slug}.xml`;
     try {
         const res = await fetchFeed(feed.feedUrl, { timeoutMs: 20_000, userAgent: env.FEED_USER_AGENT });
-        if (res.notModified) throw new Error('unexpected 304');
+        if (res.notModified) {
+            throw new Error('unexpected 304');
+        }
         let bytes = res.bytes;
         if (bytes.byteLength > MAX_BYTES) {
             // Node's latin1 round-trips bytes 1:1 (TextDecoder's "latin1" is really windows-1252 and

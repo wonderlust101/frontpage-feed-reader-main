@@ -34,7 +34,9 @@ const ACCEPT =
 /** Parses and validates a user-supplied feed URL. Throws `invalid_url`. */
 export function parseFeedUrl(input: string | undefined | null): URL {
     const raw = input?.trim();
-    if (!raw) throw new FeedError('invalid_url', 'A feed URL is required');
+    if (!raw) {
+        throw new FeedError('invalid_url', 'A feed URL is required');
+    }
     let url: URL;
     try {
         url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`);
@@ -44,7 +46,9 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
         throw new FeedError('invalid_url', 'Only http and https URLs are supported');
     }
-    if (url.username || url.password) throw new FeedError('invalid_url', 'URLs with credentials are not allowed');
+    if (url.username || url.password) {
+        throw new FeedError('invalid_url', 'URLs with credentials are not allowed');
+    }
     url.hash = '';
     return url;
 }
@@ -159,8 +163,12 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
                 Accept: ACCEPT,
                 'Accept-Encoding': ACCEPT_ENCODING,
             };
-            if (opts.etag) headers['If-None-Match'] = opts.etag;
-            if (opts.lastModified) headers['If-Modified-Since'] = opts.lastModified;
+            if (opts.etag) {
+                headers['If-None-Match'] = opts.etag;
+            }
+            if (opts.lastModified) {
+                headers['If-Modified-Since'] = opts.lastModified;
+            }
 
             const res = await request(url, headers, agents, signal);
             const status = res.statusCode ?? 0;
@@ -168,17 +176,24 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
             if ([301, 302, 303, 307, 308].includes(status)) {
                 res.destroy();
                 const location = header(res, 'location');
-                if (!location) throw new FeedError('network', `Redirect (${status}) without a Location header`);
-                if (++hops > maxRedirects) throw new FeedError('network', 'Too many redirects', { retryable: false });
+                if (!location) {
+                    throw new FeedError('network', `Redirect (${status}) without a Location header`);
+                }
+                if (++hops > maxRedirects) {
+                    throw new FeedError('network', 'Too many redirects', { retryable: false });
+                }
                 const next = new URL(location, url);
                 if (next.protocol !== 'http:' && next.protocol !== 'https:') {
                     throw new FeedError('blocked_url', 'Redirected to an unsupported protocol');
                 }
                 // Same rule as the first URL: no user:pass@ (node:http would send it as an Authorization header).
-                if (next.username || next.password)
+                if (next.username || next.password) {
                     throw new FeedError('blocked_url', 'Redirected to a URL with credentials');
+                }
                 next.hash = '';
-                if (status !== 301 && status !== 308) permanent = false;
+                if (status !== 301 && status !== 308) {
+                    permanent = false;
+                }
                 url = next;
                 continue;
             }
@@ -214,14 +229,19 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
             };
         }
     } catch (err) {
-        if (err instanceof FeedError) throw err;
-        if (isBlockedAddressError(err)) throw new FeedError('blocked_url', 'That host is not allowed');
+        if (err instanceof FeedError) {
+            throw err;
+        }
+        if (isBlockedAddressError(err)) {
+            throw new FeedError('blocked_url', 'That host is not allowed');
+        }
         if (isAbort(err) || signal.aborted) {
             throw new FeedError('timeout', `The feed took longer than ${timeoutMs / 1000}s to respond`);
         }
         const code = (err as NodeJS.ErrnoException)?.code;
-        if (code === 'ENOTFOUND')
+        if (code === 'ENOTFOUND') {
             throw new FeedError('network', `Could not resolve host ${url.hostname}`, { retryable: false });
+        }
         throw new FeedError('network', `Could not reach the feed: ${(err as Error)?.message ?? 'unknown error'}`);
     }
 }
