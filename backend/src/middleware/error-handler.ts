@@ -2,11 +2,6 @@ import type { ErrorRequestHandler, Response } from 'express';
 import type { ApiErrorResponse } from '@frontpage/shared';
 import { AppError } from '../lib/errors';
 
-// Sends the standard error body `{ error: { code, message, retryable } }`; every error response in the API goes through here.
-export function sendError(res: Response, status: number, error: ApiErrorResponse<string>['error']) {
-    res.status(status).json({ error } satisfies ApiErrorResponse<string>);
-}
-
 // Express's last middleware: turns any error thrown in a route into the standard JSON error body, so controllers never need try/catch.
 // AppErrors and client errors (e.g. bad JSON) keep their status; anything else is a bug, logged and hidden behind a generic 500.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
@@ -32,3 +27,8 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     console.error(err);
     sendError(res, 500, { code: 'internal_error', message: 'Internal server error', retryable: true });
 };
+
+// Sends the standard error body `{ error: { code, message, retryable } }`; every error response in the API goes through here.
+export function sendError(res: Response, status: number, error: ApiErrorResponse<string>['error']) {
+    res.status(status).json({ error } satisfies ApiErrorResponse<string>);
+}

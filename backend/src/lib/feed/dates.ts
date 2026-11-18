@@ -1,9 +1,15 @@
 // Parses feed dates (RFC 822 for RSS, ISO 8601 for Atom) into ISO 8601 UTC strings.
 // Unknown formats and ambiguous zone names (IST, BST, AST…) return null: we never guess a date.
 
-// Joins regex pieces into one case-insensitive regex that must match the whole string.
-// Lets each part of a date format sit on its own line with an example next to it.
-const pattern = (...parts: RegExp[]) => new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
+type DateParts = {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
+};
 
 const ISO = pattern(
     /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/, // 2024-10-02
@@ -47,19 +53,46 @@ const ZONES: Record<string, number> = {
     AWST: 8, ACST: 9.5, ACDT: 10.5, AEST: 10, AEDT: 11, NZST: 12, NZDT: 13,
 };
 
-type DateParts = {
-    year: number;
-    month: number;
-    day: number;
-    hour: number;
-    minute: number;
-    second: number;
-    millisecond: number;
-};
-
 const MAX_OFFSET_HOURS = 14;
 const MIN_TIME = Date.UTC(1995, 0, 1);
 const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
+
+// Turns a feed date ("Wed, 02 Oct 2024 15:00:00 GMT" or "2024-10-02T15:00:00Z") into an ISO 8601 UTC string.
+// Returns null rather than guessing: unknown formats or zones, impossible dates, dates before 1995 or over a day ahead.
+export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
+    const input = value?.replace(/\s+/g, ' ').trim() ?? '';
+    const groups = input.match(ISO)?.groups ?? input.match(RFC822)?.groups;
+
+    if (!groups) {
+        return null;
+    }
+
+    const month = toMonth(groups.month!);
+    const offset = toOffsetMinutes(groups.zone);
+
+    if (!month || offset === undefined) {
+        return null;
+    }
+
+    const time = toEpochMs(
+        {
+            year: toFullYear(groups.year!),
+            month,
+            day: Number(groups.day),
+            hour: Number(groups.hour ?? 0),
+            minute: Number(groups.minute ?? 0),
+            second: Number(groups.second ?? 0),
+            millisecond: Number((groups.fraction ?? '').padEnd(3, '0').slice(0, 3)),
+        },
+        offset,
+    );
+
+    if (time === null || time < MIN_TIME || time > now + FUTURE_SLACK_MS) {
+        return null;
+    }
+
+    return new Date(time).toISOString();
+}
 
 // Month number (1–12) from "10", "Oct", "Sept" or "October"; undefined otherwise (names need 3+ letters of a real month, so "Octopus" fails).
 function toMonth(value: string): number | undefined {
@@ -71,16 +104,6 @@ function toMonth(value: string): number | undefined {
     const index = MONTHS.findIndex((month) => name.length >= 3 && month.startsWith(name));
 
     return index >= 0 ? index + 1 : undefined;
-}
-
-// Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
-function toFullYear(value: string): number {
-    const year = Number(value);
-    if (year >= 100) {
-        return year;
-    }
-
-    return year < 70 ? 2000 + year : 1900 + year;
 }
 
 // Offset from UTC in minutes: "GMT" → 0, "PDT" → -420, "+0530" / "+05:30" / "+05" / "GMT+0530" → 330; no zone means UTC.
@@ -127,39 +150,18 @@ function toEpochMs(p: DateParts, offsetMinutes: number): number | null {
     return validDateCheck ? utc - offsetMinutes * 60_000 : null;
 }
 
-// Turns a feed date ("Wed, 02 Oct 2024 15:00:00 GMT" or "2024-10-02T15:00:00Z") into an ISO 8601 UTC string.
-// Returns null rather than guessing: unknown formats or zones, impossible dates, dates before 1995 or over a day ahead.
-export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
-    const input = value?.replace(/\s+/g, ' ').trim() ?? '';
-    const groups = input.match(ISO)?.groups ?? input.match(RFC822)?.groups;
-
-    if (!groups) {
-        return null;
+// Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
+function toFullYear(value: string): number {
+    const year = Number(value);
+    if (year >= 100) {
+        return year;
     }
 
-    const month = toMonth(groups.month!);
-    const offset = toOffsetMinutes(groups.zone);
+    return year < 70 ? 2000 + year : 1900 + year;
+}
 
-    if (!month || offset === undefined) {
-        return null;
-    }
-
-    const time = toEpochMs(
-        {
-            year: toFullYear(groups.year!),
-            month,
-            day: Number(groups.day),
-            hour: Number(groups.hour ?? 0),
-            minute: Number(groups.minute ?? 0),
-            second: Number(groups.second ?? 0),
-            millisecond: Number((groups.fraction ?? '').padEnd(3, '0').slice(0, 3)),
-        },
-        offset,
-    );
-
-    if (time === null || time < MIN_TIME || time > now + FUTURE_SLACK_MS) {
-        return null;
-    }
-
-    return new Date(time).toISOString();
+// Joins regex pieces into one case-insensitive regex that must match the whole string.
+// Lets each part of a date format sit on its own line with an example next to it.
+function pattern(...parts: RegExp[]) {
+    return new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
 }

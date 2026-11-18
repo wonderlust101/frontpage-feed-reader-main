@@ -14,14 +14,6 @@ const OUT_DIR = join(import.meta.dir, '../../test/fixtures/feeds/curated');
 const MAX_BYTES = 150 * 1024;
 const MAX_ITEMS = 10;
 
-// Turns a feed title into a file-safe name: "Simon Willison's Weblog" → "simon-willison-s-weblog".
-function slugify(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-}
-
 const feeds = sampleFeeds.categories.flatMap((c) => c.feeds);
 await mkdir(OUT_DIR, { recursive: true });
 const manifest: CuratedFixture[] = [];
@@ -50,3 +42,11 @@ for (const feed of feeds) {
 
 await writeFile(join(OUT_DIR, 'manifest.json'), `${JSON.stringify(manifest, null, 4)}\n`);
 console.log(`\nSaved ${manifest.length}/${feeds.length} feeds to ${OUT_DIR}`);
+
+// Turns a feed title into a file-safe name: "Simon Willison's Weblog" → "simon-willison-s-weblog".
+function slugify(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+}

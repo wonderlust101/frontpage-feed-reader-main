@@ -1,13 +1,5 @@
 // Typed access to environment variables. Each one is documented in backend/.env.example.
 
-// An env var with surrounding spaces trimmed, or undefined when it's missing or blank.
-const optional = (value: string | undefined) => value?.trim() || undefined;
-// Reads a whole-number env var. Returns `fallback` when it's missing or not a number (e.g. "abc").
-const int = (value: string | undefined, fallback: number) => {
-    const n = Number.parseInt(value ?? '', 10);
-    return Number.isFinite(n) ? n : fallback;
-};
-
 export const env = {
     NODE_ENV: process.env.NODE_ENV ?? 'development',
     PORT: int(process.env.PORT, 4000),
@@ -32,3 +24,14 @@ export const env = {
 
     FEED_REFRESH_INTERVAL_MINUTES: int(process.env.FEED_REFRESH_INTERVAL_MINUTES, 30),
 };
+
+// An env var with surrounding spaces trimmed, or undefined when it's missing or blank.
+function optional(value: string | undefined) {
+    return value?.trim() || undefined;
+}
+
+// Reads a whole-number env var. Returns `fallback` when it's missing or not a number (e.g. "abc").
+function int(value: string | undefined, fallback: number) {
+    const n = Number.parseInt(value ?? '', 10);
+    return Number.isFinite(n) ? n : fallback;
+}

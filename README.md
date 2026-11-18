@@ -84,6 +84,28 @@ Requests flow **routes → controller → service**: keep handler bodies out of 
 
 The sample feeds live in `backend/data/` because only the backend reads them.
 
+### Code style
+
+Prettier handles formatting and ESLint adds `curly` (braces on every `if`/`else`/loop body). Beyond that, every source file follows the same layout and comment rules, so any file reads the same way.
+
+**File order, top to bottom:**
+
+1. Purpose comment (a few `//` lines), then a blank line
+2. Imports
+3. Types
+4. Constants, then module state (`let` variables, caches)
+5. Exported functions, the file's main one first
+6. Private helpers, in the order the functions above call them
+
+You meet a file's main function first and read down into the details. Write helpers as `function` declarations, not `const helper = () => …`: functions are hoisted, so a constant near the top (like `const ISO = pattern(…)` in `dates.ts`) can use a helper defined further down. Test files are the exception: their setup and helpers go above the tests.
+
+**Comments** (`//` only, never `/* */` or `/** */`):
+
+- **Top of file:** optional lines stating the file's purpose and any key design decision, then a blank line.
+- **Every function:** one line saying what it does, what it returns and its edge cases (when it returns null, what it throws); two lines only for unusually complex functions. Comment lines may run past Prettier's `printWidth`, since Prettier never wraps comments.
+- **Nowhere else**, except a one-line _why_ on a genuinely complex line (a regex, a workaround, non-obvious library behaviour). No section dividers and no comments on constants, types or fields.
+- **Names first:** if code needs a comment to be understood, rename the variable or extract a named constant instead (`MAX_OFFSET_HOURS = 14`, not `14 // max offset`).
+
 ## Getting started
 
 ```bash

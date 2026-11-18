@@ -85,49 +85,6 @@ const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-prese
 
 const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
-// Resolves a URL against the page it came from; undefined unless it's http(s) or mailto, so javascript:, data:, file: and invalid URLs are dropped.
-function resolveUrl(value: string, base?: string): string | undefined {
-    const trimmed = value.trim();
-    if (!trimmed) {
-        return undefined;
-    }
-
-    try {
-        const url = new URL(trimmed, base);
-        return SAFE_PROTOCOLS.has(url.protocol) ? url.href : undefined;
-    } catch {
-        return undefined;
-    }
-}
-
-// Resolves every URL in a srcset and drops unsafe ones (undefined if none are left); a package parses it, as URLs may contain commas.
-function resolveSrcset(value: string, base?: string): string | undefined {
-    const candidates = parseSrcset(value).flatMap((candidate) => {
-        const url = resolveUrl(candidate.url, base);
-        return url ? [{ ...candidate, url }] : [];
-    });
-
-    return candidates.length > 0 ? stringifySrcset(candidates) : undefined;
-}
-
-// A copy of a tag's attributes with its URL attributes (href, src, srcset, poster) resolved; unsafe or invalid ones are removed.
-function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
-    const result = { ...attribs };
-
-    for (const name of names.filter((n) => n in result)) {
-        const resolve = name === 'srcset' ? resolveSrcset : resolveUrl;
-        const resolved = resolve(result[name]!, base);
-
-        if (resolved) {
-            result[name] = resolved;
-        } else {
-            delete result[name];
-        }
-    }
-
-    return result;
-}
-
 // Makes feed HTML safe to render: keeps semantic tags, removes scripts, styles, event handlers and unsafe URLs, and makes links absolute.
 export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: string): string {
     if (!html) {
@@ -230,4 +187,47 @@ export function truncate(text: string, max: number): string {
     const space = cut.lastIndexOf(' ');
 
     return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, '')}…`;
+}
+
+// A copy of a tag's attributes with its URL attributes (href, src, srcset, poster) resolved; unsafe or invalid ones are removed.
+function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
+    const result = { ...attribs };
+
+    for (const name of names.filter((n) => n in result)) {
+        const resolve = name === 'srcset' ? resolveSrcset : resolveUrl;
+        const resolved = resolve(result[name]!, base);
+
+        if (resolved) {
+            result[name] = resolved;
+        } else {
+            delete result[name];
+        }
+    }
+
+    return result;
+}
+
+// Resolves every URL in a srcset and drops unsafe ones (undefined if none are left); a package parses it, as URLs may contain commas.
+function resolveSrcset(value: string, base?: string): string | undefined {
+    const candidates = parseSrcset(value).flatMap((candidate) => {
+        const url = resolveUrl(candidate.url, base);
+        return url ? [{ ...candidate, url }] : [];
+    });
+
+    return candidates.length > 0 ? stringifySrcset(candidates) : undefined;
+}
+
+// Resolves a URL against the page it came from; undefined unless it's http(s) or mailto, so javascript:, data:, file: and invalid URLs are dropped.
+function resolveUrl(value: string, base?: string): string | undefined {
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return undefined;
+    }
+
+    try {
+        const url = new URL(trimmed, base);
+        return SAFE_PROTOCOLS.has(url.protocol) ? url.href : undefined;
+    } catch {
+        return undefined;
+    }
 }
