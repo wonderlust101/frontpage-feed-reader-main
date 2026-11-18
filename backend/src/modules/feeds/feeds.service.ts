@@ -12,12 +12,10 @@ const cache = new Map<string, CacheEntry>();
 
 // Fetches, decodes and normalizes one feed for the API, caching it under both the requested and the final (after redirects) URL.
 // Sends the client's ETag/Last-Modified, or the last ones we saw, so an unchanged feed is just a 304 answered from the cache.
-export async function getFeed(
-    input: string | undefined,
-    clientValidators: Partial<FeedCacheValidators> = {},
-): Promise<FetchFeedResponse> {
+export async function getFeed(input: string | undefined, clientValidators: Partial<FeedCacheValidators> = {}): Promise<FetchFeedResponse> {
     const url = parseFeedUrl(input);
     const key = url.href;
+
     const cached = recall(key);
     const clientSent = Boolean(clientValidators.etag || clientValidators.lastModified);
     const validators = clientSent ? clientValidators : (cached?.validators ?? {});
@@ -33,7 +31,6 @@ export async function getFeed(
     if (result.notModified) {
         const entry = cached ?? recall(result.finalUrl);
         if (!entry) {
-            // Upstream says "unchanged" for validators we have no feed for; refetch unconditionally.
             if (clientSent) {
                 return getFeed(input, {});
             }
@@ -41,17 +38,21 @@ export async function getFeed(
                 upstreamStatus: 304,
             });
         }
+
         const merged: FeedCacheValidators = {
             etag: result.validators.etag ?? entry.validators.etag,
             lastModified: result.validators.lastModified ?? entry.validators.lastModified,
         };
+
         return { feed: entry.feed, fetchedAt, notModified: true, cache: merged, redirect: result.redirect };
     }
 
     const xml = decodeFeed(result.bytes, result.contentType);
     const feed = normalizeFeed(xml, { url: result.finalUrl, requestedUrl: url.href });
     const entry = { validators: result.validators, feed };
+
     remember(key, entry);
+
     if (result.finalUrl !== key) {
         remember(result.finalUrl, entry);
     }
@@ -67,6 +68,7 @@ export function clearFeedCache() {
 // The cached entry for a URL (or undefined); reading it also marks it as most recently used.
 function recall(key: string): CacheEntry | undefined {
     const entry = cache.get(key);
+
     if (entry) {
         remember(key, entry);
     }
@@ -77,6 +79,7 @@ function recall(key: string): CacheEntry | undefined {
 function remember(key: string, entry: CacheEntry) {
     cache.delete(key);
     cache.set(key, entry);
+
     if (cache.size > CACHE_LIMIT) {
         cache.delete(cache.keys().next().value!);
     }

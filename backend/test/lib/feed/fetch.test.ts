@@ -173,10 +173,7 @@ describe('parseFeedUrl', () => {
         expect(parseFeedUrl('example.com/feed#top').href).toBe('https://example.com/feed');
     });
 
-    test.each([[''], ['   '], [undefined], ['ftp://example.com/feed'], ['http://user:pw@example.com/'], ['http://']])(
-        'rejects %p',
-        (input) => {
-            expect(() => parseFeedUrl(input)).toThrow(FeedError);
-        },
-    );
+    test.each([[''], ['   '], [undefined], ['ftp://example.com/feed'], ['http://user:pw@example.com/'], ['http://']])('rejects %p', (input) => {
+        expect(() => parseFeedUrl(input)).toThrow(FeedError);
+    });
 });

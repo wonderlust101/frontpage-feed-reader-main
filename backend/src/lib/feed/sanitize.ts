@@ -72,14 +72,7 @@ const ALLOWED_TAGS = [
     'col',
 ];
 
-const EMBED_HOSTS = [
-    'www.youtube.com',
-    'youtube.com',
-    'www.youtube-nocookie.com',
-    'player.vimeo.com',
-    'codepen.io',
-    'codesandbox.io',
-];
+const EMBED_HOSTS = ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'player.vimeo.com', 'codepen.io', 'codesandbox.io'];
 
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 
@@ -155,10 +148,7 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
     }
 
     // Block-level boundaries become spaces so "<p>a</p><p>b</p>" reads "a b", not "ab".
-    const spaced = html.replace(
-        /<(?:br|hr)\b[^>]*>|<\/(?:p|div|li|h[1-6]|blockquote|tr|td|th|dd|dt|pre|figure)>/gi,
-        '$& ',
-    );
+    const spaced = html.replace(/<(?:br|hr)\b[^>]*>|<\/(?:p|div|li|h[1-6]|blockquote|tr|td|th|dd|dt|pre|figure)>/gi, '$& ');
 
     const stripped = sanitize(spaced, {
         allowedTags: [],

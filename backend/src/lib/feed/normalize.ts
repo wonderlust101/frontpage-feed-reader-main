@@ -209,10 +209,7 @@ function safeUrl(value: string | null | undefined, base?: string): string | null
 
 // Turns one parsed item into a NormalizedItem: sanitizes its HTML, builds a plain-text summary, parses dates and cuts long fields.
 // Gaps get fallbacks: title from the summary, author from the feed, thumbnail from the first image, id from a hash.
-function normalizeItem(
-    item: ParsedItem,
-    ctx: { siteUrl: string; feedAuthor: string | null; now: number; index: number },
-): NormalizedItem {
+function normalizeItem(item: ParsedItem, ctx: { siteUrl: string; feedAuthor: string | null; now: number; index: number }): NormalizedItem {
     const url = safeUrl(item.url, ctx.siteUrl);
     const linkBase = url ?? ctx.siteUrl;
 
@@ -225,10 +222,7 @@ function normalizeItem(
     const contentHtml = contentHtmlRaw || descriptionHtml;
     const summary = truncate(descriptionText || contentText, SUMMARY_MAX);
 
-    const title =
-        truncate(htmlToText(item.title), TITLE_MAX) ||
-        (summary ? truncate(summary, FALLBACK_TITLE_MAX) : '') ||
-        'Untitled';
+    const title = truncate(htmlToText(item.title), TITLE_MAX) || (summary ? truncate(summary, FALLBACK_TITLE_MAX) : '') || 'Untitled';
 
     const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), ctx.now);
     const updatedAt = firstDate(rawText(item, UPDATED_TAGS), ctx.now) ?? publishedAt;

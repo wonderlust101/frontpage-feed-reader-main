@@ -11,9 +11,7 @@ describe('detectCharset', () => {
     });
 
     test('uses the Content-Type charset before the XML prolog', () => {
-        expect(
-            detectCharset(enc('<?xml version="1.0" encoding="utf-8"?><rss/>'), 'text/xml; charset="ISO-8859-1"'),
-        ).toBe('windows-1252');
+        expect(detectCharset(enc('<?xml version="1.0" encoding="utf-8"?><rss/>'), 'text/xml; charset="ISO-8859-1"')).toBe('windows-1252');
     });
 
     test('falls back to the XML prolog, then UTF-8', () => {
@@ -39,10 +37,7 @@ describe('decodeFeed', () => {
     });
 
     test('decodes Latin-1 declared only in the HTTP header', () => {
-        const xml = decodeFeed(
-            readFixture('odd/iso-8859-1-header-only.xml'),
-            'application/rss+xml; charset=ISO-8859-1',
-        );
+        const xml = decodeFeed(readFixture('odd/iso-8859-1-header-only.xml'), 'application/rss+xml; charset=ISO-8859-1');
         expect(xml).toContain('Grüße aus München');
     });
 

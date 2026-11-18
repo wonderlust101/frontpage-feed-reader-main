@@ -17,9 +17,7 @@ describe.skipIf(!process.env.LIVE_FEEDS)('live SSRF protection via GET /api/fetc
     });
 
     test.each(['localtest.me', '127.0.0.1.nip.io'])('refuses %s', async (host) => {
-        const res = await fetch(
-            `${api.url}/api/fetch?url=${encodeURIComponent(`http://${host}:${new URL(api.url).port}/api/health`)}`,
-        );
+        const res = await fetch(`${api.url}/api/fetch?url=${encodeURIComponent(`http://${host}:${new URL(api.url).port}/api/health`)}`);
         expect(res.status).toBe(400);
         expect(((await res.json()) as FeedErrorResponse).error.code).toBe('blocked_url');
     });

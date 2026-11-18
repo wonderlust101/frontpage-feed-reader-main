@@ -69,9 +69,7 @@ describe('feed fixtures', () => {
     });
 
     test('curated manifest and files match one-to-one', () => {
-        const manifest: Array<{ file: string }> = JSON.parse(
-            readFileSync(join(FIXTURES_DIR, 'curated/manifest.json'), 'utf8'),
-        );
+        const manifest: Array<{ file: string }> = JSON.parse(readFileSync(join(FIXTURES_DIR, 'curated/manifest.json'), 'utf8'));
         const listed = manifest.map((m) => m.file).sort();
         const onDisk = readdirSync(join(FIXTURES_DIR, 'curated'))
             .filter((f) => f !== 'manifest.json')
@@ -85,9 +83,7 @@ describe('feed fixtures', () => {
             .filter((f) => f.startsWith('helpers/'))
             .map((f) => readFileSync(join(TEST_DIR, f), 'utf8'))
             .join('\n');
-        const unused = readdirSync(join(FIXTURES_DIR, 'odd')).filter(
-            (f) => !sources.includes(`odd/${f}`) && !helperSources.includes(`odd/${f}`),
-        );
+        const unused = readdirSync(join(FIXTURES_DIR, 'odd')).filter((f) => !sources.includes(`odd/${f}`) && !helperSources.includes(`odd/${f}`));
         expect(unused).toEqual([]);
     });
 });

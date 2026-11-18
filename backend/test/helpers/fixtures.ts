@@ -8,9 +8,7 @@ export type CuratedFixture = { slug: string; title: string; feedUrl: string; fil
 
 export const FIXTURES_DIR = join(import.meta.dir, '../fixtures/feeds');
 
-export const curatedFixtures: CuratedFixture[] = JSON.parse(
-    readFileSync(join(FIXTURES_DIR, 'curated/manifest.json'), 'utf8'),
-);
+export const curatedFixtures: CuratedFixture[] = JSON.parse(readFileSync(join(FIXTURES_DIR, 'curated/manifest.json'), 'utf8'));
 
 // The raw bytes of a fixture file, e.g. readFixture('odd/xss.xml').
 export function readFixture(path: string): Uint8Array {

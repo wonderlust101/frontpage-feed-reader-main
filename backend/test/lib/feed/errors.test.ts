@@ -25,9 +25,7 @@ describe('FeedError', () => {
     });
 
     test('retryable can be overridden per error (e.g. 429 is a retryable 4xx)', () => {
-        expect(new FeedError('http_4xx', 'rate limited', { upstreamStatus: 429, retryable: true }).retryable).toBe(
-            true,
-        );
+        expect(new FeedError('http_4xx', 'rate limited', { upstreamStatus: 429, retryable: true }).retryable).toBe(true);
     });
 
     test('the upstream status is kept and exposed as `status` in details', () => {

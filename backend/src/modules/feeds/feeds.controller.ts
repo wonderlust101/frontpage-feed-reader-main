@@ -9,6 +9,7 @@ const CACHE_CONTROL = 'public, max-age=300';
 // GET /api/fetch?url=… fetches and normalizes one feed; any error is thrown to the error handler.
 export async function fetchFeedController(req: Request, res: Response) {
     const url = typeof req.query.url === 'string' ? req.query.url : undefined;
+
     const result = await getFeed(url, {
         etag: req.get('if-none-match') ?? null,
         lastModified: req.get('if-modified-since') ?? null,
@@ -22,6 +23,5 @@ export async function fetchFeedController(req: Request, res: Response) {
     }
     res.set('Cache-Control', CACHE_CONTROL);
 
-    // Express answers 304 itself when the ETag above matches the request's If-None-Match.
     res.json(result);
 }

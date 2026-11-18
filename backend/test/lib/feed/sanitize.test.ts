@@ -19,11 +19,7 @@ describe('sanitizeFeedHtml', () => {
         ['unknown schemes', '<a href="ms-msdt:/id PCWDiagnostic">x</a>', /ms-msdt/],
         ['file: links', '<a href="file:///etc/passwd">x</a>', /file:/],
         ['javascript: split by a newline', '<a href="java&#10;script:alert(1)">x</a>', /script:/],
-        [
-            'javascript: in a video poster',
-            '<video src="v.mp4" poster="javascript:alert(1)"></video>',
-            /poster|javascript/,
-        ],
+        ['javascript: in a video poster', '<video src="v.mp4" poster="javascript:alert(1)"></video>', /poster|javascript/],
         ['unsafe srcset candidates', '<img src="a.png" srcset="javascript:alert(1) 1x, b.png 2x">', /javascript/],
     ])('removes %s', (_label, html, forbidden) => {
         expect(sanitizeFeedHtml(html, BASE)).not.toMatch(forbidden);
@@ -51,10 +47,7 @@ describe('sanitizeFeedHtml', () => {
     });
 
     test('a feed cannot loosen the iframe sandbox', () => {
-        const out = sanitizeFeedHtml(
-            '<iframe src="https://www.youtube.com/embed/abc" sandbox="allow-top-navigation allow-forms"></iframe>',
-            BASE,
-        );
+        const out = sanitizeFeedHtml('<iframe src="https://www.youtube.com/embed/abc" sandbox="allow-top-navigation allow-forms"></iframe>', BASE);
         expect(out).not.toContain('allow-top-navigation');
         expect(out).not.toContain('allow-forms');
     });
@@ -64,10 +57,7 @@ describe('sanitizeFeedHtml', () => {
     });
 
     test('resolves relative links, images and srcsets against the base URL', () => {
-        const out = sanitizeFeedHtml(
-            '<a href="../about">a</a><img src="img/a.png" srcset="img/a.png 1x, /img/a@2x.png 2x">',
-            BASE,
-        );
+        const out = sanitizeFeedHtml('<a href="../about">a</a><img src="img/a.png" srcset="img/a.png 1x, /img/a@2x.png 2x">', BASE);
         expect(out).toContain('href="https://blog.example/about"');
         expect(out).toContain('src="https://blog.example/posts/img/a.png"');
         expect(out).toContain('srcset="https://blog.example/posts/img/a.png 1x, https://blog.example/img/a@2x.png 2x"');
@@ -75,10 +65,7 @@ describe('sanitizeFeedHtml', () => {
 
     test('keeps commas inside srcset URLs (Cloudinary / Substack style)', () => {
         const cdn = 'https://res.cloudinary.com/demo/image/upload';
-        const out = sanitizeFeedHtml(
-            `<img src="a.png" srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w">`,
-            BASE,
-        );
+        const out = sanitizeFeedHtml(`<img src="a.png" srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w">`, BASE);
         expect(out).toContain(`srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w"`);
     });
 

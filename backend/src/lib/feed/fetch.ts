@@ -32,12 +32,14 @@ export type FetchFeedResult =
           contentType: string | null;
       });
 
-type Agents = { http: http.Agent; https: https.Agent };
+type Agents = {
+    http: http.Agent;
+    https: https.Agent;
+};
 
 export const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPT_ENCODING = 'gzip, deflate, br';
-const ACCEPT =
-    'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
+const ACCEPT = 'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const WEB_PROTOCOLS = new Set(['http:', 'https:']);
 
@@ -85,13 +87,7 @@ export function parseFeedUrl(input: string | undefined | null): URL {
 // Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
 // and enforces the timeout and size cap. Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
 export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
-    const {
-        timeoutMs = 10_000,
-        userAgent = 'Frontpage/0.1 (RSS reader)',
-        maxRedirects = 5,
-        maxBytes = DEFAULT_MAX_BYTES,
-        allowLoopback = false,
-    } = opts;
+    const { timeoutMs = 10_000, userAgent = 'Frontpage/0.1 (RSS reader)', maxRedirects = 5, maxBytes = DEFAULT_MAX_BYTES, allowLoopback = false } = opts;
     const signal = AbortSignal.timeout(timeoutMs);
     const agents = agentsFor(allowLoopback);
     const headers = requestHeaders(userAgent, opts);
@@ -121,8 +117,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
 
             const fetchedFrom: FetchedFrom = {
                 finalUrl: url.href,
-                redirect:
-                    redirectCount > 0 ? { permanent: allRedirectsPermanent, from: startUrl.href, to: url.href } : null,
+                redirect: redirectCount > 0 ? { permanent: allRedirectsPermanent, from: startUrl.href, to: url.href } : null,
                 validators: { etag: header(res, 'etag'), lastModified: header(res, 'last-modified') },
             };
 
