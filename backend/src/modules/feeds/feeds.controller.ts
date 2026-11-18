@@ -1,5 +1,5 @@
 // HTTP in/out for /api/fetch: read the request, call the service, shape the response.
-// No error handling here: thrown errors become JSON in middleware/error-handler.ts.
+// No error handling here: thrown errors become JSON in src/errors.ts.
 
 import type { Request, Response } from 'express';
 import { getFeed } from './feeds.service';

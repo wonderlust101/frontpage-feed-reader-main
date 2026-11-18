@@ -3,8 +3,7 @@
 import express from 'express';
 import cors from 'cors';
 import { env } from './env';
-import { errorHandler } from './middleware/error-handler';
-import { notFound } from './middleware/not-found';
+import { errorHandler, notFoundHandler } from './errors';
 import { healthRouter } from './modules/health/health.routes';
 import { fetchRouter } from './modules/feeds/feeds.routes';
 
@@ -17,5 +16,5 @@ app.use(express.json());
 app.use('/api/health', healthRouter);
 app.use('/api/fetch', fetchRouter);
 
-app.use(notFound);
+app.use(notFoundHandler);
 app.use(errorHandler);

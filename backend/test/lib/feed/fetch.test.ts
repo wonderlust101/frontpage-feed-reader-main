@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { AppError } from '../../../src/lib/errors';
+import { HttpError } from '../../../src/errors';
 import { fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 
@@ -14,18 +14,18 @@ afterAll(() => {
     upstream.stop();
 });
 
-// Asserts the promise rejects with a AppError of this `code` (and `retryable`, if given) and returns the error for further checks.
-async function expectError(promise: Promise<unknown>, code: AppError['code'], retryable?: boolean) {
+// Asserts the promise rejects with an HttpError of this `code` (and `retryable`, if given) and returns the error for further checks.
+async function expectError(promise: Promise<unknown>, code: HttpError['code'], retryable?: boolean) {
     const err = await promise.then(
         () => null,
         (e: unknown) => e,
     );
-    expect(err).toBeInstanceOf(AppError);
-    expect((err as AppError).code).toBe(code);
+    expect(err).toBeInstanceOf(HttpError);
+    expect((err as HttpError).code).toBe(code);
     if (retryable !== undefined) {
-        expect((err as AppError).retryable).toBe(retryable);
+        expect((err as HttpError).retryable).toBe(retryable);
     }
-    return err as AppError;
+    return err as HttpError;
 }
 
 describe('fetchFeed', () => {
@@ -175,6 +175,6 @@ describe('parseFeedUrl', () => {
     });
 
     test.each([[''], ['   '], [undefined], ['ftp://example.com/feed'], ['http://user:pw@example.com/'], ['http://']])('rejects %p', (input) => {
-        expect(() => parseFeedUrl(input)).toThrow(AppError);
+        expect(() => parseFeedUrl(input)).toThrow(HttpError);
     });
 });

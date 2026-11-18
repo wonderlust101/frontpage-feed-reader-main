@@ -3,7 +3,7 @@
 
 import type { FeedCacheValidators, FetchFeedResponse, NormalizedFeed } from '@frontpage/shared';
 import { env } from '../../env';
-import { AppError } from '../../lib/errors';
+import { BadGatewayError } from '../../errors';
 import { decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl } from '../../lib/feed';
 
 type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
@@ -35,7 +35,7 @@ export async function getFeed(input: string | undefined, clientValidators: Parti
             if (clientSent) {
                 return getFeed(input, {});
             }
-            throw new AppError('http_5xx', 'The feed server answered 304 without a cached copy', {
+            throw new BadGatewayError('http_5xx', 'The feed server answered 304 without a cached copy', {
                 upstreamStatus: 304,
             });
         }

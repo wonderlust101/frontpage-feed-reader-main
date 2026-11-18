@@ -42,11 +42,11 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │   └── src/
 │       ├── index.ts          # starts the server (PORT, graceful shutdown)
 │       ├── app.ts            # Express app: global middleware + mounts module routers
+│       ├── errors.ts         # all error handling: error classes (BadRequestError…) + the 404 and error handlers
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
 │       │   └── feeds/        #   GET /api/fetch (routes → controller → service) + Drizzle "feeds" table
-│       ├── middleware/       # Express middleware shared by all modules (404, error handler; later auth)
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
 │       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
 │       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
@@ -78,9 +78,9 @@ Requests flow **routes → controller → service**: keep handler bodies out of 
 { "error": { "code": "not_found", "message": "Feed not found", "retryable": false } }
 ```
 
-- Services **throw** `new AppError(code, message)` from `src/lib/errors.ts`, or a helper: `notFound()`, `badRequest()`. The code decides the HTTP status and whether the error is retryable.
-- Controllers **don't catch**. Express 5 forwards thrown errors to `src/middleware/error-handler.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
-- All error codes live in one table, `ERRORS` in `src/lib/errors.ts`. A new kind of error is one line there (`code: { httpStatus, retryable }`) plus the code in `ApiErrorCode` in `packages/shared/src/api.ts`; TypeScript flags a code that's missing from either.
+- Services **throw** the class for the status they mean, from `src/errors.ts`: `BadRequestError` (400), `NotFoundError` (404), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `BadGatewayError` (502), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
+- Controllers **don't catch**. Express 5 forwards thrown errors to `errorHandler` in `src/errors.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
+- A new kind of error needs no registration: throw the right class with a new code, and add the code to `ApiErrorCode` in `packages/shared/src/api.ts` so the frontend knows it. A new status is a 3-line subclass in `src/errors.ts`.
 
 The sample feeds live in `backend/data/` because only the backend reads them.
 
