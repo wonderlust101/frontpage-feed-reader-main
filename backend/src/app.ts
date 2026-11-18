@@ -3,7 +3,8 @@
 import express from 'express';
 import cors from 'cors';
 import { env } from './env';
-import { errorHandler, notFoundHandler } from './errors';
+import { errorHandler } from './middleware/error-handler';
+import { notFoundHandler } from './middleware/not-found-handler';
 import { healthRouter } from './modules/health/health.routes';
 import { fetchRouter } from './modules/feeds/feeds.routes';
 

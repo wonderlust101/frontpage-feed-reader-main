@@ -1,16 +1,7 @@
 import { afterEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
-import {
-    BadGatewayError,
-    BadRequestError,
-    GatewayTimeoutError,
-    HttpError,
-    NotFoundError,
-    PayloadTooLargeError,
-    UnprocessableEntityError,
-    errorHandler,
-    notFoundHandler,
-} from '../src/errors';
+import { errorHandler } from '../../src/middleware/error-handler';
+import { BadGatewayError, GatewayTimeoutError } from '../../src/middleware/errors';
 
 // A minimal fake Express Response that records the status and JSON body, so the error handler can be tested without a server.
 function fakeRes() {
@@ -37,39 +28,6 @@ function handle(err: unknown) {
 
 afterEach(() => {
     mock.restore();
-});
-
-describe('error classes', () => {
-    test.each([
-        [BadRequestError, 400, false],
-        [NotFoundError, 404, false],
-        [PayloadTooLargeError, 413, false],
-        [UnprocessableEntityError, 422, false],
-        [BadGatewayError, 502, true],
-        [GatewayTimeoutError, 504, true],
-    ] as const)('%p → %i (retryable by default: %p)', (ErrorClass, status, retryable) => {
-        const err = new ErrorClass('bad_request', 'message');
-        expect(err).toBeInstanceOf(HttpError);
-        expect(err).toMatchObject({ status, retryable, code: 'bad_request', name: ErrorClass.name });
-    });
-
-    test.each([
-        [408, true],
-        [429, true],
-        [400, false],
-        [503, true],
-    ])('a %i status is retryable: %p', (status, retryable) => {
-        expect(new HttpError(status, 'http_4xx', 'message').retryable).toBe(retryable);
-    });
-
-    test('retryable can be overridden per error', () => {
-        expect(new BadGatewayError('http_4xx', 'dead feed', { retryable: false }).retryable).toBe(false);
-    });
-
-    test('keeps the upstream status of a failing feed server', () => {
-        expect(new BadGatewayError('http_5xx', 'boom', { upstreamStatus: 503 }).upstreamStatus).toBe(503);
-        expect(new GatewayTimeoutError('timeout', 'slow').upstreamStatus).toBeUndefined();
-    });
 });
 
 describe('errorHandler', () => {
@@ -119,16 +77,5 @@ describe('errorHandler', () => {
         const log = spyOn(console, 'error').mockImplementation(() => {});
         handle(new BadGatewayError('network', 'Could not reach the feed'));
         expect(log).not.toHaveBeenCalled();
-    });
-});
-
-describe('notFoundHandler', () => {
-    test('passes unknown routes to the error handler as a standard 404', () => {
-        let forwarded: unknown;
-        notFoundHandler({} as Request, {} as Response, ((err: unknown) => (forwarded = err)) as NextFunction);
-        expect(handle(forwarded)).toEqual({
-            status: 404,
-            body: { error: { code: 'not_found', message: 'Not found', retryable: false } },
-        });
     });
 });
