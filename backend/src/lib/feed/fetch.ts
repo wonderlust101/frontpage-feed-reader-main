@@ -32,6 +32,8 @@ export type FetchFeedResult =
           contentType: string | null;
       });
 
+type Agents = { http: http.Agent; https: https.Agent };
+
 export const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPT_ENCODING = 'gzip, deflate, br';
 const ACCEPT =
@@ -49,6 +51,10 @@ const DECOMPRESSORS: Record<string, () => Transform> = {
     deflate: zlib.createInflate,
     br: zlib.createBrotliDecompress,
 };
+
+const LOOPBACK = ['127.0.0.1', '::1'];
+let publicAgents: Agents | undefined;
+let loopbackAgents: Agents | undefined;
 
 // Turns a user-typed feed URL into a URL (adding "https://" if needed); throws `invalid_url` if it's empty, invalid, not http(s) or has a password.
 export function parseFeedUrl(input: string | undefined | null): URL {
@@ -76,10 +82,72 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     return url;
 }
 
-type Agents = { http: http.Agent; https: https.Agent };
-const LOOPBACK = ['127.0.0.1', '::1'];
-let publicAgents: Agents | undefined;
-let loopbackAgents: Agents | undefined;
+// Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
+// and enforces the timeout and size cap. Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
+export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
+    const {
+        timeoutMs = 10_000,
+        userAgent = 'Frontpage/0.1 (RSS reader)',
+        maxRedirects = 5,
+        maxBytes = DEFAULT_MAX_BYTES,
+        allowLoopback = false,
+    } = opts;
+    const signal = AbortSignal.timeout(timeoutMs);
+    const agents = agentsFor(allowLoopback);
+    const headers = requestHeaders(userAgent, opts);
+    const startUrl = typeof input === 'string' ? parseFeedUrl(input) : input;
+
+    let url = startUrl;
+    let redirectCount = 0;
+    let allRedirectsPermanent = true;
+
+    try {
+        while (true) {
+            const res = await request(url, headers, agents, signal);
+            const status = res.statusCode ?? 0;
+
+            if (REDIRECT_STATUSES.has(status)) {
+                res.destroy();
+
+                redirectCount++;
+                if (redirectCount > maxRedirects) {
+                    throw new FeedError('network', 'Too many redirects', { retryable: false });
+                }
+
+                url = nextRedirectUrl(res, url);
+                allRedirectsPermanent &&= PERMANENT_REDIRECT_STATUSES.has(status);
+                continue;
+            }
+
+            const fetchedFrom: FetchedFrom = {
+                finalUrl: url.href,
+                redirect:
+                    redirectCount > 0 ? { permanent: allRedirectsPermanent, from: startUrl.href, to: url.href } : null,
+                validators: { etag: header(res, 'etag'), lastModified: header(res, 'last-modified') },
+            };
+
+            if (status === 304) {
+                res.destroy();
+                return { ...fetchedFrom, notModified: true };
+            }
+
+            if (status < 200 || status >= 300) {
+                res.destroy();
+                throw httpError(status);
+            }
+
+            const bytes = await readBody(res, maxBytes);
+            return { ...fetchedFrom, notModified: false, bytes, contentType: header(res, 'content-type') };
+        }
+    } catch (err) {
+        throw toFeedError(err, url, signal, timeoutMs);
+    }
+}
+
+// The shared agents, created on first use: public addresses only, or loopback allowed too for tests.
+function agentsFor(allowLoopback: boolean): Agents {
+    return allowLoopback ? (loopbackAgents ??= createAgents(LOOPBACK)) : (publicAgents ??= createAgents([]));
+}
 
 // Creates keep-alive http/https agents that refuse private or reserved IPs, except the exact addresses in `allowIPAddressList`.
 function createAgents(allowIPAddressList: string[]): Agents {
@@ -87,11 +155,6 @@ function createAgents(allowIPAddressList: string[]): Agents {
         http: new RequestFilteringHttpAgent({ keepAlive: true, allowIPAddressList }),
         https: new RequestFilteringHttpsAgent({ keepAlive: true, allowIPAddressList }),
     };
-}
-
-// The shared agents, created on first use: public addresses only, or loopback allowed too for tests.
-function agentsFor(allowLoopback: boolean): Agents {
-    return allowLoopback ? (loopbackAgents ??= createAgents(LOOPBACK)) : (publicAgents ??= createAgents([]));
 }
 
 // The headers sent on every request: who we are, what we accept, and the last ETag / Last-Modified so an unchanged feed is a 304.
@@ -155,20 +218,6 @@ function httpError(status: number): FeedError {
     });
 }
 
-// The response body, decompressed: unlike fetch, node:http leaves gzip, deflate and brotli bodies compressed.
-function decompress(res: IncomingMessage): Readable {
-    const encoding = header(res, 'content-encoding')?.trim().toLowerCase() ?? '';
-    const decoder = DECOMPRESSORS[encoding]?.();
-
-    // pipeline() forwards errors and aborts from the response into the decoder.
-    return decoder ? pipeline(res, decoder, () => {}) : res;
-}
-
-// The error thrown when a feed is bigger than `maxBytes`.
-function tooLarge(maxBytes: number): FeedError {
-    return new FeedError('too_large', `Feed is larger than ${maxBytes} bytes`);
-}
-
 // Reads the whole decompressed body; throws `too_large` as soon as it passes `maxBytes`, so huge responses and zip bombs can't fill memory.
 async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Array> {
     const declared = Number(header(res, 'content-length'));
@@ -195,6 +244,20 @@ async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Ar
     return new Uint8Array(Buffer.concat(chunks, total));
 }
 
+// The error thrown when a feed is bigger than `maxBytes`.
+function tooLarge(maxBytes: number): FeedError {
+    return new FeedError('too_large', `Feed is larger than ${maxBytes} bytes`);
+}
+
+// The response body, decompressed: unlike fetch, node:http leaves gzip, deflate and brotli bodies compressed.
+function decompress(res: IncomingMessage): Readable {
+    const encoding = header(res, 'content-encoding')?.trim().toLowerCase() ?? '';
+    const decoder = DECOMPRESSORS[encoding]?.();
+
+    // pipeline() forwards errors and aborts from the response into the decoder.
+    return decoder ? pipeline(res, decoder, () => {}) : res;
+}
+
 // Turns any error from a fetch into a FeedError: blocked address, timeout, unknown host, or another network failure.
 function toFeedError(err: unknown, url: URL, signal: AbortSignal, timeoutMs: number): FeedError {
     if (err instanceof FeedError) {
@@ -215,66 +278,4 @@ function toFeedError(err: unknown, url: URL, signal: AbortSignal, timeoutMs: num
     }
 
     return new FeedError('network', `Could not reach the feed: ${(err as Error)?.message ?? 'unknown error'}`);
-}
-
-// Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
-// and enforces the timeout and size cap. Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
-export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
-    const {
-        timeoutMs = 10_000,
-        userAgent = 'Frontpage/0.1 (RSS reader)',
-        maxRedirects = 5,
-        maxBytes = DEFAULT_MAX_BYTES,
-        allowLoopback = false,
-    } = opts;
-    const signal = AbortSignal.timeout(timeoutMs);
-    const agents = agentsFor(allowLoopback);
-    const headers = requestHeaders(userAgent, opts);
-    const startUrl = typeof input === 'string' ? parseFeedUrl(input) : input;
-
-    let url = startUrl;
-    let redirectCount = 0;
-    let allRedirectsPermanent = true;
-
-    try {
-        while (true) {
-            const res = await request(url, headers, agents, signal);
-            const status = res.statusCode ?? 0;
-
-            if (REDIRECT_STATUSES.has(status)) {
-                res.destroy();
-
-                redirectCount++;
-                if (redirectCount > maxRedirects) {
-                    throw new FeedError('network', 'Too many redirects', { retryable: false });
-                }
-
-                url = nextRedirectUrl(res, url);
-                allRedirectsPermanent &&= PERMANENT_REDIRECT_STATUSES.has(status);
-                continue;
-            }
-
-            const fetchedFrom: FetchedFrom = {
-                finalUrl: url.href,
-                redirect:
-                    redirectCount > 0 ? { permanent: allRedirectsPermanent, from: startUrl.href, to: url.href } : null,
-                validators: { etag: header(res, 'etag'), lastModified: header(res, 'last-modified') },
-            };
-
-            if (status === 304) {
-                res.destroy();
-                return { ...fetchedFrom, notModified: true };
-            }
-
-            if (status < 200 || status >= 300) {
-                res.destroy();
-                throw httpError(status);
-            }
-
-            const bytes = await readBody(res, maxBytes);
-            return { ...fetchedFrom, notModified: false, bytes, contentType: header(res, 'content-type') };
-        }
-    } catch (err) {
-        throw toFeedError(err, url, signal, timeoutMs);
-    }
 }
