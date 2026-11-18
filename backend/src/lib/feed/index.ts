@@ -1,4 +1,3 @@
-export { FEED_ERRORS, FeedError } from './errors';
 export { fetchFeed, parseFeedUrl, type FetchFeedOptions, type FetchFeedResult } from './fetch';
 export { decodeFeed, detectCharset } from './decode';
 export { parseFeedDate } from './dates';

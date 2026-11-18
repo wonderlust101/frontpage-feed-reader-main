@@ -4,7 +4,7 @@
 import { createHash } from 'node:crypto';
 import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
-import { FeedError } from './errors';
+import { AppError } from '../errors';
 import { parseFeedDate } from './dates';
 import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 
@@ -42,10 +42,10 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     const warnings: string[] = [];
 
     if (!feedXml.trim()) {
-        throw new FeedError('not_a_feed', 'The response was empty');
+        throw new AppError('not_a_feed', 'The response was empty');
     }
     if (looksLikeHtmlPage(feedXml)) {
-        throw new FeedError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
+        throw new AppError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
     }
 
     const limited = limitItems(feedXml, MAX_ITEMS);
@@ -58,9 +58,9 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
         feed = parseFeed(limited.xml);
     } catch (err) {
         if ((err as { code?: string })?.code === 'INVALID_FEED') {
-            throw new FeedError('not_a_feed', 'No RSS or Atom feed was found at this URL');
+            throw new AppError('not_a_feed', 'No RSS or Atom feed was found at this URL');
         }
-        throw new FeedError('parse_error', `The feed could not be parsed: ${(err as Error)?.message ?? err}`);
+        throw new AppError('parse_error', `The feed could not be parsed: ${(err as Error)?.message ?? err}`);
     }
 
     const format = detectFormat(feed, feedXml);

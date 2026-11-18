@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
 import { AppError, badRequest, notFound } from '../../src/lib/errors';
-import { FeedError } from '../../src/lib/feed';
 import { errorHandler } from '../../src/middleware/error-handler';
+import { notFound as notFoundMiddleware } from '../../src/middleware/not-found';
 
 // A minimal fake Express Response that records the status and JSON body, so the error handler can be tested without a server.
 function fakeRes() {
@@ -32,16 +32,15 @@ afterEach(() => {
 });
 
 describe('errorHandler', () => {
-    test('AppError: uses its status, code, retryable flag and details', () => {
-        const err = new AppError('quota_exceeded', 'Too many feeds', 409, { retryable: true, details: { limit: 50 } });
-        expect(handle(err)).toEqual({
-            status: 409,
-            body: { error: { code: 'quota_exceeded', message: 'Too many feeds', retryable: true, limit: 50 } },
+    test('AppError: takes its status and retryable flag from the ERRORS table', () => {
+        expect(handle(new AppError('timeout', 'The feed took longer than 10s to respond'))).toEqual({
+            status: 504,
+            body: { error: { code: 'timeout', message: 'The feed took longer than 10s to respond', retryable: true } },
         });
     });
 
-    test('FeedError: maps its code to a status and exposes the upstream status', () => {
-        const err = new FeedError('http_4xx', 'The feed server responded with 404', { upstreamStatus: 404 });
+    test('AppError: exposes the upstream status of a failing feed server', () => {
+        const err = new AppError('http_4xx', 'The feed server responded with 404', { upstreamStatus: 404 });
         expect(handle(err)).toEqual({
             status: 502,
             body: {
@@ -90,5 +89,14 @@ describe('errorHandler', () => {
         });
         expect(JSON.stringify(sent.body)).not.toContain('hunter2');
         expect(log).toHaveBeenCalledTimes(1);
+    });
+
+    test('unknown routes are passed to the error handler as a standard not_found error', () => {
+        let forwarded: unknown;
+        notFoundMiddleware({} as Request, {} as Response, ((err: unknown) => (forwarded = err)) as NextFunction);
+        expect(handle(forwarded)).toEqual({
+            status: 404,
+            body: { error: { code: 'not_found', message: 'Not found', retryable: false } },
+        });
     });
 });

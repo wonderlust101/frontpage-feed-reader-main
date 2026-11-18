@@ -78,9 +78,9 @@ Requests flow **routes → controller → service**: keep handler bodies out of 
 { "error": { "code": "not_found", "message": "Feed not found", "retryable": false } }
 ```
 
-- Services **throw**: an `AppError` (`src/lib/errors.ts`), a helper (`notFound()`, `badRequest()`), or a module subclass like `FeedError`.
+- Services **throw** `new AppError(code, message)` from `src/lib/errors.ts`, or a helper: `notFound()`, `badRequest()`. The code decides the HTTP status and whether the error is retryable.
 - Controllers **don't catch**. Express 5 forwards thrown errors to `src/middleware/error-handler.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
-- A new kind of error is one table entry, not new controller code: add `code → { httpStatus, retryable }` to the module's errors file (see `FEED_ERRORS` in `src/lib/feed/errors.ts`), and add the code to `ApiErrorCode` in `packages/shared/src/api.ts`.
+- All error codes live in one table, `ERRORS` in `src/lib/errors.ts`. A new kind of error is one line there (`code: { httpStatus, retryable }`) plus the code in `ApiErrorCode` in `packages/shared/src/api.ts`; TypeScript flags a code that's missing from either.
 
 The sample feeds live in `backend/data/` because only the backend reads them.
 

@@ -8,7 +8,7 @@ import { pipeline, type Readable, type Transform } from 'node:stream';
 import zlib from 'node:zlib';
 import { RequestFilteringHttpAgent, RequestFilteringHttpsAgent } from 'request-filtering-agent';
 import type { FeedCacheValidators, FeedRedirect } from '@frontpage/shared';
-import { FeedError } from './errors';
+import { AppError } from '../errors';
 
 export type FetchFeedOptions = Partial<FeedCacheValidators> & {
     timeoutMs?: number;
@@ -62,22 +62,22 @@ let loopbackAgents: Agents | undefined;
 export function parseFeedUrl(input: string | undefined | null): URL {
     const raw = input?.trim();
     if (!raw) {
-        throw new FeedError('invalid_url', 'A feed URL is required');
+        throw new AppError('invalid_url', 'A feed URL is required');
     }
 
     let url: URL;
     try {
         url = new URL(HAS_SCHEME.test(raw) ? raw : `https://${raw}`);
     } catch {
-        throw new FeedError('invalid_url', `Not a valid URL: ${raw}`);
+        throw new AppError('invalid_url', `Not a valid URL: ${raw}`);
     }
 
     if (!WEB_PROTOCOLS.has(url.protocol)) {
-        throw new FeedError('invalid_url', 'Only http and https URLs are supported');
+        throw new AppError('invalid_url', 'Only http and https URLs are supported');
     }
 
     if (url.username || url.password) {
-        throw new FeedError('invalid_url', 'URLs with credentials are not allowed');
+        throw new AppError('invalid_url', 'URLs with credentials are not allowed');
     }
 
     url.hash = '';
@@ -85,7 +85,7 @@ export function parseFeedUrl(input: string | undefined | null): URL {
 }
 
 // Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
-// and enforces the timeout and size cap. Every failure is thrown as a FeedError with a code such as `timeout`, `http_4xx` or `blocked_url`.
+// and enforces the timeout and size cap. Every failure is thrown as a AppError with a code such as `timeout`, `http_4xx` or `blocked_url`.
 export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const { timeoutMs = 10_000, userAgent = 'Frontpage/0.1 (RSS reader)', maxRedirects = 5, maxBytes = DEFAULT_MAX_BYTES, allowLoopback = false } = opts;
     const signal = AbortSignal.timeout(timeoutMs);
@@ -107,7 +107,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
 
                 redirectCount++;
                 if (redirectCount > maxRedirects) {
-                    throw new FeedError('network', 'Too many redirects', { retryable: false });
+                    throw new AppError('network', 'Too many redirects', { retryable: false });
                 }
 
                 url = nextRedirectUrl(res, url);
@@ -135,7 +135,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
             return { ...fetchedFrom, notModified: false, bytes, contentType: header(res, 'content-type') };
         }
     } catch (err) {
-        throw toFeedError(err, url, signal, timeoutMs);
+        throw toAppError(err, url, signal, timeoutMs);
     }
 }
 
@@ -189,25 +189,25 @@ function header(res: IncomingMessage, name: string): string | null {
 function nextRedirectUrl(res: IncomingMessage, currentUrl: URL): URL {
     const location = header(res, 'location');
     if (!location) {
-        throw new FeedError('network', `Redirect (${res.statusCode}) without a Location header`);
+        throw new AppError('network', `Redirect (${res.statusCode}) without a Location header`);
     }
 
     const next = new URL(location, currentUrl);
     if (!WEB_PROTOCOLS.has(next.protocol)) {
-        throw new FeedError('blocked_url', 'Redirected to an unsupported protocol');
+        throw new AppError('blocked_url', 'Redirected to an unsupported protocol');
     }
 
     if (next.username || next.password) {
-        throw new FeedError('blocked_url', 'Redirected to a URL with credentials');
+        throw new AppError('blocked_url', 'Redirected to a URL with credentials');
     }
 
     next.hash = '';
     return next;
 }
 
-// The FeedError for a 4xx/5xx response: 5xx, 408 (timeout) and 429 (rate limited) are worth retrying, other 4xx are not.
-function httpError(status: number): FeedError {
-    return new FeedError(status >= 500 ? 'http_5xx' : 'http_4xx', `The feed server responded with ${status}`, {
+// The AppError for a 4xx/5xx response: 5xx, 408 (timeout) and 429 (rate limited) are worth retrying, other 4xx are not.
+function httpError(status: number): AppError {
+    return new AppError(status >= 500 ? 'http_5xx' : 'http_4xx', `The feed server responded with ${status}`, {
         upstreamStatus: status,
         retryable: status >= 500 || RETRYABLE_CLIENT_ERRORS.has(status),
     });
@@ -240,8 +240,8 @@ async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Ar
 }
 
 // The error thrown when a feed is bigger than `maxBytes`.
-function tooLarge(maxBytes: number): FeedError {
-    return new FeedError('too_large', `Feed is larger than ${maxBytes} bytes`);
+function tooLarge(maxBytes: number): AppError {
+    return new AppError('too_large', `Feed is larger than ${maxBytes} bytes`);
 }
 
 // The response body, decompressed: unlike fetch, node:http leaves gzip, deflate and brotli bodies compressed.
@@ -253,24 +253,24 @@ function decompress(res: IncomingMessage): Readable {
     return decoder ? pipeline(res, decoder, () => {}) : res;
 }
 
-// Turns any error from a fetch into a FeedError: blocked address, timeout, unknown host, or another network failure.
-function toFeedError(err: unknown, url: URL, signal: AbortSignal, timeoutMs: number): FeedError {
-    if (err instanceof FeedError) {
+// Turns any error from a fetch into a AppError: blocked address, timeout, unknown host, or another network failure.
+function toAppError(err: unknown, url: URL, signal: AbortSignal, timeoutMs: number): AppError {
+    if (err instanceof AppError) {
         return err;
     }
 
     // request-filtering-agent refuses private addresses with a plain Error, recognisable only by its message.
     if (err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message)) {
-        return new FeedError('blocked_url', 'That host is not allowed');
+        return new AppError('blocked_url', 'That host is not allowed');
     }
 
     if (signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError'))) {
-        return new FeedError('timeout', `The feed took longer than ${timeoutMs / 1000}s to respond`);
+        return new AppError('timeout', `The feed took longer than ${timeoutMs / 1000}s to respond`);
     }
 
     if ((err as NodeJS.ErrnoException)?.code === 'ENOTFOUND') {
-        return new FeedError('network', `Could not resolve host ${url.hostname}`, { retryable: false });
+        return new AppError('network', `Could not resolve host ${url.hostname}`, { retryable: false });
     }
 
-    return new FeedError('network', `Could not reach the feed: ${(err as Error)?.message ?? 'unknown error'}`);
+    return new AppError('network', `Could not reach the feed: ${(err as Error)?.message ?? 'unknown error'}`);
 }

@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
-import { sendError } from './error-handler';
+import { notFound as notFoundError } from '../lib/errors';
 
-// Answers unknown routes with a JSON 404 in the standard error shape (Express's default is an HTML page).
-export const notFound: RequestHandler = (_req, res) => {
-    sendError(res, 404, { code: 'not_found', message: 'Not found', retryable: false });
+// Passes unknown routes to the error handler as a `not_found` error, so the 404 has the standard error shape.
+export const notFound: RequestHandler = (_req, _res, next) => {
+    next(notFoundError());
 };

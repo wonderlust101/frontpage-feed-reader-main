@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { NormalizedFeed } from '@frontpage/shared';
-import { FeedError, MAX_ITEMS, decodeFeed, limitItems, normalizeFeed } from '../../../src/lib/feed';
+import { AppError } from '../../../src/lib/errors';
+import { MAX_ITEMS, decodeFeed, limitItems, normalizeFeed } from '../../../src/lib/feed';
 import { curatedFixtures, readFixture } from '../../helpers/fixtures';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');
@@ -11,16 +12,16 @@ function load(path: string, contentType?: string, now = NOW): NormalizedFeed {
     return normalizeFeed(decodeFeed(readFixture(path), contentType), { url: FEED_URL, now });
 }
 
-// Asserts `fn` throws a FeedError with this `code`.
-function expectFeedError(fn: () => unknown, code: string) {
+// Asserts `fn` throws a AppError with this `code`.
+function expectAppError(fn: () => unknown, code: string) {
     try {
         fn();
     } catch (err) {
-        expect(err).toBeInstanceOf(FeedError);
-        expect((err as FeedError).code).toBe(code as FeedError['code']);
+        expect(err).toBeInstanceOf(AppError);
+        expect((err as AppError).code).toBe(code as AppError['code']);
         return;
     }
-    throw new Error(`expected FeedError(${code})`);
+    throw new Error(`expected AppError(${code})`);
 }
 
 // Asserts a feed is complete and safe: titled items with ids, URLs and valid ISO dates, short summaries, no scripts, newest first.
@@ -91,15 +92,15 @@ describe('broken and odd feeds', () => {
     });
 
     test('an HTML page is rejected as not_a_feed', () => {
-        expectFeedError(() => load('odd/not-a-feed.html'), 'not_a_feed');
+        expectAppError(() => load('odd/not-a-feed.html'), 'not_a_feed');
     });
 
     test('non-feed XML is rejected as not_a_feed', () => {
-        expectFeedError(() => load('odd/not-a-feed.xml'), 'not_a_feed');
+        expectAppError(() => load('odd/not-a-feed.xml'), 'not_a_feed');
     });
 
     test('an empty body is rejected as not_a_feed', () => {
-        expectFeedError(() => normalizeFeed('   ', { url: FEED_URL }), 'not_a_feed');
+        expectAppError(() => normalizeFeed('   ', { url: FEED_URL }), 'not_a_feed');
     });
 
     test('an empty channel yields a titled feed with no items', () => {
