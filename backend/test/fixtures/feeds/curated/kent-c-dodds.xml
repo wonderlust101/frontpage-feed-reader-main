@@ -1,0 +1,1508 @@
+<rss xmlns:blogChannel="https://kentcdodds.com/blog" version="2.0">
+      <channel>
+        <title>Kent C. Dodds Blog</title>
+        <link>https://kentcdodds.com/blog</link>
+        <description>The Kent C. Dodds Blog</description>
+        <language>en-us</language>
+        <generator>Kody the Koala</generator>
+        <ttl>40</ttl>
+        <item>
+              <title><![CDATA[You Own the Outcome: Product Engineering in the Age of AI]]></title>
+              <description><![CDATA[Agents are great at producing code. The valuable work left for you is deciding what should exist, how it should behave, and what you're willing to trade for it.]]></description>
+              <pubDate>2026-09-24</pubDate>
+              <link>https://kentcdodds.com/blog/you-own-the-outcome</link>
+              <guid>https://kentcdodds.com/blog/you-own-the-outcome</guid>
+            </item>
+<item>
+              <title><![CDATA[Introducing Kody: Your Personal Software Factory]]></title>
+              <description><![CDATA[Kody turns the good answer into a package you keep.]]></description>
+              <pubDate>2026-09-08</pubDate>
+              <link>https://kentcdodds.com/blog/introducing-kody-your-personal-software-factory</link>
+              <guid>https://kentcdodds.com/blog/introducing-kody-your-personal-software-factory</guid>
+            </item>
+<item>
+              <title><![CDATA[Implementing Hybrid Semantic + Lexical Search]]></title>
+              <description><![CDATA[Semantic search alone wasn't good enough. Here's how I improved search on kentcdodds.com through three rounds of iteration with Cursor and GPT-5.4, each time learning something that the previous design missed.]]></description>
+              <pubDate>2026-03-16</pubDate>
+              <link>https://kentcdodds.com/blog/implementing-hybrid-semantic-lexical-search</link>
+              <guid>https://kentcdodds.com/blog/implementing-hybrid-semantic-lexical-search</guid>
+            </item>
+<item>
+              <title><![CDATA[Simplifying Containers with Cloudflare Sandboxes]]></title>
+              <description><![CDATA[How I replaced a long-lived Cloudflare Container with a one-shot Cloudflare Sandbox, deleted most of the control-plane code, and let an agent do the heavy lifting in less than an hour of my own time.]]></description>
+              <pubDate>2026-03-11</pubDate>
+              <link>https://kentcdodds.com/blog/simplifying-containers-with-cloudflare-sandboxes</link>
+              <guid>https://kentcdodds.com/blog/simplifying-containers-with-cloudflare-sandboxes</guid>
+            </item>
+<item>
+              <title><![CDATA[Migrating to Workspaces and Nx]]></title>
+              <description><![CDATA[The interesting part of moving kentcdodds.com to npm workspaces was not the file moves. It was everything the file moves broke.]]></description>
+              <pubDate>2026-03-10</pubDate>
+              <link>https://kentcdodds.com/blog/migrating-to-workspaces-and-nx</link>
+              <guid>https://kentcdodds.com/blog/migrating-to-workspaces-and-nx</guid>
+            </item>
+<item>
+              <title><![CDATA[Offloading FFmpeg with Cloudflare]]></title>
+              <description><![CDATA[How I moved Call Kent podcast episode processing off my primary Fly.io app server and onto Cloudflare Queues and Containers: what broke, what I missed, and whether it was worth the complexity.]]></description>
+              <pubDate>2026-03-09</pubDate>
+              <link>https://kentcdodds.com/blog/offloading-ffmpeg-with-cloudflare</link>
+              <guid>https://kentcdodds.com/blog/offloading-ffmpeg-with-cloudflare</guid>
+            </item>
+<item>
+              <title><![CDATA[Building Semantic Search on my Content]]></title>
+              <description><![CDATA[I've added some pretty cool AI-powered features to kentcdodds.com and I want to tell you all about it.]]></description>
+              <pubDate>2026-02-24</pubDate>
+              <link>https://kentcdodds.com/blog/building-semantic-search-on-my-content</link>
+              <guid>https://kentcdodds.com/blog/building-semantic-search-on-my-content</guid>
+            </item>
+<item>
+              <title><![CDATA[Helping YOU ask ME questions with AI]]></title>
+              <description><![CDATA[Here's how I've made it easier for you to call into the Call Kent podcast without having to record yourself and also make yourself anonymous using AI.]]></description>
+              <pubDate>2026-02-24</pubDate>
+              <link>https://kentcdodds.com/blog/helping-you-ask-me-questions-with-ai</link>
+              <guid>https://kentcdodds.com/blog/helping-you-ask-me-questions-with-ai</guid>
+            </item>
+<item>
+              <title><![CDATA[How I used Cursor to Migrate Frameworks]]></title>
+              <description><![CDATA[I upgraded kentcdodds.com from Remix v2 to React Router v7 in a day with over 17k lines of code changed. Here's how I did it.]]></description>
+              <pubDate>2026-02-20</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-used-cursor-to-migrate-frameworks</link>
+              <guid>https://kentcdodds.com/blog/how-i-used-cursor-to-migrate-frameworks</guid>
+            </item>
+<item>
+              <title><![CDATA[The Dow's Start on the Covenant Path]]></title>
+              <description><![CDATA[My experience sharing the gospel with Jeremiah and Beiyi Dow]]></description>
+              <pubDate>2026-01-05</pubDate>
+              <link>https://kentcdodds.com/blog/the-dows-start-on-the-covenant-path</link>
+              <guid>https://kentcdodds.com/blog/the-dows-start-on-the-covenant-path</guid>
+            </item>
+<item>
+              <title><![CDATA[2025 in Review]]></title>
+              <description><![CDATA[Looking back over my 2025 and looking forward to my 2026]]></description>
+              <pubDate>2025-12-31</pubDate>
+              <link>https://kentcdodds.com/blog/2025-in-review</link>
+              <guid>https://kentcdodds.com/blog/2025-in-review</guid>
+            </item>
+<item>
+              <title><![CDATA[The next chapter: EpicAI.pro]]></title>
+              <description><![CDATA[What I'm working on with AI education and why I think it's the future.]]></description>
+              <pubDate>2025-04-10</pubDate>
+              <link>https://kentcdodds.com/blog/the-next-chapter-epicai-pro</link>
+              <guid>https://kentcdodds.com/blog/the-next-chapter-epicai-pro</guid>
+            </item>
+<item>
+              <title><![CDATA[AI is taking your job]]></title>
+              <description><![CDATA[AI is changing how hiring works, and that makes in person connections even more important.]]></description>
+              <pubDate>2024-11-21</pubDate>
+              <link>https://kentcdodds.com/blog/ai-is-taking-your-job</link>
+              <guid>https://kentcdodds.com/blog/ai-is-taking-your-job</guid>
+            </item>
+<item>
+              <title><![CDATA[How I increased my visibility]]></title>
+              <description><![CDATA[Someone asked me this and here's my answer.]]></description>
+              <pubDate>2024-10-29</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-increased-my-visibility</link>
+              <guid>https://kentcdodds.com/blog/how-i-increased-my-visibility</guid>
+            </item>
+<item>
+              <title><![CDATA[2023 in Review]]></title>
+              <description><![CDATA[A review of what happened in the life of Kent C. Dodds in 2023]]></description>
+              <pubDate>2023-12-20</pubDate>
+              <link>https://kentcdodds.com/blog/2023-in-review</link>
+              <guid>https://kentcdodds.com/blog/2023-in-review</guid>
+            </item>
+<item>
+              <title><![CDATA[Launching Epic Web]]></title>
+              <description><![CDATA[The story of how Epic Web came to be]]></description>
+              <pubDate>2023-12-20</pubDate>
+              <link>https://kentcdodds.com/blog/launching-epic-web</link>
+              <guid>https://kentcdodds.com/blog/launching-epic-web</guid>
+            </item>
+<item>
+              <title><![CDATA[Stop Being a Junior]]></title>
+              <description><![CDATA[Some advise for people who still consider themselves junior developers]]></description>
+              <pubDate>2023-05-30</pubDate>
+              <link>https://kentcdodds.com/blog/stop-being-a-junior</link>
+              <guid>https://kentcdodds.com/blog/stop-being-a-junior</guid>
+            </item>
+<item>
+              <title><![CDATA[RSC with Dan Abramov and Joe Savona Live Stream]]></title>
+              <description><![CDATA[I had a live streamed conversation with Joe Savona and Dan Abramov. Here's a summary of our discussion.]]></description>
+              <pubDate>2023-03-14</pubDate>
+              <link>https://kentcdodds.com/blog/rsc-with-dan-abramov-and-joe-savona-live-stream</link>
+              <guid>https://kentcdodds.com/blog/rsc-with-dan-abramov-and-joe-savona-live-stream</guid>
+            </item>
+<item>
+              <title><![CDATA[Fixing a Memory Leak in a Production Node.js App]]></title>
+              <description><![CDATA[How I found and fixed a memory leak on kentcdodds.com]]></description>
+              <pubDate>2023-01-12</pubDate>
+              <link>https://kentcdodds.com/blog/fixing-a-memory-leak-in-a-production-node-js-app</link>
+              <guid>https://kentcdodds.com/blog/fixing-a-memory-leak-in-a-production-node-js-app</guid>
+            </item>
+<item>
+              <title><![CDATA[2022 in Review]]></title>
+              <description><![CDATA[A review of what happened in the KCD world in 2022]]></description>
+              <pubDate>2022-12-29</pubDate>
+              <link>https://kentcdodds.com/blog/2022-in-review</link>
+              <guid>https://kentcdodds.com/blog/2022-in-review</guid>
+            </item>
+<item>
+              <title><![CDATA[My Car Accident]]></title>
+              <description><![CDATA[I was involved in a very bad car accident in 2022. Here's the story.]]></description>
+              <pubDate>2022-12-29</pubDate>
+              <link>https://kentcdodds.com/blog/my-car-accident</link>
+              <guid>https://kentcdodds.com/blog/my-car-accident</guid>
+            </item>
+<item>
+              <title><![CDATA[I Migrated from a Postgres Cluster to Distributed SQLite with LiteFS]]></title>
+              <description><![CDATA[Why and how I migrated from distributed postgres to distributed sqlite on kentcdodds.com]]></description>
+              <pubDate>2022-11-21</pubDate>
+              <link>https://kentcdodds.com/blog/i-migrated-from-a-postgres-cluster-to-distributed-sqlite-with-litefs</link>
+              <guid>https://kentcdodds.com/blog/i-migrated-from-a-postgres-cluster-to-distributed-sqlite-with-litefs</guid>
+            </item>
+<item>
+              <title><![CDATA[I'm building EpicWeb.dev]]></title>
+              <description><![CDATA[I've struck out on my own again to focus on my most ambitious project yet.]]></description>
+              <pubDate>2022-09-07</pubDate>
+              <link>https://kentcdodds.com/blog/i-m-building-epicweb-dev</link>
+              <guid>https://kentcdodds.com/blog/i-m-building-epicweb-dev</guid>
+            </item>
+<item>
+              <title><![CDATA[A review of my time at Remix]]></title>
+              <description><![CDATA[As I move on to my next adventure, I want to take this opportunity to review what I accomplished while at Remix.]]></description>
+              <pubDate>2022-09-06</pubDate>
+              <link>https://kentcdodds.com/blog/a-review-of-my-time-at-remix</link>
+              <guid>https://kentcdodds.com/blog/a-review-of-my-time-at-remix</guid>
+            </item>
+<item>
+              <title><![CDATA[Remix: The Yang to React's Yin]]></title>
+              <description><![CDATA[Remix fills the missing piece that all React web applications need: The Network Chasm]]></description>
+              <pubDate>2022-03-24</pubDate>
+              <link>https://kentcdodds.com/blog/remix-the-yang-to-react-s-yin</link>
+              <guid>https://kentcdodds.com/blog/remix-the-yang-to-react-s-yin</guid>
+            </item>
+<item>
+              <title><![CDATA[How I help you build better websites]]></title>
+              <description><![CDATA[I'm making a career move to more effectively help you make the web (and the world) better.]]></description>
+              <pubDate>2021-11-15</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-help-you-build-better-websites</link>
+              <guid>https://kentcdodds.com/blog/how-i-help-you-build-better-websites</guid>
+            </item>
+<item>
+              <title><![CDATA[Why I Love Remix]]></title>
+              <description><![CDATA[I've written tens of thousands of lines of code with Remix and I want to tell you why I love using this framework.]]></description>
+              <pubDate>2021-11-13</pubDate>
+              <link>https://kentcdodds.com/blog/why-i-love-remix</link>
+              <guid>https://kentcdodds.com/blog/why-i-love-remix</guid>
+            </item>
+<item>
+              <title><![CDATA[The State Initializer Pattern]]></title>
+              <description><![CDATA[A simple pattern used in libraries like downshift and ReachUI to enable component/hook users to initialize your state and even reset it to that initial value.]]></description>
+              <pubDate>2021-11-05</pubDate>
+              <link>https://kentcdodds.com/blog/the-state-initializer-pattern</link>
+              <guid>https://kentcdodds.com/blog/the-state-initializer-pattern</guid>
+            </item>
+<item>
+              <title><![CDATA[How to React ⚛️]]></title>
+              <description><![CDATA[Let's see how learning React ⚛️ in the right order can make it less overwhelming.]]></description>
+              <pubDate>2021-11-03</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-react</link>
+              <guid>https://kentcdodds.com/blog/how-to-react</guid>
+            </item>
+<item>
+              <title><![CDATA[Get a catch block error message with TypeScript]]></title>
+              <description><![CDATA[TypeScript forces you to acknowledge you can't know what was thrown making getting the error message a pain. Here's how you can manage it.]]></description>
+              <pubDate>2021-10-28</pubDate>
+              <link>https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript</link>
+              <guid>https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript</guid>
+            </item>
+<item>
+              <title><![CDATA[Building an awesome image loading experience]]></title>
+              <description><![CDATA[How Unsplash's blurred image loading works and why I did mine differently for a more excellent experience on my site.]]></description>
+              <pubDate>2021-10-19</pubDate>
+              <link>https://kentcdodds.com/blog/building-an-awesome-image-loading-experience</link>
+              <guid>https://kentcdodds.com/blog/building-an-awesome-image-loading-experience</guid>
+            </item>
+<item>
+              <title><![CDATA[How Remix makes CSS clashes predictable]]></title>
+              <description><![CDATA[Remix has this beautifully simple feature for CSS that I want to tell you all about.]]></description>
+              <pubDate>2021-10-13</pubDate>
+              <link>https://kentcdodds.com/blog/how-remix-makes-css-clashes-predictable</link>
+              <guid>https://kentcdodds.com/blog/how-remix-makes-css-clashes-predictable</guid>
+            </item>
+<item>
+              <title><![CDATA[Introducing the new kentcdodds.com]]></title>
+              <description><![CDATA[This site just experienced a huge rewrite and I want to show you around a bit.]]></description>
+              <pubDate>2021-10-04</pubDate>
+              <link>https://kentcdodds.com/blog/introducing-the-new-kentcdodds.com</link>
+              <guid>https://kentcdodds.com/blog/introducing-the-new-kentcdodds.com</guid>
+            </item>
+<item>
+              <title><![CDATA[How I built a modern website in 2021]]></title>
+              <description><![CDATA[I rewrote kentcdodds.com using the latest technologies and I want to talk about what I did.]]></description>
+              <pubDate>2021-09-29</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-built-a-modern-website-in-2021</link>
+              <guid>https://kentcdodds.com/blog/how-i-built-a-modern-website-in-2021</guid>
+            </item>
+<item>
+              <title><![CDATA[How to use React Context effectively]]></title>
+              <description><![CDATA[How to create and expose React Context providers and consumers]]></description>
+              <pubDate>2021-06-05</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-use-react-context-effectively</link>
+              <guid>https://kentcdodds.com/blog/how-to-use-react-context-effectively</guid>
+            </item>
+<item>
+              <title><![CDATA[Static vs Unit vs Integration vs E2E Testing for Frontend Apps]]></title>
+              <description><![CDATA[What these mean, why they matter, and why they don't]]></description>
+              <pubDate>2021-06-03</pubDate>
+              <link>https://kentcdodds.com/blog/static-vs-unit-vs-integration-vs-e2e-tests</link>
+              <guid>https://kentcdodds.com/blog/static-vs-unit-vs-integration-vs-e2e-tests</guid>
+            </item>
+<item>
+              <title><![CDATA[The Testing Trophy and Testing Classifications]]></title>
+              <description><![CDATA[How to interpret the testing trophy for optimal clarity]]></description>
+              <pubDate>2021-06-03</pubDate>
+              <link>https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications</link>
+              <guid>https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications</guid>
+            </item>
+<item>
+              <title><![CDATA[Array reduce vs chaining vs for loop]]></title>
+              <description><![CDATA[A comparison of different approaches to operating on an array]]></description>
+              <pubDate>2021-05-24</pubDate>
+              <link>https://kentcdodds.com/blog/array-reduce-vs-chaining-vs-for-loop</link>
+              <guid>https://kentcdodds.com/blog/array-reduce-vs-chaining-vs-for-loop</guid>
+            </item>
+<item>
+              <title><![CDATA[Don't Solve Problems, Eliminate Them]]></title>
+              <description><![CDATA[How eliminating problems can drastically simplify your codebases and life]]></description>
+              <pubDate>2021-05-11</pubDate>
+              <link>https://kentcdodds.com/blog/don-t-solve-problems-eliminate-them</link>
+              <guid>https://kentcdodds.com/blog/don-t-solve-problems-eliminate-them</guid>
+            </item>
+<item>
+              <title><![CDATA[Super Simple Start to Remix]]></title>
+              <description><![CDATA[The simplest distraction-free version of a remix app]]></description>
+              <pubDate>2021-05-03</pubDate>
+              <link>https://kentcdodds.com/blog/super-simple-start-to-remix</link>
+              <guid>https://kentcdodds.com/blog/super-simple-start-to-remix</guid>
+            </item>
+<item>
+              <title><![CDATA[Super Simple Start to ESModules in Node.js]]></title>
+              <description><![CDATA[All supported versions of Node.js support ESModules now. Here's how to get started using them.]]></description>
+              <pubDate>2021-04-08</pubDate>
+              <link>https://kentcdodds.com/blog/super-simple-start-to-es-modules-in-node-js</link>
+              <guid>https://kentcdodds.com/blog/super-simple-start-to-es-modules-in-node-js</guid>
+            </item>
+<item>
+              <title><![CDATA[JavaScript Pass By Value Function Parameters]]></title>
+              <description><![CDATA[How it works and how to work with it... and around it]]></description>
+              <pubDate>2021-03-23</pubDate>
+              <link>https://kentcdodds.com/blog/javascript-pass-by-value-function-parameters</link>
+              <guid>https://kentcdodds.com/blog/javascript-pass-by-value-function-parameters</guid>
+            </item>
+<item>
+              <title><![CDATA[How to write a Constrained Identity Function (CIF) in TypeScript]]></title>
+              <description><![CDATA[A handy advanced TypeScript pattern to increase your productivity.]]></description>
+              <pubDate>2021-03-09</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-write-a-constrained-identity-function-in-typescript</link>
+              <guid>https://kentcdodds.com/blog/how-to-write-a-constrained-identity-function-in-typescript</guid>
+            </item>
+<item>
+              <title><![CDATA[How to optimize your context value]]></title>
+              <description><![CDATA[Why and how you can optimize your context provider's value to avoid performance issues]]></description>
+              <pubDate>2021-03-08</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-optimize-your-context-value</link>
+              <guid>https://kentcdodds.com/blog/how-to-optimize-your-context-value</guid>
+            </item>
+<item>
+              <title><![CDATA[How to write a React Component in TypeScript]]></title>
+              <description><![CDATA[There are plenty of ways to do it, here's how I recommend typing React Components]]></description>
+              <pubDate>2021-03-04</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-write-a-react-component-in-typescript</link>
+              <guid>https://kentcdodds.com/blog/how-to-write-a-react-component-in-typescript</guid>
+            </item>
+<item>
+              <title><![CDATA[TypeScript Function Syntaxes]]></title>
+              <description><![CDATA[The syntax for various functions and function types in TypeScript with simple examples.]]></description>
+              <pubDate>2021-02-25</pubDate>
+              <link>https://kentcdodds.com/blog/typescript-function-syntaxes</link>
+              <guid>https://kentcdodds.com/blog/typescript-function-syntaxes</guid>
+            </item>
+<item>
+              <title><![CDATA[Listify a JavaScript Array]]></title>
+              <description><![CDATA[Make a human readable list from an array in JavaScript.]]></description>
+              <pubDate>2021-02-18</pubDate>
+              <link>https://kentcdodds.com/blog/listify-a-java-script-array</link>
+              <guid>https://kentcdodds.com/blog/listify-a-java-script-array</guid>
+            </item>
+<item>
+              <title><![CDATA[Build vs Buy: Component Libraries edition]]></title>
+              <description><![CDATA[Some things to think about before you decide to create your own component library.]]></description>
+              <pubDate>2021-02-04</pubDate>
+              <link>https://kentcdodds.com/blog/build-vs-buy-component-libraries-edition</link>
+              <guid>https://kentcdodds.com/blog/build-vs-buy-component-libraries-edition</guid>
+            </item>
+<item>
+              <title><![CDATA[Using fetch with TypeScript]]></title>
+              <description><![CDATA[How to make HTTP requests with fetch and TypeScript]]></description>
+              <pubDate>2021-01-26</pubDate>
+              <link>https://kentcdodds.com/blog/using-fetch-with-type-script</link>
+              <guid>https://kentcdodds.com/blog/using-fetch-with-type-script</guid>
+            </item>
+<item>
+              <title><![CDATA[Wrapping React.useState with TypeScript]]></title>
+              <description><![CDATA[How to make a custom hook that wraps useState with TypeScript properly]]></description>
+              <pubDate>2021-01-19</pubDate>
+              <link>https://kentcdodds.com/blog/wrapping-react-use-state-with-type-script</link>
+              <guid>https://kentcdodds.com/blog/wrapping-react-use-state-with-type-script</guid>
+            </item>
+<item>
+              <title><![CDATA[Define function overload types with TypeScript]]></title>
+              <description><![CDATA[Have your JS expressiveness and type it too.]]></description>
+              <pubDate>2021-01-12</pubDate>
+              <link>https://kentcdodds.com/blog/define-function-overload-types-with-type-script</link>
+              <guid>https://kentcdodds.com/blog/define-function-overload-types-with-type-script</guid>
+            </item>
+<item>
+              <title><![CDATA[2020 in Review]]></title>
+              <description><![CDATA[An overview of what I accomplished in 2020 and a bit about my goals for 2021.]]></description>
+              <pubDate>2021-01-04</pubDate>
+              <link>https://kentcdodds.com/blog/2020-in-review</link>
+              <guid>https://kentcdodds.com/blog/2020-in-review</guid>
+            </item>
+<item>
+              <title><![CDATA[Business and Engineering alignment]]></title>
+              <description><![CDATA[How to convince "the business folks" to let you do what you want.]]></description>
+              <pubDate>2020-12-10</pubDate>
+              <link>https://kentcdodds.com/blog/business-and-engineering-alignment</link>
+              <guid>https://kentcdodds.com/blog/business-and-engineering-alignment</guid>
+            </item>
+<item>
+              <title><![CDATA[Hi, thanks for reaching out to me 👋]]></title>
+              <description><![CDATA[How to get help from Kent]]></description>
+              <pubDate>2020-12-02</pubDate>
+              <link>https://kentcdodds.com/blog/hi-thanks-for-reaching-out-to-me</link>
+              <guid>https://kentcdodds.com/blog/hi-thanks-for-reaching-out-to-me</guid>
+            </item>
+<item>
+              <title><![CDATA[useEffect vs useLayoutEffect]]></title>
+              <description><![CDATA[The simple rules for when to use each.]]></description>
+              <pubDate>2020-12-01</pubDate>
+              <link>https://kentcdodds.com/blog/useeffect-vs-uselayouteffect</link>
+              <guid>https://kentcdodds.com/blog/useeffect-vs-uselayouteffect</guid>
+            </item>
+<item>
+              <title><![CDATA[Super simple start to Firebase functions]]></title>
+              <description><![CDATA[The simplest getting started guide for Firebase Cloud functions]]></description>
+              <pubDate>2020-11-12</pubDate>
+              <link>https://kentcdodds.com/blog/super-simple-start-to-firebase-functions</link>
+              <guid>https://kentcdodds.com/blog/super-simple-start-to-firebase-functions</guid>
+            </item>
+<item>
+              <title><![CDATA[Super simple start to Netlify functions]]></title>
+              <description><![CDATA[Easily create server code without worrying about managing servers yourself]]></description>
+              <pubDate>2020-11-11</pubDate>
+              <link>https://kentcdodds.com/blog/super-simple-start-to-netlify-functions</link>
+              <guid>https://kentcdodds.com/blog/super-simple-start-to-netlify-functions</guid>
+            </item>
+<item>
+              <title><![CDATA[Super Simple Start to css variables]]></title>
+              <description><![CDATA[How to get started using css variables]]></description>
+              <pubDate>2020-10-28</pubDate>
+              <link>https://kentcdodds.com/blog/super-simple-start-to-css-variables</link>
+              <guid>https://kentcdodds.com/blog/super-simple-start-to-css-variables</guid>
+            </item>
+<item>
+              <title><![CDATA[Favor Progress Over Pride in Open Source]]></title>
+              <description><![CDATA[How I deprecated my most popular open source project in favor of a better library]]></description>
+              <pubDate>2020-08-24</pubDate>
+              <link>https://kentcdodds.com/blog/favor-progress-over-pride-in-open-source</link>
+              <guid>https://kentcdodds.com/blog/favor-progress-over-pride-in-open-source</guid>
+            </item>
+<item>
+              <title><![CDATA[Testing Implementation Details]]></title>
+              <description><![CDATA[Testing implementation details is a recipe for disaster. Why is that? And what does it even mean?]]></description>
+              <pubDate>2020-08-17</pubDate>
+              <link>https://kentcdodds.com/blog/testing-implementation-details</link>
+              <guid>https://kentcdodds.com/blog/testing-implementation-details</guid>
+            </item>
+<item>
+              <title><![CDATA[How getting into Open Source has been awesome for me]]></title>
+              <description><![CDATA[An anecdotal argument for contributing and using open source]]></description>
+              <pubDate>2020-08-10</pubDate>
+              <link>https://kentcdodds.com/blog/how-getting-into-open-source-has-been-awesome-for-me</link>
+              <guid>https://kentcdodds.com/blog/how-getting-into-open-source-has-been-awesome-for-me</guid>
+            </item>
+<item>
+              <title><![CDATA[useState lazy initialization and function updates]]></title>
+              <description><![CDATA[When to pass a function to useState and setState]]></description>
+              <pubDate>2020-08-03</pubDate>
+              <link>https://kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates</link>
+              <guid>https://kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates</guid>
+            </item>
+<item>
+              <title><![CDATA[Use ternaries rather than && in JSX]]></title>
+              <description><![CDATA[What problems can happen when you use && to conditionally render content in JSX]]></description>
+              <pubDate>2020-07-27</pubDate>
+              <link>https://kentcdodds.com/blog/use-ternaries-rather-than-and-and-in-jsx</link>
+              <guid>https://kentcdodds.com/blog/use-ternaries-rather-than-and-and-in-jsx</guid>
+            </item>
+<item>
+              <title><![CDATA[Application State Management with React]]></title>
+              <description><![CDATA[How React is all you need to manage your application state]]></description>
+              <pubDate>2020-07-21</pubDate>
+              <link>https://kentcdodds.com/blog/application-state-management-with-react</link>
+              <guid>https://kentcdodds.com/blog/application-state-management-with-react</guid>
+            </item>
+<item>
+              <title><![CDATA[Use react-error-boundary to handle errors in React]]></title>
+              <description><![CDATA[How to simplify your React apps by handling React errors effectively with react-error-boundary]]></description>
+              <pubDate>2020-07-20</pubDate>
+              <link>https://kentcdodds.com/blog/use-react-error-boundary-to-handle-errors-in-react</link>
+              <guid>https://kentcdodds.com/blog/use-react-error-boundary-to-handle-errors-in-react</guid>
+            </item>
+<item>
+              <title><![CDATA[JavaScript to Know for React]]></title>
+              <description><![CDATA[What JavaScript features you should be familiar with when learning and using React]]></description>
+              <pubDate>2020-07-15</pubDate>
+              <link>https://kentcdodds.com/blog/javascript-to-know-for-react</link>
+              <guid>https://kentcdodds.com/blog/javascript-to-know-for-react</guid>
+            </item>
+<item>
+              <title><![CDATA[How I structure Express apps]]></title>
+              <description><![CDATA[The build/dev tools and scripts I use for Node backends.]]></description>
+              <pubDate>2020-07-13</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-structure-express-apps</link>
+              <guid>https://kentcdodds.com/blog/how-i-structure-express-apps</guid>
+            </item>
+<item>
+              <title><![CDATA[What open source project should I contribute to?]]></title>
+              <description><![CDATA[My silver bullet answer to this frequently posed question, and how to get started]]></description>
+              <pubDate>2020-07-06</pubDate>
+              <link>https://kentcdodds.com/blog/what-open-source-project-should-i-contribute-to</link>
+              <guid>https://kentcdodds.com/blog/what-open-source-project-should-i-contribute-to</guid>
+            </item>
+<item>
+              <title><![CDATA[When I follow TDD]]></title>
+              <description><![CDATA[Test-Driven Development doesn't always make sense, here's when it does for me.]]></description>
+              <pubDate>2020-06-29</pubDate>
+              <link>https://kentcdodds.com/blog/when-i-follow-tdd</link>
+              <guid>https://kentcdodds.com/blog/when-i-follow-tdd</guid>
+            </item>
+<item>
+              <title><![CDATA[AHA Programming 💡]]></title>
+              <description><![CDATA[The dangers of DRY, the web of WET, the awesomeness of AHA.]]></description>
+              <pubDate>2020-06-22</pubDate>
+              <link>https://kentcdodds.com/blog/aha-programming</link>
+              <guid>https://kentcdodds.com/blog/aha-programming</guid>
+            </item>
+<item>
+              <title><![CDATA[How I Record Educational Videos]]></title>
+              <description><![CDATA[My process for making high value-to-minute content.]]></description>
+              <pubDate>2020-06-22</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-record-educational-videos</link>
+              <guid>https://kentcdodds.com/blog/how-i-record-educational-videos</guid>
+            </item>
+<item>
+              <title><![CDATA[Should I write a test or fix a bug?]]></title>
+              <description><![CDATA[How to prioritize tests relative to everything else.]]></description>
+              <pubDate>2020-06-15</pubDate>
+              <link>https://kentcdodds.com/blog/should-i-write-a-test-or-fix-a-bug</link>
+              <guid>https://kentcdodds.com/blog/should-i-write-a-test-or-fix-a-bug</guid>
+            </item>
+<item>
+              <title><![CDATA[Stop mocking fetch]]></title>
+              <description><![CDATA[Why you shouldn't mock fetch or your API Client in your tests and what to do instead.]]></description>
+              <pubDate>2020-06-03</pubDate>
+              <link>https://kentcdodds.com/blog/stop-mocking-fetch</link>
+              <guid>https://kentcdodds.com/blog/stop-mocking-fetch</guid>
+            </item>
+<item>
+              <title><![CDATA[Intentional Career Building]]></title>
+              <description><![CDATA[A challenge and ideas for you to do something to build your career.]]></description>
+              <pubDate>2020-05-26</pubDate>
+              <link>https://kentcdodds.com/blog/intentional-career-building</link>
+              <guid>https://kentcdodds.com/blog/intentional-career-building</guid>
+            </item>
+<item>
+              <title><![CDATA[Improve test error messages of your abstractions]]></title>
+              <description><![CDATA[How to manipulate stack traces to get beautiful error messages with Jest and your test helper functions.]]></description>
+              <pubDate>2020-05-18</pubDate>
+              <link>https://kentcdodds.com/blog/improve-test-error-messages-of-your-abstractions</link>
+              <guid>https://kentcdodds.com/blog/improve-test-error-messages-of-your-abstractions</guid>
+            </item>
+<item>
+              <title><![CDATA[Tracing user interactions with React]]></title>
+              <description><![CDATA[How to use the (EXPERIMENTAL) interactions tracing API in React.]]></description>
+              <pubDate>2020-05-08</pubDate>
+              <link>https://kentcdodds.com/blog/tracing-user-interactions-with-react</link>
+              <guid>https://kentcdodds.com/blog/tracing-user-interactions-with-react</guid>
+            </item>
+<item>
+              <title><![CDATA[Eliminate an entire category of bugs with a few simple tools]]></title>
+              <description><![CDATA[How you can use a few simple static code analysis tools to avoid common programming bugs.]]></description>
+              <pubDate>2020-05-07</pubDate>
+              <link>https://kentcdodds.com/blog/eliminate-an-entire-category-of-bugs-with-a-few-simple-tools</link>
+              <guid>https://kentcdodds.com/blog/eliminate-an-entire-category-of-bugs-with-a-few-simple-tools</guid>
+            </item>
+<item>
+              <title><![CDATA[Common mistakes with React Testing Library]]></title>
+              <description><![CDATA[Some mistakes I frequently see people making with React Testing Library.]]></description>
+              <pubDate>2020-05-04</pubDate>
+              <link>https://kentcdodds.com/blog/common-mistakes-with-react-testing-library</link>
+              <guid>https://kentcdodds.com/blog/common-mistakes-with-react-testing-library</guid>
+            </item>
+<item>
+              <title><![CDATA[Super Simple Start to React]]></title>
+              <description><![CDATA[The most simple React setup imaginable]]></description>
+              <pubDate>2020-04-24</pubDate>
+              <link>https://kentcdodds.com/blog/super-simple-start-to-react</link>
+              <guid>https://kentcdodds.com/blog/super-simple-start-to-react</guid>
+            </item>
+<item>
+              <title><![CDATA[Stop using client-side route redirects]]></title>
+              <description><![CDATA[Why you should stop using client-side route redirects (like the `from` prop on React Router's Redirect component) and what you should do instead.]]></description>
+              <pubDate>2020-04-13</pubDate>
+              <link>https://kentcdodds.com/blog/stop-using-client-side-route-redirects</link>
+              <guid>https://kentcdodds.com/blog/stop-using-client-side-route-redirects</guid>
+            </item>
+<item>
+              <title><![CDATA[The State Reducer Pattern with React Hooks]]></title>
+              <description><![CDATA[A pattern for you to use in custom hooks to enhance the power and flexibility of your hooks.]]></description>
+              <pubDate>2020-04-06</pubDate>
+              <link>https://kentcdodds.com/blog/the-state-reducer-pattern-with-react-hooks</link>
+              <guid>https://kentcdodds.com/blog/the-state-reducer-pattern-with-react-hooks</guid>
+            </item>
+<item>
+              <title><![CDATA[Function forms]]></title>
+              <description><![CDATA[When I prefer to use function declarations instead of arrow functions]]></description>
+              <pubDate>2020-04-05</pubDate>
+              <link>https://kentcdodds.com/blog/function-forms</link>
+              <guid>https://kentcdodds.com/blog/function-forms</guid>
+            </item>
+<item>
+              <title><![CDATA[Replace axios with a simple custom fetch wrapper]]></title>
+              <description><![CDATA[Axios can do a ton of stuff, but here's a simpler solution that can handle most use cases]]></description>
+              <pubDate>2020-03-30</pubDate>
+              <link>https://kentcdodds.com/blog/replace-axios-with-a-simple-custom-fetch-wrapper</link>
+              <guid>https://kentcdodds.com/blog/replace-axios-with-a-simple-custom-fetch-wrapper</guid>
+            </item>
+<item>
+              <title><![CDATA[How to test custom React hooks]]></title>
+              <description><![CDATA[Get confidence your custom React hooks work properly with solid tests.]]></description>
+              <pubDate>2020-03-22</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-test-custom-react-hooks</link>
+              <guid>https://kentcdodds.com/blog/how-to-test-custom-react-hooks</guid>
+            </item>
+<item>
+              <title><![CDATA[React Production Performance Monitoring]]></title>
+              <description><![CDATA[How to set up performance monitoring for production React applications.]]></description>
+              <pubDate>2020-03-16</pubDate>
+              <link>https://kentcdodds.com/blog/react-production-performance-monitoring</link>
+              <guid>https://kentcdodds.com/blog/react-production-performance-monitoring</guid>
+            </item>
+<item>
+              <title><![CDATA[Should I useState or useReducer?]]></title>
+              <description><![CDATA[Two built-in React hooks that handle state, which one should you use?]]></description>
+              <pubDate>2020-03-09</pubDate>
+              <link>https://kentcdodds.com/blog/should-i-usestate-or-usereducer</link>
+              <guid>https://kentcdodds.com/blog/should-i-usestate-or-usereducer</guid>
+            </item>
+<item>
+              <title><![CDATA[Stop using isLoading booleans]]></title>
+              <description><![CDATA[Why using a status enum (or even better: a **state machine**) will help your app stay bug free]]></description>
+              <pubDate>2020-03-02</pubDate>
+              <link>https://kentcdodds.com/blog/stop-using-isloading-booleans</link>
+              <guid>https://kentcdodds.com/blog/stop-using-isloading-booleans</guid>
+            </item>
+<item>
+              <title><![CDATA[Make Your Test Fail]]></title>
+              <description><![CDATA[If you're not careful you can write a test that's worse than having no tests at all]]></description>
+              <pubDate>2020-02-24</pubDate>
+              <link>https://kentcdodds.com/blog/make-your-test-fail</link>
+              <guid>https://kentcdodds.com/blog/make-your-test-fail</guid>
+            </item>
+<item>
+              <title><![CDATA[Make your own DevTools]]></title>
+              <description><![CDATA[How creating DevTools specific for your own app can improve your productivity]]></description>
+              <pubDate>2020-02-17</pubDate>
+              <link>https://kentcdodds.com/blog/make-your-own-dev-tools</link>
+              <guid>https://kentcdodds.com/blog/make-your-own-dev-tools</guid>
+            </item>
+<item>
+              <title><![CDATA[An Argument for Automation]]></title>
+              <description><![CDATA[Why it can be worth spending 1 hour automating a 10 second task]]></description>
+              <pubDate>2020-02-10</pubDate>
+              <link>https://kentcdodds.com/blog/automation</link>
+              <guid>https://kentcdodds.com/blog/automation</guid>
+            </item>
+<item>
+              <title><![CDATA[Fix the "not wrapped in act(...)" warning]]></title>
+              <description><![CDATA[There are a few reasons you're getting this warning. Here's how you fix it.]]></description>
+              <pubDate>2020-02-03</pubDate>
+              <link>https://kentcdodds.com/blog/fix-the-not-wrapped-in-act-warning</link>
+              <guid>https://kentcdodds.com/blog/fix-the-not-wrapped-in-act-warning</guid>
+            </item>
+<item>
+              <title><![CDATA[Super Simple Start to ESModules in the Browser]]></title>
+              <description><![CDATA[All major browsers support ESModules now. Here's how to get started using them.]]></description>
+              <pubDate>2020-01-22</pubDate>
+              <link>https://kentcdodds.com/blog/super-simple-start-to-es-modules-in-the-browser</link>
+              <guid>https://kentcdodds.com/blog/super-simple-start-to-es-modules-in-the-browser</guid>
+            </item>
+<item>
+              <title><![CDATA[Implementing a simple state machine library in JavaScript]]></title>
+              <description><![CDATA[Let's write a state machine abstraction together to understand it better]]></description>
+              <pubDate>2020-01-20</pubDate>
+              <link>https://kentcdodds.com/blog/implementing-a-simple-state-machine-library-in-javascript</link>
+              <guid>https://kentcdodds.com/blog/implementing-a-simple-state-machine-library-in-javascript</guid>
+            </item>
+<item>
+              <title><![CDATA[2010s Decade in Review]]></title>
+              <description><![CDATA[The 2010s are over, time to think back, then forward]]></description>
+              <pubDate>2019-12-31</pubDate>
+              <link>https://kentcdodds.com/blog/2010s-decade-in-review</link>
+              <guid>https://kentcdodds.com/blog/2010s-decade-in-review</guid>
+            </item>
+<item>
+              <title><![CDATA[Why users care about how you write code]]></title>
+              <description><![CDATA[Your coding practices and technology choices impact user experience...]]></description>
+              <pubDate>2019-12-23</pubDate>
+              <link>https://kentcdodds.com/blog/why-users-care-about-how-you-write-code</link>
+              <guid>https://kentcdodds.com/blog/why-users-care-about-how-you-write-code</guid>
+            </item>
+<item>
+              <title><![CDATA[Why I avoid nesting closures]]></title>
+              <description><![CDATA[A little tendency I have to reduce cognitive load for readers of my code.]]></description>
+              <pubDate>2019-12-13</pubDate>
+              <link>https://kentcdodds.com/blog/why-i-avoid-nesting-closures</link>
+              <guid>https://kentcdodds.com/blog/why-i-avoid-nesting-closures</guid>
+            </item>
+<item>
+              <title><![CDATA[Don't call a React function component]]></title>
+              <description><![CDATA[The difference between React.createElement and calling a function component directly]]></description>
+              <pubDate>2019-12-08</pubDate>
+              <link>https://kentcdodds.com/blog/dont-call-a-react-function-component</link>
+              <guid>https://kentcdodds.com/blog/dont-call-a-react-function-component</guid>
+            </item>
+<item>
+              <title><![CDATA[Why your team needs TestingJavaScript.com]]></title>
+              <description><![CDATA[A letter you can copy/paste and send to your boss.]]></description>
+              <pubDate>2019-12-03</pubDate>
+              <link>https://kentcdodds.com/blog/why-your-team-needs-testing-javascript-com</link>
+              <guid>https://kentcdodds.com/blog/why-your-team-needs-testing-javascript-com</guid>
+            </item>
+<item>
+              <title><![CDATA[Inversion of Control]]></title>
+              <description><![CDATA[A simple principle that can drastically improve your reusable code]]></description>
+              <pubDate>2019-11-18</pubDate>
+              <link>https://kentcdodds.com/blog/inversion-of-control</link>
+              <guid>https://kentcdodds.com/blog/inversion-of-control</guid>
+            </item>
+<item>
+              <title><![CDATA[Understanding React's key prop]]></title>
+              <description><![CDATA[The key prop is a mechanism for controlling component instances.]]></description>
+              <pubDate>2019-11-11</pubDate>
+              <link>https://kentcdodds.com/blog/understanding-reacts-key-prop</link>
+              <guid>https://kentcdodds.com/blog/understanding-reacts-key-prop</guid>
+            </item>
+<item>
+              <title><![CDATA[How to Enable React Concurrent Mode]]></title>
+              <description><![CDATA[Concurrent Mode is an enormous improvement for user experience and developer experience. Here's how you enable it.]]></description>
+              <pubDate>2019-11-04</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-enable-react-concurrent-mode</link>
+              <guid>https://kentcdodds.com/blog/how-to-enable-react-concurrent-mode</guid>
+            </item>
+<item>
+              <title><![CDATA[How to add testing to an existing project]]></title>
+              <description><![CDATA[This is how you get started in testing your application]]></description>
+              <pubDate>2019-10-28</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-add-testing-to-an-existing-project</link>
+              <guid>https://kentcdodds.com/blog/how-to-add-testing-to-an-existing-project</guid>
+            </item>
+<item>
+              <title><![CDATA[Building the Open Source Community We Want]]></title>
+              <description><![CDATA[Let's be intentional about the open source community we want and work hard to build it.]]></description>
+              <pubDate>2019-10-08</pubDate>
+              <link>https://kentcdodds.com/blog/building-the-open-source-community-we-want</link>
+              <guid>https://kentcdodds.com/blog/building-the-open-source-community-we-want</guid>
+            </item>
+<item>
+              <title><![CDATA[Making your UI tests resilient to change]]></title>
+              <description><![CDATA[User interface tests are famously finicky and prone to breakage. Let's talk about how to improve this.]]></description>
+              <pubDate>2019-10-07</pubDate>
+              <link>https://kentcdodds.com/blog/making-your-ui-tests-resilient-to-change</link>
+              <guid>https://kentcdodds.com/blog/making-your-ui-tests-resilient-to-change</guid>
+            </item>
+<item>
+              <title><![CDATA[Speed up your App with Web Workers]]></title>
+              <description><![CDATA[How to get started using web workers for practical use cases]]></description>
+              <pubDate>2019-10-04</pubDate>
+              <link>https://kentcdodds.com/blog/speed-up-your-app-with-web-workers</link>
+              <guid>https://kentcdodds.com/blog/speed-up-your-app-with-web-workers</guid>
+            </item>
+<item>
+              <title><![CDATA[Don't Sync State. Derive It!]]></title>
+              <description><![CDATA[How to avoid state synchronization bugs and complexity with derived state.]]></description>
+              <pubDate>2019-09-30</pubDate>
+              <link>https://kentcdodds.com/blog/dont-sync-state-derive-it</link>
+              <guid>https://kentcdodds.com/blog/dont-sync-state-derive-it</guid>
+            </item>
+<item>
+              <title><![CDATA[State Colocation will make your React app faster]]></title>
+              <description><![CDATA[How state colocation makes your app not only more maintainable but also faster.]]></description>
+              <pubDate>2019-09-23</pubDate>
+              <link>https://kentcdodds.com/blog/state-colocation-will-make-your-react-app-faster</link>
+              <guid>https://kentcdodds.com/blog/state-colocation-will-make-your-react-app-faster</guid>
+            </item>
+<item>
+              <title><![CDATA[Profile a React App for Performance]]></title>
+              <description><![CDATA[How to use the React DevTools and React's profiling build to properly profile a production app]]></description>
+              <pubDate>2019-09-16</pubDate>
+              <link>https://kentcdodds.com/blog/profile-a-react-app-for-performance</link>
+              <guid>https://kentcdodds.com/blog/profile-a-react-app-for-performance</guid>
+            </item>
+<item>
+              <title><![CDATA[Fix the slow render before you fix the re-render]]></title>
+              <description><![CDATA[How to start optimizing your React app renders]]></description>
+              <pubDate>2019-09-09</pubDate>
+              <link>https://kentcdodds.com/blog/fix-the-slow-render-before-you-fix-the-re-render</link>
+              <guid>https://kentcdodds.com/blog/fix-the-slow-render-before-you-fix-the-re-render</guid>
+            </item>
+<item>
+              <title><![CDATA[How to implement useState with useReducer]]></title>
+              <description><![CDATA[A fun exercise to help understand the differences and use cases of these two related hooks]]></description>
+              <pubDate>2019-08-30</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-implement-usestate-with-usereducer</link>
+              <guid>https://kentcdodds.com/blog/how-to-implement-usestate-with-usereducer</guid>
+            </item>
+<item>
+              <title><![CDATA[Write fewer, longer tests]]></title>
+              <description><![CDATA[Making tests too short often leads to poor testing practices and way more tests.]]></description>
+              <pubDate>2019-08-26</pubDate>
+              <link>https://kentcdodds.com/blog/write-fewer-longer-tests</link>
+              <guid>https://kentcdodds.com/blog/write-fewer-longer-tests</guid>
+            </item>
+<item>
+              <title><![CDATA[How to get experience as a software engineer]]></title>
+              <description><![CDATA[There's no shortcut to experience, but there are things you can do to increase the impact of your time.]]></description>
+              <pubDate>2019-08-12</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-get-experience-as-a-software-engineer</link>
+              <guid>https://kentcdodds.com/blog/how-to-get-experience-as-a-software-engineer</guid>
+            </item>
+<item>
+              <title><![CDATA[5 Tips to Help You Avoid React Hooks Pitfalls]]></title>
+              <description><![CDATA[Let's explore some hook gotchas and how to avoid them.]]></description>
+              <pubDate>2019-08-05</pubDate>
+              <link>https://kentcdodds.com/blog/react-hooks-pitfalls</link>
+              <guid>https://kentcdodds.com/blog/react-hooks-pitfalls</guid>
+            </item>
+<item>
+              <title><![CDATA[Avoid Nesting when you're Testing]]></title>
+              <description><![CDATA[Why using hooks like beforeEach as a mechanism for code reuse leads to unmaintainable tests and how to avoid it.]]></description>
+              <pubDate>2019-07-29</pubDate>
+              <link>https://kentcdodds.com/blog/avoid-nesting-when-youre-testing</link>
+              <guid>https://kentcdodds.com/blog/avoid-nesting-when-youre-testing</guid>
+            </item>
+<item>
+              <title><![CDATA[When to break up a component into multiple components]]></title>
+              <description><![CDATA[At what point does it make sense to break a single component into multiple components?]]></description>
+              <pubDate>2019-07-19</pubDate>
+              <link>https://kentcdodds.com/blog/when-to-break-up-a-component-into-multiple-components</link>
+              <guid>https://kentcdodds.com/blog/when-to-break-up-a-component-into-multiple-components</guid>
+            </item>
+<item>
+              <title><![CDATA[Write tests. Not too many. Mostly integration.]]></title>
+              <description><![CDATA[[Guillermo Rauch](https://x.com/rauchg) [tweeted](https://x.com/rauchg/status/807626710350839808) this a while back. Let's take a dive into what it means.]]></description>
+              <pubDate>2019-07-13</pubDate>
+              <link>https://kentcdodds.com/blog/write-tests</link>
+              <guid>https://kentcdodds.com/blog/write-tests</guid>
+            </item>
+<item>
+              <title><![CDATA[React Fundamentals: Props vs State]]></title>
+              <description><![CDATA[What's the difference between props and state in React?]]></description>
+              <pubDate>2019-07-08</pubDate>
+              <link>https://kentcdodds.com/blog/props-vs-state</link>
+              <guid>https://kentcdodds.com/blog/props-vs-state</guid>
+            </item>
+<item>
+              <title><![CDATA[How I Teach]]></title>
+              <description><![CDATA[How I apply the science of learning to help students retain what I teach them, and how I learn.]]></description>
+              <pubDate>2019-07-01</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-teach</link>
+              <guid>https://kentcdodds.com/blog/how-i-teach</guid>
+            </item>
+<item>
+              <title><![CDATA[One simple trick to optimize React re-renders]]></title>
+              <description><![CDATA[Without using React.memo, PureComponent, or shouldComponentUpdate]]></description>
+              <pubDate>2019-06-24</pubDate>
+              <link>https://kentcdodds.com/blog/optimize-react-re-renders</link>
+              <guid>https://kentcdodds.com/blog/optimize-react-re-renders</guid>
+            </item>
+<item>
+              <title><![CDATA[Colocation]]></title>
+              <description><![CDATA[Maintainability through colocation]]></description>
+              <pubDate>2019-06-17</pubDate>
+              <link>https://kentcdodds.com/blog/colocation</link>
+              <guid>https://kentcdodds.com/blog/colocation</guid>
+            </item>
+<item>
+              <title><![CDATA[When to useMemo and useCallback]]></title>
+              <description><![CDATA[Performance optimizations ALWAYS come with a cost but do NOT always come with a benefit. Let's talk about the costs and benefits of useMemo and useCallback.]]></description>
+              <pubDate>2019-06-04</pubDate>
+              <link>https://kentcdodds.com/blog/usememo-and-usecallback</link>
+              <guid>https://kentcdodds.com/blog/usememo-and-usecallback</guid>
+            </item>
+<item>
+              <title><![CDATA[Avoid the Test User]]></title>
+              <description><![CDATA[How your UI code has only two users, but the wrong tests can add a third]]></description>
+              <pubDate>2019-05-24</pubDate>
+              <link>https://kentcdodds.com/blog/avoid-the-test-user</link>
+              <guid>https://kentcdodds.com/blog/avoid-the-test-user</guid>
+            </item>
+<item>
+              <title><![CDATA[Authentication in React Applications]]></title>
+              <description><![CDATA[How to handle user authentication in modern React Applications with context and hooks]]></description>
+              <pubDate>2019-05-20</pubDate>
+              <link>https://kentcdodds.com/blog/authentication-in-react-applications</link>
+              <guid>https://kentcdodds.com/blog/authentication-in-react-applications</guid>
+            </item>
+<item>
+              <title><![CDATA[How to know what to test]]></title>
+              <description><![CDATA[Practical advice to help you determine what to test.]]></description>
+              <pubDate>2019-04-13</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-know-what-to-test</link>
+              <guid>https://kentcdodds.com/blog/how-to-know-what-to-test</guid>
+            </item>
+<item>
+              <title><![CDATA[AHA Testing 💡]]></title>
+              <description><![CDATA[How to apply the "Avoid Hasty Abstraction" principle to your test code.]]></description>
+              <pubDate>2019-04-07</pubDate>
+              <link>https://kentcdodds.com/blog/aha-testing</link>
+              <guid>https://kentcdodds.com/blog/aha-testing</guid>
+            </item>
+<item>
+              <title><![CDATA[How to get started with programming]]></title>
+              <description><![CDATA[So you want to get into programming? Here's how you get started.]]></description>
+              <pubDate>2019-03-06</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-get-started-with-programming</link>
+              <guid>https://kentcdodds.com/blog/how-to-get-started-with-programming</guid>
+            </item>
+<item>
+              <title><![CDATA[How to Enable React Strict Mode]]></title>
+              <description><![CDATA[What it is and how to add it to your app.]]></description>
+              <pubDate>2019-03-04</pubDate>
+              <link>https://kentcdodds.com/blog/react-strict-mode</link>
+              <guid>https://kentcdodds.com/blog/react-strict-mode</guid>
+            </item>
+<item>
+              <title><![CDATA[Goodbye Medium]]></title>
+              <description><![CDATA[I've migrated from Medium to kentcdodds.com/blog... Here's why]]></description>
+              <pubDate>2019-02-25</pubDate>
+              <link>https://kentcdodds.com/blog/goodbye-medium</link>
+              <guid>https://kentcdodds.com/blog/goodbye-medium</guid>
+            </item>
+<item>
+              <title><![CDATA[React Hooks: Compound Components]]></title>
+              <description><![CDATA[How do compound components change with React hooks?]]></description>
+              <pubDate>2019-02-18</pubDate>
+              <link>https://kentcdodds.com/blog/compound-components-with-react-hooks</link>
+              <guid>https://kentcdodds.com/blog/compound-components-with-react-hooks</guid>
+            </item>
+<item>
+              <title><![CDATA[🚨 Big Announcement: I'm a full-time educator! 👨‍🏫]]></title>
+              <description><![CDATA[After years of teaching on the side, I've decided to take the plunge and go full-time as an educator!]]></description>
+              <pubDate>2019-02-17</pubDate>
+              <link>https://kentcdodds.com/blog/full-time-educator</link>
+              <guid>https://kentcdodds.com/blog/full-time-educator</guid>
+            </item>
+<item>
+              <title><![CDATA[Please stop building inaccessible forms (and how to fix them)]]></title>
+              <description><![CDATA[I regularly find inaccessible forms. In this post we'll check out some common accessibility problems and fix them.]]></description>
+              <pubDate>2019-02-04</pubDate>
+              <link>https://kentcdodds.com/blog/please-stop-building-inaccessible-forms-and-how-to-fix-them</link>
+              <guid>https://kentcdodds.com/blog/please-stop-building-inaccessible-forms-and-how-to-fix-them</guid>
+            </item>
+<item>
+              <title><![CDATA[2018 in Review]]></title>
+              <description><![CDATA[An overview of what I've accomplished in 2018 and a bit about my goals for 2019.]]></description>
+              <pubDate>2019-01-14</pubDate>
+              <link>https://kentcdodds.com/blog/2018-in-review</link>
+              <guid>https://kentcdodds.com/blog/2018-in-review</guid>
+            </item>
+<item>
+              <title><![CDATA[React Hooks: Array Destructuring Fundamentals]]></title>
+              <description><![CDATA[React's upcoming useState hook relies on array destructuring, let's dive in and see how that feature works.]]></description>
+              <pubDate>2018-12-31</pubDate>
+              <link>https://kentcdodds.com/blog/react-hooks-array-destructuring-fundamentals</link>
+              <guid>https://kentcdodds.com/blog/react-hooks-array-destructuring-fundamentals</guid>
+            </item>
+<item>
+              <title><![CDATA[React Hooks: What's going to happen to my tests?]]></title>
+              <description><![CDATA[How can we prepare our tests for React's new hooks feature?]]></description>
+              <pubDate>2018-12-24</pubDate>
+              <link>https://kentcdodds.com/blog/react-hooks-whats-going-to-happen-to-my-tests</link>
+              <guid>https://kentcdodds.com/blog/react-hooks-whats-going-to-happen-to-my-tests</guid>
+            </item>
+<item>
+              <title><![CDATA[React Hooks: What's going to happen to react context?]]></title>
+              <description><![CDATA[With the cool new stuff coming to React (Hooks/Suspense), what's going to happen to the context api?]]></description>
+              <pubDate>2018-12-17</pubDate>
+              <link>https://kentcdodds.com/blog/react-hooks-whats-going-to-happen-to-react-context</link>
+              <guid>https://kentcdodds.com/blog/react-hooks-whats-going-to-happen-to-react-context</guid>
+            </item>
+<item>
+              <title><![CDATA[React Hooks: What's going to happen to render props?]]></title>
+              <description><![CDATA[What am I going to do with all these render props components now that react hooks solve the code reuse problem better than render props ever did?]]></description>
+              <pubDate>2018-12-10</pubDate>
+              <link>https://kentcdodds.com/blog/react-hooks-whats-going-to-happen-to-render-props</link>
+              <guid>https://kentcdodds.com/blog/react-hooks-whats-going-to-happen-to-render-props</guid>
+            </item>
+<item>
+              <title><![CDATA[How Gratitude can make you a better developer]]></title>
+              <description><![CDATA[What does gratitude have to do with software development?]]></description>
+              <pubDate>2018-12-03</pubDate>
+              <link>https://kentcdodds.com/blog/how-gratitude-can-make-you-a-better-developer</link>
+              <guid>https://kentcdodds.com/blog/how-gratitude-can-make-you-a-better-developer</guid>
+            </item>
+<item>
+              <title><![CDATA[Introducing a new course: Simplify React Apps with React Hooks and Suspense]]></title>
+              <description><![CDATA[Learn about the massive improvements coming to function components in React via a fresh new course showing you how to refactor an existing...]]></description>
+              <pubDate>2018-12-03</pubDate>
+              <link>https://kentcdodds.com/blog/introducing-a-new-course-simplify-react-apps-with-react-hooks-and-suspense</link>
+              <guid>https://kentcdodds.com/blog/introducing-a-new-course-simplify-react-apps-with-react-hooks-and-suspense</guid>
+            </item>
+<item>
+              <title><![CDATA[Common Testing Mistakes]]></title>
+              <description><![CDATA[Today let's talk about some common mistakes that people make when testing JavaScript applications.]]></description>
+              <pubDate>2018-11-12</pubDate>
+              <link>https://kentcdodds.com/blog/common-testing-mistakes</link>
+              <guid>https://kentcdodds.com/blog/common-testing-mistakes</guid>
+            </item>
+<item>
+              <title><![CDATA[UI Testing Myths]]></title>
+              <description><![CDATA[Some common myths around testing and what the reality is...]]></description>
+              <pubDate>2018-11-08</pubDate>
+              <link>https://kentcdodds.com/blog/ui-testing-myths</link>
+              <guid>https://kentcdodds.com/blog/ui-testing-myths</guid>
+            </item>
+<item>
+              <title><![CDATA[The Merits of Mocking]]></title>
+              <description><![CDATA[What are you doing when you mock something, and when is it worth the cost?]]></description>
+              <pubDate>2018-11-05</pubDate>
+              <link>https://kentcdodds.com/blog/the-merits-of-mocking</link>
+              <guid>https://kentcdodds.com/blog/the-merits-of-mocking</guid>
+            </item>
+<item>
+              <title><![CDATA[The time I messed up]]></title>
+              <description><![CDATA[That time I went too far with Test Driven Development and forgot a very important step]]></description>
+              <pubDate>2018-10-22</pubDate>
+              <link>https://kentcdodds.com/blog/the-time-i-messed-up</link>
+              <guid>https://kentcdodds.com/blog/the-time-i-messed-up</guid>
+            </item>
+<item>
+              <title><![CDATA[React is an implementation detail]]></title>
+              <description><![CDATA[...yep, you read that right. Most of the course actually has nothing to do with React specifically.]]></description>
+              <pubDate>2018-10-20</pubDate>
+              <link>https://kentcdodds.com/blog/react-is-an-implementation-detail</link>
+              <guid>https://kentcdodds.com/blog/react-is-an-implementation-detail</guid>
+            </item>
+<item>
+              <title><![CDATA[Why you've been bad about testing]]></title>
+              <description><![CDATA[Some common struggles people have with testing, and things you can do to improve.]]></description>
+              <pubDate>2018-10-15</pubDate>
+              <link>https://kentcdodds.com/blog/why-youve-been-bad-about-testing</link>
+              <guid>https://kentcdodds.com/blog/why-youve-been-bad-about-testing</guid>
+            </item>
+<item>
+              <title><![CDATA[Demystifying Testing]]></title>
+              <description><![CDATA[How to get from aimlessly testing or not testing at all to really understanding how and what to test.]]></description>
+              <pubDate>2018-10-11</pubDate>
+              <link>https://kentcdodds.com/blog/demystifying-testing</link>
+              <guid>https://kentcdodds.com/blog/demystifying-testing</guid>
+            </item>
+<item>
+              <title><![CDATA[Confidently Shipping Code]]></title>
+              <description><![CDATA[Why I care about testing]]></description>
+              <pubDate>2018-10-08</pubDate>
+              <link>https://kentcdodds.com/blog/confidently-shipping-code</link>
+              <guid>https://kentcdodds.com/blog/confidently-shipping-code</guid>
+            </item>
+<item>
+              <title><![CDATA[React/JSX as a server-side templating language]]></title>
+              <description><![CDATA[Using React function components to render your website's skeleton index.html]]></description>
+              <pubDate>2018-10-01</pubDate>
+              <link>https://kentcdodds.com/blog/react-jsx-as-a-server-side-templating-language</link>
+              <guid>https://kentcdodds.com/blog/react-jsx-as-a-server-side-templating-language</guid>
+            </item>
+<item>
+              <title><![CDATA[How I am so productive]]></title>
+              <description><![CDATA[People regularly ask me how I get so much done. Here's my secret...]]></description>
+              <pubDate>2018-09-24</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-am-so-productive</link>
+              <guid>https://kentcdodds.com/blog/how-i-am-so-productive</guid>
+            </item>
+<item>
+              <title><![CDATA[Getting Noticed and Widening Your Reach]]></title>
+              <description><![CDATA[Some things you can do to gain a wider audience and get your stuff noticed]]></description>
+              <pubDate>2018-09-17</pubDate>
+              <link>https://kentcdodds.com/blog/getting-noticed-and-widening-your-reach</link>
+              <guid>https://kentcdodds.com/blog/getting-noticed-and-widening-your-reach</guid>
+            </item>
+<item>
+              <title><![CDATA[Make Impossible States Impossible]]></title>
+              <description><![CDATA[A simple trick to simplify your application and component state]]></description>
+              <pubDate>2018-09-10</pubDate>
+              <link>https://kentcdodds.com/blog/make-impossible-states-impossible</link>
+              <guid>https://kentcdodds.com/blog/make-impossible-states-impossible</guid>
+            </item>
+<item>
+              <title><![CDATA[How to make the most out of conferences]]></title>
+              <description><![CDATA[Some specific things you can do as a conference attendee]]></description>
+              <pubDate>2018-09-03</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-make-the-most-out-of-conferences</link>
+              <guid>https://kentcdodds.com/blog/how-to-make-the-most-out-of-conferences</guid>
+            </item>
+<item>
+              <title><![CDATA[Why and How I started public speaking]]></title>
+              <description><![CDATA[Some stories and some advice from an international speaker and trainer]]></description>
+              <pubDate>2018-08-27</pubDate>
+              <link>https://kentcdodds.com/blog/why-and-how-i-started-public-speaking</link>
+              <guid>https://kentcdodds.com/blog/why-and-how-i-started-public-speaking</guid>
+            </item>
+<item>
+              <title><![CDATA[mdx-deck: slide decks powered by markdown and react]]></title>
+              <description><![CDATA[Why it's awesome, what it is, how it works, and how to use mdx-deck.]]></description>
+              <pubDate>2018-08-20</pubDate>
+              <link>https://kentcdodds.com/blog/mdx-deck-slide-decks-powered-by-markdown-and-react</link>
+              <guid>https://kentcdodds.com/blog/mdx-deck-slide-decks-powered-by-markdown-and-react</guid>
+            </item>
+<item>
+              <title><![CDATA[unpkg: An open source CDN for npm]]></title>
+              <description><![CDATA[Let's learn how unpkg the service and the open source project can improve performance for your company's apps.]]></description>
+              <pubDate>2018-08-13</pubDate>
+              <link>https://kentcdodds.com/blog/unpkg-an-open-source-cdn-for-npm</link>
+              <guid>https://kentcdodds.com/blog/unpkg-an-open-source-cdn-for-npm</guid>
+            </item>
+<item>
+              <title><![CDATA[Polyfill as needed with polyfill-service]]></title>
+              <description><![CDATA[How to maximize the performance of loading polyfills for your application users.]]></description>
+              <pubDate>2018-08-06</pubDate>
+              <link>https://kentcdodds.com/blog/polyfill-as-needed-with-polyfill-service</link>
+              <guid>https://kentcdodds.com/blog/polyfill-as-needed-with-polyfill-service</guid>
+            </item>
+<item>
+              <title><![CDATA[What is a polyfill]]></title>
+              <description><![CDATA[The difference between a polyfill and a code transform.]]></description>
+              <pubDate>2018-07-30</pubDate>
+              <link>https://kentcdodds.com/blog/what-is-a-polyfill</link>
+              <guid>https://kentcdodds.com/blog/what-is-a-polyfill</guid>
+            </item>
+<item>
+              <title><![CDATA[Why I Never Use Shallow Rendering]]></title>
+              <description><![CDATA[Tests should help me be confident that my application is working and there are better ways to do that than shallow rendering.]]></description>
+              <pubDate>2018-07-23</pubDate>
+              <link>https://kentcdodds.com/blog/why-i-never-use-shallow-rendering</link>
+              <guid>https://kentcdodds.com/blog/why-i-never-use-shallow-rendering</guid>
+            </item>
+<item>
+              <title><![CDATA[What is JSX?]]></title>
+              <description><![CDATA[You may use it every day, but have you seen what happens after Babel compiles it?]]></description>
+              <pubDate>2018-07-09</pubDate>
+              <link>https://kentcdodds.com/blog/what-is-jsx</link>
+              <guid>https://kentcdodds.com/blog/what-is-jsx</guid>
+            </item>
+<item>
+              <title><![CDATA[Test Isolation with React]]></title>
+              <description><![CDATA[Why your tests should be completely isolated from one another and how to do that.]]></description>
+              <pubDate>2018-07-02</pubDate>
+              <link>https://kentcdodds.com/blog/test-isolation-with-react</link>
+              <guid>https://kentcdodds.com/blog/test-isolation-with-react</guid>
+            </item>
+<item>
+              <title><![CDATA[JavaScript default parameters]]></title>
+              <description><![CDATA[The expressive power of expressions in default values for parameters]]></description>
+              <pubDate>2018-06-25</pubDate>
+              <link>https://kentcdodds.com/blog/javascript-default-parameters</link>
+              <guid>https://kentcdodds.com/blog/javascript-default-parameters</guid>
+            </item>
+<item>
+              <title><![CDATA[Dealing with FOMO]]></title>
+              <description><![CDATA[What is "Fear Of Missing Out" and how to deal with this natural unhealthy tendency.]]></description>
+              <pubDate>2018-06-18</pubDate>
+              <link>https://kentcdodds.com/blog/dealing-with-fomo</link>
+              <guid>https://kentcdodds.com/blog/dealing-with-fomo</guid>
+            </item>
+<item>
+              <title><![CDATA[🏎 downshift 2.0.0 released 🎉]]></title>
+              <description><![CDATA[Even better accessibility, React Native and ReasonReact support, even simpler API, improved docs, new examples site, Flow and TypeScript...]]></description>
+              <pubDate>2018-06-15</pubDate>
+              <link>https://kentcdodds.com/blog/downshift-2-0-0-released</link>
+              <guid>https://kentcdodds.com/blog/downshift-2-0-0-released</guid>
+            </item>
+<item>
+              <title><![CDATA[When to use Control Props or State Reducers]]></title>
+              <description><![CDATA[Comparing two similar patterns that enable many of the same use cases.]]></description>
+              <pubDate>2018-06-11</pubDate>
+              <link>https://kentcdodds.com/blog/control-props-vs-state-reducers</link>
+              <guid>https://kentcdodds.com/blog/control-props-vs-state-reducers</guid>
+            </item>
+<item>
+              <title><![CDATA[Write your own code transform for fun and profit]]></title>
+              <description><![CDATA[How to write your own code macro with babel-plugin-macros 🎣]]></description>
+              <pubDate>2018-06-04</pubDate>
+              <link>https://kentcdodds.com/blog/write-your-own-code-transform</link>
+              <guid>https://kentcdodds.com/blog/write-your-own-code-transform</guid>
+            </item>
+<item>
+              <title><![CDATA[💯 UPDATED: Advanced React Component Patterns ⚛️]]></title>
+              <description><![CDATA[Now featuring the latest React APIs (like context) and entirely new patterns (like state reducer props).]]></description>
+              <pubDate>2018-06-01</pubDate>
+              <link>https://kentcdodds.com/blog/updated-advanced-react-component-patterns</link>
+              <guid>https://kentcdodds.com/blog/updated-advanced-react-component-patterns</guid>
+            </item>
+<item>
+              <title><![CDATA[React DevTools]]></title>
+              <description><![CDATA[A quick demo of the browser extension you should definitely be using.]]></description>
+              <pubDate>2018-05-28</pubDate>
+              <link>https://kentcdodds.com/blog/react-devtools</link>
+              <guid>https://kentcdodds.com/blog/react-devtools</guid>
+            </item>
+<item>
+              <title><![CDATA[Prop Drilling]]></title>
+              <description><![CDATA[What it is, why it's good, why it's bad, and how to avoid common problems with it]]></description>
+              <pubDate>2018-05-21</pubDate>
+              <link>https://kentcdodds.com/blog/prop-drilling</link>
+              <guid>https://kentcdodds.com/blog/prop-drilling</guid>
+            </item>
+<item>
+              <title><![CDATA[How I learn an Open Source Codebase]]></title>
+              <description><![CDATA[What I do to learn and understand an open source project to which I want to contribute.]]></description>
+              <pubDate>2018-05-14</pubDate>
+              <link>https://kentcdodds.com/blog/how-i-learn-an-open-source-codebase</link>
+              <guid>https://kentcdodds.com/blog/how-i-learn-an-open-source-codebase</guid>
+            </item>
+<item>
+              <title><![CDATA[Mixing Component Patterns]]></title>
+              <description><![CDATA[Let's make a component that supports Render Props, Component Injection, Compound Components, the Provider Pattern, and Higher Order...]]></description>
+              <pubDate>2018-05-07</pubDate>
+              <link>https://kentcdodds.com/blog/mixing-component-patterns</link>
+              <guid>https://kentcdodds.com/blog/mixing-component-patterns</guid>
+            </item>
+<item>
+              <title><![CDATA[Pure Modules]]></title>
+              <description><![CDATA[How you write your ES Modules impacts the performance and maintainability of your code.]]></description>
+              <pubDate>2018-04-30</pubDate>
+              <link>https://kentcdodds.com/blog/pure-modules</link>
+              <guid>https://kentcdodds.com/blog/pure-modules</guid>
+            </item>
+<item>
+              <title><![CDATA[Migrating to React's New Context API]]></title>
+              <description><![CDATA[Let's compare the before/after of React's new context API.]]></description>
+              <pubDate>2018-04-23</pubDate>
+              <link>https://kentcdodds.com/blog/migrating-to-reacts-new-context-api</link>
+              <guid>https://kentcdodds.com/blog/migrating-to-reacts-new-context-api</guid>
+            </item>
+<item>
+              <title><![CDATA[Compose Render Props]]></title>
+              <description><![CDATA[One of the reasons I'm so excited about render props]]></description>
+              <pubDate>2018-04-09</pubDate>
+              <link>https://kentcdodds.com/blog/compose-render-props</link>
+              <guid>https://kentcdodds.com/blog/compose-render-props</guid>
+            </item>
+<item>
+              <title><![CDATA[Introducing the react-testing-library 🐐]]></title>
+              <description><![CDATA[A simpler replacement for enzyme that encourages good testing practices.]]></description>
+              <pubDate>2018-04-02</pubDate>
+              <link>https://kentcdodds.com/blog/introducing-the-react-testing-library</link>
+              <guid>https://kentcdodds.com/blog/introducing-the-react-testing-library</guid>
+            </item>
+<item>
+              <title><![CDATA[When to NOT use Render Props]]></title>
+              <description><![CDATA[Let's back up from the hype and think critically about the render props pattern]]></description>
+              <pubDate>2018-03-26</pubDate>
+              <link>https://kentcdodds.com/blog/when-to-not-use-render-props</link>
+              <guid>https://kentcdodds.com/blog/when-to-not-use-render-props</guid>
+            </item>
+<item>
+              <title><![CDATA[But really, what is a JavaScript mock?]]></title>
+              <description><![CDATA[Let's take a step back and understand what mocks are and how to use them to facilitate testing in JavaScript.]]></description>
+              <pubDate>2018-03-19</pubDate>
+              <link>https://kentcdodds.com/blog/but-really-what-is-a-javascript-mock</link>
+              <guid>https://kentcdodds.com/blog/but-really-what-is-a-javascript-mock</guid>
+            </item>
+<item>
+              <title><![CDATA[Increase your marketability]]></title>
+              <description><![CDATA[Some tips of things that I've done that have helped me get where I want to be in the industry.]]></description>
+              <pubDate>2018-03-12</pubDate>
+              <link>https://kentcdodds.com/blog/increase-your-marketability</link>
+              <guid>https://kentcdodds.com/blog/increase-your-marketability</guid>
+            </item>
+<item>
+              <title><![CDATA[Solidifying what you learn]]></title>
+              <description><![CDATA[Teaching is nature's way of letting you know how sloppy your understanding is.]]></description>
+              <pubDate>2018-03-05</pubDate>
+              <link>https://kentcdodds.com/blog/solidifying-what-you-learn</link>
+              <guid>https://kentcdodds.com/blog/solidifying-what-you-learn</guid>
+            </item>
+<item>
+              <title><![CDATA[The state reducer pattern ⚛️ 🏎]]></title>
+              <description><![CDATA[A new pattern has been implemented in downshift and it's awesome. Use the state reducer pattern to make your components more useful.]]></description>
+              <pubDate>2018-02-19</pubDate>
+              <link>https://kentcdodds.com/blog/the-state-reducer-pattern</link>
+              <guid>https://kentcdodds.com/blog/the-state-reducer-pattern</guid>
+            </item>
+<item>
+              <title><![CDATA[Answers to common questions about render props]]></title>
+              <description><![CDATA[Because there's a ton of hype, and a bunch of questions ⚛️]]></description>
+              <pubDate>2018-02-12</pubDate>
+              <link>https://kentcdodds.com/blog/answers-to-common-questions-about-render-props</link>
+              <guid>https://kentcdodds.com/blog/answers-to-common-questions-about-render-props</guid>
+            </item>
+<item>
+              <title><![CDATA[React's ⚛️ new Context API]]></title>
+              <description><![CDATA[It's way more ergonomic, it's no longer "experimental," and it's now a first-class API! OH, AND IT USES A RENDER PROP!]]></description>
+              <pubDate>2018-02-05</pubDate>
+              <link>https://kentcdodds.com/blog/reacts-new-context-api</link>
+              <guid>https://kentcdodds.com/blog/reacts-new-context-api</guid>
+            </item>
+<item>
+              <title><![CDATA[Concerning toolkits 🛠 📦]]></title>
+              <description><![CDATA[The merits and use cases of consolidating tools into one "zero config" toolkit.]]></description>
+              <pubDate>2018-01-29</pubDate>
+              <link>https://kentcdodds.com/blog/concerning-toolkits</link>
+              <guid>https://kentcdodds.com/blog/concerning-toolkits</guid>
+            </item>
+<item>
+              <title><![CDATA[Spelunking in node_modules 👷]]></title>
+              <description><![CDATA[Deep dive into Jest, React, and jsdom: A story about how I go about finding and fixing bugs in my dependencies.]]></description>
+              <pubDate>2018-01-22</pubDate>
+              <link>https://kentcdodds.com/blog/spelunking-in-node-modules</link>
+              <guid>https://kentcdodds.com/blog/spelunking-in-node-modules</guid>
+            </item>
+<item>
+              <title><![CDATA[Building Production Apps 100% in the browser]]></title>
+              <description><![CDATA[How I built & deployed 2 production apps without downloading any source code.]]></description>
+              <pubDate>2018-01-15</pubDate>
+              <link>https://kentcdodds.com/blog/building-production-apps-100-in-the-browser</link>
+              <guid>https://kentcdodds.com/blog/building-production-apps-100-in-the-browser</guid>
+            </item>
+<item>
+              <title><![CDATA[Testing ⚛️ components using render props]]></title>
+              <description><![CDATA[Let's look at how we can write tests for React components that use render props!]]></description>
+              <pubDate>2018-01-08</pubDate>
+              <link>https://kentcdodds.com/blog/testing-components-using-render-props</link>
+              <guid>https://kentcdodds.com/blog/testing-components-using-render-props</guid>
+            </item>
+<item>
+              <title><![CDATA[But really, what is a JavaScript test?]]></title>
+              <description><![CDATA[Let's take a step back and understand automated testing of JavaScript from square one.]]></description>
+              <pubDate>2018-01-01</pubDate>
+              <link>https://kentcdodds.com/blog/but-really-what-is-a-javascript-test</link>
+              <guid>https://kentcdodds.com/blog/but-really-what-is-a-javascript-test</guid>
+            </item>
+<item>
+              <title><![CDATA[Merry Christmas!]]></title>
+              <description><![CDATA[As I write this, it's Christmas Eve. My kids have fallen asleep and I've wrapped up the last few presents I've made or purchased for them...]]></description>
+              <pubDate>2017-12-25</pubDate>
+              <link>https://kentcdodds.com/blog/merry-christmas</link>
+              <guid>https://kentcdodds.com/blog/merry-christmas</guid>
+            </item>
+<item>
+              <title><![CDATA[The Beginner's Guide to ReactJS]]></title>
+              <description><![CDATA[The course is free forever on egghead.io! Let's talk about how it teaches even developers experienced with React ⚛️]]></description>
+              <pubDate>2017-12-18</pubDate>
+              <link>https://kentcdodds.com/blog/the-beginners-guide-to-reactjs</link>
+              <guid>https://kentcdodds.com/blog/the-beginners-guide-to-reactjs</guid>
+            </item>
+<item>
+              <title><![CDATA[Giving good demos]]></title>
+              <description><![CDATA[I gave a pretty good demo and here are some things I did that might help you give good demos too.]]></description>
+              <pubDate>2017-12-11</pubDate>
+              <link>https://kentcdodds.com/blog/giving-good-demos</link>
+              <guid>https://kentcdodds.com/blog/giving-good-demos</guid>
+            </item>
+<item>
+              <title><![CDATA[Advanced React Component Patterns]]></title>
+              <description><![CDATA[An overview of some of the patterns covered in my recently released egghead.io course (free until Friday).]]></description>
+              <pubDate>2017-12-05</pubDate>
+              <link>https://kentcdodds.com/blog/advanced-react-component-patterns</link>
+              <guid>https://kentcdodds.com/blog/advanced-react-component-patterns</guid>
+            </item>
+<item>
+              <title><![CDATA[Learn React Fundamentals 🆓 and Advanced Patterns ⚛️ 🎁]]></title>
+              <description><![CDATA[Two and a half hours of new beginner (free) and advanced React material are now available egghead.io!]]></description>
+              <pubDate>2017-12-04</pubDate>
+              <link>https://kentcdodds.com/blog/learn-react-fundamentals-and-advanced-patterns</link>
+              <guid>https://kentcdodds.com/blog/learn-react-fundamentals-and-advanced-patterns</guid>
+            </item>
+<item>
+              <title><![CDATA[Becoming an Open Source Project Maintainer]]></title>
+              <description><![CDATA[Some tips and tricks that have worked for me.]]></description>
+              <pubDate>2017-11-20</pubDate>
+              <link>https://kentcdodds.com/blog/becoming-an-open-source-project-maintainer</link>
+              <guid>https://kentcdodds.com/blog/becoming-an-open-source-project-maintainer</guid>
+            </item>
+<item>
+              <title><![CDATA[Rendering a function with React]]></title>
+              <description><![CDATA[How I tricked React into rendering a function (not call it... render it)]]></description>
+              <pubDate>2017-11-13</pubDate>
+              <link>https://kentcdodds.com/blog/rendering-a-function-with-react</link>
+              <guid>https://kentcdodds.com/blog/rendering-a-function-with-react</guid>
+            </item>
+<item>
+              <title><![CDATA[Improving the usability of your modules]]></title>
+              <description><![CDATA[How to make your modules more generically useful and easier to test.]]></description>
+              <pubDate>2017-11-06</pubDate>
+              <link>https://kentcdodds.com/blog/improving-the-usability-of-your-modules</link>
+              <guid>https://kentcdodds.com/blog/improving-the-usability-of-your-modules</guid>
+            </item>
+<item>
+              <title><![CDATA[Effective Snapshot Testing]]></title>
+              <description><![CDATA[Snapshot testing can be useless, or super useful. Your choice. Let's talk about how to make them useful.]]></description>
+              <pubDate>2017-10-30</pubDate>
+              <link>https://kentcdodds.com/blog/effective-snapshot-testing</link>
+              <guid>https://kentcdodds.com/blog/effective-snapshot-testing</guid>
+            </item>
+<item>
+              <title><![CDATA[Make maintainable workarounds with codegen 💥]]></title>
+              <description><![CDATA[Sometimes you need to workaround issues in other libraries. These workarounds can often lead to messy code. codegen is a tool that helps...]]></description>
+              <pubDate>2017-10-09</pubDate>
+              <link>https://kentcdodds.com/blog/make-maintainable-workarounds-with-codegen</link>
+              <guid>https://kentcdodds.com/blog/make-maintainable-workarounds-with-codegen</guid>
+            </item>
+<item>
+              <title><![CDATA[How to give rendering control to users with prop getters]]></title>
+              <description><![CDATA[Render props are awesome, put it together with prop getters and you have an awesome combination to give users of your React components...]]></description>
+              <pubDate>2017-10-02</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-give-rendering-control-to-users-with-prop-getters</link>
+              <guid>https://kentcdodds.com/blog/how-to-give-rendering-control-to-users-with-prop-getters</guid>
+            </item>
+<item>
+              <title><![CDATA[Tools without config 🛠📦]]></title>
+              <description><![CDATA[TL;DR/Spoiler alert: I'm working on a tool at PayPal called paypal-scripts and a personal one called kcd-scripts. You should try it too!]]></description>
+              <pubDate>2017-09-26</pubDate>
+              <link>https://kentcdodds.com/blog/tools-without-config</link>
+              <guid>https://kentcdodds.com/blog/tools-without-config</guid>
+            </item>
+<item>
+              <title><![CDATA[Introducing downshift 🏎 for React ⚛️]]></title>
+              <description><![CDATA[downshift 🏎 is the primitive you need to build simple, flexible, WAI-ARIA compliant React...]]></description>
+              <pubDate>2017-08-23</pubDate>
+              <link>https://kentcdodds.com/blog/introducing-downshift-for-react</link>
+              <guid>https://kentcdodds.com/blog/introducing-downshift-for-react</guid>
+            </item>
+<item>
+              <title><![CDATA[How writing custom Babel & ESLint plugins can increase productivity & improve user experience]]></title>
+              <description><![CDATA[And it's way more approachable than you think...]]></description>
+              <pubDate>2017-07-17</pubDate>
+              <link>https://kentcdodds.com/blog/how-writing-custom-babel-and-eslint-plugins-can-increase-productivity-and-improve-user-experience</link>
+              <guid>https://kentcdodds.com/blog/how-writing-custom-babel-and-eslint-plugins-can-increase-productivity-and-improve-user-experience</guid>
+            </item>
+<item>
+              <title><![CDATA[Classes, Complexity, and Functional Programming]]></title>
+              <description><![CDATA[When I use classes, when I don't, what I do instead, and why]]></description>
+              <pubDate>2017-06-06</pubDate>
+              <link>https://kentcdodds.com/blog/classes-complexity-and-functional-programming</link>
+              <guid>https://kentcdodds.com/blog/classes-complexity-and-functional-programming</guid>
+            </item>
+<item>
+              <title><![CDATA[Introducing glamorous 💄]]></title>
+              <description><![CDATA[A styled-components 💅 and jsxstyle inspired solution for styling ⚛️ React Components from PayPal]]></description>
+              <pubDate>2017-04-04</pubDate>
+              <link>https://kentcdodds.com/blog/introducing-glamorous</link>
+              <guid>https://kentcdodds.com/blog/introducing-glamorous</guid>
+            </item>
+<item>
+              <title><![CDATA[Tips for making a CLI-based tool with node]]></title>
+              <description><![CDATA[I got this question on my AMA and decided to turn the answer into a formal blogpost.]]></description>
+              <pubDate>2016-11-18</pubDate>
+              <link>https://kentcdodds.com/blog/tips-for-making-a-cli-based-tool-with-node</link>
+              <guid>https://kentcdodds.com/blog/tips-for-making-a-cli-based-tool-with-node</guid>
+            </item>
+<item>
+              <title><![CDATA[Migrating to Jest]]></title>
+              <description><![CDATA[on the P2P team at PayPal]]></description>
+              <pubDate>2016-11-14</pubDate>
+              <link>https://kentcdodds.com/blog/migrating-to-jest</link>
+              <guid>https://kentcdodds.com/blog/migrating-to-jest</guid>
+            </item>
+<item>
+              <title><![CDATA[🌆 Sunsetting JavaScript Air 🌆]]></title>
+              <description><![CDATA[for now... 🌇]]></description>
+              <pubDate>2016-10-28</pubDate>
+              <link>https://kentcdodds.com/blog/sunsetting-javascript-air</link>
+              <guid>https://kentcdodds.com/blog/sunsetting-javascript-air</guid>
+            </item>
+<item>
+              <title><![CDATA[Kent OOO (Out Of the Office)]]></title>
+              <description><![CDATA[Why this week's episode of JavaScript Air is canceled and where I'm going...]]></description>
+              <pubDate>2016-05-31</pubDate>
+              <link>https://kentcdodds.com/blog/kent-ooo-out-of-the-office</link>
+              <guid>https://kentcdodds.com/blog/kent-ooo-out-of-the-office</guid>
+            </item>
+<item>
+              <title><![CDATA[Introducing: How to Contribute to Open Source]]></title>
+              <description><![CDATA[My free, first-timer friendly egghead.io series all about how to contribute to open source projects on GitHub.]]></description>
+              <pubDate>2016-02-08</pubDate>
+              <link>https://kentcdodds.com/blog/introducing-how-to-contribute-to-open-source</link>
+              <guid>https://kentcdodds.com/blog/introducing-how-to-contribute-to-open-source</guid>
+            </item>
+<item>
+              <title><![CDATA[Misunderstanding ES6 Modules, Upgrading Babel, Tears, and a Solution]]></title>
+              <description><![CDATA[On October 29th, 2015, Sebastian McKenzie, James Kyle, and the rest of the Babel team dropped a huge major release for frontend developers...]]></description>
+              <pubDate>2015-12-23</pubDate>
+              <link>https://kentcdodds.com/blog/misunderstanding-es6-modules-upgrading-babel-tears-and-a-solution</link>
+              <guid>https://kentcdodds.com/blog/misunderstanding-es6-modules-upgrading-babel-tears-and-a-solution</guid>
+            </item>
+<item>
+              <title><![CDATA[Semicolons in JavaScript: A preference]]></title>
+              <description><![CDATA[An argument for why use of semicolons in JavaScript source is a preference]]></description>
+              <pubDate>2015-11-16</pubDate>
+              <link>https://kentcdodds.com/blog/semicolons-in-javascript-a-preference</link>
+              <guid>https://kentcdodds.com/blog/semicolons-in-javascript-a-preference</guid>
+            </item>
+<item>
+              <title><![CDATA[Please, don't commit commented out code]]></title>
+              <description><![CDATA[Some solid reasons you should delete code that is not used]]></description>
+              <pubDate>2015-10-27</pubDate>
+              <link>https://kentcdodds.com/blog/please-dont-commit-commented-out-code</link>
+              <guid>https://kentcdodds.com/blog/please-dont-commit-commented-out-code</guid>
+            </item>
+<item>
+              <title><![CDATA[Open Source Stamina]]></title>
+              <description><![CDATA[You contribute best to something you use regularly.]]></description>
+              <pubDate>2015-10-22</pubDate>
+              <link>https://kentcdodds.com/blog/open-source-stamina</link>
+              <guid>https://kentcdodds.com/blog/open-source-stamina</guid>
+            </item>
+<item>
+              <title><![CDATA[Why I don't commit generated files to master]]></title>
+              <description><![CDATA[for libraries...]]></description>
+              <pubDate>2015-10-05</pubDate>
+              <link>https://kentcdodds.com/blog/why-i-dont-commit-generated-files-to-master</link>
+              <guid>https://kentcdodds.com/blog/why-i-dont-commit-generated-files-to-master</guid>
+            </item>
+<item>
+              <title><![CDATA[How to Write a JavaScript Library]]></title>
+              <description><![CDATA[There are so many reasons to open source your code. But knowing how to do it can be a real challenge.]]></description>
+              <pubDate>2015-09-08</pubDate>
+              <link>https://kentcdodds.com/blog/how-to-write-a-javascript-library</link>
+              <guid>https://kentcdodds.com/blog/how-to-write-a-javascript-library</guid>
+            </item>
+<item>
+              <title><![CDATA[First Timers Only]]></title>
+              <description><![CDATA[A suggestion to Open Source project maintainers...]]></description>
+              <pubDate>2015-08-04</pubDate>
+              <link>https://kentcdodds.com/blog/first-timers-only</link>
+              <guid>https://kentcdodds.com/blog/first-timers-only</guid>
+            </item>
+<item>
+              <title><![CDATA[Newspaper Code Structure]]></title>
+              <description><![CDATA[Your code should read like a newspaper article. Important stuff at the top, details at the bottom. I have a particular convention for my...]]></description>
+              <pubDate>2015-05-18</pubDate>
+              <link>https://kentcdodds.com/blog/newspaper-code-structure</link>
+              <guid>https://kentcdodds.com/blog/newspaper-code-structure</guid>
+            </item>
+      </channel>
+    </rss>

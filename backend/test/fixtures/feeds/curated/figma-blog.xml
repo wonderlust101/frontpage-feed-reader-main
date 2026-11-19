@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://www.figma.com/blog/</id>
+    <title>Figma Blog | Shortcut</title>
+    <updated>2026-11-16T19:29:51.244Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://www.figma.com/blog/"/>
+    <link rel="self" href="https://www.figma.com/blog/feed/atom.xml"/>
+    <subtitle>Welcome to Shortcut, Figma’s blog for telling stories about people, and the priorities, plans, and pivots they discover along the path of bringing new ideas to life.</subtitle>
+    <entry>
+        <title type="html"><![CDATA[How 1Password uses Figma Make to design for trust and certainty]]></title>
+        <id>https://www.figma.com/blog/1password-figma-make/</id>
+        <link href="https://www.figma.com/blog/1password-figma-make/"/>
+        <updated>2026-11-16T18:03:00.000Z</updated>
+        <content type="html"><![CDATA[From autofill to AI agent approvals, every 1Password interaction counts. Here's how the design team uses Figma Make to design moments users trust.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[AI’s role in the creative process]]></title>
+        <id>https://www.figma.com/blog/ai-role-in-the-creative-process/</id>
+        <link href="https://www.figma.com/blog/ai-role-in-the-creative-process/"/>
+        <updated>2026-11-13T20:00:00.000Z</updated>
+        <content type="html"><![CDATA[Which parts of the creative process can AI do for us—and which do we insist on keeping for ourselves?]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[How 3D transforms and Figma’s agent brought a launch video to life]]></title>
+        <id>https://www.figma.com/blog/how-3d-transforms-and-figmas-agent-brought-a-launch-video-to-life/</id>
+        <link href="https://www.figma.com/blog/how-3d-transforms-and-figmas-agent-brought-a-launch-video-to-life/"/>
+        <updated>2026-11-12T14:00:00.000Z</updated>
+        <content type="html"><![CDATA[See how Figma’s Brand Studio team combined 3D design, agent-built plugins, shaders, and motion to create a video together on the canvas.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[6 easy ways to use the Figma agent right now]]></title>
+        <id>https://www.figma.com/blog/6-easy-ways-to-use-the-figma-agent-right-now/</id>
+        <link href="https://www.figma.com/blog/6-easy-ways-to-use-the-figma-agent-right-now/"/>
+        <updated>2026-11-09T21:46:00.000Z</updated>
+        <content type="html"><![CDATA[From making designs more expressive and automating busywork, to exploring more possibilities on the canvas, here are six ways to push designers further with the Figma agent.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[In conversation: Dylan Field and David Friedberg on the human role in creating with AI]]></title>
+        <id>https://www.figma.com/blog/in-conversation-dylan-field-and-david-friedberg/</id>
+        <link href="https://www.figma.com/blog/in-conversation-dylan-field-and-david-friedberg/"/>
+        <updated>2026-11-06T20:31:00.000Z</updated>
+        <content type="html"><![CDATA[On why design is the new code, shaping AI’s creative output, and the human vision and judgment behind what we make.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Workflow lab: Test ideas with code layers and the Figma agent]]></title>
+        <id>https://www.figma.com/blog/workflow-lab-build-with-code-on-the-canvas-using-the-figma-agent-and-code-layers/</id>
+        <link href="https://www.figma.com/blog/workflow-lab-build-with-code-on-the-canvas-using-the-figma-agent-and-code-layers/"/>
+        <updated>2026-11-04T22:12:00.000Z</updated>
+        <content type="html"><![CDATA[Bringing code onto the canvas gives teams a shared space to compare working prototypes side by side, refine a direction, and collaborate on ideas with teammates. This workflow shows how a designer uses code layers and the Figma agent to explore a new feature.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[How Figma manages sandboxes at scale]]></title>
+        <id>https://www.figma.com/blog/how-figma-manages-sandboxes-at-scale/</id>
+        <link href="https://www.figma.com/blog/how-figma-manages-sandboxes-at-scale/"/>
+        <updated>2026-11-04T16:23:00.000Z</updated>
+        <content type="html"><![CDATA[Figma’s AI products require tens of thousands of sandboxes to run untrusted code safely. That’s why we built Nimbus: a platform that makes sandboxes fast, reliable, and easy for Figma product teams and operators to manage.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[How we brought Hello Kitty® and Friends to Figma]]></title>
+        <id>https://www.figma.com/blog/hello-kitty-and-friends-in-figma/</id>
+        <link href="https://www.figma.com/blog/hello-kitty-and-friends-in-figma/"/>
+        <updated>2026-11-02T14:58:00.000Z</updated>
+        <content type="html"><![CDATA[Since Hello Kitty® first stepped onto the world stage in 1974, she and her friends have connected generations of fans through the spirit of togetherness and thoughtful design. Here’s how our shared love of craft and community shaped our collaboration with Sanrio®, in FigJam and around the world.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Figma and Sanrio® celebrate Hello Kitty® and the joy of making things with friends]]></title>
+        <id>https://www.figma.com/blog/figma-and-sanrio-celebrate-hello-kitty-and-friends/</id>
+        <link href="https://www.figma.com/blog/figma-and-sanrio-celebrate-hello-kitty-and-friends/"/>
+        <updated>2026-11-02T14:00:00.000Z</updated>
+        <content type="html"><![CDATA[In honor of Hello Kitty®’s birthday, Hello Kitty® and Friends are moving into FigJam, and throwing a party in NYC.]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[The TL;DR on Figma Weave: Make your creative process repeatable]]></title>
+        <id>https://www.figma.com/blog/the-tldr-on-figma-weave/</id>
+        <link href="https://www.figma.com/blog/the-tldr-on-figma-weave/"/>
+        <updated>2026-10-31T00:58:00.000Z</updated>
+        <content type="html"><![CDATA[Figma Weave brings AI generation and editing tools together into connected, reusable workflows, giving you a process your team can shape, refine, and repeat. Here’s what it unlocks for creative teams and how to get the most out of it.]]></content>
+    </entry>
+</feed>

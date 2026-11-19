@@ -1,3 +1,6 @@
+// Postgres through Drizzle: one connection pool for the server's lifetime, using Neon's pooled DATABASE_URL.
+// Without DATABASE_URL, `db` is null and the API runs without a database.
+
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
@@ -5,10 +8,6 @@ import { env } from '../env';
 import * as schema from './schema';
 import type { DbStatus } from '@frontpage/shared';
 
-/** The backend is a long-running server, so it keeps one node-postgres pool
- for its whole lifetime and reuses connections across requests. DATABASE_URL is Neon's
- *pooled* connection string (PgBouncer, host contains "-pooler"); migrations use the
- direct string instead (see drizzle.config.ts). **/
 export const pool = env.DATABASE_URL
     ? new Pool({
           connectionString: env.DATABASE_URL,
@@ -18,17 +17,18 @@ export const pool = env.DATABASE_URL
       })
     : null;
 
-/** The server can drop an idle pooled connection (e.g. compute suspended);
- log it instead of crashing the process. The pool replaces the connection. **/
+// Neon can drop idle connections (e.g. when compute suspends): log it instead of crashing; the pool reconnects.
 pool?.on('error', (err) => {
     console.error('Postgres pool error:', err.message);
 });
 
-/** `null` when DATABASE_URL isn't configured — the API still runs without a DB. */
 export const db = pool ? drizzle({ client: pool, schema }) : null;
 
+// Checks the database with `select 1` for /api/health: 'connected', 'skipped' (no DATABASE_URL) or 'error' with the driver's message.
 export async function checkDatabase(): Promise<{ status: DbStatus; error?: string }> {
-    if (!db) return { status: 'skipped' };
+    if (!db) {
+        return { status: 'skipped' };
+    }
     try {
         await db.execute(sql`select 1`);
         return { status: 'connected' };
@@ -39,7 +39,7 @@ export async function checkDatabase(): Promise<{ status: DbStatus; error?: strin
     }
 }
 
-/** Closes all pooled connections. Called on shutdown. */
+// Closes every pooled connection so the process can exit cleanly; called on shutdown.
 export async function closeDatabase() {
     await pool?.end();
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>Half a Feed</title>
+<link>https://broken.example/</link>
+<item>
+<title>First post survives</title>
+<link>https://broken.example/one</link>
+<pubDate>Tue, 10 Jun 2025 09:00:00 GMT</pubDate>
+<description>The first item is complete.</description>
+</item>
+<item>
+<title>Second post is cut off</title>
+<link>https://broken.example/two</link>
+<description>Unclosed <b>bold & a stray ampersand

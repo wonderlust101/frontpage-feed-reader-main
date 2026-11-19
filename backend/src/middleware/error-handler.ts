@@ -1,12 +1,42 @@
-import type { ErrorRequestHandler } from 'express';
+// Express's last middleware: every error thrown in a route ends up here and is sent as the standard JSON error body.
 
-/**
- * Errors → JSON. Client errors (e.g. malformed JSON body) keep their status and message;
- * anything else is logged and returned as a generic 500 so internals don't leak.
- * Must be registered last, after all routes.
- */
+import type { ErrorRequestHandler } from 'express';
+import type { ApiErrorResponse } from '@frontpage/shared';
+import { HttpError } from './errors';
+
+// Sends any thrown error as { error: { code, message, retryable } }, so controllers never need try/catch.
+// Unexpected errors (bugs) are logged and answered with a generic 500 that hides the details.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-    const status: number = err?.status ?? err?.statusCode ?? 500;
-    if (status >= 500) console.error(err);
-    res.status(status).json({ error: status < 500 ? err.message : 'Internal server error' });
+    const error = toHttpError(err);
+    if (error.code === 'internal_error') {
+        console.error(err);
+    }
+
+    const body: ApiErrorResponse = {
+        error: {
+            code: error.code,
+            message: error.message,
+            retryable: error.retryable,
+            ...(error.upstreamStatus !== undefined && { status: error.upstreamStatus }),
+        },
+    };
+    res.status(error.status).json(body);
 };
+
+// Any thrown value as an HttpError: ours pass through, Express's own 4xx (e.g. bad JSON) keep their status, anything else becomes a 500.
+function toHttpError(err: unknown): HttpError {
+    if (err instanceof HttpError) {
+        return err;
+    }
+
+    const expressError = err as { status?: number; statusCode?: number; type?: string; message?: string } | undefined;
+    const status = expressError?.status ?? expressError?.statusCode ?? 500;
+    if (status >= 400 && status < 500) {
+        const invalidJson = err instanceof SyntaxError || expressError?.type === 'entity.parse.failed';
+        return invalidJson
+            ? new HttpError(status, 'invalid_json', 'The request body is not valid JSON')
+            : new HttpError(status, 'bad_request', String(expressError?.message ?? 'Bad request'));
+    }
+
+    return new HttpError(500, 'internal_error', 'Internal server error');
+}

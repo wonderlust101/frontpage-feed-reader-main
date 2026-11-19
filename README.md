@@ -37,16 +37,19 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │   ├── neon.ts               # Neon infrastructure-as-code (linked via .neon)
 │   ├── bunfig.toml           # bun test config (preloads test/setup.ts)
 │   ├── data/                 # sample feeds (JSON + OPML) for the guest experience
-│   ├── test/                 # API tests: setup.ts, helpers.ts, *.test.ts
+│   ├── test/                 # bun:test tests mirroring src/ (see backend/test/README.md)
 │   ├── requests/             # .http files for manual API requests
 │   └── src/
 │       ├── index.ts          # starts the server (PORT, graceful shutdown)
 │       ├── app.ts            # Express app: global middleware + mounts module routers
+│       ├── middleware/       # error handling, shared by all modules (later also auth)
+│       │   ├── error-handler.ts      # errorHandler: every thrown error → the standard JSON error body
+│       │   ├── not-found-handler.ts  # notFoundHandler: unknown routes → 404
+│       │   └── errors/               # one file per error class: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
-│       │   ├── health/       #   health.routes.ts → GET /api/health
-│       │   └── feeds/        #   feeds.schema.ts  → Drizzle "feeds" table
-│       ├── middleware/       # Express middleware shared by all modules (404, error handler; later auth)
+│       │   ├── health/       #   GET /api/health (routes → controller)
+│       │   └── feeds/        #   GET /api/fetch (routes → controller → service) + Drizzle "feeds" table
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
 │       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
 │       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
@@ -62,16 +65,49 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 
 Each feature lives in `backend/src/modules/<feature>/`, with files named after the feature:
 
-| File                   | Holds                                                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `<feature>.routes.ts`  | Express `Router`, mounted in `app.ts` (`app.use("/api/<feature>", router)`)                                   |
-| `<feature>.service.ts` | Business logic and database queries; routes call this                                                         |
-| `<feature>.schema.ts`  | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it |
-| `<feature>.types.ts`   | Types used only inside this module                                                                            |
+| File                      | Holds                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `<feature>.routes.ts`     | Express `Router`, mounted in `app.ts` (`app.use("/api/<feature>", router)`). Only maps URL + method → controller          |
+| `<feature>.controller.ts` | HTTP in/out: reads `req` (query, params, headers, body), calls the service, sets status/headers, maps errors to responses |
+| `<feature>.service.ts`    | Business logic and database queries; controllers call this. Never touches `req`/`res`                                     |
+| `<feature>.schema.ts`     | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it             |
+| `<feature>.types.ts`      | Types used only inside this module                                                                                        |
 
-Only create the files a module needs. `health/` has just routes; `feeds/` currently has just its table.
+Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, service and its table.
+
+**Errors.** Every API error has the same shape, whatever the status:
+
+```json
+{ "error": { "code": "not_found", "message": "Feed not found", "retryable": false } }
+```
+
+- Services **throw** the class for the status they mean, from `src/middleware/errors/`: `BadRequestError` (400), `NotFoundError` (404), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `BadGatewayError` (502), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
+- Controllers **don't catch**. Express 5 forwards thrown errors to `src/middleware/error-handler.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
+- A new kind of error needs no registration: throw the right class with a new code, and add the code to `ApiErrorCode` in `packages/shared/src/api.ts` so the frontend knows it. A new status is a small file in `src/middleware/errors/` (copy one of the others) plus a line in its `index.ts`.
 
 The sample feeds live in `backend/data/` because only the backend reads them.
+
+### Code style
+
+Prettier handles formatting and ESLint adds `curly` (braces on every `if`/`else`/loop body). Beyond that, every source file follows the same layout and comment rules, so any file reads the same way.
+
+**File order, top to bottom:**
+
+1. Purpose comment (a few `//` lines), then a blank line
+2. Imports
+3. Types
+4. Constants, then module state (`let` variables, caches)
+5. Exported functions, the file's main one first
+6. Private helpers, in the order the functions above call them
+
+You meet a file's main function first and read down into the details. Write helpers as `function` declarations, not `const helper = () => …`: functions are hoisted, so a constant near the top (like `const ISO = pattern(…)` in `dates.ts`) can use a helper defined further down. Test files are the exception: their setup and helpers go above the tests.
+
+**Comments** (`//` only, never `/* */` or `/** */`):
+
+- **Top of file:** optional lines stating the file's purpose and any key design decision, then a blank line.
+- **Every function:** one line saying what it does, what it returns and its edge cases (when it returns null, what it throws); two lines only for unusually complex functions. Comment lines may run past Prettier's `printWidth`, since Prettier never wraps comments.
+- **Nowhere else**, except a one-line _why_ on a genuinely complex line (a regex, a workaround, non-obvious library behaviour). No section dividers and no comments on constants, types or fields.
+- **Names first:** if code needs a comment to be understood, rename the variable or extract a named constant instead (`MAX_OFFSET_HOURS = 14`, not `14 // max offset`).
 
 ## Getting started
 
@@ -117,7 +153,7 @@ docker compose run --rm migrate     # re-sync the Drizzle schema after editing *
 | `bun run start:frontend` / `start:backend`                     | Production servers                                                          |
 | `bun run typecheck`                                            | Type-check both projects                                                    |
 | `bun run test` / `test:watch`                                  | Backend API tests (`bun test`)                                              |
-| `bun run lint`                                                 | Lint the frontend                                                           |
+| `bun run lint`                                                 | Lint frontend and backend (ESLint; Prettier handles formatting)             |
 | `bun run db:generate` / `db:migrate` / `db:push` / `db:studio` | Drizzle Kit (backend)                                                       |
 | `bun run docker:up` / `docker:down` / `docker:logs`            | Local Docker stack (see above)                                              |
 
@@ -128,19 +164,21 @@ You can also `cd frontend` or `cd backend` and use their own scripts directly. T
 ### Automated tests
 
 ```bash
-bun run test          # from the repo root (or `bun test` inside backend/)
-bun run test:watch    # re-run on save
+bun run test            # from the repo root (or `bun test` inside backend/)
+bun run test:watch      # re-run on save
+bun run test:live       # opt-in: hit the real curated feeds over the network
+bun run fixtures:feeds  # re-download the curated feed snapshots used by the tests
 ```
 
-- Tests live in `backend/test/*.test.ts` and use Bun's built-in runner (`bun:test`). No extra dependencies.
-- `startTestServer()` (`backend/test/helpers.ts`) starts the real Express app on a random free port, so tests call it with plain `fetch`. You don't need `bun dev` running.
+- Tests live in `backend/test/` and use Bun's built-in runner (`bun:test`). No extra dependencies. The folder mirrors `backend/src/` (the test for `src/x/y.ts` is `test/x/y.test.ts`). See [`backend/test/README.md`](backend/test/README.md) for the layout rules, which `test/structure.test.ts` enforces in CI.
+- `startTestServer()` (`backend/test/helpers/test-server.ts`) starts the real Express app on a random free port, so tests call it with plain `fetch`. You don't need `bun dev` running.
 - `backend/test/setup.ts` runs before every test file (via `backend/bunfig.toml`). It blanks `DATABASE_URL` and pins `WEB_ORIGIN`, so tests behave the same on every machine and never touch your real Neon database, even though `bun test` auto-loads `backend/.env`.
 
-Template for a new endpoint test:
+Template for a new endpoint test, e.g. `backend/test/modules/feeds/feeds.routes.test.ts`:
 
 ```ts
 import { afterAll, beforeAll, expect, test } from 'bun:test';
-import { startTestServer } from './helpers';
+import { startTestServer } from '../../helpers/test-server';
 
 let server: Awaited<ReturnType<typeof startTestServer>>;
 beforeAll(async () => {

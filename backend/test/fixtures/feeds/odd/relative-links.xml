@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>Relative Links</title>
+<link>https://rel.example/blog/</link>
+<item>
+<title>Relative</title>
+<link>/blog/relative-post</link>
+<pubDate>Tue, 10 Jun 2025 09:00:00 GMT</pubDate>
+<description><![CDATA[<p>See <a href="../about">about</a> and <img src="images/pic.png" srcset="images/pic.png 1x, images/pic@2x.png 2x" alt="pic"></p>]]></description>
+</item>
+</channel></rss>

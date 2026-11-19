@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>Dupes</title>
+<link>https://dupes.example/</link>
+<item><title>Original</title><guid>dup-1</guid><link>https://dupes.example/1</link><pubDate>Tue, 10 Jun 2025 09:00:00 GMT</pubDate></item>
+<item><title>Repeat</title><guid>dup-1</guid><link>https://dupes.example/1</link><pubDate>Tue, 10 Jun 2025 09:00:00 GMT</pubDate></item>
+<item><title>Newer</title><guid>dup-2</guid><link>https://dupes.example/2</link><pubDate>Wed, 11 Jun 2025 09:00:00 GMT</pubDate></item>
+</channel></rss>

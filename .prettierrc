@@ -1,5 +1,5 @@
 {
-    "printWidth": 120,
+    "printWidth": 160,
     "tabWidth": 4,
     "useTabs": false,
     "semi": true,
@@ -15,5 +15,13 @@
     "singleAttributePerLine": false,
     "proseWrap": "preserve",
     "htmlWhitespaceSensitivity": "css",
-    "embeddedLanguageFormatting": "auto"
+    "embeddedLanguageFormatting": "auto",
+    "overrides": [
+        {
+            "files": ["*.yml", "*.yaml"],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
 }

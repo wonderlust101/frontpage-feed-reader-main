@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>Weird Dates</title>
+<link>https://dates.example/</link>
+<item>
+<title>Date rfc822</title>
+<link>https://dates.example/rfc822</link>
+<pubDate>Wed, 02 Oct 2024 15:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Date named-tz</title>
+<link>https://dates.example/named-tz</link>
+<pubDate>Wed, 02 Oct 2024 08:00:00 PDT</pubDate>
+</item>
+<item>
+<title>Date no-seconds</title>
+<link>https://dates.example/no-seconds</link>
+<pubDate>Wed, 02 Oct 2024 15:00 GMT</pubDate>
+</item>
+<item>
+<title>Date no-dayname</title>
+<link>https://dates.example/no-dayname</link>
+<pubDate>2 Oct 2024 15:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Date wrong-dayname</title>
+<link>https://dates.example/wrong-dayname</link>
+<pubDate>Monday, 02 Oct 2024 15:00:00 GMT</pubDate>
+</item>
+<item>
+<title>Date two-digit-year</title>
+<link>https://dates.example/two-digit-year</link>
+<pubDate>Wed, 02 Oct 24 15:00:00 GMT</pubDate>
+</item>
+<item>
+<title>Date iso-no-zone</title>
+<link>https://dates.example/iso-no-zone</link>
+<pubDate>2024-10-02 15:00:00</pubDate>
+</item>
+<item>
+<title>Date iso-offset</title>
+<link>https://dates.example/iso-offset</link>
+<pubDate>2024-10-02T17:00:00+02:00</pubDate>
+</item>
+<item>
+<title>Date month-first</title>
+<link>https://dates.example/month-first</link>
+<pubDate>October 2, 2024 3:00 PM GMT</pubDate>
+</item>
+<item>
+<title>Date full-month</title>
+<link>https://dates.example/full-month</link>
+<pubDate>Wednesday, 2 October 2024 15:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Date garbage</title>
+<link>https://dates.example/garbage</link>
+<pubDate>sometime last week</pubDate>
+</item>
+<item>
+<title>Date impossible</title>
+<link>https://dates.example/impossible</link>
+<pubDate>Sat, 31 Feb 2024 10:00:00 GMT</pubDate>
+</item>
+</channel></rss>
