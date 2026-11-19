@@ -33,6 +33,7 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+.fuse_hidden*
 
 # ── AI tooling: personal/local files only ──────────────────────
 # (shared config like .claude/settings.json, .cursorignore, .aiignore IS committed)
