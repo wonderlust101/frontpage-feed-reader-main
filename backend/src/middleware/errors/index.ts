@@ -1,6 +1,6 @@
 // The error classes, importable from one place: `import { NotFoundError } from '../middleware/errors'`.
 
-export { HttpError, isRetryableStatus, type HttpErrorOptions } from './http-error';
+export { HttpError, isRetryableStatus } from './http-error';
 export { BadRequestError } from './bad-request-error';
 export { NotFoundError } from './not-found-error';
 export { PayloadTooLargeError } from './payload-too-large-error';

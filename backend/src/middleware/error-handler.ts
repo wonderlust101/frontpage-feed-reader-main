@@ -29,13 +29,12 @@ function toHttpError(err: unknown): HttpError {
         return err;
     }
 
-    const expressError = err as { status?: number; statusCode?: number; type?: string; message?: string } | undefined;
-    const status = expressError?.status ?? expressError?.statusCode ?? 500;
+    const expressError = err as { status?: number; type?: string; message?: string } | undefined;
+    const status = expressError?.status ?? 500;
     if (status >= 400 && status < 500) {
-        const invalidJson = err instanceof SyntaxError || expressError?.type === 'entity.parse.failed';
-        return invalidJson
+        return expressError?.type === 'entity.parse.failed'
             ? new HttpError(status, 'invalid_json', 'The request body is not valid JSON')
-            : new HttpError(status, 'bad_request', String(expressError?.message ?? 'Bad request'));
+            : new HttpError(status, 'bad_request', expressError?.message || 'Bad request');
     }
 
     return new HttpError(500, 'internal_error', 'Internal server error');
