@@ -2,6 +2,7 @@
 
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
+// Feed subscriptions by URL (placeholder until the real feeds model replaces it).
 export const feeds = pgTable('feeds', {
     id: uuid('id').primaryKey().defaultRandom(),
     url: text('url').notNull().unique(),

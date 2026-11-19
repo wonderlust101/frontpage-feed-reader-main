@@ -1,6 +1,6 @@
 # Backend tests
 
-Tests use `bun:test` and run without a database or network. Run them from the repo root:
+Tests use `bun:test` and run without a database server or network. Tests that need Postgres use `createTestDb()` (in-memory PGlite, built from the committed migrations). Run them from the repo root:
 
 | Command                  | What it runs                                                           |
 | ------------------------ | ---------------------------------------------------------------------- |
@@ -24,7 +24,8 @@ test/
 ├── helpers/                ← shared test code, no tests
 │   ├── test-server.ts      ← startTestServer(): the Express app on a random port
 │   ├── feed-server.ts      ← fake upstream feed server (redirects, 304, timeouts, 4xx/5xx)
-│   └── fixtures.ts         ← readFixture(), curatedFixtures
+│   ├── fixtures.ts         ← readFixture(), curatedFixtures
+│   └── test-db.ts          ← createTestDb(): in-memory Postgres (PGlite) with every migration applied
 └── fixtures/feeds/
     ├── curated/            ← byte-exact snapshots of the 19 curated feeds + manifest.json
     └── odd/                ← hand-written broken/edge-case feeds, one problem per file
