@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { fetchFeedController } from './feeds.controller';
 
-export const fetchRouter = Router();
+export const feedsRouter = Router();
 
-fetchRouter.get('/', fetchFeedController);
+feedsRouter.get('/', fetchFeedController);
