@@ -4,6 +4,7 @@
 import sanitize from 'sanitize-html';
 import { decode } from 'html-entities';
 import { parseSrcset, stringifySrcset } from 'srcset';
+import { LINK_PROTOCOLS, resolveUrl } from './urls';
 
 const ALLOWED_TAGS = [
     'p',
@@ -75,8 +76,6 @@ const ALLOWED_TAGS = [
 const EMBED_HOSTS = ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'player.vimeo.com', 'codepen.io', 'codesandbox.io'];
 
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
-
-const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
 // Tags whose text is never content (code, styles, form options…): dropped along with the tag.
 const NON_TEXT_TAGS = ['script', 'style', 'textarea', 'option', 'noscript', 'template', 'title', 'head'];
@@ -194,8 +193,8 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
     const result = { ...attribs };
 
     for (const name of names.filter((n) => n in result)) {
-        const resolve = name === 'srcset' ? resolveSrcset : resolveUrl;
-        const resolved = resolve(result[name]!, base);
+        const value = result[name]!;
+        const resolved = name === 'srcset' ? resolveSrcset(value, base) : resolveUrl(value, base, LINK_PROTOCOLS);
 
         if (resolved) {
             result[name] = resolved;
@@ -207,27 +206,12 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
     return result;
 }
 
-// Resolves every URL in a srcset and drops unsafe ones (undefined if none are left); a package parses it, as URLs may contain commas.
-function resolveSrcset(value: string, base?: string): string | undefined {
+// Resolves every URL in a srcset and drops unsafe ones (null if none are left); a package parses it, as URLs may contain commas.
+function resolveSrcset(value: string, base?: string): string | null {
     const candidates = parseSrcset(value).flatMap((candidate) => {
-        const url = resolveUrl(candidate.url, base);
+        const url = resolveUrl(candidate.url, base, LINK_PROTOCOLS);
         return url ? [{ ...candidate, url }] : [];
     });
 
-    return candidates.length > 0 ? stringifySrcset(candidates) : undefined;
-}
-
-// Resolves a URL against the page it came from; undefined unless it's http(s) or mailto, so javascript:, data:, file: and invalid URLs are dropped.
-function resolveUrl(value: string, base?: string): string | undefined {
-    const trimmed = value.trim();
-    if (!trimmed) {
-        return undefined;
-    }
-
-    try {
-        const url = new URL(trimmed, base);
-        return SAFE_PROTOCOLS.has(url.protocol) ? url.href : undefined;
-    } catch {
-        return undefined;
-    }
+    return candidates.length > 0 ? stringifySrcset(candidates) : null;
 }

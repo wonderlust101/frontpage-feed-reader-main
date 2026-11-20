@@ -9,6 +9,7 @@ import zlib from 'node:zlib';
 import { RequestFilteringHttpAgent, RequestFilteringHttpsAgent } from 'request-filtering-agent';
 import type { FeedCacheValidators, FeedRedirect } from '@frontpage/shared';
 import { HttpError, BadGatewayError, BadRequestError, GatewayTimeoutError, PayloadTooLargeError, isRetryableStatus } from '../../middleware/errors';
+import { WEB_PROTOCOLS } from './urls';
 
 export type FetchFeedOptions = Partial<FeedCacheValidators> & {
     timeoutMs?: number;
@@ -60,22 +61,9 @@ const DEFAULT_MAX_REDIRECTS = 5;
 const ACCEPT_ENCODING = 'gzip, deflate, br';
 const ACCEPT = 'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
-const WEB_PROTOCOLS = new Set(['http:', 'https:']);
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const PERMANENT_REDIRECT_STATUSES = new Set([301, 308]);
-
-// The same URL rules apply to what the user typed and to where a redirect points; only the error wording differs.
-const TYPED_URL = {
-    code: 'invalid_url',
-    badProtocol: 'Only http and https URLs are supported',
-    hasCredentials: 'URLs with credentials are not allowed',
-} as const;
-const REDIRECT_URL = {
-    code: 'blocked_url',
-    badProtocol: 'Redirected to an unsupported protocol',
-    hasCredentials: 'Redirected to a URL with credentials',
-} as const;
 
 const DECOMPRESSORS: Record<string, () => Transform> = {
     gzip: zlib.createGunzip,
@@ -102,7 +90,15 @@ export function parseFeedUrl(input: string | undefined | null): URL {
         throw new BadRequestError('invalid_url', `Not a valid URL: ${raw}`);
     }
 
-    return asWebUrl(url, TYPED_URL);
+    if (!WEB_PROTOCOLS.has(url.protocol)) {
+        throw new BadRequestError('invalid_url', 'Only http and https URLs are supported');
+    }
+    if (url.username || url.password) {
+        throw new BadRequestError('invalid_url', 'URLs with credentials are not allowed');
+    }
+
+    url.hash = '';
+    return url;
 }
 
 // Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
@@ -152,20 +148,6 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
         // Connection errors were already mapped per hop in request(); this catches body, decompression and timeout errors.
         throw toFetchError(err, startUrl, ctx);
     }
-}
-
-// Throws unless the URL is http(s) without a username or password, then drops the #fragment (servers never see it).
-function asWebUrl(url: URL, rules: typeof TYPED_URL | typeof REDIRECT_URL): URL {
-    if (!WEB_PROTOCOLS.has(url.protocol)) {
-        throw new BadRequestError(rules.code, rules.badProtocol);
-    }
-
-    if (url.username || url.password) {
-        throw new BadRequestError(rules.code, rules.hasCredentials);
-    }
-
-    url.hash = '';
-    return url;
 }
 
 // Sends the GET and follows redirects itself, up to `maxRedirects`, so a moved feed can be reported.
@@ -247,7 +229,16 @@ function nextRedirectUrl(res: IncomingMessage, currentUrl: URL): URL {
         throw new BadGatewayError('network', `Redirect (${res.statusCode}) without a Location header`);
     }
 
-    return asWebUrl(new URL(location, currentUrl), REDIRECT_URL);
+    const next = new URL(location, currentUrl);
+    if (!WEB_PROTOCOLS.has(next.protocol)) {
+        throw new BadRequestError('blocked_url', 'Redirected to an unsupported protocol');
+    }
+    if (next.username || next.password) {
+        throw new BadRequestError('blocked_url', 'Redirected to a URL with credentials');
+    }
+
+    next.hash = '';
+    return next;
 }
 
 // Reads the whole decompressed body; throws `too_large` as soon as it passes `maxBytes`, so huge responses and zip bombs can't fill memory.

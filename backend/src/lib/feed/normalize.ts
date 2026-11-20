@@ -7,6 +7,7 @@ import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shar
 import { UnprocessableEntityError } from '../../middleware/errors';
 import { parseFeedDate } from './dates';
 import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
+import { resolveUrl } from './urls';
 
 type ParsedFeed = ReturnType<typeof parseFeed>;
 
@@ -33,6 +34,16 @@ type CollectedItems = {
     dropped: number;
 };
 
+// Everything non-fatal found while reading a feed; buildWarnings turns each into a message.
+type FeedProblems = {
+    itemLimitHit: boolean;
+    missingDates: number;
+    duplicates: number;
+    dropped: number;
+    noItems: boolean;
+    truncated: boolean;
+};
+
 const BYTE_ORDER_MARK = /^﻿/;
 export const MAX_ITEMS = 500;
 
@@ -44,7 +55,6 @@ const DESCRIPTION_MAX = 1_000;
 const CATEGORIES_MAX = 20;
 const CATEGORY_MAX = 100;
 const ID_MAX = 512;
-const URL_MAX = 2_048;
 
 // Content counts as the full article (not a teaser) when its text is at least 20% longer than the description's.
 const FULL_CONTENT_RATIO = 1.2;
@@ -65,7 +75,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     const feed = parseXml(limited.xml);
 
     const feedUrl = opts.url;
-    const siteUrl = safeUrl(feed.url, feedUrl) ?? new URL('/', feedUrl).href;
+    const siteUrl = resolveUrl(feed.url, feedUrl) ?? new URL('/', feedUrl).href;
     const siteHostname = new URL(siteUrl).hostname.replace(/^www\./, '');
     const feedAuthor = joinAuthors(feed.authors.map((a) => htmlToText(a.name)));
 
@@ -80,13 +90,15 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
         title: truncate(htmlToText(feed.title), TITLE_MAX) || siteHostname,
         description: htmlToText(feed.description, DESCRIPTION_MAX) || null,
         siteUrl,
-        imageUrl: safeUrl(feed.image?.url, siteUrl),
+        imageUrl: resolveUrl(feed.image?.url, siteUrl),
         language: feed.language?.trim() || null,
         updatedAt: firstDate([feed.updated, feed.published], now) ?? newestItemDate,
         items,
         warnings: buildWarnings({
-            ...collected,
             itemLimitHit: limited.limited,
+            missingDates: collected.missingDates,
+            duplicates: collected.duplicates,
+            dropped: collected.dropped,
             noItems: feed.items.length === 0,
             truncated: looksTruncated(feedXml),
         }),
@@ -184,7 +196,7 @@ function byNewestFirst(a: NormalizedItem, b: NormalizedItem): number {
 }
 
 // The non-fatal problems found while reading the feed, as messages for the client.
-function buildWarnings(found: Omit<CollectedItems, 'items'> & { itemLimitHit: boolean; noItems: boolean; truncated: boolean }): string[] {
+function buildWarnings(found: FeedProblems): string[] {
     const warnings: string[] = [];
 
     if (found.itemLimitHit) {
@@ -233,24 +245,10 @@ function isRdf(xml: string): boolean {
     return /<rdf:rdf[\s>]/i.test(xml.slice(0, HEAD_CHARS));
 }
 
-// Resolves a possibly relative URL against `base`; null unless it's http(s) and at most URL_MAX characters long.
-function safeUrl(value: string | null | undefined, base?: string): string | null {
-    if (!value || value.length > URL_MAX) {
-        return null;
-    }
-
-    try {
-        const url = new URL(value.trim(), base);
-        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null;
-    } catch {
-        return null;
-    }
-}
-
 // Turns one parsed item into a NormalizedItem: sanitizes its HTML, builds a plain-text summary, parses dates and cuts long fields.
 // Gaps get fallbacks: title from the summary, author from the feed, thumbnail from the first image, id from a hash.
 function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): NormalizedItem {
-    const url = safeUrl(item.url, ctx.siteUrl);
+    const url = resolveUrl(item.url, ctx.siteUrl);
     const linkBase = url ?? ctx.siteUrl;
 
     const descriptionText = htmlToText(item.description);
@@ -266,10 +264,10 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
     // Thumbnail: the item's own image, else its first media image, else the first <img> in its (already sanitized) content.
     const firstContentImage = contentHtml.match(/<img\b[^>]*\bsrc="([^"]+)"/i)?.[1];
     const imageUrl =
-        safeUrl(item.image?.url, linkBase) ??
-        safeUrl(item.mediaImages[0]?.url, linkBase) ??
-        safeUrl(item.mediaImages[0]?.image, linkBase) ??
-        safeUrl(firstContentImage, linkBase);
+        resolveUrl(item.image?.url, linkBase) ??
+        resolveUrl(item.mediaImages[0]?.url, linkBase) ??
+        resolveUrl(item.mediaImages[0]?.image, linkBase) ??
+        resolveUrl(firstContentImage, linkBase);
 
     return {
         id: itemId(item.id?.trim() || url, `${title}|${publishedAt ?? ''}|${index}`),
