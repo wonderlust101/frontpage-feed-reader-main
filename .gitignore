@@ -44,10 +44,10 @@ CLAUDE.local.md
 
 # ── Challenge reference material ───────────────────────────────
 # Kept locally for planning and AI sessions; not part of the shipped solution.
-# Root-anchored so frontend/AGENTS.md (Next.js agent rules) is still committed.
+# AGENTS.md is ignored in every folder (including frontend/AGENTS.md, which `next dev` writes).
 /docs/spec/
 /docs/guidance/
 /docs/challenge-brief.md
 /docs/starter-tailwind.reference.css
-/AGENTS.md
+AGENTS.md
 /CLAUDE.md
