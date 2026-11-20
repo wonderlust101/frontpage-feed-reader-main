@@ -7,3 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Local testing
+
+Run checks and the app against local services only, never the staging or production API or database (Neon, Railway). From the repo root: `bun run typecheck:frontend` and `bun run lint:frontend` (in Docker: `docker compose run --rm --no-deps -T frontend sh -c 'bun run typecheck && bun run lint'`). Point the app at the local API (`API_URL=http://localhost:4000`, or `http://backend:4000` inside Docker), never the Railway URL.
