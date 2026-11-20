@@ -60,7 +60,7 @@ export type FetchFeedResponse = {
 
 export type FeedErrorCode = 'invalid_url' | 'blocked_url' | 'timeout' | 'network' | 'http_4xx' | 'http_5xx' | 'not_a_feed' | 'parse_error' | 'too_large';
 
-export type ApiErrorCode = FeedErrorCode | 'not_found' | 'bad_request' | 'invalid_json' | 'internal_error';
+export type ApiErrorCode = FeedErrorCode | 'not_found' | 'bad_request' | 'invalid_json' | 'unauthorized' | 'database_unavailable' | 'internal_error';
 
 export type ApiErrorResponse<C extends string = ApiErrorCode> = {
     error: {
