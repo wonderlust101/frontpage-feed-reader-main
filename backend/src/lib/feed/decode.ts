@@ -3,7 +3,10 @@
 
 import { decodeBuffer, getEncoding, type SnifferOptions } from 'encoding-sniffer';
 
-// Turns feed bytes into a string using the detected encoding (BOM → Content-Type → <?xml encoding> → UTF-8), without a BOM.
+// The charset parameter of a Content-Type header: `text/xml; charset="ISO-8859-1"` → ISO-8859-1.
+const CHARSET_PARAM = /charset\s*=\s*["']?([^;\s"']+)/i;
+
+// Turns feed bytes into a string using the detected encoding, without a BOM.
 export function decodeFeed(bytes: Uint8Array, contentType?: string | null): string {
     return decodeBuffer(asBuffer(bytes), snifferOptions(contentType));
 }
@@ -18,8 +21,12 @@ function asBuffer(bytes: Uint8Array) {
     return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
 
-// Options for encoding-sniffer: the bare charset from the Content-Type header (e.g. "ISO-8859-1"), or none so it checks the bytes.
+// Options for encoding-sniffer: trust the Content-Type charset if there is one, otherwise let it check the bytes.
 function snifferOptions(contentType: string | null | undefined): SnifferOptions {
-    const charset = contentType?.match(/charset\s*=\s*["']?([^;\s"']+)/i)?.[1];
-    return { transportLayerEncodingLabel: charset, defaultEncoding: 'UTF-8' };
+    return { transportLayerEncodingLabel: charsetFrom(contentType), defaultEncoding: 'UTF-8' };
+}
+
+// The bare charset named in a Content-Type header, or undefined if it names none.
+function charsetFrom(contentType: string | null | undefined): string | undefined {
+    return contentType?.match(CHARSET_PARAM)?.[1];
 }
