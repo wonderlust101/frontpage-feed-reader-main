@@ -28,16 +28,51 @@ const RFC822 = pattern(
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
-// prettier-ignore
 const ZONE_OFFSET_HOURS: Record<string, number> = {
-    UT: 0, UTC: 0, GMT: 0, Z: 0,
-    EST: -5, EDT: -4, CST: -6, CDT: -5, MST: -7, MDT: -6, PST: -8, PDT: -7,
-    AKST: -9, AKDT: -8, HST: -10, NST: -3.5, NDT: -2.5,
-    BRT: -3, ART: -3,
-    WET: 0, WEST: 1, CET: 1, CEST: 2, EET: 2, EEST: 3, MSK: 3,
-    WAT: 1, CAT: 2, SAST: 2, EAT: 3,
-    PKT: 5, NPT: 5.75, WIB: 7, HKT: 8, SGT: 8, JST: 9, KST: 9,
-    AWST: 8, ACST: 9.5, ACDT: 10.5, AEST: 10, AEDT: 11, NZST: 12, NZDT: 13,
+    UT: 0,
+    UTC: 0,
+    GMT: 0,
+    Z: 0,
+    EST: -5,
+    EDT: -4,
+    CST: -6,
+    CDT: -5,
+    MST: -7,
+    MDT: -6,
+    PST: -8,
+    PDT: -7,
+    AKST: -9,
+    AKDT: -8,
+    HST: -10,
+    NST: -3.5,
+    NDT: -2.5,
+    BRT: -3,
+    ART: -3,
+    WET: 0,
+    WEST: 1,
+    CET: 1,
+    CEST: 2,
+    EET: 2,
+    EEST: 3,
+    MSK: 3,
+    WAT: 1,
+    CAT: 2,
+    SAST: 2,
+    EAT: 3,
+    PKT: 5,
+    NPT: 5.75,
+    WIB: 7,
+    HKT: 8,
+    SGT: 8,
+    JST: 9,
+    KST: 9,
+    AWST: 8,
+    ACST: 9.5,
+    ACDT: 10.5,
+    AEST: 10,
+    AEDT: 11,
+    NZST: 12,
+    NZDT: 13,
 };
 
 // A numeric zone, optionally after GMT/UTC/UT: "+0530", "-05:00", "+05", "GMT+0530".
@@ -46,7 +81,7 @@ const NUMERIC_OFFSET = /^(?:GMT|UTC|UT)?(?<sign>[+-])(?<hours>\d{1,2})(?::?(?<mi
 const MAX_OFFSET_HOURS = 14;
 const EARLIEST_FEED_TIME = Date.UTC(1995, 0, 1);
 const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
-// Two-digit years below this are 20xx, the rest 19xx.
+
 const TWO_DIGIT_YEAR_PIVOT = 70;
 
 // Turns a feed date ("Wed, 02 Oct 2024 15:00:00 GMT" or "2024-10-02T15:00:00Z") into an ISO 8601 UTC string.
@@ -65,7 +100,13 @@ export function parseFeedDate(value: string | null | undefined, now: number = Da
     }
 
     const time = toEpochMs(parts, offset);
-    if (time === null || !isPlausibleTime(time, now)) {
+    if (time === null) {
+        return null;
+    }
+
+    // Not before 1995 (older than RSS itself) and at most a day ahead (publishers' clocks and time zones drift).
+    const isRealisticPublishTime = time >= EARLIEST_FEED_TIME && time <= now + FUTURE_SLACK_MS;
+    if (!isRealisticPublishTime) {
         return null;
     }
 
@@ -152,11 +193,6 @@ function toEpochMs(parts: DateParts, offsetMinutes: number): number | null {
         d.getUTCSeconds() === parts.second;
 
     return isRealDate ? utc - offsetMinutes * 60_000 : null;
-}
-
-// True for times a feed item could really have: not before 1995 (before RSS existed) and at most a day ahead (clock skew).
-function isPlausibleTime(time: number, now: number): boolean {
-    return time >= EARLIEST_FEED_TIME && time <= now + FUTURE_SLACK_MS;
 }
 
 // Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
