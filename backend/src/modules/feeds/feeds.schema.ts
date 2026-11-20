@@ -11,14 +11,20 @@ export const feeds = pgTable(
     {
         id: uuid('id').primaryKey().defaultRandom(),
         url: text('url').notNull().unique(),
+
+        // What the feed says about itself (refreshed on every successful fetch).
         title: text('title').notNull(),
         description: text('description'),
         siteUrl: text('site_url'),
         imageUrl: text('image_url'),
         format: text('format').$type<FeedFormat>(),
         language: text('language'),
+
+        // Sent back on the next fetch so an unchanged feed answers 304.
         etag: text('etag'),
         lastModified: text('last_modified'),
+
+        // How recent fetches went; feed health is derived from these.
         lastFetchedAt: timestamp('last_fetched_at', { withTimezone: true }),
         lastSuccessAt: timestamp('last_success_at', { withTimezone: true }),
         lastErrorCode: text('last_error_code').$type<FeedErrorCode>(),
@@ -26,7 +32,10 @@ export const feeds = pgTable(
         lastErrorStatus: integer('last_error_status'),
         consecutiveFailures: integer('consecutive_failures').notNull().default(0),
         latestItemAt: timestamp('latest_item_at', { withTimezone: true }),
+
+        // When the scheduler should fetch it next (indexed below).
         nextFetchAt: timestamp('next_fetch_at', { withTimezone: true }).notNull().defaultNow(),
+
         createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
         updatedAt: timestamp('updated_at', { withTimezone: true })
             .notNull()

@@ -4,6 +4,7 @@
 import sanitize from 'sanitize-html';
 import { decode } from 'html-entities';
 import { parseSrcset, stringifySrcset } from 'srcset';
+import { LINK_PROTOCOLS, resolveUrl } from './urls';
 
 const ALLOWED_TAGS = [
     'p',
@@ -76,7 +77,25 @@ const EMBED_HOSTS = ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com
 
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 
-const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
+// Tags whose text is never content (code, styles, form options…): dropped along with the tag.
+const NON_TEXT_TAGS = ['script', 'style', 'textarea', 'option', 'noscript', 'template', 'title', 'head'];
+
+// The attributes of each tag that hold URLs: made absolute against the item's link, and removed if unsafe.
+const URL_ATTRIBUTES: Record<string, string[]> = {
+    a: ['href'],
+    img: ['src', 'srcset'],
+    source: ['src', 'srcset'],
+    video: ['src', 'poster'],
+    audio: ['src'],
+    track: ['src'],
+};
+
+// Attributes set whatever the feed sent: links open in a new tab without leaking our page, images load lazily, embeds are sandboxed.
+const FORCED_ATTRIBUTES: Record<string, sanitize.Attributes> = {
+    a: { rel: 'noopener noreferrer nofollow', target: '_blank' },
+    img: { loading: 'lazy' },
+    iframe: { sandbox: IFRAME_SANDBOX, loading: 'lazy', referrerpolicy: 'strict-origin-when-cross-origin' },
+};
 
 // Makes feed HTML safe to render: keeps semantic tags, removes scripts, styles, event handlers and unsafe URLs, and makes links absolute.
 export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: string): string {
@@ -107,34 +126,8 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
         allowedIframeHostnames: EMBED_HOSTS,
         allowProtocolRelative: true,
         disallowedTagsMode: 'discard',
-        nonTextTags: ['script', 'style', 'textarea', 'option', 'noscript', 'template', 'title', 'head'],
-        transformTags: {
-            a: (tagName, attribs) => ({
-                tagName,
-                attribs: {
-                    ...withResolvedUrls(attribs, ['href'], baseUrl),
-                    rel: 'noopener noreferrer nofollow',
-                    target: '_blank',
-                },
-            }),
-            img: (tagName, attribs) => ({
-                tagName,
-                attribs: { ...withResolvedUrls(attribs, ['src', 'srcset'], baseUrl), loading: 'lazy' },
-            }),
-            source: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src', 'srcset'], baseUrl) }),
-            video: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src', 'poster'], baseUrl) }),
-            audio: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src'], baseUrl) }),
-            track: (tagName, attribs) => ({ tagName, attribs: withResolvedUrls(attribs, ['src'], baseUrl) }),
-            iframe: (tagName, attribs) => ({
-                tagName,
-                attribs: {
-                    ...attribs,
-                    sandbox: IFRAME_SANDBOX,
-                    loading: 'lazy',
-                    referrerpolicy: 'strict-origin-when-cross-origin',
-                },
-            }),
-        },
+        nonTextTags: NON_TEXT_TAGS,
+        transformTags: tagTransforms(baseUrl),
         exclusiveFilter: (frame) => (frame.tag === 'img' || frame.tag === 'iframe') && !frame.attribs.src,
     })
         .replace(/<(p|div|span)>\s*<\/\1>/g, '')
@@ -153,7 +146,8 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
     const stripped = sanitize(spaced, {
         allowedTags: [],
         allowedAttributes: {},
-        nonTextTags: ['script', 'style', 'textarea', 'option', 'noscript', 'template', 'title', 'head', 'figcaption'],
+        // Captions are dropped too: in a title or summary they'd read as part of the sentence.
+        nonTextTags: [...NON_TEXT_TAGS, 'figcaption'],
     });
 
     // Decode twice to fix double-encoded entities like "&amp;amp;" that some feeds emit.
@@ -179,13 +173,28 @@ export function truncate(text: string, max: number): string {
     return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, '')}…`;
 }
 
+// One transform per tag listed in URL_ATTRIBUTES or FORCED_ATTRIBUTES: resolve its URLs, then apply its forced attributes.
+function tagTransforms(baseUrl: string | undefined): Record<string, sanitize.Transformer> {
+    const tags = new Set([...Object.keys(URL_ATTRIBUTES), ...Object.keys(FORCED_ATTRIBUTES)]);
+
+    return Object.fromEntries(
+        [...tags].map((tag) => [
+            tag,
+            (tagName: string, attribs: sanitize.Attributes) => ({
+                tagName,
+                attribs: { ...withResolvedUrls(attribs, URL_ATTRIBUTES[tag] ?? [], baseUrl), ...FORCED_ATTRIBUTES[tag] },
+            }),
+        ]),
+    );
+}
+
 // A copy of a tag's attributes with its URL attributes (href, src, srcset, poster) resolved; unsafe or invalid ones are removed.
 function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
     const result = { ...attribs };
 
     for (const name of names.filter((n) => n in result)) {
-        const resolve = name === 'srcset' ? resolveSrcset : resolveUrl;
-        const resolved = resolve(result[name]!, base);
+        const value = result[name]!;
+        const resolved = name === 'srcset' ? resolveSrcset(value, base) : resolveUrl(value, base, LINK_PROTOCOLS);
 
         if (resolved) {
             result[name] = resolved;
@@ -197,27 +206,12 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
     return result;
 }
 
-// Resolves every URL in a srcset and drops unsafe ones (undefined if none are left); a package parses it, as URLs may contain commas.
-function resolveSrcset(value: string, base?: string): string | undefined {
+// Resolves every URL in a srcset and drops unsafe ones (null if none are left); a package parses it, as URLs may contain commas.
+function resolveSrcset(value: string, base?: string): string | null {
     const candidates = parseSrcset(value).flatMap((candidate) => {
-        const url = resolveUrl(candidate.url, base);
+        const url = resolveUrl(candidate.url, base, LINK_PROTOCOLS);
         return url ? [{ ...candidate, url }] : [];
     });
 
-    return candidates.length > 0 ? stringifySrcset(candidates) : undefined;
-}
-
-// Resolves a URL against the page it came from; undefined unless it's http(s) or mailto, so javascript:, data:, file: and invalid URLs are dropped.
-function resolveUrl(value: string, base?: string): string | undefined {
-    const trimmed = value.trim();
-    if (!trimmed) {
-        return undefined;
-    }
-
-    try {
-        const url = new URL(trimmed, base);
-        return SAFE_PROTOCOLS.has(url.protocol) ? url.href : undefined;
-    } catch {
-        return undefined;
-    }
+    return candidates.length > 0 ? stringifySrcset(candidates) : null;
 }
