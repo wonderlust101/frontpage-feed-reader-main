@@ -126,6 +126,18 @@ describe('foreign keys', () => {
     });
 });
 
+describe('updated_at', () => {
+    test('moves forward when a row is updated through Drizzle', async () => {
+        const [category] = await testDb.db
+            .insert(categories)
+            .values({ userId: await newUser(), name: 'News', position: 0 })
+            .returning();
+        await Bun.sleep(5);
+        const [renamed] = await testDb.db.update(categories).set({ name: 'World' }).where(eq(categories.id, category!.id)).returning();
+        expect(renamed!.updatedAt.getTime()).toBeGreaterThan(category!.updatedAt.getTime());
+    });
+});
+
 describe('checks and unique names', () => {
     test('category names are unique per user ignoring case', async () => {
         const user = await newUser();

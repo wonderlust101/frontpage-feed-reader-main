@@ -27,10 +27,6 @@ export const items = pgTable(
         contentHtml: text('content_html').notNull(),
         hasFullContent: boolean('has_full_content').notNull(),
         imageUrl: text('image_url'),
-        categories: text('categories')
-            .array()
-            .notNull()
-            .default(sql`'{}'::text[]`),
         publishedAt: timestamp('published_at', { withTimezone: true }),
         updatedAt: timestamp('updated_at', { withTimezone: true }),
         firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
@@ -60,7 +56,6 @@ export const itemReadStates = pgTable(
             .notNull()
             .references(() => items.id, { onDelete: 'cascade' }),
         isRead: boolean('is_read').notNull(),
-        updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     },
     (t) => [primaryKey({ columns: [t.userId, t.itemId] }), index('item_read_states_item_id_idx').on(t.itemId)],
 );

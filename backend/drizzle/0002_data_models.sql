@@ -8,7 +8,6 @@ CREATE TABLE "item_read_states" (
 	"user_id" text NOT NULL,
 	"item_id" uuid NOT NULL,
 	"is_read" boolean NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "item_read_states_user_id_item_id_pk" PRIMARY KEY("user_id","item_id")
 );
 --> statement-breakpoint
@@ -23,7 +22,6 @@ CREATE TABLE "items" (
 	"content_html" text NOT NULL,
 	"has_full_content" boolean NOT NULL,
 	"image_url" text,
-	"categories" text[] DEFAULT '{}'::text[] NOT NULL,
 	"published_at" timestamp with time zone,
 	"updated_at" timestamp with time zone,
 	"first_seen_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -49,7 +47,6 @@ CREATE TABLE "subscriptions" (
 	"feed_id" uuid NOT NULL,
 	"category_id" uuid,
 	"custom_title" text,
-	"position" integer DEFAULT 0 NOT NULL,
 	"read_cutoff" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -110,7 +107,7 @@ CREATE INDEX "items_feed_id_first_seen_at_idx" ON "items" USING btree ("feed_id"
 CREATE INDEX "items_search_idx" ON "items" USING gin ("search");--> statement-breakpoint
 CREATE UNIQUE INDEX "categories_user_id_name_unique" ON "categories" USING btree ("user_id",lower("name"));--> statement-breakpoint
 CREATE INDEX "categories_user_id_position_idx" ON "categories" USING btree ("user_id","position");--> statement-breakpoint
-CREATE INDEX "subscriptions_user_id_category_id_idx" ON "subscriptions" USING btree ("user_id","category_id");--> statement-breakpoint
+CREATE INDEX "subscriptions_category_id_idx" ON "subscriptions" USING btree ("category_id");--> statement-breakpoint
 CREATE INDEX "subscriptions_feed_id_idx" ON "subscriptions" USING btree ("feed_id");--> statement-breakpoint
 CREATE INDEX "bookmarks_user_id_created_at_idx" ON "bookmarks" USING btree ("user_id","created_at" DESC NULLS FIRST,"item_id" DESC NULLS FIRST);--> statement-breakpoint
 CREATE INDEX "bookmarks_item_id_idx" ON "bookmarks" USING btree ("item_id");--> statement-breakpoint

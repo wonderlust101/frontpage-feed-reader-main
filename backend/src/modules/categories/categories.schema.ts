@@ -17,7 +17,10 @@ export const categories = pgTable(
         position: integer('position').notNull(),
         layout: text('layout'),
         createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-        updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+        updatedAt: timestamp('updated_at', { withTimezone: true })
+            .notNull()
+            .defaultNow()
+            .$onUpdate(() => new Date()),
     },
     (t) => [
         uniqueIndex('categories_user_id_name_unique').on(t.userId, sql`lower(${t.name})`),

@@ -15,7 +15,10 @@ export const userPreferences = pgTable(
         itemOrder: text('item_order').$type<'newest' | 'oldest'>().notNull().default('newest'),
         showRead: boolean('show_read').notNull().default(true),
         lastVisitedAt: timestamp('last_visited_at', { withTimezone: true }),
-        updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+        updatedAt: timestamp('updated_at', { withTimezone: true })
+            .notNull()
+            .defaultNow()
+            .$onUpdate(() => new Date()),
     },
     (t) => [
         check('user_preferences_refresh_interval_check', sql`${t.refreshIntervalMinutes} in (0, 15, 30, 60)`),

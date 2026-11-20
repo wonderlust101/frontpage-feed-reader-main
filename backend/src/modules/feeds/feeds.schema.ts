@@ -28,7 +28,10 @@ export const feeds = pgTable(
         latestItemAt: timestamp('latest_item_at', { withTimezone: true }),
         nextFetchAt: timestamp('next_fetch_at', { withTimezone: true }).notNull().defaultNow(),
         createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-        updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+        updatedAt: timestamp('updated_at', { withTimezone: true })
+            .notNull()
+            .defaultNow()
+            .$onUpdate(() => new Date()),
     },
     (t) => [index('feeds_next_fetch_at_idx').on(t.nextFetchAt)],
 );
