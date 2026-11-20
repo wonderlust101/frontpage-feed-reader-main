@@ -8,12 +8,14 @@ import { fromNodeHeaders } from 'better-auth/node';
 import type { IncomingHttpHeaders } from 'node:http';
 import { db } from '../../db';
 import { env } from '../../env';
-import { escapeHtml, sendEmail } from '../../lib/email';
+import { escapeHtml, sendEmail, type Email } from '../../lib/email';
 import { accounts, sessions, users, verifications } from './auth.schema';
 
 type AuthDatabase = Parameters<typeof drizzleAdapter>[0];
 
-type SendResetLink = (user: { email: string; name: string }, url: string) => Promise<void>;
+type ResetEmailUser = { email: string; name: string };
+
+type SendResetLink = (user: ResetEmailUser, url: string) => Promise<void>;
 
 const MIN_PASSWORD_LENGTH = 8;
 const SESSION_DAYS = 30;
@@ -32,8 +34,12 @@ export async function getSession(headers: IncomingHttpHeaders) {
 }
 
 // Builds a Better Auth instance on a Drizzle database: the app's one at startup, an in-memory one in tests.
-// `sendResetLink` emails the password-reset link; tests pass their own to capture it.
 export function createAuth(database: AuthDatabase, sendResetLink: SendResetLink = sendPasswordResetEmail) {
+    // Without a fixed base URL, Better Auth builds reset links from the request's Host header, which a client controls.
+    if (env.NODE_ENV === 'production' && !env.AUTH_URL) {
+        throw new Error('AUTH_URL is required in production: password-reset links are built from it');
+    }
+
     return betterAuth({
         appName: 'Frontpage',
         baseURL: env.AUTH_URL,
@@ -57,25 +63,33 @@ export function createAuth(database: AuthDatabase, sendResetLink: SendResetLink 
             expiresIn: SESSION_DAYS * SECONDS_PER_DAY,
             updateAge: SECONDS_PER_DAY,
         },
+        // Better Auth only rate-limits when NODE_ENV is 'production'; keep it on unless we're running tests.
+        rateLimit: { enabled: env.NODE_ENV !== 'test' },
         // One query per session check (session joined to its user) instead of two; needs the relations in auth.schema.ts.
         advanced: { database: { joins: true } },
     });
 }
 
-// Emails the password-reset link; logs (never throws) when sending fails, because nobody is waiting on it.
-async function sendPasswordResetEmail(user: { email: string; name: string }, url: string) {
+// The password-reset email for `user`: plain text plus HTML, with the name and link escaped in the HTML.
+export function passwordResetEmail(user: ResetEmailUser, url: string): Email {
     const greeting = user.name ? `Hi ${user.name},` : 'Hi,';
 
+    return {
+        to: user.email,
+        subject: 'Reset your Frontpage password',
+        text: `${greeting}\n\nOpen this link to choose a new password (it expires in ${RESET_TOKEN_MINUTES} minutes):\n${url}\n\nIf you didn't ask for this, you can ignore this email.`,
+        html: `<p>${escapeHtml(greeting)}</p><p><a href="${escapeHtml(url)}">Choose a new password</a> (the link expires in ${RESET_TOKEN_MINUTES} minutes).</p><p>If you didn't ask for this, you can ignore this email.</p>`,
+    };
+}
+
+// Emails the password-reset link; logs (never throws) when sending fails, because nobody is waiting on it.
+async function sendPasswordResetEmail(user: ResetEmailUser, url: string) {
     try {
-        await sendEmail(
-            {
-                to: user.email,
-                subject: 'Reset your Frontpage password',
-                text: `${greeting}\n\nOpen this link to choose a new password (it expires in ${RESET_TOKEN_MINUTES} minutes):\n${url}\n\nIf you didn't ask for this, you can ignore this email.`,
-                html: `<p>${escapeHtml(greeting)}</p><p><a href="${escapeHtml(url)}">Choose a new password</a> (the link expires in ${RESET_TOKEN_MINUTES} minutes).</p><p>If you didn't ask for this, you can ignore this email.</p>`,
-            },
-            { apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM, production: env.NODE_ENV === 'production' },
-        );
+        await sendEmail(passwordResetEmail(user, url), {
+            apiKey: env.RESEND_API_KEY,
+            from: env.EMAIL_FROM,
+            production: env.NODE_ENV === 'production',
+        });
     } catch (err) {
         console.error('Password reset email failed:', err instanceof Error ? err.message : err);
     }

@@ -1,4 +1,4 @@
-// requireAuth and currentUser without a database: nobody is signed in, so both refuse with 401.
+// requireAuth and currentUser without a database: requireAuth refuses with 401; currentUser without requireAuth is a bug (plain Error).
 
 import { describe, expect, test } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
@@ -26,7 +26,8 @@ describe('currentUser', () => {
         expect(currentUser(res)).toBe(user as never);
     });
 
-    test('throws unauthorized when requireAuth did not run', () => {
-        expect(() => currentUser({ locals: {} } as Response)).toThrow(UnauthorizedError);
+    test('throws a plain error (not a 401) when requireAuth did not run', () => {
+        expect(() => currentUser({ locals: {} } as Response)).toThrow('currentUser() needs requireAuth on this route');
+        expect(() => currentUser({ locals: {} } as Response)).not.toThrow(UnauthorizedError);
     });
 });

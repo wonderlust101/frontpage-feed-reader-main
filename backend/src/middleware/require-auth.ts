@@ -17,12 +17,12 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
     next();
 };
 
-// The signed-in user that requireAuth stored; throws `unauthorized` if the route forgot to use requireAuth.
+// The signed-in user that requireAuth stored. Throws a plain Error (a logged 500) if the route forgot requireAuth: that's a bug, not a 401.
 export function currentUser(res: Response): AuthUser {
     const user = res.locals.auth?.user;
 
     if (!user) {
-        throw new UnauthorizedError('unauthorized', 'Sign in to continue');
+        throw new Error('currentUser() needs requireAuth on this route');
     }
 
     return user;
