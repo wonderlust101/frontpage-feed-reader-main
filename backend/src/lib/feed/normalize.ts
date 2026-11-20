@@ -263,12 +263,13 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
     const authorNames = item.authors.map((a) => (htmlToText(a.name) || htmlToText(a.email)).replace(/^by\s+/i, ''));
     const categoryNames = item.categories.map((c) => truncate(htmlToText(c.label || c.term), CATEGORY_MAX));
 
-    // Thumbnail: the item's own image, else its first media image, else the first <img> in its content.
+    // Thumbnail: the item's own image, else its first media image, else the first <img> in its (already sanitized) content.
+    const firstContentImage = contentHtml.match(/<img\b[^>]*\bsrc="([^"]+)"/i)?.[1];
     const imageUrl =
         safeUrl(item.image?.url, linkBase) ??
         safeUrl(item.mediaImages[0]?.url, linkBase) ??
         safeUrl(item.mediaImages[0]?.image, linkBase) ??
-        safeUrl(firstImageInHtml(contentHtml), linkBase);
+        safeUrl(firstContentImage, linkBase);
 
     return {
         id: itemId(item.id?.trim() || url, `${title}|${publishedAt ?? ''}|${index}`),
@@ -323,11 +324,6 @@ function rawText(item: ParsedItem, tags: string[]): string[] {
     }
 
     return out;
-}
-
-// The src of the first <img> in already-sanitized HTML, or null; used as a fallback thumbnail.
-function firstImageInHtml(html: string): string | null {
-    return html.match(/<img\b[^>]*\bsrc="([^"]+)"/i)?.[1] ?? null;
 }
 
 // A stable "urn:frontpage:…" id from any text (same input, same id); used when an item has no usable or short-enough guid or link.

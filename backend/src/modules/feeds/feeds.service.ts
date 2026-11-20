@@ -29,12 +29,10 @@ export async function getFeed(input: string | undefined, clientValidators: Valid
     }
 
     // Upstream says the client's copy is current, but we have no copy to answer with: ask again without validators.
-    if (!hasValidators(validators)) {
-        throw notModifiedWithoutCopy();
-    }
-    const full = await fetchUpstream(url, {});
+    // (If we sent none, asking again can't help: the 304 we already have stands.)
+    const full = hasValidators(validators) ? await fetchUpstream(url, {}) : result;
     if (full.notModified) {
-        throw notModifiedWithoutCopy();
+        throw new BadGatewayError('http_5xx', 'The feed server answered 304 without a cached copy', { upstreamStatus: 304 });
     }
     return answerFresh(url, full);
 }
@@ -80,11 +78,6 @@ function answerNotModified(result: NotModifiedResult, entry: CacheEntry): FetchF
 // True when there's an ETag or Last-Modified to send, i.e. the request will be conditional.
 function hasValidators(validators: Validators): boolean {
     return Boolean(validators.etag || validators.lastModified);
-}
-
-// The error for an upstream 304 we can't answer, because neither we nor the request has the feed's content.
-function notModifiedWithoutCopy() {
-    return new BadGatewayError('http_5xx', 'The feed server answered 304 without a cached copy', { upstreamStatus: 304 });
 }
 
 // --- LRU cache of the last good result per URL ---

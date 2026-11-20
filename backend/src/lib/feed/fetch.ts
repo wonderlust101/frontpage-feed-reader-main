@@ -139,7 +139,11 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
 
         if (status < 200 || status >= 300) {
             res.destroy();
-            throw httpError(status);
+            // 5xx, 408 (timeout) and 429 (rate limited) are worth retrying; other 4xx are not.
+            throw new BadGatewayError(status >= 500 ? 'http_5xx' : 'http_4xx', `The feed server responded with ${status}`, {
+                upstreamStatus: status,
+                retryable: isRetryableStatus(status),
+            });
         }
 
         const bytes = await readBody(res, maxBytes);
@@ -246,20 +250,12 @@ function nextRedirectUrl(res: IncomingMessage, currentUrl: URL): URL {
     return asWebUrl(new URL(location, currentUrl), REDIRECT_URL);
 }
 
-// The HttpError for a 4xx/5xx response: 5xx, 408 (timeout) and 429 (rate limited) are worth retrying, other 4xx are not.
-function httpError(status: number): HttpError {
-    return new BadGatewayError(status >= 500 ? 'http_5xx' : 'http_4xx', `The feed server responded with ${status}`, {
-        upstreamStatus: status,
-        retryable: isRetryableStatus(status),
-    });
-}
-
 // Reads the whole decompressed body; throws `too_large` as soon as it passes `maxBytes`, so huge responses and zip bombs can't fill memory.
 async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Array> {
     const declared = Number(header(res, 'content-length'));
     if (Number.isFinite(declared) && declared > maxBytes) {
         res.destroy();
-        throw tooLarge(maxBytes);
+        throw new PayloadTooLargeError('too_large', `Feed is larger than ${maxBytes} bytes`);
     }
 
     const body = decompress(res);
@@ -271,18 +267,13 @@ async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Ar
         if (total > maxBytes) {
             body.destroy();
             res.destroy();
-            throw tooLarge(maxBytes);
+            throw new PayloadTooLargeError('too_large', `Feed is larger than ${maxBytes} bytes`);
         }
 
         chunks.push(chunk);
     }
 
     return new Uint8Array(Buffer.concat(chunks, total));
-}
-
-// The error thrown when a feed is bigger than `maxBytes`.
-function tooLarge(maxBytes: number): HttpError {
-    return new PayloadTooLargeError('too_large', `Feed is larger than ${maxBytes} bytes`);
 }
 
 // The response body, decompressed: unlike fetch, node:http leaves gzip, deflate and brotli bodies compressed.
