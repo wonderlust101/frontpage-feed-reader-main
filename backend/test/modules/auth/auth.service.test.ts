@@ -44,6 +44,14 @@ describe('sign up and sign in', () => {
         expect(session?.user.name).toBe('Ada');
     });
 
+    test('checking a session is one query (the session joined to its user)', async () => {
+        const cookie = await signUp('joan@example.com');
+        testDb.queries.length = 0;
+        const session = await auth.api.getSession({ headers: new Headers({ cookie }) });
+        expect(session?.user.email).toBe('joan@example.com');
+        expect(testDb.queries).toHaveLength(1);
+    });
+
     test('the same email cannot sign up twice', async () => {
         await signUp('twice@example.com');
         await expect(signUp('twice@example.com')).rejects.toThrow();

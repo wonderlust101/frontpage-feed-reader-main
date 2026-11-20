@@ -57,6 +57,8 @@ export function createAuth(database: AuthDatabase, sendResetLink: SendResetLink 
             expiresIn: SESSION_DAYS * SECONDS_PER_DAY,
             updateAge: SECONDS_PER_DAY,
         },
+        // One query per session check (session joined to its user) instead of two; needs the relations in auth.schema.ts.
+        advanced: { database: { joins: true } },
     });
 }
 
