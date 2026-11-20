@@ -46,3 +46,31 @@ GET {{baseUrl}}/api/fetch?url=https://example.com/
 
 ### Missing url → 400 { error: { code: "invalid_url" } }
 GET {{baseUrl}}/api/fetch
+
+### Auth — sign up (email + password; sets the session cookie)
+POST {{baseUrl}}/api/auth/sign-up/email
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "email": "ada@example.com", "password": "correct horse battery", "name": "Ada" }
+
+### Auth — sign in
+POST {{baseUrl}}/api/auth/sign-in/email
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "email": "ada@example.com", "password": "correct horse battery" }
+
+### Auth — current session (null when signed out; 503 without a database)
+GET {{baseUrl}}/api/auth/get-session
+
+### Auth — request a password reset (without RESEND_API_KEY the link is logged by the backend)
+POST {{baseUrl}}/api/auth/request-password-reset
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "email": "ada@example.com", "redirectTo": "http://localhost:3000/reset-password" }
+
+### Auth — sign out
+POST {{baseUrl}}/api/auth/sign-out
+Origin: http://localhost:3000
