@@ -3,5 +3,5 @@ import { authController } from './auth.controller';
 
 export const authRouter = Router();
 
-// Better Auth matches on the full URL, so this router is mounted with app.all('/api/auth/*splat') rather than app.use (which strips the prefix).
+// Better Auth matches on the full URL, so the route keeps the whole path and app.ts mounts this router without a prefix (a prefix would be stripped).
 authRouter.all('/api/auth/*splat', authController);

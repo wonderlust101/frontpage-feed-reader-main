@@ -1,7 +1,7 @@
 // Better Auth against a real (in-memory) Postgres built from our migrations: proves the hand-written schema matches what Better Auth expects.
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { createAuth } from '../../../src/modules/auth/auth.service';
+import { createAuth, passwordResetEmail } from '../../../src/modules/auth/auth.service';
 import { createTestDb } from '../../helpers/test-db';
 
 const PASSWORD = 'correct horse battery';
@@ -34,6 +34,11 @@ function cookieFrom(headers: Headers) {
         .getSetCookie()
         .map((c) => c.split(';')[0])
         .join('; ');
+}
+
+// The reset token at the end of a reset link (".../reset-password/<token>?callbackURL=...").
+function tokenFrom(link: string | undefined) {
+    return new URL(link!).pathname.split('/').at(-1)!;
 }
 
 describe('sign up and sign in', () => {
@@ -82,7 +87,7 @@ describe('password reset', () => {
 
         const link = resetLinks.at(-1);
         expect(link).toContain('/api/auth/reset-password/');
-        const token = new URL(link!).pathname.split('/').at(-1)!;
+        const token = tokenFrom(link);
 
         await auth.api.resetPassword({ body: { token, newPassword: NEW_PASSWORD } });
 
@@ -101,8 +106,26 @@ describe('password reset', () => {
     test('a used reset token cannot be used again', async () => {
         await signUp('once@example.com');
         await auth.api.requestPasswordReset({ body: { email: 'once@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
-        const token = new URL(resetLinks.at(-1)!).pathname.split('/').at(-1)!;
+        const token = tokenFrom(resetLinks.at(-1));
         await auth.api.resetPassword({ body: { token, newPassword: NEW_PASSWORD } });
         await expect(auth.api.resetPassword({ body: { token, newPassword: 'another new password' } })).rejects.toThrow();
+    });
+});
+
+describe('passwordResetEmail', () => {
+    const URL_WITH_QUERY = 'http://localhost:4000/api/auth/reset-password/abc?callbackURL=http%3A%2F%2Fx&a=1';
+
+    test('escapes the name and link in the HTML and keeps the raw link in the text', () => {
+        const email = passwordResetEmail({ email: 'ada@example.com', name: '<b>Ada</b>' }, URL_WITH_QUERY);
+        expect(email.to).toBe('ada@example.com');
+        expect(email.html).toContain('Hi &lt;b&gt;Ada&lt;/b&gt;,');
+        expect(email.html).toContain('href="http://localhost:4000/api/auth/reset-password/abc?callbackURL=http%3A%2F%2Fx&amp;a=1"');
+        expect(email.html).not.toContain('<b>');
+        expect(email.text).toContain(URL_WITH_QUERY);
+    });
+
+    test('greets with just "Hi," when the user has no name', () => {
+        const email = passwordResetEmail({ email: 'anon@example.com', name: '' }, URL_WITH_QUERY);
+        expect(email.text.startsWith('Hi,\n')).toBe(true);
     });
 });
