@@ -66,6 +66,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
 
     const feedUrl = opts.url;
     const siteUrl = safeUrl(feed.url, feedUrl) ?? new URL('/', feedUrl).href;
+    const siteHostname = new URL(siteUrl).hostname.replace(/^www\./, '');
     const feedAuthor = joinAuthors(feed.authors.map((a) => htmlToText(a.name)));
 
     const collected = collectItems(feed.items, { siteUrl, feedAuthor, now });
@@ -76,7 +77,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
         url: feedUrl,
         requestedUrl: opts.requestedUrl ?? feedUrl,
         format: detectFormat(feed, feedXml),
-        title: truncate(htmlToText(feed.title), TITLE_MAX) || hostnameOf(siteUrl),
+        title: truncate(htmlToText(feed.title), TITLE_MAX) || siteHostname,
         description: htmlToText(feed.description, DESCRIPTION_MAX) || null,
         siteUrl,
         imageUrl: safeUrl(feed.image?.url, siteUrl),
@@ -232,11 +233,6 @@ function isRdf(xml: string): boolean {
     return /<rdf:rdf[\s>]/i.test(xml.slice(0, HEAD_CHARS));
 }
 
-// The site's hostname without "www.", used as the title of a feed that has none.
-function hostnameOf(url: string): string {
-    return new URL(url).hostname.replace(/^www\./, '');
-}
-
 // Resolves a possibly relative URL against `base`; null unless it's http(s) and at most URL_MAX characters long.
 function safeUrl(value: string | null | undefined, base?: string): string | null {
     if (!value || value.length > URL_MAX) {
@@ -265,6 +261,14 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
     const title = truncate(htmlToText(item.title), TITLE_MAX) || truncate(summary, FALLBACK_TITLE_MAX) || 'Untitled';
     const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), ctx.now);
     const authorNames = item.authors.map((a) => (htmlToText(a.name) || htmlToText(a.email)).replace(/^by\s+/i, ''));
+    const categoryNames = item.categories.map((c) => truncate(htmlToText(c.label || c.term), CATEGORY_MAX));
+
+    // Thumbnail: the item's own image, else its first media image, else the first <img> in its content.
+    const imageUrl =
+        safeUrl(item.image?.url, linkBase) ??
+        safeUrl(item.mediaImages[0]?.url, linkBase) ??
+        safeUrl(item.mediaImages[0]?.image, linkBase) ??
+        safeUrl(firstImageInHtml(contentHtml), linkBase);
 
     return {
         id: itemId(item.id?.trim() || url, `${title}|${publishedAt ?? ''}|${index}`),
@@ -276,8 +280,8 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
         summary,
         contentHtml,
         hasFullContent: contentText.length > 0 && contentText.length > descriptionText.length * FULL_CONTENT_RATIO,
-        imageUrl: itemImageUrl(item, contentHtml, linkBase),
-        categories: itemCategories(item),
+        imageUrl,
+        categories: [...new Set(categoryNames.filter(Boolean))].slice(0, CATEGORIES_MAX),
     };
 }
 
@@ -289,22 +293,6 @@ function itemId(ownId: string | null | undefined, fallbackKey: string): string {
     }
 
     return ownId.length <= ID_MAX ? ownId : hashedId(ownId);
-}
-
-// The item's thumbnail: its own image, else its first media image, else the first <img> in its content.
-function itemImageUrl(item: ParsedItem, contentHtml: string, base: string): string | null {
-    return (
-        safeUrl(item.image?.url, base) ??
-        safeUrl(item.mediaImages[0]?.url, base) ??
-        safeUrl(item.mediaImages[0]?.image, base) ??
-        safeUrl(firstImageInHtml(contentHtml), base)
-    );
-}
-
-// The item's category names as plain text, without blanks or repeats, at most CATEGORIES_MAX.
-function itemCategories(item: ParsedItem): string[] {
-    const names = item.categories.map((c) => truncate(htmlToText(c.label || c.term), CATEGORY_MAX));
-    return [...new Set(names.filter(Boolean))].slice(0, CATEGORIES_MAX);
 }
 
 // Joins author names with ", " (blanks skipped) and cuts to AUTHOR_MAX; null when there are none.

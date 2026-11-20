@@ -2,7 +2,6 @@
 // No error handling here: thrown errors become JSON in middleware/error-handler.ts.
 
 import type { Request, Response } from 'express';
-import type { FeedCacheValidators } from '@frontpage/shared';
 import { getFeed } from './feeds.service';
 
 // Browsers may reuse a feed response for 5 minutes before asking again.
@@ -17,18 +16,15 @@ export async function fetchFeedController(req: Request, res: Response) {
         lastModified: req.get('if-modified-since'),
     });
 
-    setCacheHeaders(res, result.cache);
-    // When these headers match the request's If-None-Match / If-Modified-Since, Express turns this into a bodiless 304 itself (req.fresh).
-    res.json(result);
-}
-
-// Passes on the feed's ETag / Last-Modified so the client can ask "has it changed?" next time, plus how long to cache it.
-function setCacheHeaders(res: Response, cache: FeedCacheValidators) {
-    if (cache.etag) {
-        res.set('ETag', cache.etag);
+    // Pass on the feed's ETag / Last-Modified so the client can ask "has it changed?" next time.
+    if (result.cache.etag) {
+        res.set('ETag', result.cache.etag);
     }
-    if (cache.lastModified) {
-        res.set('Last-Modified', cache.lastModified);
+    if (result.cache.lastModified) {
+        res.set('Last-Modified', result.cache.lastModified);
     }
     res.set('Cache-Control', CACHE_CONTROL);
+
+    // When those headers match the request's If-None-Match / If-Modified-Since, Express turns this into a bodiless 304 itself (req.fresh).
+    res.json(result);
 }

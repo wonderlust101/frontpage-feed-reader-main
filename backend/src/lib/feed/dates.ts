@@ -127,7 +127,8 @@ function toDateParts(groups: Record<string, string | undefined>): DateParts | un
         hour: Number(groups.hour ?? 0),
         minute: Number(groups.minute ?? 0),
         second: Number(groups.second ?? 0),
-        millisecond: toMilliseconds(groups.fraction),
+        // The first three digits of the fractional second: "5" → 500, "123456" → 123, none → 0.
+        millisecond: Number((groups.fraction ?? '').padEnd(3, '0').slice(0, 3)),
     };
 }
 
@@ -144,11 +145,6 @@ function toMonth(value: string): number | undefined {
 
     const index = MONTHS.findIndex((month) => month.startsWith(name));
     return index >= 0 ? index + 1 : undefined;
-}
-
-// The first three digits of a fractional second as milliseconds: "5" → 500, "123456" → 123, none → 0.
-function toMilliseconds(fraction: string | undefined): number {
-    return Number((fraction ?? '').padEnd(3, '0').slice(0, 3));
 }
 
 // Offset from UTC in minutes: "GMT" → 0, "PDT" → -420, "+0530" / "+05:30" / "+05" / "GMT+0530" → 330; no zone means UTC.

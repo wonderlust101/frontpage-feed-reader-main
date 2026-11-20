@@ -23,10 +23,6 @@ function asBuffer(bytes: Uint8Array) {
 
 // Options for encoding-sniffer: trust the Content-Type charset if there is one, otherwise let it check the bytes.
 function snifferOptions(contentType: string | null | undefined): SnifferOptions {
-    return { transportLayerEncodingLabel: charsetFrom(contentType), defaultEncoding: 'UTF-8' };
-}
-
-// The bare charset named in a Content-Type header, or undefined if it names none.
-function charsetFrom(contentType: string | null | undefined): string | undefined {
-    return contentType?.match(CHARSET_PARAM)?.[1];
+    const charset = contentType?.match(CHARSET_PARAM)?.[1];
+    return { transportLayerEncodingLabel: charset, defaultEncoding: 'UTF-8' };
 }
