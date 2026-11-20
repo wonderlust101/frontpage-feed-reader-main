@@ -48,8 +48,14 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       │   └── errors/               # one file per error class: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
+│       │   ├── auth/         #   /api/auth/* (Better Auth) + "users", "sessions", "accounts", "verifications" tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
-│       │   └── feeds/        #   GET /api/fetch (routes → controller → service) + Drizzle "feeds" table
+│       │   ├── feeds/        #   GET /api/fetch (routes → controller → service) + "feeds", "starter_feeds" tables
+│       │   ├── items/        #   "items", "item_read_states" tables
+│       │   ├── categories/   #   "categories" table
+│       │   ├── subscriptions/#   "subscriptions" table
+│       │   ├── preferences/  #   "user_preferences" table
+│       │   └── bookmarks/    #   "bookmarks" table
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
 │       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
 │       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
