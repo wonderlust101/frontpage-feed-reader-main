@@ -19,6 +19,7 @@ test/
 ├── structure.test.ts       ← enforces this layout in CI
 ├── app.test.ts             ← src/app.ts: CORS, JSON 404, error handler
 ├── lib/feed/*.test.ts      ← src/lib/feed/*.ts: pure engine logic (dates, decode, sanitize, normalize, fetch)
+├── db/schema.test.ts       ← src/db/schema.ts: migrations apply; keys, cascades and checks hold
 ├── modules/<feature>/      ← src/modules/<feature>/: HTTP routes via startTestServer()
 ├── live/*.live.test.ts     ← real network; skipped unless LIVE_FEEDS=1
 ├── helpers/                ← shared test code, no tests

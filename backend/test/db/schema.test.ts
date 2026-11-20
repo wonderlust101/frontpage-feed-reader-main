@@ -1,0 +1,144 @@
+// The data model against an in-memory Postgres: every migration applies, and the constraints the app relies on hold.
+
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { eq, sql } from 'drizzle-orm';
+import { bookmarks, categories, feeds, itemReadStates, items, subscriptions, userPreferences, users } from '../../src/db/schema';
+import { createTestDb } from '../helpers/test-db';
+
+let testDb: Awaited<ReturnType<typeof createTestDb>>;
+
+beforeAll(async () => {
+    testDb = await createTestDb();
+});
+
+afterAll(async () => {
+    await testDb.close();
+});
+
+// Inserts a user and returns their id.
+async function newUser(): Promise<string> {
+    const id = crypto.randomUUID();
+    await testDb.db.insert(users).values({ id, name: 'Test User', email: `${id}@example.com` });
+    return id;
+}
+
+// Inserts a feed and returns its id.
+async function newFeed(): Promise<string> {
+    const [row] = await testDb.db
+        .insert(feeds)
+        .values({ url: `https://example.com/${crypto.randomUUID()}.xml`, title: 'Example' })
+        .returning({ id: feeds.id });
+    return row!.id;
+}
+
+// Inserts an item into a feed and returns the stored row.
+async function newItem(feedId: string, overrides: Partial<typeof items.$inferInsert> = {}) {
+    const [row] = await testDb.db
+        .insert(items)
+        .values({
+            feedId,
+            guid: crypto.randomUUID(),
+            title: 'Rust compiler released',
+            summary: 'Faster builds',
+            contentHtml: '<p>Faster builds</p>',
+            hasFullContent: false,
+            contentHash: 'hash',
+            ...overrides,
+        })
+        .returning();
+    return row!;
+}
+
+// The Postgres error code (e.g. 23505 unique violation) a failing query threw.
+async function errorCode(query: Promise<unknown>): Promise<string | undefined> {
+    try {
+        await query;
+    } catch (err) {
+        const cause = (err as { cause?: { code?: string } }).cause;
+        return cause?.code ?? (err as { code?: string }).code;
+    }
+    return undefined;
+}
+
+describe('items', () => {
+    test('the same guid twice in one feed is rejected', async () => {
+        const feedId = await newFeed();
+        await newItem(feedId, { guid: 'same' });
+        expect(await errorCode(newItem(feedId, { guid: 'same' }))).toBe('23505');
+    });
+
+    test('sort_at falls back to first_seen_at, and search matches title words', async () => {
+        const feedId = await newFeed();
+        const dated = await newItem(feedId, { publishedAt: new Date('2026-01-02T10:00:00.000Z') });
+        const undated = await newItem(feedId);
+        expect(dated.sortAt).toEqual(new Date('2026-01-02T10:00:00.000Z'));
+        expect(undated.sortAt).toEqual(undated.firstSeenAt);
+
+        const found = await testDb.db
+            .select({ id: items.id })
+            .from(items)
+            .where(sql`${items.feedId} = ${feedId} and ${items.search} @@ websearch_to_tsquery('english', 'compilers')`);
+        expect(found).toHaveLength(2);
+    });
+});
+
+describe('foreign keys', () => {
+    test('a bookmarked item and a followed feed cannot be deleted', async () => {
+        const user = await newUser();
+        const feedId = await newFeed();
+        const item = await newItem(feedId);
+        await testDb.db.insert(bookmarks).values({ userId: user, itemId: item.id });
+        await testDb.db.insert(subscriptions).values({ userId: user, feedId });
+
+        expect(await errorCode(testDb.db.delete(items).where(eq(items.id, item.id)))).toBe('23001');
+        expect(await errorCode(testDb.db.delete(feeds).where(eq(feeds.id, feedId)))).toBe('23001');
+    });
+
+    test('deleting a user deletes all of their data, but not the shared feeds and items', async () => {
+        const user = await newUser();
+        const feedId = await newFeed();
+        const item = await newItem(feedId);
+        const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
+        await testDb.db.insert(subscriptions).values({ userId: user, feedId, categoryId: category!.id });
+        await testDb.db.insert(itemReadStates).values({ userId: user, itemId: item.id, isRead: true });
+        await testDb.db.insert(bookmarks).values({ userId: user, itemId: item.id });
+        await testDb.db.insert(userPreferences).values({ userId: user });
+
+        await testDb.db.delete(users).where(eq(users.id, user));
+
+        for (const table of [categories, subscriptions, itemReadStates, bookmarks, userPreferences]) {
+            expect(await testDb.db.select().from(table).where(eq(table.userId, user))).toEqual([]);
+        }
+        expect(await testDb.db.select().from(items).where(eq(items.id, item.id))).toHaveLength(1);
+    });
+
+    test('deleting a category moves its subscriptions to Uncategorized', async () => {
+        const user = await newUser();
+        const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
+        const [sub] = await testDb.db
+            .insert(subscriptions)
+            .values({ userId: user, feedId: await newFeed(), categoryId: category!.id })
+            .returning();
+
+        await testDb.db.delete(categories).where(eq(categories.id, category!.id));
+        const [after] = await testDb.db.select().from(subscriptions).where(eq(subscriptions.id, sub!.id));
+        expect(after!.categoryId).toBeNull();
+    });
+});
+
+describe('checks and unique names', () => {
+    test('category names are unique per user ignoring case', async () => {
+        const user = await newUser();
+        await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 });
+        expect(await errorCode(testDb.db.insert(categories).values({ userId: user, name: 'news', position: 1 }))).toBe('23505');
+        await testDb.db.insert(categories).values({ userId: await newUser(), name: 'news', position: 0 });
+    });
+
+    test('preferences reject an unsupported refresh interval or order', async () => {
+        const user = await newUser();
+        expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, refreshIntervalMinutes: 45 }))).toBe('23514');
+        expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, itemOrder: 'random' as 'newest' }))).toBe('23514');
+        const [defaults] = await testDb.db.insert(userPreferences).values({ userId: user }).returning();
+        expect(defaults).toMatchObject({ layout: 'list', refreshIntervalMinutes: 30, itemOrder: 'newest', showRead: true });
+    });
+});
