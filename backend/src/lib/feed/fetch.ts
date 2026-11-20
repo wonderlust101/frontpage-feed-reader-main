@@ -37,7 +37,26 @@ type Agents = {
     https: https.Agent;
 };
 
+// What every request of one fetch shares: headers, SSRF-safe agents, and the timeout that covers all hops and the body.
+type RequestContext = {
+    headers: Record<string, string>;
+    agents: Agents;
+    signal: AbortSignal;
+    timeoutMs: number;
+};
+
+// The response that ended the redirect chain, where it came from, and the redirect to report (null if there was none).
+type Arrival = {
+    res: IncomingMessage;
+    url: URL;
+    redirect: FeedRedirect | null;
+};
+
 export const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
+const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_USER_AGENT = 'Frontpage/0.1 (RSS reader)';
+const DEFAULT_MAX_REDIRECTS = 5;
+
 const ACCEPT_ENCODING = 'gzip, deflate, br';
 const ACCEPT = 'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
@@ -45,6 +64,18 @@ const WEB_PROTOCOLS = new Set(['http:', 'https:']);
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const PERMANENT_REDIRECT_STATUSES = new Set([301, 308]);
+
+// The same URL rules apply to what the user typed and to where a redirect points; only the error wording differs.
+const TYPED_URL = {
+    code: 'invalid_url',
+    badProtocol: 'Only http and https URLs are supported',
+    hasCredentials: 'URLs with credentials are not allowed',
+} as const;
+const REDIRECT_URL = {
+    code: 'blocked_url',
+    badProtocol: 'Redirected to an unsupported protocol',
+    hasCredentials: 'Redirected to a URL with credentials',
+} as const;
 
 const DECOMPRESSORS: Record<string, () => Transform> = {
     gzip: zlib.createGunzip,
@@ -71,70 +102,90 @@ export function parseFeedUrl(input: string | undefined | null): URL {
         throw new BadRequestError('invalid_url', `Not a valid URL: ${raw}`);
     }
 
+    return asWebUrl(url, TYPED_URL);
+}
+
+// Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
+// and enforces the timeout and size cap. Every failure is thrown as an HttpError with a code such as `timeout`, `http_4xx` or `blocked_url`.
+export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
+    const {
+        timeoutMs = DEFAULT_TIMEOUT_MS,
+        userAgent = DEFAULT_USER_AGENT,
+        maxRedirects = DEFAULT_MAX_REDIRECTS,
+        maxBytes = DEFAULT_MAX_BYTES,
+        allowLoopback = false,
+    } = opts;
+    const ctx: RequestContext = {
+        headers: requestHeaders(userAgent, opts),
+        agents: agentsFor(allowLoopback),
+        signal: AbortSignal.timeout(timeoutMs),
+        timeoutMs,
+    };
+    const startUrl = typeof input === 'string' ? parseFeedUrl(input) : input;
+
+    try {
+        const { res, url, redirect } = await followRedirects(startUrl, ctx, maxRedirects);
+        const status = res.statusCode ?? 0;
+        const fetchedFrom: FetchedFrom = {
+            finalUrl: url.href,
+            redirect,
+            validators: { etag: header(res, 'etag'), lastModified: header(res, 'last-modified') },
+        };
+
+        if (status === 304) {
+            res.destroy();
+            return { ...fetchedFrom, notModified: true };
+        }
+
+        if (status < 200 || status >= 300) {
+            res.destroy();
+            throw httpError(status);
+        }
+
+        const bytes = await readBody(res, maxBytes);
+        return { ...fetchedFrom, notModified: false, bytes, contentType: header(res, 'content-type') };
+    } catch (err) {
+        // Connection errors were already mapped per hop in request(); this catches body, decompression and timeout errors.
+        throw toFetchError(err, startUrl, ctx);
+    }
+}
+
+// Throws unless the URL is http(s) without a username or password, then drops the #fragment (servers never see it).
+function asWebUrl(url: URL, rules: typeof TYPED_URL | typeof REDIRECT_URL): URL {
     if (!WEB_PROTOCOLS.has(url.protocol)) {
-        throw new BadRequestError('invalid_url', 'Only http and https URLs are supported');
+        throw new BadRequestError(rules.code, rules.badProtocol);
     }
 
     if (url.username || url.password) {
-        throw new BadRequestError('invalid_url', 'URLs with credentials are not allowed');
+        throw new BadRequestError(rules.code, rules.hasCredentials);
     }
 
     url.hash = '';
     return url;
 }
 
-// Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
-// and enforces the timeout and size cap. Every failure is thrown as an HttpError with a code such as `timeout`, `http_4xx` or `blocked_url`.
-export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
-    const { timeoutMs = 10_000, userAgent = 'Frontpage/0.1 (RSS reader)', maxRedirects = 5, maxBytes = DEFAULT_MAX_BYTES, allowLoopback = false } = opts;
-    const signal = AbortSignal.timeout(timeoutMs);
-    const agents = agentsFor(allowLoopback);
-    const headers = requestHeaders(userAgent, opts);
-    const startUrl = typeof input === 'string' ? parseFeedUrl(input) : input;
-
+// Sends the GET and follows redirects itself, up to `maxRedirects`, so a moved feed can be reported.
+// The move counts as permanent only if every hop was (301 or 308).
+async function followRedirects(startUrl: URL, ctx: RequestContext, maxRedirects: number): Promise<Arrival> {
     let url = startUrl;
-    let redirectCount = 0;
-    let allRedirectsPermanent = true;
+    let allPermanent = true;
 
-    try {
-        while (true) {
-            const res = await request(url, headers, agents, signal);
-            const status = res.statusCode ?? 0;
+    for (let hops = 0; ; hops++) {
+        const res = await request(url, ctx);
+        const status = res.statusCode ?? 0;
 
-            if (REDIRECT_STATUSES.has(status)) {
-                res.destroy();
-
-                redirectCount++;
-                if (redirectCount > maxRedirects) {
-                    throw new BadGatewayError('network', 'Too many redirects', { retryable: false });
-                }
-
-                url = nextRedirectUrl(res, url);
-                allRedirectsPermanent &&= PERMANENT_REDIRECT_STATUSES.has(status);
-                continue;
-            }
-
-            const fetchedFrom: FetchedFrom = {
-                finalUrl: url.href,
-                redirect: redirectCount > 0 ? { permanent: allRedirectsPermanent, from: startUrl.href, to: url.href } : null,
-                validators: { etag: header(res, 'etag'), lastModified: header(res, 'last-modified') },
-            };
-
-            if (status === 304) {
-                res.destroy();
-                return { ...fetchedFrom, notModified: true };
-            }
-
-            if (status < 200 || status >= 300) {
-                res.destroy();
-                throw httpError(status);
-            }
-
-            const bytes = await readBody(res, maxBytes);
-            return { ...fetchedFrom, notModified: false, bytes, contentType: header(res, 'content-type') };
+        if (!REDIRECT_STATUSES.has(status)) {
+            const redirect = hops > 0 ? { permanent: allPermanent, from: startUrl.href, to: url.href } : null;
+            return { res, url, redirect };
         }
-    } catch (err) {
-        throw toFetchError(err, url, signal, timeoutMs);
+
+        res.destroy();
+        if (hops === maxRedirects) {
+            throw new BadGatewayError('network', 'Too many redirects', { retryable: false });
+        }
+
+        url = nextRedirectUrl(res, url);
+        allPermanent &&= PERMANENT_REDIRECT_STATUSES.has(status);
     }
 }
 
@@ -169,12 +220,13 @@ function requestHeaders(userAgent: string, validators: Partial<FeedCacheValidato
     return headers;
 }
 
-// Sends one GET and resolves once the response headers arrive; doesn't follow redirects (fetchFeed does that).
-function request(url: URL, headers: Record<string, string>, agents: Agents, signal: AbortSignal) {
-    const [client, agent] = url.protocol === 'https:' ? [https, agents.https] : [http, agents.http];
+// Sends one GET and resolves once the response headers arrive; doesn't follow redirects (followRedirects does that).
+// Connection errors are mapped here, where we still know which URL (which redirect hop) failed.
+function request(url: URL, ctx: RequestContext) {
+    const [client, agent] = url.protocol === 'https:' ? [https, ctx.agents.https] : [http, ctx.agents.http];
 
     return new Promise<IncomingMessage>((resolve, reject) => {
-        client.get(url, { headers, agent, signal }, resolve).on('error', reject);
+        client.get(url, { headers: ctx.headers, agent, signal: ctx.signal }, resolve).on('error', (err) => reject(toFetchError(err, url, ctx)));
     });
 }
 
@@ -191,17 +243,7 @@ function nextRedirectUrl(res: IncomingMessage, currentUrl: URL): URL {
         throw new BadGatewayError('network', `Redirect (${res.statusCode}) without a Location header`);
     }
 
-    const next = new URL(location, currentUrl);
-    if (!WEB_PROTOCOLS.has(next.protocol)) {
-        throw new BadRequestError('blocked_url', 'Redirected to an unsupported protocol');
-    }
-
-    if (next.username || next.password) {
-        throw new BadRequestError('blocked_url', 'Redirected to a URL with credentials');
-    }
-
-    next.hash = '';
-    return next;
+    return asWebUrl(new URL(location, currentUrl), REDIRECT_URL);
 }
 
 // The HttpError for a 4xx/5xx response: 5xx, 408 (timeout) and 429 (rate limited) are worth retrying, other 4xx are not.
@@ -253,7 +295,7 @@ function decompress(res: IncomingMessage): Readable {
 }
 
 // Turns any error from a fetch into an HttpError: blocked address, timeout, unknown host, or another network failure.
-function toFetchError(err: unknown, url: URL, signal: AbortSignal, timeoutMs: number): HttpError {
+function toFetchError(err: unknown, url: URL, ctx: RequestContext): HttpError {
     if (err instanceof HttpError) {
         return err;
     }
@@ -263,8 +305,8 @@ function toFetchError(err: unknown, url: URL, signal: AbortSignal, timeoutMs: nu
         return new BadRequestError('blocked_url', 'That host is not allowed');
     }
 
-    if (signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError'))) {
-        return new GatewayTimeoutError('timeout', `The feed took longer than ${timeoutMs / 1000}s to respond`);
+    if (ctx.signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError'))) {
+        return new GatewayTimeoutError('timeout', `The feed took longer than ${ctx.timeoutMs / 1000}s to respond`);
     }
 
     if ((err as NodeJS.ErrnoException)?.code === 'ENOTFOUND') {
