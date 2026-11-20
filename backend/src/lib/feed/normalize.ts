@@ -18,10 +18,25 @@ export type NormalizeOptions = {
     now?: number;
 };
 
-const BYTE_ORDER_MARK = /^\uFEFF/;
+// What every item needs from its feed: where relative links point, whose name to use if it has no author, and the clock.
+type ItemContext = {
+    siteUrl: string;
+    feedAuthor: string | null;
+    now: number;
+};
+
+// The items worth keeping, plus how many were skipped and why (each count becomes a warning).
+type CollectedItems = {
+    items: NormalizedItem[];
+    missingDates: number;
+    duplicates: number;
+    dropped: number;
+};
+
+const BYTE_ORDER_MARK = /^﻿/;
 export const MAX_ITEMS = 500;
 
-export const SUMMARY_MAX = 300;
+const SUMMARY_MAX = 300;
 const FALLBACK_TITLE_MAX = 80;
 const TITLE_MAX = 300;
 const AUTHOR_MAX = 200;
@@ -31,6 +46,11 @@ const CATEGORY_MAX = 100;
 const ID_MAX = 512;
 const URL_MAX = 2_048;
 
+// Content counts as the full article (not a teaser) when its text is at least 20% longer than the description's.
+const FULL_CONTENT_RATIO = 1.2;
+// How far into the document to look for the root element (<rdf:RDF>); it's always near the top.
+const HEAD_CHARS = 4096;
+
 const PUBLISHED_TAGS = ['pubdate', 'published', 'issued', 'created', 'date', 'updated', 'modified'];
 const UPDATED_TAGS = ['updated', 'modified', 'date'];
 
@@ -39,112 +59,36 @@ const UPDATED_TAGS = ['updated', 'modified', 'date'];
 export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFeed {
     const now = opts.now ?? Date.now();
     const feedXml = xml.replace(BYTE_ORDER_MARK, '');
-    const warnings: string[] = [];
-
-    if (!feedXml.trim()) {
-        throw new UnprocessableEntityError('not_a_feed', 'The response was empty');
-    }
-    if (looksLikeHtmlPage(feedXml)) {
-        throw new UnprocessableEntityError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
-    }
+    rejectNonFeeds(feedXml);
 
     const limited = limitItems(feedXml, MAX_ITEMS);
-    if (limited.limited) {
-        warnings.push(`The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`);
-    }
+    const feed = parseXml(limited.xml);
 
-    let feed: ParsedFeed;
-    try {
-        feed = parseFeed(limited.xml);
-    } catch (err) {
-        if ((err as { code?: string })?.code === 'INVALID_FEED') {
-            throw new UnprocessableEntityError('not_a_feed', 'No RSS or Atom feed was found at this URL');
-        }
-        throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${(err as Error)?.message ?? err}`);
-    }
-
-    const format = detectFormat(feed, feedXml);
     const feedUrl = opts.url;
     const siteUrl = safeUrl(feed.url, feedUrl) ?? new URL('/', feedUrl).href;
-    const feedAuthor =
-        truncate(
-            feed.authors
-                .map((a) => htmlToText(a.name))
-                .filter(Boolean)
-                .join(', '),
-            AUTHOR_MAX,
-        ) || null;
+    const feedAuthor = joinAuthors(feed.authors.map((a) => htmlToText(a.name)));
 
-    const seen = new Set<string>();
-    const items: NormalizedItem[] = [];
-    let missingDates = 0;
-    let duplicates = 0;
-    let dropped = 0;
-
-    feed.items.forEach((raw, index) => {
-        let item: NormalizedItem;
-        try {
-            item = normalizeItem(raw, { siteUrl, feedAuthor, now, index });
-        } catch {
-            dropped++;
-            return;
-        }
-        if (seen.has(item.id)) {
-            duplicates++;
-            return;
-        }
-        seen.add(item.id);
-        if (!item.publishedAt) {
-            missingDates++;
-        }
-        items.push(item);
-    });
-
-    // Newest first; undated items keep their feed order at the end.
-    items.sort((a, b) => {
-        if (a.publishedAt && b.publishedAt) {
-            return b.publishedAt.localeCompare(a.publishedAt);
-        }
-        if (a.publishedAt) {
-            return -1;
-        }
-        if (b.publishedAt) {
-            return 1;
-        }
-        return 0;
-    });
-
-    if (missingDates) {
-        warnings.push(`${missingDates} item(s) have no usable date`);
-    }
-    if (duplicates) {
-        warnings.push(`${duplicates} duplicate item(s) were removed`);
-    }
-    if (dropped) {
-        warnings.push(`${dropped} item(s) could not be read and were skipped`);
-    }
-    if (feed.items.length === 0) {
-        warnings.push('The feed has no items');
-    }
-    if (looksTruncated(feedXml)) {
-        warnings.push('The feed XML is malformed; it was parsed partially');
-    }
-
-    const hostname = new URL(siteUrl).hostname.replace(/^www\./, '');
-    const latestItem = items.find((i) => i.publishedAt)?.publishedAt ?? null;
+    const collected = collectItems(feed.items, { siteUrl, feedAuthor, now });
+    const items = collected.items.sort(byNewestFirst);
+    const newestItemDate = items[0]?.publishedAt ?? null;
 
     return {
         url: feedUrl,
         requestedUrl: opts.requestedUrl ?? feedUrl,
-        format,
-        title: truncate(htmlToText(feed.title), TITLE_MAX) || hostname,
+        format: detectFormat(feed, feedXml),
+        title: truncate(htmlToText(feed.title), TITLE_MAX) || hostnameOf(siteUrl),
         description: htmlToText(feed.description, DESCRIPTION_MAX) || null,
         siteUrl,
         imageUrl: safeUrl(feed.image?.url, siteUrl),
         language: feed.language?.trim() || null,
-        updatedAt: firstDate([feed.updated, feed.published], now) ?? latestItem,
+        updatedAt: firstDate([feed.updated, feed.published], now) ?? newestItemDate,
         items,
-        warnings,
+        warnings: buildWarnings({
+            ...collected,
+            itemLimitHit: limited.limited,
+            noItems: feed.items.length === 0,
+            truncated: looksTruncated(feedXml),
+        }),
     };
 }
 
@@ -169,9 +113,99 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
     }
 
     const isAtom = lastKeptItem[1]!.toLowerCase() === 'entry';
-    const isRdf = /<rdf:RDF[\s>]/i.test(xml.slice(0, 4096));
-    const closingRootTag = isAtom ? '</feed>' : isRdf ? '</rdf:RDF>' : '</channel></rss>';
+    const closingRootTag = isAtom ? '</feed>' : isRdf(xml) ? '</rdf:RDF>' : '</channel></rss>';
     return { xml: `${keptXml}\n${closingRootTag}\n`, limited: true };
+}
+
+// Throws `not_a_feed` for an empty response or a normal web page, before spending time on parsing.
+function rejectNonFeeds(xml: string) {
+    if (!xml.trim()) {
+        throw new UnprocessableEntityError('not_a_feed', 'The response was empty');
+    }
+    if (looksLikeHtmlPage(xml)) {
+        throw new UnprocessableEntityError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
+    }
+}
+
+// Runs the feed parser; throws `not_a_feed` for XML that isn't RSS or Atom, and `parse_error` for anything else it can't read.
+function parseXml(xml: string): ParsedFeed {
+    try {
+        return parseFeed(xml);
+    } catch (err) {
+        if ((err as { code?: string })?.code === 'INVALID_FEED') {
+            throw new UnprocessableEntityError('not_a_feed', 'No RSS or Atom feed was found at this URL');
+        }
+        throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${(err as Error)?.message ?? err}`);
+    }
+}
+
+// Normalizes every item in feed order, skipping ones that fail and repeats of an id already seen, and counting both.
+function collectItems(rawItems: ParsedItem[], ctx: ItemContext): CollectedItems {
+    const seenIds = new Set<string>();
+    const collected: CollectedItems = { items: [], missingDates: 0, duplicates: 0, dropped: 0 };
+
+    for (const [index, raw] of rawItems.entries()) {
+        let item: NormalizedItem;
+        try {
+            item = normalizeItem(raw, ctx, index);
+        } catch {
+            collected.dropped++;
+            continue;
+        }
+
+        if (seenIds.has(item.id)) {
+            collected.duplicates++;
+            continue;
+        }
+
+        seenIds.add(item.id);
+        if (!item.publishedAt) {
+            collected.missingDates++;
+        }
+        collected.items.push(item);
+    }
+
+    return collected;
+}
+
+// Sort order for items: newest first; undated items go last and keep their feed order (the sort is stable).
+function byNewestFirst(a: NormalizedItem, b: NormalizedItem): number {
+    if (a.publishedAt && b.publishedAt) {
+        return b.publishedAt.localeCompare(a.publishedAt);
+    }
+    if (a.publishedAt) {
+        return -1;
+    }
+    if (b.publishedAt) {
+        return 1;
+    }
+    return 0;
+}
+
+// The non-fatal problems found while reading the feed, as messages for the client.
+function buildWarnings(found: Omit<CollectedItems, 'items'> & { itemLimitHit: boolean; noItems: boolean; truncated: boolean }): string[] {
+    const warnings: string[] = [];
+
+    if (found.itemLimitHit) {
+        warnings.push(`The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`);
+    }
+    if (found.missingDates) {
+        warnings.push(`${found.missingDates} item(s) have no usable date`);
+    }
+    if (found.duplicates) {
+        warnings.push(`${found.duplicates} duplicate item(s) were removed`);
+    }
+    if (found.dropped) {
+        warnings.push(`${found.dropped} item(s) could not be read and were skipped`);
+    }
+    if (found.noItems) {
+        warnings.push('The feed has no items');
+    }
+    if (found.truncated) {
+        warnings.push('The feed XML is malformed; it was parsed partially');
+    }
+
+    return warnings;
 }
 
 // True when the response is a normal web page (it starts like HTML and has no <rss> or <feed>),
@@ -186,11 +220,21 @@ function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
         return 'atom';
     }
 
-    if (feed.meta.version?.startsWith('1') || /<rdf:rdf[\s>]/i.test(xml.slice(0, 4096))) {
+    if (feed.meta.version?.startsWith('1') || isRdf(xml)) {
         return 'rss1';
     }
 
     return 'rss2';
+}
+
+// True when the root element is <rdf:RDF>, i.e. RSS 1.0.
+function isRdf(xml: string): boolean {
+    return /<rdf:rdf[\s>]/i.test(xml.slice(0, HEAD_CHARS));
+}
+
+// The site's hostname without "www.", used as the title of a feed that has none.
+function hostnameOf(url: string): string {
+    return new URL(url).hostname.replace(/^www\./, '');
 }
 
 // Resolves a possibly relative URL against `base`; null unless it's http(s) and at most URL_MAX characters long.
@@ -209,56 +253,63 @@ function safeUrl(value: string | null | undefined, base?: string): string | null
 
 // Turns one parsed item into a NormalizedItem: sanitizes its HTML, builds a plain-text summary, parses dates and cuts long fields.
 // Gaps get fallbacks: title from the summary, author from the feed, thumbnail from the first image, id from a hash.
-function normalizeItem(item: ParsedItem, ctx: { siteUrl: string; feedAuthor: string | null; now: number; index: number }): NormalizedItem {
+function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): NormalizedItem {
     const url = safeUrl(item.url, ctx.siteUrl);
     const linkBase = url ?? ctx.siteUrl;
 
-    const descriptionHtml = sanitizeFeedHtml(item.description, linkBase);
-    const contentHtmlRaw = sanitizeFeedHtml(item.content, linkBase);
     const descriptionText = htmlToText(item.description);
     const contentText = htmlToText(item.content);
-
-    const hasFullContent = contentText.length > 0 && contentText.length > descriptionText.length * 1.2;
-    const contentHtml = contentHtmlRaw || descriptionHtml;
     const summary = truncate(descriptionText || contentText, SUMMARY_MAX);
+    const contentHtml = sanitizeFeedHtml(item.content, linkBase) || sanitizeFeedHtml(item.description, linkBase);
 
-    const title = truncate(htmlToText(item.title), TITLE_MAX) || (summary ? truncate(summary, FALLBACK_TITLE_MAX) : '') || 'Untitled';
-
+    const title = truncate(htmlToText(item.title), TITLE_MAX) || truncate(summary, FALLBACK_TITLE_MAX) || 'Untitled';
     const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), ctx.now);
-    const updatedAt = firstDate(rawText(item, UPDATED_TAGS), ctx.now) ?? publishedAt;
-
-    const authors = item.authors.map((a) => (htmlToText(a.name) || htmlToText(a.email)).replace(/^by\s+/i, ''));
-    const author = truncate(authors.filter(Boolean).join(', '), AUTHOR_MAX) || ctx.feedAuthor;
-
-    const imageUrl =
-        safeUrl(item.image?.url, linkBase) ??
-        safeUrl(item.mediaImages[0]?.url, linkBase) ??
-        safeUrl(item.mediaImages[0]?.image, linkBase) ??
-        safeUrl(firstImageInHtml(contentHtml), linkBase);
-
-    const categoryNames = item.categories.map((c) => truncate(htmlToText(c.label || c.term), CATEGORY_MAX));
-    const categories = [...new Set(categoryNames.filter(Boolean))].slice(0, CATEGORIES_MAX);
-
-    const feedProvidedId = item.id?.trim() || url;
-    const id = feedProvidedId
-        ? feedProvidedId.length <= ID_MAX
-            ? feedProvidedId
-            : hashedId(feedProvidedId)
-        : hashedId(`${title}|${publishedAt ?? ''}|${ctx.index}`);
+    const authorNames = item.authors.map((a) => (htmlToText(a.name) || htmlToText(a.email)).replace(/^by\s+/i, ''));
 
     return {
-        id,
+        id: itemId(item.id?.trim() || url, `${title}|${publishedAt ?? ''}|${index}`),
         title,
         url,
-        author,
+        author: joinAuthors(authorNames) ?? ctx.feedAuthor,
         publishedAt,
-        updatedAt,
+        updatedAt: firstDate(rawText(item, UPDATED_TAGS), ctx.now) ?? publishedAt,
         summary,
         contentHtml,
-        hasFullContent,
-        imageUrl,
-        categories,
+        hasFullContent: contentText.length > 0 && contentText.length > descriptionText.length * FULL_CONTENT_RATIO,
+        imageUrl: itemImageUrl(item, contentHtml, linkBase),
+        categories: itemCategories(item),
     };
+}
+
+// The feed's own id for an item (guid, else link) when it's short enough; otherwise a stable hash of it,
+// or, for items with neither, a hash of `fallbackKey` (title, date and position).
+function itemId(ownId: string | null | undefined, fallbackKey: string): string {
+    if (!ownId) {
+        return hashedId(fallbackKey);
+    }
+
+    return ownId.length <= ID_MAX ? ownId : hashedId(ownId);
+}
+
+// The item's thumbnail: its own image, else its first media image, else the first <img> in its content.
+function itemImageUrl(item: ParsedItem, contentHtml: string, base: string): string | null {
+    return (
+        safeUrl(item.image?.url, base) ??
+        safeUrl(item.mediaImages[0]?.url, base) ??
+        safeUrl(item.mediaImages[0]?.image, base) ??
+        safeUrl(firstImageInHtml(contentHtml), base)
+    );
+}
+
+// The item's category names as plain text, without blanks or repeats, at most CATEGORIES_MAX.
+function itemCategories(item: ParsedItem): string[] {
+    const names = item.categories.map((c) => truncate(htmlToText(c.label || c.term), CATEGORY_MAX));
+    return [...new Set(names.filter(Boolean))].slice(0, CATEGORIES_MAX);
+}
+
+// Joins author names with ", " (blanks skipped) and cuts to AUTHOR_MAX; null when there are none.
+function joinAuthors(names: string[]): string | null {
+    return truncate(names.filter(Boolean).join(', '), AUTHOR_MAX) || null;
 }
 
 // Tries each candidate with parseFeedDate and returns the first valid one as an ISO string, or null.
