@@ -1,17 +1,20 @@
 /* Component styles that utilities can't express cleanly: filter capsules, range inputs, health lines. */
 
 @layer components {
+    /* Capsules: --capsule-field fills the capsule when it is on; --capsule-on is the text on that fill (on-field ink */
+    /* for every field, "No color" included). Edges are real borders so they survive forced-colors mode. */
     .capsule {
+        position: relative;
         display: inline-flex;
         align-items: center;
         flex: none;
         gap: 0.5rem;
         height: 2.25rem;
         padding-inline: 0.75rem 1rem;
+        border: 1.5px solid var(--color-ink);
         border-radius: 9999px;
         background: var(--color-ground);
         color: var(--color-ink);
-        box-shadow: inset 0 0 0 1.5px var(--color-ink);
         font-weight: 600;
         font-size: var(--text-ui);
         line-height: 1;
@@ -20,6 +23,13 @@
         transition:
             background-color 200ms var(--ease-out),
             color 200ms var(--ease-out);
+    }
+
+    /* The capsule is 36px to look like a chip; its hit area reaches 44px. */
+    .capsule::after {
+        content: '';
+        position: absolute;
+        inset: -5px -1.5px;
     }
 
     .capsule:hover {
@@ -33,35 +43,176 @@
         height: 0.875rem;
         border-radius: 50%;
         background: var(--capsule-field);
-        box-shadow: inset 0 0 0 1.5px var(--color-ink);
+        /* The fill-edge hairline, so pale fields (Lemon, No color) keep an edge on any ground. */
+        box-shadow: inset 0 0 0 1px var(--color-fill-edge);
     }
 
     .capsule-mark svg {
         display: none;
     }
 
-    .capsule[aria-pressed='true'] {
+    .capsule:is([aria-pressed='true'], [aria-checked='true']) {
+        border-color: var(--capsule-on, var(--color-on-field));
         background: var(--capsule-field);
-        color: var(--color-on-field);
-        box-shadow: inset 0 0 0 1.5px var(--color-on-field);
+        color: var(--capsule-on, var(--color-on-field));
     }
 
-    .capsule[aria-pressed='true']:hover {
-        box-shadow: inset 0 0 0 2.5px var(--color-on-field);
+    /* Hover thickens the edge from 1.5px to 2.5px, inward: a 1px inset ring drawn against the border's inner side. */
+    /* A ring takes no space, so the capsule never changes size. Skipped while focused, where the ring is the halo. */
+    .capsule:is([aria-pressed='true'], [aria-checked='true']):hover:not(:focus-visible) {
+        box-shadow: inset 0 0 0 1px var(--capsule-on, var(--color-on-field));
     }
 
-    .capsule[aria-pressed='true'] .capsule-mark {
+    .capsule:is([aria-pressed='true'], [aria-checked='true']) .capsule-mark {
         background: none;
         box-shadow: none;
     }
 
-    .capsule[aria-pressed='true'] .capsule-mark svg {
+    .capsule:is([aria-pressed='true'], [aria-checked='true']) .capsule-mark svg {
         display: block;
     }
 
-    .capsule:focus-visible {
-        outline: 2px solid var(--color-ink);
-        outline-offset: 3px;
+    @media (forced-colors: active) {
+        .capsule:is([aria-pressed='true'], [aria-checked='true']) {
+            border-width: 3px;
+        }
+    }
+
+    /* Switch: track 48 × 28 with a 1.5px edge; the 20px thumb keeps an even 2.5px gap on every side and travels 20px. */
+    .switch {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-height: 2.75rem;
+        text-align: left;
+        font-size: var(--text-ui);
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .switch:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+    }
+
+    .switch-track {
+        position: relative;
+        flex: none;
+        width: 3rem;
+        height: 1.75rem;
+        border: 1.5px solid var(--color-ink);
+        border-radius: 9999px;
+        background: var(--color-ground);
+        transition:
+            background-color 200ms var(--ease-out),
+            border-color 200ms var(--ease-out);
+    }
+
+    .switch-thumb {
+        position: absolute;
+        top: 2.5px;
+        left: 2.5px;
+        display: grid;
+        place-items: center;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background: var(--color-ink-2);
+        color: var(--color-field-lemon);
+        transition:
+            transform 200ms var(--ease-out),
+            background-color 200ms var(--ease-out);
+    }
+
+    .switch-thumb svg {
+        opacity: 0;
+        transition: opacity 200ms var(--ease-out);
+    }
+
+    /* Off, hover darkens the thumb from ink-2 to ink; it reads on any stage, where a tinted track would vanish. */
+    .switch:hover .switch-thumb {
+        background: var(--color-ink);
+    }
+
+    .switch[aria-checked='true'] .switch-track {
+        border-color: var(--color-on-field);
+        background: var(--color-field-lemon);
+    }
+
+    /* On, hover thickens the edge inward like an on capsule: a ring, so nothing moves. */
+    .switch[aria-checked='true']:hover .switch-track {
+        box-shadow: inset 0 0 0 1px var(--color-on-field);
+    }
+
+    .switch[aria-checked='true'] .switch-thumb {
+        transform: translateX(1.25rem);
+        background: var(--color-on-field);
+    }
+
+    .switch[aria-checked='true'] .switch-thumb svg {
+        opacity: 1;
+    }
+
+    /* Forced colors drop fills: the thumb is drawn in the text color and the on track in the highlight color. */
+    @media (forced-colors: active) {
+        .switch-thumb {
+            background: CanvasText;
+            color: Canvas;
+        }
+
+        .switch[aria-checked='true'] .switch-track {
+            background: Highlight;
+        }
+    }
+
+    /* Field swatches: a 32px dot in its field with the same 1px hairline as capsule dots, inside a 44px target, */
+    /* "No color" (stone) included. The chosen one shows a check and a ring. */
+    .field-swatch {
+        display: grid;
+        place-items: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .field-swatch-dot {
+        display: grid;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: var(--swatch-field);
+        color: var(--color-on-field);
+        box-shadow: inset 0 0 0 1px var(--color-fill-edge);
+        transition: box-shadow 200ms var(--ease-out);
+    }
+
+    .field-swatch svg {
+        opacity: 0;
+    }
+
+    .field-swatch:hover .field-swatch-dot {
+        box-shadow:
+            inset 0 0 0 1px var(--color-fill-edge),
+            0 0 0 3px var(--color-ground),
+            0 0 0 4px var(--color-edge);
+    }
+
+    .field-swatch:has(:checked) .field-swatch-dot {
+        box-shadow:
+            inset 0 0 0 1px var(--color-fill-edge),
+            0 0 0 3px var(--color-ground),
+            0 0 0 4.5px var(--color-ink);
+    }
+
+    .field-swatch:has(:checked) svg {
+        opacity: 1;
+    }
+
+    .field-swatch:has(:focus-visible) {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 1px;
     }
 
     .range {
@@ -105,6 +256,13 @@
         outline-offset: 6px;
     }
 
+    /* Forced colors drop the drawn track and thumb, so the slider goes back to the system's own. */
+    @media (forced-colors: active) {
+        .range {
+            appearance: auto;
+        }
+    }
+
     .hero-field {
         transition: color var(--duration-field) var(--ease-out);
     }
@@ -143,4 +301,10 @@
     .health-line[data-health='failing']::after {
         transform: rotate(-45deg);
     }
+}
+
+/* The fill-edge hairline for small color fills drawn with utilities: tags, fallback tiles, swatches, sidebar dots. */
+/* An inset ring, so it never changes size. */
+@utility fill-edge {
+    box-shadow: inset 0 0 0 1px var(--color-fill-edge);
 }
