@@ -32,7 +32,7 @@ export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
 
     return (
         <nav aria-label="Contents" className="hidden lg:block">
-            <ul className="sticky top-24 space-y-1 border-t-2 border-rule pt-3">
+            <ul className="sticky top-24 space-y-1 rule-t pt-3">
                 {entries.map((entry) => {
                     const isCurrent = entry.id === currentId;
                     return (
@@ -43,7 +43,7 @@ export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
                                 className={`flex items-center gap-2 py-1 text-ui hover:text-ink hover:underline ${isCurrent ? 'font-semibold text-ink' : 'font-medium text-ink-2'}`}
                             >
                                 <span
-                                    className={`size-2 flex-none rounded-full ${isCurrent ? 'bg-field-lemon shadow-[inset_0_0_0_1px_var(--color-ink)]' : 'bg-transparent'}`}
+                                    className={`size-2 flex-none rounded-full ${isCurrent ? 'fill-edge bg-field-lemon' : 'bg-transparent'}`}
                                     aria-hidden="true"
                                 />
                                 {entry.label}
