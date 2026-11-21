@@ -27,10 +27,13 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │   ├── vercel.json
 │   ├── .env.example
 │   └── src/
-│       ├── app/              # routes, layout, globals.css (Tailwind + theme)
-│       ├── components/
+│       ├── app/              # routes, layout, globals.css; route-private code in _components/ _data/ _assets/
+│       │   └── design-system/  # /design-system: the living design system page
+│       ├── features/         # app features, mirroring backend/src/modules (categories, items, preferences…)
+│       │   └── <domain>/     #   components/, fields.ts, later hooks/, actions.ts, types.ts
+│       ├── components/       # shared, feature-agnostic: ui/ primitives and logo.tsx
 │       ├── lib/api.ts        # server-side client for the backend
-│       └── styles/tokens.css # brand design tokens
+│       └── styles/           # tokens.css (design tokens), components.css (component layer)
 ├── backend/                  # Express → Railway (built from the repo root)
 │   ├── .env.example
 │   ├── drizzle.config.ts

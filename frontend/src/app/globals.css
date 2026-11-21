@@ -1,74 +1,88 @@
 @import 'tailwindcss';
 @import '../styles/tokens.css';
+@import '../styles/components.css';
 
 @theme inline {
-    --color-bg-primary: var(--color-bg-primary);
-    --color-bg-secondary: var(--color-bg-secondary);
-    --color-bg-tertiary: var(--color-bg-tertiary);
-    --color-surface: var(--color-surface);
-    --color-border: var(--color-border);
-    --color-border-subtle: var(--color-border-subtle);
-    --color-text-primary: var(--color-text-primary);
-    --color-text-secondary: var(--color-text-secondary);
-    --color-text-tertiary: var(--color-text-tertiary);
-    --color-accent: var(--color-accent);
-    --color-accent-hover: var(--color-accent-hover);
-    --color-accent-subtle: var(--color-accent-subtle);
-    --color-success: var(--color-success);
-    --color-warning: var(--color-warning);
+    --color-ground: var(--color-ground);
+    --color-ground-2: var(--color-ground-2);
+    --color-ink: var(--color-ink);
+    --color-ink-2: var(--color-ink-2);
+    --color-muted: var(--color-meta);
+    --color-rule: var(--color-rule);
+    --color-rule-soft: var(--color-rule-soft);
+    --color-on-field: var(--color-on-field);
     --color-error: var(--color-error);
-    --color-unread: var(--color-unread-indicator);
+    --color-warning: var(--color-warning);
+    --color-field-lemon: var(--color-field-lemon);
+    --color-field-coral: var(--color-field-coral);
+    --color-field-sky: var(--color-field-sky);
+    --color-field-leaf: var(--color-field-leaf);
+    --color-field-lilac: var(--color-field-lilac);
+    --color-field-tangerine: var(--color-field-tangerine);
+    --color-field-aqua: var(--color-field-aqua);
+    --color-field-rose: var(--color-field-rose);
 
-    --shadow-sm: var(--shadow-sm);
-    --shadow-md: var(--shadow-md);
-    --shadow-lg: var(--shadow-lg);
-}
+    --font-display: var(--font-bricolage), system-ui, sans-serif;
+    --font-sans: var(--font-onest), system-ui, -apple-system, sans-serif;
+    --font-reading: var(--reading-face, var(--font-onest)), system-ui, sans-serif;
+    --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-@theme {
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-serif: 'Georgia', 'Charter', serif;
-    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    --text-meta: var(--text-meta);
+    --text-small: var(--text-small);
+    --text-ui: var(--text-ui);
+    --text-body: var(--text-body);
+    --text-title: var(--text-title);
+    --text-headline: var(--text-headline);
+    --text-display: var(--text-display);
+    --text-specimen: var(--text-specimen);
 
-    --text-xs: 0.6875rem;
-    --text-xs--line-height: 1.45;
-    --text-sm: 0.8125rem;
-    --text-sm--line-height: 1.45;
-    --text-base: 1rem;
-    --text-base--line-height: 1.55;
-    --text-lg: 1.25rem;
-    --text-lg--line-height: 1.4;
-    --text-xl: 1.5625rem;
-    --text-xl--line-height: 1.3;
-    --text-2xl: 1.9375rem;
-    --text-2xl--line-height: 1.25;
-    --text-3xl: 2.4375rem;
-    --text-3xl--line-height: 1.2;
+    --spacing-gutter: var(--gutter);
+    --container-page: var(--page-max);
+    --container-measure: var(--measure);
 
-    --font-weight-regular: var(--font-regular);
-    --font-weight-medium: var(--font-medium);
-    --font-weight-semibold: var(--font-semibold);
-    --font-weight-bold: var(--font-bold);
-
-    --spacing: 0.25rem;
-
-    --radius-sm: 0.25rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    --radius-full: 9999rem;
-
-    --spacing-sidebar: 16.25rem;
-    --container-content: 45rem;
-    --container-feed: 60rem;
-    --container-page: 80rem;
-}
-
-/* next/font exposes Inter as --font-inter; prefer it over the plain family name */
-@theme inline {
-    --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+    --ease-out: var(--ease-out);
 }
 
 body {
-    background: var(--color-bg-primary);
-    color: var(--color-text-primary);
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-ui);
+    line-height: var(--leading-ui);
+}
+
+::selection {
+    background: var(--color-ink);
+    color: var(--color-ground);
+}
+
+:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+}
+
+a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+}
+
+html {
+    scrollbar-color: var(--color-meta) var(--color-ground);
+}
+
+/* Very wide screens (2560px and up, such as 4K at 100% scaling): the whole rem-based system scales with the */
+/* viewport, up to 1.5x at 3840px, so a 4K screen gets the same proportions as a 2560px one. */
+@media (min-width: 160rem) {
+    html {
+        font-size: min(calc(100vw / 160), 24px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+    }
 }
