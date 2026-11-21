@@ -13,7 +13,7 @@ export async function BackendStatus() {
     const health = await getHealth();
 
     return (
-        <p className="text-sm text-text-secondary" role="status">
+        <p className="text-sm text-ink-2" role="status">
             {health ? `API: online · Database: ${DB_LABEL[health.database]}` : 'API: offline'}
         </p>
     );
