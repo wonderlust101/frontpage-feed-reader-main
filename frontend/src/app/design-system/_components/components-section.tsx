@@ -1,0 +1,103 @@
+// Components section of the design system page: every shared UI primitive, live, with its states.
+
+import { AiSummary } from '@/components/ui/ai-summary';
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
+import { HealthMark } from '@/components/ui/health-mark';
+import { CategoryTag, NewTag } from '@/components/ui/tags';
+import { TextField } from '@/components/ui/text-field';
+import { CategoryFilterDemo } from './category-filter-demo';
+import { DocSection, Specimen } from './doc-section';
+import { CATEGORIES } from '../_data/sample-data';
+
+// Renders buttons, capsules, inputs, tags, feed health and the AI summary panel.
+export function ComponentsSection() {
+    return (
+        <DocSection
+            id="components"
+            title="Components"
+            intro="Controls are softly rounded ink outlines; color appears only for categories and for Frontpage's own Lemon. Each component below is the one the app uses, in its real states."
+        >
+            <div className="grid gap-14 2xl:grid-cols-2 2xl:gap-x-10">
+                <Specimen
+                    title="Buttons"
+                    description="One primary per view. Destructive actions look quiet at rest and sit apart from everything else, so they are never hit by accident."
+                >
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-6">
+                        <Button>Add feed</Button>
+                        <Button variant="secondary">Import OPML</Button>
+                        <Button variant="quiet">View all sources</Button>
+                        <Button disabled>
+                            <Icon name="loading" size="action" className="animate-spin" />
+                            Saving…
+                        </Button>
+                        <span className="ml-auto pl-12">
+                            <Button variant="destructive">Unsubscribe</Button>
+                        </span>
+                    </div>
+                </Specimen>
+
+                <Specimen
+                    title="Capsules"
+                    description="Category filters. Fully rounded, smaller than buttons. Off, an outlined chip with a dot in the category color. On, filled with the category field and a check mark, so the state never rests on color alone."
+                >
+                    <CategoryFilterDemo />
+                </Specimen>
+
+                <Specimen title="Text field" description="Errors name the problem and the fix in red, with an icon and a heavier border.">
+                    <div className="grid max-w-3xl gap-8 md:grid-cols-2">
+                        <TextField
+                            id="feed-url"
+                            label="Feed or site URL"
+                            hint="Paste a blog, newsletter or RSS address."
+                            placeholder="https://css-tricks.com"
+                        />
+                        <TextField
+                            id="feed-url-error"
+                            label="Feed or site URL"
+                            defaultValue="https://example.com/blog"
+                            error="No feed found at that address. Try the site's homepage."
+                        />
+                    </div>
+                </Specimen>
+
+                <Specimen
+                    title="Tags"
+                    description="Category tags are flat labels: filled with the category color, no outline, square-ish corners, because they are not clickable. The solid New tag pairs with a bolder title."
+                >
+                    <div className="flex flex-wrap items-center gap-2">
+                        {CATEGORIES.map((category) => (
+                            <CategoryTag key={category.id} name={category.name} field={category.field.color} />
+                        ))}
+                        <span className="mx-2 h-6 w-px bg-rule-soft" aria-hidden="true" />
+                        <NewTag />
+                    </div>
+                </Specimen>
+
+                <Specimen
+                    title="Feed health"
+                    description="Healthy stays neutral because it needs nothing from you. Stale turns amber, failing turns red, and each keeps its own line form and label, so it reads in grayscale too."
+                >
+                    <div className="flex flex-wrap gap-x-10 gap-y-4">
+                        <HealthMark health="healthy" />
+                        <HealthMark health="stale" />
+                        <HealthMark health="failing" />
+                    </div>
+                </Specimen>
+
+                <Specimen
+                    title="AI summary"
+                    stage="none"
+                    description="Generated text is never set like the author's words: its own panel, a drawn mark and a plain warning."
+                >
+                    <div className="max-w-xl">
+                        <AiSummary>
+                            A month of using a small local model as a first reviewer: good at style and naming, unreliable on logic, and fast enough to run on
+                            every commit.
+                        </AiSummary>
+                    </div>
+                </Specimen>
+            </div>
+        </DocSection>
+    );
+}
