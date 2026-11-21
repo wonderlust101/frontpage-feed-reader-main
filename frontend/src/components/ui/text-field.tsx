@@ -37,7 +37,7 @@ export function TextField({ id, label, hint, error, className = '', ...inputProp
                 id={id}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={describedBy}
-                className={`h-12 rounded-[10px] bg-ground px-5 text-ui text-ink placeholder:text-muted ${borderClasses}`}
+                className={`h-12 rounded-control bg-ground px-5 text-ui text-ink placeholder:text-muted ${borderClasses}`}
                 {...inputProps}
             />
         </div>

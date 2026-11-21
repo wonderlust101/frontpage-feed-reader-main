@@ -4,6 +4,7 @@
 import { ArticleView } from '@/features/items/components/article-view';
 import { FeedItemRow } from '@/features/items/components/feed-item-row';
 import { SAMPLE_ITEMS, getCategory } from '../_data/sample-data';
+import { AppShellDemo } from './app-shell-demo';
 import { DocSection, Specimen } from './doc-section';
 
 const frontend = getCategory('frontend');
@@ -26,9 +27,17 @@ export function PatternsSection() {
             title="Patterns"
             intro="The feed is a ruled list, newest first, with the time leading each row. Unread rows carry the New tag and a bold title; read rows fall back to regular weight. Change the density above and watch the rows breathe."
         >
+            <Specimen
+                title="App shell"
+                stage="frame"
+                description="Views and categories down the side, each with its unread count; search and the one primary action on top; the feed list below. Categories without a color are stone."
+            >
+                <AppShellDemo />
+            </Specimen>
+
             <div className="grid gap-14 xl:grid-cols-2 xl:gap-x-10">
                 <Specimen title="Feed list" stage="frame" description="Sample data. Titles are illustrative; sources and categories are the guest feeds.">
-                    <ul className="border-t-2 border-rule">
+                    <ul className="rule-t">
                         {SAMPLE_ITEMS.map((item) => {
                             const category = getCategory(item.category);
                             return (
@@ -40,7 +49,7 @@ export function PatternsSection() {
                                     time={item.time}
                                     isNew={item.isNew}
                                     health={item.health}
-                                    category={{ name: category.name, color: category.field.color }}
+                                    category={category}
                                 />
                             );
                         })}
@@ -56,7 +65,7 @@ export function PatternsSection() {
                         id="article"
                         titleAs="h4"
                         title="Container queries in practice: three real layouts"
-                        category={{ name: frontend.name, color: frontend.field.color }}
+                        category={frontend}
                         source="CSS-Tricks"
                         meta="Today, 09:15 · 6 min read"
                         summary="Three layouts that respond to their own width instead of the viewport, with the CSS for each and the cases where media queries still win."
@@ -66,7 +75,7 @@ export function PatternsSection() {
                             instead, so the same component can sit in a sidebar and in a full-width grid without a single breakpoint override.
                         </p>
                         <p>The pattern is short. Mark the parent as a container, then write the rule against the container&apos;s width:</p>
-                        <pre className="overflow-x-auto rounded-xl bg-ground-2 px-5 py-4 font-mono text-small leading-[1.6]">
+                        <pre className="overflow-x-auto rounded-panel bg-ground-2 px-5 py-4 font-mono text-small leading-[1.6]">
                             <code>{CODE_SAMPLE}</code>
                         </pre>
                         <p>

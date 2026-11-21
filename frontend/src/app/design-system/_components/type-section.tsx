@@ -5,7 +5,7 @@ import { DocSection } from './doc-section';
 const TYPE_ROLES = [
     {
         role: 'Specimen',
-        spec: 'Bricolage Grotesque 700 · 4–10.5rem · 0.9 · −0.04em',
+        spec: 'Bricolage Grotesque 700 · 4–11rem · 0.9 · −0.04em',
         sample: 'Type leads.',
         className: "font-display text-[4rem] leading-[0.9] font-bold tracking-[-0.04em] [font-variation-settings:'opsz'_96]",
     },
@@ -13,25 +13,25 @@ const TYPE_ROLES = [
         role: 'Display',
         spec: 'Bricolage Grotesque 700 · 2.75–4.5rem · 0.95 · −0.035em',
         sample: 'Section opener',
-        className: "font-display text-display leading-[0.95] font-bold tracking-[-0.035em] [font-variation-settings:'opsz'_96]",
+        className: 'type-display',
     },
     {
         role: 'Headline',
         spec: 'Bricolage Grotesque 600 · 2rem · 1.1 · −0.02em',
         sample: 'Container queries in practice',
-        className: 'font-display text-headline leading-[1.1] font-semibold tracking-[-0.02em]',
+        className: 'type-headline',
     },
     {
         role: 'Title',
         spec: 'Bricolage Grotesque 600 · 1.375rem · 1.2 · −0.015em',
         sample: 'Notes on running small models locally for code review',
-        className: 'font-display text-title leading-[1.2] font-semibold tracking-[-0.015em]',
+        className: 'type-title font-semibold',
     },
     {
         role: 'Body',
         spec: 'Reading face · follows the reading controls · 66ch',
         sample: 'Frontpage keeps the reading column calm: one face, a real measure and line height you choose yourself.',
-        className: 'max-w-measure font-reading text-body leading-[var(--leading-body)]',
+        className: 'max-w-measure type-body',
     },
     {
         role: 'UI',
@@ -55,7 +55,7 @@ export function TypeSection() {
             title="Type"
             intro="Bricolage Grotesque sets everything you scan: headlines, section openers, item titles. Onest sets everything you read and operate. The body face is yours to change, so the reading controls retune every body sample on this page."
         >
-            <dl className="mt-10 border-t-2 border-rule">
+            <dl className="mt-10 rule-t">
                 {TYPE_ROLES.map((type) => (
                     <div key={type.role} className="grid gap-3 border-b border-rule-soft py-6 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-8">
                         <dt>

@@ -7,6 +7,7 @@ import { HealthMark } from '@/components/ui/health-mark';
 import { CategoryTag, NewTag } from '@/components/ui/tags';
 import { TextField } from '@/components/ui/text-field';
 import { CategoryFilterDemo } from './category-filter-demo';
+import { FormControlsDemo } from './form-controls-demo';
 import { DocSection, Specimen } from './doc-section';
 import { CATEGORIES } from '../_data/sample-data';
 
@@ -21,7 +22,7 @@ export function ComponentsSection() {
             <div className="grid gap-14 2xl:grid-cols-2 2xl:gap-x-10">
                 <Specimen
                     title="Buttons"
-                    description="One primary per view. Destructive actions look quiet at rest and sit apart from everything else, so they are never hit by accident."
+                    description="One primary per view. Destructive actions are drawn in the error color, never filled, and sit apart from everything else, so they are never hit by accident."
                 >
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-6">
                         <Button>Add feed</Button>
@@ -62,12 +63,19 @@ export function ComponentsSection() {
                 </Specimen>
 
                 <Specimen
+                    title="Choices and fields"
+                    description="Checkboxes for settings saved together, a switch for one that applies at once, a native select for a short list, and search with a clear button. All share the 1.5px ink edge."
+                >
+                    <FormControlsDemo />
+                </Specimen>
+
+                <Specimen
                     title="Tags"
                     description="Category tags are flat labels: filled with the category color, no outline, square-ish corners, because they are not clickable. The solid New tag pairs with a bolder title."
                 >
                     <div className="flex flex-wrap items-center gap-2">
                         {CATEGORIES.map((category) => (
-                            <CategoryTag key={category.id} name={category.name} field={category.field.color} />
+                            <CategoryTag key={category.id} name={category.name} field={category.field} />
                         ))}
                         <span className="mx-2 h-6 w-px bg-rule-soft" aria-hidden="true" />
                         <NewTag />

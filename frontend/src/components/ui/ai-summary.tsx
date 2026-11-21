@@ -6,7 +6,7 @@ import { Icon } from './icon';
 // Renders the summary panel around `children`, the generated text.
 export function AiSummary({ children }: { children: ReactNode }) {
     return (
-        <aside aria-label="AI summary" className="rounded-xl border border-ink/10 bg-ground-2 px-5 py-4">
+        <aside aria-label="AI summary" className="rounded-panel border border-edge bg-ground-2 px-5 py-4">
             <p className="flex items-center gap-2 text-meta font-semibold text-ink-2">
                 <Icon name="ai-summary" size="inline" />
                 AI summary · can miss nuance, read the source

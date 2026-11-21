@@ -1,20 +1,39 @@
 'use client';
 
-// Reading controls: a sticky bar for body size, line height, density and reading face. They set CSS custom properties
-// (--text-body, --leading-body, --density, --reading-face) on a wrapper, so every reading surface inside inherits them.
+// Reading controls: a sticky bar for body size, line height, density, line length, reading face and contrast. All but
+// contrast set CSS custom properties (--text-body, --leading-body, --density, --measure, --reading-face) on a wrapper,
+// so every reading surface inside inherits them; contrast is page-wide, on <html data-contrast>. Line length is in em of
+// the text it is set on (27, 32, 38em: about 55, 66 and 78 characters of Onest).
 
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Icon } from '@/components/ui/icon';
+import { createHtmlPreference } from '../html-preference';
 
 type Density = 'compact' | 'comfortable' | 'spacious';
 
+type Measure = 'narrow' | 'standard' | 'wide';
+
 type ReadingFace = 'onest' | 'atkinson' | 'lexend';
+
+const useContrast = createHtmlPreference('frontpage-contrast', 'contrast', ['standard', 'more'] as const);
 
 const DENSITY_OPTIONS: { value: Density; label: string; scale: number }[] = [
     { value: 'compact', label: 'Compact', scale: 0.7 },
     { value: 'comfortable', label: 'Comfortable', scale: 1 },
     { value: 'spacious', label: 'Spacious', scale: 1.35 },
 ];
+
+const MEASURE_OPTIONS: { value: Measure; label: string; width: string }[] = [
+    { value: 'narrow', label: 'Narrow', width: '27em' },
+    { value: 'standard', label: 'Standard', width: '32em' },
+    { value: 'wide', label: 'Wide', width: '38em' },
+];
+
+const CONTRAST_OPTIONS = [
+    { value: 'auto', label: 'Auto' },
+    { value: 'standard', label: 'Standard' },
+    { value: 'more', label: 'High' },
+] as const;
 
 const FACE_OPTIONS: { value: ReadingFace; label: string; variable: string }[] = [
     { value: 'onest', label: 'Onest', variable: 'var(--font-onest)' },
@@ -27,21 +46,25 @@ export function ReadingControls({ children }: { children: ReactNode }) {
     const [size, setSize] = useState(19);
     const [leading, setLeading] = useState(1.6);
     const [density, setDensity] = useState<Density>('comfortable');
+    const [measure, setMeasure] = useState<Measure>('standard');
+    const [contrast, setContrast] = useContrast();
     const [face, setFace] = useState<ReadingFace>('onest');
     const [isOpen, setIsOpen] = useState(false);
 
     const densityOption = DENSITY_OPTIONS.find((option) => option.value === density) ?? DENSITY_OPTIONS[1];
+    const measureOption = MEASURE_OPTIONS.find((option) => option.value === measure) ?? MEASURE_OPTIONS[1];
     const faceOption = FACE_OPTIONS.find((option) => option.value === face) ?? FACE_OPTIONS[0];
     const readingStyle = {
         '--text-body': `${size / 16}rem`,
         '--leading-body': String(leading),
         '--density': String(densityOption.scale),
+        '--measure': measureOption.width,
         '--reading-face': faceOption.variable,
     } as CSSProperties;
 
     return (
         <div style={readingStyle} className="flex flex-1 flex-col">
-            <section aria-label="Reading controls" className="sticky top-0 z-20 border-b border-ink/15 bg-ground-2">
+            <section aria-label="Reading controls" className="sticky top-0 z-20 border-b border-edge bg-ground-2">
                 <div className="mx-auto max-w-page px-gutter">
                     <button
                         type="button"
@@ -52,12 +75,12 @@ export function ReadingControls({ children }: { children: ReactNode }) {
                     >
                         Reading controls
                         <span className="text-meta font-medium text-ink-2">
-                            {size}px · {leading.toFixed(2)} · {densityOption.label}
+                            {size}px · {leading.toFixed(2)} · {densityOption.label} · {measureOption.label}
                         </span>
                     </button>
                     <div
                         id="reading-controls-panel"
-                        className={`${isOpen ? 'flex' : 'hidden'} flex-col gap-4 pb-4 md:flex md:flex-row md:flex-wrap md:items-center md:gap-x-10 md:py-3`}
+                        className={`${isOpen ? 'flex' : 'hidden'} flex-col gap-4 pb-4 md:flex md:flex-row md:flex-wrap md:items-center md:gap-x-8 md:gap-y-3 md:py-3`}
                     >
                         <RangeControl id="text-size" label="Text size" min={16} max={24} step={1} value={size} display={`${size}px`} onChange={setSize} />
                         <RangeControl
@@ -70,34 +93,15 @@ export function ReadingControls({ children }: { children: ReactNode }) {
                             display={leading.toFixed(2)}
                             onChange={setLeading}
                         />
-                        <fieldset className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                            <legend className="float-left mr-3 text-meta font-semibold text-ink-2">Density</legend>
-                            <span className="flex gap-1">
-                                {DENSITY_OPTIONS.map((option) => (
-                                    <label
-                                        key={option.value}
-                                        className="cursor-pointer rounded-lg border-[1.5px] border-ink px-3 py-1 text-meta font-semibold has-[:checked]:bg-ink has-[:checked]:text-ground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink"
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="density"
-                                            value={option.value}
-                                            checked={density === option.value}
-                                            onChange={() => setDensity(option.value)}
-                                            className="sr-only"
-                                        />
-                                        {option.label}
-                                    </label>
-                                ))}
-                            </span>
-                        </fieldset>
+                        <ChoiceControl name="density" legend="Density" options={DENSITY_OPTIONS} value={density} onChange={setDensity} />
+                        <ChoiceControl name="measure" legend="Line length" options={MEASURE_OPTIONS} value={measure} onChange={setMeasure} />
                         <label className="flex items-center gap-3 text-meta font-semibold text-ink-2">
                             Reading face
                             <span className="relative inline-flex items-center">
                                 <select
                                     value={face}
                                     onChange={(event) => setFace(event.target.value as ReadingFace)}
-                                    className="h-8 appearance-none rounded-lg border-[1.5px] border-ink bg-ground pr-8 pl-3 text-meta font-semibold text-ink"
+                                    className="h-8 appearance-none rounded-toggle border-[1.5px] border-ink bg-ground pr-8 pl-3 text-meta font-semibold text-ink"
                                 >
                                     {FACE_OPTIONS.map((option) => (
                                         <option key={option.value} value={option.value}>
@@ -108,11 +112,47 @@ export function ReadingControls({ children }: { children: ReactNode }) {
                                 <Icon name="expand" size="inline" className="pointer-events-none absolute right-2.5" />
                             </span>
                         </label>
+                        <ChoiceControl name="contrast" legend="Contrast" options={CONTRAST_OPTIONS} value={contrast} onChange={setContrast} />
                     </div>
                 </div>
             </section>
             {children}
         </div>
+    );
+}
+
+type ChoiceControlProps<Value extends string> = {
+    name: string;
+    legend: string;
+    options: readonly { value: Value; label: string }[];
+    value: Value;
+    onChange: (value: Value) => void;
+};
+
+// Renders a labeled row of radio pills; used for density, line length and contrast.
+function ChoiceControl<Value extends string>({ name, legend, options, value, onChange }: ChoiceControlProps<Value>) {
+    return (
+        <fieldset className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <legend className="float-left mr-3 w-20 text-meta font-semibold text-ink-2 md:w-auto">{legend}</legend>
+            <span className="flex gap-1">
+                {options.map((option) => (
+                    <label
+                        key={option.value}
+                        className="relative cursor-pointer rounded-toggle border-[1.5px] border-ink px-3 py-1 text-meta font-semibold after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] has-[:checked]:bg-ink has-[:checked]:text-ground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink"
+                    >
+                        <input
+                            type="radio"
+                            name={name}
+                            value={option.value}
+                            checked={value === option.value}
+                            onChange={() => onChange(option.value)}
+                            className="sr-only"
+                        />
+                        {option.label}
+                    </label>
+                ))}
+            </span>
+        </fieldset>
     );
 }
 

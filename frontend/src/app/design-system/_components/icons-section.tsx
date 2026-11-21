@@ -150,7 +150,7 @@ export function IconsSection() {
                 <ul className="grid gap-6 sm:grid-cols-3">
                     {SIZE_SCALE.map((step) => (
                         <li key={step.size} className="flex items-center gap-4">
-                            <span className="grid size-12 place-items-center rounded-[10px] border border-ink/15 bg-ground">
+                            <span className="grid size-12 place-items-center rounded-control border border-edge bg-ground">
                                 <Icon name="saved" size={step.size} />
                             </span>
                             <span>
@@ -169,7 +169,7 @@ export function IconsSection() {
                     <Specimen key={group.title} title={group.title} description={group.description}>
                         <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4">
                             {group.items.map(([name, label]) => (
-                                <li key={name} className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-ground">
+                                <li key={name} className="flex items-center gap-3 rounded-toggle px-2 py-2.5 transition-colors hover:bg-ground">
                                     <Icon name={name} size="nav" />
                                     <span className="min-w-0">
                                         <span className="block text-ui leading-tight font-semibold">{label}</span>

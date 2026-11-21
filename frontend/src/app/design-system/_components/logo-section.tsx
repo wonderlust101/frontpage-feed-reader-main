@@ -7,7 +7,7 @@ import { DocSection, Specimen } from './doc-section';
 const GROUNDS = [
     { name: 'On the ground', note: 'Lemon mark, ink wordmark', background: 'var(--color-ground)', ink: 'var(--color-ink)', variant: 'lemon' },
     { name: 'On Lemon or a field', note: 'Ink mark, ink wordmark', background: 'var(--color-field-lemon)', ink: 'var(--color-on-field)', variant: 'ink' },
-    { name: 'On ink', note: 'Lemon mark, light wordmark', background: 'var(--color-on-field)', ink: '#f3f3ee', variant: 'lemon' },
+    { name: 'On ink', note: 'Lemon mark, light wordmark', background: 'var(--color-on-field)', ink: 'var(--color-on-ink)', variant: 'lemon' },
 ] as const;
 
 const MARK_SIZES = [
@@ -50,7 +50,7 @@ export function LogoSection() {
                     {GROUNDS.map((ground) => (
                         <li
                             key={ground.name}
-                            className="flex min-h-44 flex-col justify-between rounded-[14px] border border-ink/15 p-6"
+                            className="flex min-h-44 flex-col justify-between rounded-stage border border-edge p-6"
                             style={{ background: ground.background, color: ground.ink }}
                         >
                             <Logo size="md" variant={ground.variant} />
@@ -105,7 +105,7 @@ export function LogoSection() {
             <Specimen title="Files" stage="none">
                 <table className="w-full border-collapse text-left">
                     <thead>
-                        <tr className="border-b-2 border-rule text-meta text-ink-2">
+                        <tr className="rule-b text-meta text-ink-2">
                             <th scope="col" className="py-2 pr-4 font-semibold">
                                 File
                             </th>
