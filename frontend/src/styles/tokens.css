@@ -1,101 +1,77 @@
+/* Frontpage design tokens: ink on a plain ground, and a palette of eight flat fields that categories take one each. */
+/* Text on any category field is always --color-on-field, in both themes. */
+
 :root {
-    --color-bg-primary: #ffffff;
-    --color-bg-secondary: #f8f9fa;
-    --color-bg-tertiary: #f1f3f5;
-    --color-surface: #ffffff;
-    --color-border: #e1e4e8;
-    --color-border-subtle: #eceef0;
+    color-scheme: light;
 
-    --color-text-primary: #1a1d21;
-    --color-text-secondary: #57606a;
-    --color-text-tertiary: #8b949e;
+    --color-ground: #f9f9f7;
+    --color-ground-2: #efefeb;
+    --color-ink: #0a0a0a;
+    --color-ink-2: #3d3d3a;
+    --color-meta: #64645f;
+    --color-rule: #0a0a0a;
+    --color-rule-soft: #e2e2dc;
+    --color-on-field: #0a0a0a;
+    --color-error: #b42318;
+    --color-warning: #8a5300;
 
-    --color-accent: #2563eb;
-    --color-accent-hover: #1d4ed8;
-    --color-accent-subtle: #eff6ff;
+    --color-field-lemon: #f5e211;
+    --color-field-coral: #ff756e;
+    --color-field-sky: #04acfb;
+    --color-field-leaf: #63de44;
+    --color-field-lilac: #c085fe;
+    --color-field-tangerine: #fd9305;
+    --color-field-aqua: #0bdac9;
+    --color-field-rose: #fe6ab9;
 
-    --color-success: #16a34a;
-    --color-warning: #ca8a04;
-    --color-error: #dc2626;
+    --text-meta: 0.8125rem;
+    --text-small: 0.875rem;
+    --text-ui: 0.9375rem;
+    --text-body: 1.1875rem;
+    --text-title: 1.375rem;
+    --text-headline: 2rem;
+    --text-display: clamp(2.75rem, 1.6rem + 4vw, 4.5rem);
+    --text-specimen: clamp(4rem, 0.8rem + 9.6vw, 14rem);
 
-    --color-unread-indicator: #2563eb;
+    --leading-specimen: 0.9;
+    --leading-display: 0.95;
+    --leading-title: 1.2;
+    --leading-ui: 1.45;
+    --leading-body: 1.6;
 
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-serif: 'Georgia', 'Charter', serif;
-    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    --measure: 66ch;
+    --density: 1;
+    --gutter: clamp(1rem, 0.4rem + 2.6vw, 4.5rem);
+    --page-max: 140rem;
 
-    --text-xs: 0.6875rem;
-    --text-sm: 0.8125rem;
-    --text-base: 1rem;
-    --text-lg: 1.25rem;
-    --text-xl: 1.5625rem;
-    --text-2xl: 1.9375rem;
-    --text-3xl: 2.4375rem;
-
-    --leading-tight: 1.2;
-    --leading-snug: 1.3;
-    --leading-normal: 1.4;
-    --leading-relaxed: 1.45;
-    --leading-loose: 1.55;
-
-    --font-regular: 400;
-    --font-medium: 500;
-    --font-semibold: 600;
-    --font-bold: 700;
-
-    --space-1: 0.25rem;
-    --space-2: 0.5rem;
-    --space-3: 0.75rem;
-    --space-4: 1rem;
-    --space-5: 1.25rem;
-    --space-6: 1.5rem;
-    --space-8: 2rem;
-    --space-10: 2.5rem;
-    --space-12: 3rem;
-    --space-16: 4rem;
-    --space-20: 5rem;
-
-    --radius-sm: 0.25rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    --radius-full: 9999rem;
-
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-
-    --sidebar-width: 16.25rem;
-    --content-max-width: 45rem;
-    --feed-max-width: 60rem;
-    --page-max-width: 80rem;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-field: 400ms;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
-        --color-bg-primary: #0d1117;
-        --color-bg-secondary: #161b22;
-        --color-bg-tertiary: #21262d;
-        --color-surface: #161b22;
-        --color-border: #30363d;
-        --color-border-subtle: #21262d;
-
-        --color-text-primary: #e6edf3;
-        --color-text-secondary: #8b949e;
-        --color-text-tertiary: #6e7681;
-
-        --color-accent: #58a6ff;
-        --color-accent-hover: #79c0ff;
-        --color-accent-subtle: #1a2332;
-
-        --color-success: #3fb950;
-        --color-warning: #d29922;
-        --color-error: #f85149;
-
-        --color-unread-indicator: #58a6ff;
-
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    :root:not([data-theme='light']) {
+        color-scheme: dark;
+        --color-ground: #0e0e0c;
+        --color-ground-2: #1b1b18;
+        --color-ink: #f3f3ee;
+        --color-ink-2: #c9c9c1;
+        --color-meta: #9b9b93;
+        --color-rule: #f3f3ee;
+        --color-rule-soft: #2c2c28;
+        --color-error: #ff7a70;
+        --color-warning: #f2b13b;
     }
+}
+
+:root[data-theme='dark'] {
+    color-scheme: dark;
+    --color-ground: #0e0e0c;
+    --color-ground-2: #1b1b18;
+    --color-ink: #f3f3ee;
+    --color-ink-2: #c9c9c1;
+    --color-meta: #9b9b93;
+    --color-rule: #f3f3ee;
+    --color-rule-soft: #2c2c28;
+    --color-error: #ff7a70;
+    --color-warning: #f2b13b;
 }

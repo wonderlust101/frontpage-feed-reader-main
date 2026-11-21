@@ -1,10 +1,34 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque, JetBrains_Mono, Lexend, Onest } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({
-    variable: '--font-inter',
+const bricolage = Bricolage_Grotesque({
+    variable: '--font-bricolage',
     subsets: ['latin'],
+    axes: ['opsz', 'wdth'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+    variable: '--font-jetbrains-mono',
+    subsets: ['latin'],
+});
+
+const onest = Onest({
+    variable: '--font-onest',
+    subsets: ['latin'],
+});
+
+// Reading faces readers can switch to; not preloaded, so they download only when chosen.
+const atkinson = Atkinson_Hyperlegible_Next({
+    variable: '--font-atkinson',
+    subsets: ['latin'],
+    preload: false,
+});
+
+const lexend = Lexend({
+    variable: '--font-lexend',
+    subsets: ['latin'],
+    preload: false,
 });
 
 export const metadata: Metadata = {
@@ -15,8 +39,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
     return (
-        <html lang="en" className={`${inter.variable} h-full antialiased`}>
-            <body className="flex min-h-full flex-col font-sans">{children}</body>
+        <html
+            lang="en"
+            className={`${bricolage.variable} ${onest.variable} ${jetbrainsMono.variable} ${atkinson.variable} ${lexend.variable} h-full antialiased`}
+        >
+            <body className="flex min-h-full flex-col">{children}</body>
         </html>
     );
 }
