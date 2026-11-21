@@ -58,7 +58,7 @@ export function ImagerySection() {
                     {MOOD_PHOTOS.slice(0, 2).map((photo) => (
                         <MoodTile key={photo.alt} photo={photo} />
                     ))}
-                    <div className="flex flex-col justify-between rounded-[10px] bg-field-lemon p-5 text-on-field">
+                    <div className="flex flex-col justify-between rounded-control bg-field-lemon p-5 text-on-field">
                         <span className="font-display text-title leading-[1.05] font-bold md:text-headline tracking-[-0.03em]">Read at your own pace.</span>
                         <span className="text-meta font-semibold">Frontpage · Lemon</span>
                     </div>
@@ -89,20 +89,20 @@ export function ImagerySection() {
                 </Specimen>
 
                 <Specimen title="In the feed" stage="frame" description="A 3:2 thumbnail at the row's end, and the fallback when a feed sends no image.">
-                    <ul className="border-t-2 border-rule">
+                    <ul className="rule-t">
                         <li className="flex items-center gap-4 border-b border-rule-soft py-4">
                             <div className="min-w-0 flex-1">
-                                <p className="font-display text-title leading-[1.2] font-semibold tracking-[-0.015em]">Designing for one-handed reading</p>
+                                <p className="type-title font-semibold">Designing for one-handed reading</p>
                                 <p className="mt-1 text-meta text-ink-2">Figma Blog · 4h · sample</p>
                             </div>
-                            <ItemThumbnail image={desk} source="Figma Blog" color={design.field.color} />
+                            <ItemThumbnail image={desk} source="Figma Blog" field={design.field} />
                         </li>
                         <li className="flex items-center gap-4 border-b border-rule-soft py-4">
                             <div className="min-w-0 flex-1">
-                                <p className="font-display text-title leading-[1.2] font-semibold tracking-[-0.015em]">Progressive disclosure, revisited</p>
+                                <p className="type-title font-semibold">Progressive disclosure, revisited</p>
                                 <p className="mt-1 text-meta text-ink-2">Nielsen Norman Group · yesterday · no image</p>
                             </div>
-                            <ItemThumbnail source="Nielsen Norman Group" color={design.field.color} />
+                            <ItemThumbnail source="Nielsen Norman Group" field={design.field} />
                         </li>
                     </ul>
                 </Specimen>
@@ -114,7 +114,7 @@ export function ImagerySection() {
 // Renders one moodboard photo, cropped to fill its grid cell.
 function MoodTile({ photo }: { photo: MoodPhoto }) {
     return (
-        <div className={`relative overflow-hidden rounded-[10px] ${photo.className}`}>
+        <div className={`relative overflow-hidden rounded-control ${photo.className}`}>
             <Image src={photo.image} alt={photo.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" placeholder="blur" />
         </div>
     );

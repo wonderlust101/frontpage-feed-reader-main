@@ -1,6 +1,9 @@
 // Space and shape section of the design system page: the spacing scale, density, and the three shapes the system uses.
 
 import { Button } from '@/components/ui/button';
+import { Capsule } from '@/components/ui/capsule';
+import { CategoryTag } from '@/components/ui/tags';
+import { CATEGORIES } from '../_data/sample-data';
 import { DocSection, Specimen } from './doc-section';
 
 const SPACE_STEPS = [4, 8, 12, 16, 24, 32, 48, 64, 96];
@@ -26,7 +29,7 @@ export function SpaceSection() {
                 </Specimen>
 
                 <Specimen title="Density" description="Set with the reading controls above. Rows below use calc(var(--density) × 1rem) for their padding.">
-                    <ul className="border-t-2 border-rule">
+                    <ul className="rule-t">
                         {['Compact fits more rows on screen', 'Comfortable is the default', 'Spacious gives every row room'].map((row) => (
                             <li key={row} className="border-b border-rule-soft py-[calc(var(--density)*1rem)] text-ui">
                                 {row}
@@ -39,12 +42,16 @@ export function SpaceSection() {
             <Specimen title="Shapes">
                 <div className="grid gap-8 sm:grid-cols-3">
                     <figure>
-                        <div className="flex h-32 items-center">
+                        <div inert className="flex h-32 flex-wrap content-center items-center gap-3">
                             <Button>Add feed</Button>
+                            <Capsule field={CATEGORIES[0].field} on={false}>
+                                {CATEGORIES[0].name}
+                            </Capsule>
+                            <CategoryTag name={CATEGORIES[0].name} field={CATEGORIES[0].field} />
                         </div>
                         <figcaption className="mt-3 text-ui text-ink-2">
-                            Each control has its own shape: 10px rectangles for buttons and inputs, round chips for filters, 6px flat labels for tags, 14px
-                            stages.
+                            Shape says what a thing does: 10px rectangles act (buttons, inputs), round chips filter, 6px flat labels only label. Stages are
+                            14px.
                         </figcaption>
                     </figure>
                     <figure>
@@ -53,11 +60,11 @@ export function SpaceSection() {
                     </figure>
                     <figure>
                         <div className="flex h-32 flex-col justify-center">
-                            <span className="block border-t-2 border-rule" />
+                            <span className="block rule-t" />
                             <span className="mt-6 block border-t border-rule-soft" />
                             <span className="mt-6 block border-t border-rule-soft" />
                         </div>
-                        <figcaption className="mt-3 text-ui text-ink-2">A 2px ink rule opens a list; 1px rules separate its rows.</figcaption>
+                        <figcaption className="mt-3 text-ui text-ink-2">A 1.5px ink rule opens a list; 1px rules separate its rows.</figcaption>
                     </figure>
                 </div>
             </Specimen>

@@ -10,7 +10,9 @@
     --color-muted: var(--color-meta);
     --color-rule: var(--color-rule);
     --color-rule-soft: var(--color-rule-soft);
+    --color-edge: var(--color-edge);
     --color-on-field: var(--color-on-field);
+    --color-on-ink: var(--color-on-ink);
     --color-error: var(--color-error);
     --color-warning: var(--color-warning);
     --color-field-lemon: var(--color-field-lemon);
@@ -21,6 +23,7 @@
     --color-field-tangerine: var(--color-field-tangerine);
     --color-field-aqua: var(--color-field-aqua);
     --color-field-rose: var(--color-field-rose);
+    --color-field-none: var(--color-field-none);
 
     --font-display: var(--font-bricolage), system-ui, sans-serif;
     --font-sans: var(--font-onest), system-ui, -apple-system, sans-serif;
@@ -36,11 +39,67 @@
     --text-display: var(--text-display);
     --text-specimen: var(--text-specimen);
 
+    --radius-tag: var(--radius-tag);
+    --radius-toggle: var(--radius-toggle);
+    --radius-control: var(--radius-control);
+    --radius-panel: var(--radius-panel);
+    --radius-stage: var(--radius-stage);
+
     --spacing-gutter: var(--gutter);
     --container-page: var(--page-max);
     --container-measure: var(--measure);
 
     --ease-out: var(--ease-out);
+}
+
+/* The ink rule that opens a list, table or section (top), or closes a table head (bottom). */
+@utility rule-t {
+    border-top: var(--rule-width) solid var(--color-rule);
+}
+
+@utility rule-b {
+    border-bottom: var(--rule-width) solid var(--color-rule);
+}
+
+/* Type roles from DESIGN.md. Each sets face, size, leading, tracking and optical size; weight is left to the call */
+/* site where a role has more than one (feed titles are semibold unread, regular read). */
+@utility type-specimen {
+    font-family: var(--font-display);
+    font-size: var(--text-specimen);
+    line-height: var(--leading-specimen);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    font-variation-settings: 'opsz' 96;
+}
+
+@utility type-display {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    font-variation-settings: 'opsz' 96;
+}
+
+@utility type-headline {
+    font-family: var(--font-display);
+    font-size: var(--text-headline);
+    line-height: var(--leading-headline);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+@utility type-title {
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    line-height: var(--leading-title);
+    letter-spacing: -0.015em;
+}
+
+@utility type-body {
+    font-family: var(--font-reading);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
 }
 
 body {
@@ -57,8 +116,26 @@ body {
 }
 
 :focus-visible {
-    outline: 2px solid var(--color-ink);
+    outline: 2px solid var(--color-focus);
     outline-offset: 3px;
+    box-shadow: 0 0 0 3px var(--color-focus-halo);
+}
+
+/* Any surface filled with a field: focus rings switch to on-field ink, which every field carries at 7.5:1. */
+.on-field {
+    --color-focus: var(--color-on-field);
+}
+
+/* Paragraphs avoid a lone word on their last line; headings balance their lines. */
+p {
+    text-wrap-style: pretty;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    text-wrap-style: balance;
 }
 
 a {
@@ -70,11 +147,11 @@ html {
     scrollbar-color: var(--color-meta) var(--color-ground);
 }
 
-/* Very wide screens (2560px and up, such as 4K at 100% scaling): the whole rem-based system scales with the */
-/* viewport, up to 1.5x at 3840px, so a 4K screen gets the same proportions as a 2560px one. */
+/* Very wide screens (2560px and up, such as 4K at 100% scaling): the whole rem-based system grows gently with the */
+/* viewport, from 16px at 2560px to 20px (1.25x) at 3840px, so text stays readable at a distance without looming.  */
 @media (min-width: 160rem) {
     html {
-        font-size: min(calc(100vw / 160), 24px);
+        font-size: min(calc(16px + (100vw - 2560px) * 0.003125), 20px);
     }
 }
 

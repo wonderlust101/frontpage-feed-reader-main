@@ -1,9 +1,11 @@
 // Sample categories and items for the design system page.
 // Category and source names come from backend/data/sample-feeds.json; item titles are illustrative.
-// Categories take their fields from the palette in creation order, exactly as user-made categories will.
+// The guest categories come with preset colors (part of the curated sample); a reader can change them in the Color
+// section. New categories start with "No color". READER_CATEGORIES adds example categories a reader might add (not
+// guest feeds): two still on No color, and Football sharing Leaf with Backend & DevOps, since categories may share.
 
 import type { FeedHealth } from '@/components/ui/health-mark';
-import { nextField, type Field } from '@/features/categories/fields';
+import { NO_FIELD, categoryFieldById, type Field, type FieldChoices } from '@/features/categories/fields';
 
 export type CategoryId = 'frontend' | 'design' | 'backend' | 'tech' | 'ai';
 
@@ -24,38 +26,50 @@ export type SampleItem = {
     health: FeedHealth;
 };
 
-const GUEST_CATEGORIES: Omit<Category, 'field'>[] = [
+const GUEST_CATEGORIES: (Omit<Category, 'field'> & { preset: Field['id'] })[] = [
     {
         id: 'frontend',
+        preset: 'coral',
         name: 'Frontend',
         sources: ['CSS-Tricks', 'Smashing Magazine', 'Josh W. Comeau', 'Kent C. Dodds', 'web.dev', 'MDN Blog'],
     },
     {
         id: 'design',
+        preset: 'sky',
         name: 'Design',
         sources: ['Sidebar.io', 'Nielsen Norman Group', 'Figma Blog', 'A List Apart', 'UX Collective'],
     },
     {
         id: 'backend',
+        preset: 'leaf',
         name: 'Backend & DevOps',
         sources: ['Cloudflare Blog', 'Vercel Blog', 'The GitHub Blog', 'Netlify Blog'],
     },
     {
         id: 'tech',
+        preset: 'lilac',
         name: 'General Tech',
         sources: ['The Pragmatic Engineer', 'Hacker News Best'],
     },
     {
         id: 'ai',
+        preset: 'tangerine',
         name: 'AI & ML',
         sources: ["Simon Willison's Weblog", 'Hugging Face Blog'],
     },
 ];
 
-export const CATEGORIES: Category[] = GUEST_CATEGORIES.reduce<Category[]>(
-    (assigned, category) => [...assigned, { ...category, field: nextField(assigned.map((taken) => taken.field.id)) }],
-    [],
-);
+export const CATEGORY_PRESETS: FieldChoices = Object.fromEntries(GUEST_CATEGORIES.map((category) => [category.id, category.preset]));
+
+export const CATEGORIES: Category[] = GUEST_CATEGORIES.map(({ preset, ...category }) => ({ ...category, field: categoryFieldById(preset) ?? NO_FIELD }));
+
+export const READER_CATEGORIES: { name: string; field: Field }[] = [
+    ...CATEGORIES.map((category) => ({ name: category.name, field: category.field })),
+    { name: 'World news', field: NO_FIELD },
+    { name: 'Film & TV', field: categoryFieldById('rose') ?? NO_FIELD },
+    { name: 'Football', field: categoryFieldById('leaf') ?? NO_FIELD },
+    { name: 'Cooking', field: NO_FIELD },
+];
 
 export const SAMPLE_ITEMS: SampleItem[] = [
     {

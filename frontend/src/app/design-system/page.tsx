@@ -11,18 +11,9 @@ import { IconsSection } from './_components/icons-section';
 import { ImagerySection } from './_components/imagery-section';
 import { LogoSection } from './_components/logo-section';
 import { PatternsSection } from './_components/patterns-section';
+import { StatesSection } from './_components/states-section';
 import { ReadingControls } from '@/features/preferences/components/reading-controls';
-
-const CONTENTS = [
-    { id: 'logo', label: 'Logo' },
-    { id: 'color', label: 'Color' },
-    { id: 'imagery', label: 'Imagery' },
-    { id: 'type', label: 'Type' },
-    { id: 'space', label: 'Space and shape' },
-    { id: 'icons', label: 'Icons' },
-    { id: 'components', label: 'Components' },
-    { id: 'patterns', label: 'Patterns' },
-];
+import { SECTIONS } from './_data/sections';
 
 export const metadata: Metadata = {
     title: 'Design system · Frontpage',
@@ -35,7 +26,7 @@ export default function DesignSystemPage() {
             <HeroField />
             <ReadingControls>
                 <div className="mx-auto grid w-full max-w-page gap-x-16 px-gutter pt-16 lg:grid-cols-[11rem_minmax(0,1fr)]">
-                    <ContentsNav entries={CONTENTS} />
+                    <ContentsNav entries={SECTIONS} />
                     <main id="main" className="min-w-0">
                         <LogoSection />
                         <ColorSection />
@@ -44,6 +35,7 @@ export default function DesignSystemPage() {
                         <SpaceSection />
                         <IconsSection />
                         <ComponentsSection />
+                        <StatesSection />
                         <PatternsSection />
                     </main>
                 </div>
