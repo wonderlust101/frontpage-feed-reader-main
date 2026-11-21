@@ -30,8 +30,8 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       ├── app/              # routes, layout, globals.css; route-private code in _components/ _data/ _assets/
 │       │   └── design-system/  # /design-system: the living design system page
 │       ├── features/         # app features, mirroring backend/src/modules (categories, items, preferences…)
-│       │   └── <domain>/     #   components/, fields.ts, later hooks/, actions.ts, types.ts
-│       ├── components/       # shared, feature-agnostic: ui/ primitives and logo.tsx
+│       │   └── <domain>/     #   components/, logic (fields.ts, category-field-store.ts…), later hooks/, actions.ts, types.ts
+│       ├── components/       # shared, feature-agnostic: ui/ primitives, logo.tsx, app-sidebar.tsx
 │       ├── lib/api.ts        # server-side client for the backend
 │       └── styles/           # tokens.css (design tokens), components.css (component layer)
 ├── backend/                  # Express → Railway (built from the repo root)
@@ -150,6 +150,21 @@ docker compose run --rm migrate     # re-sync the Drizzle schema after editing *
 - **Dependencies:** `node_modules` lives inside the containers, not on the bind mount. After `bun add`, run `bun run docker:up` again to reinstall.
 - **Neon stays untouched:** because of the bind mount, `backend/.env` is visible in the containers. Bun runs with `--no-env-file`, and compose sets every database variable explicitly, so the stack only talks to the local Postgres. Keep it that way if you edit `docker-compose.yml`.
 - **File names:** the images are built from `backend/Dockerfile.local` and `frontend/Dockerfile.local`. They're named `.local` so Railway keeps building the backend with Railpack instead of picking up a `Dockerfile`.
+- **Testing on other devices:** open `http://<your machine's LAN IP>:3000` on a phone or another computer on the same network (`ip -4 addr` shows the IP). `allowedDevOrigins` in `frontend/next.config.ts` lets `192.168.*.*` load the dev scripts; without it the page renders but isn't interactive. It affects `next dev` only.
+- **Stale CSS:** file-change events from the bind mount occasionally don't reach the frontend container, so a CSS edit doesn't show up. `docker restart frontpage-frontend-1` picks it up.
+
+## Design system
+
+The living reference is **`/design-system`** (`frontend/src/app/design-system/`): every token and component, working, in both themes. Tokens are in `frontend/src/styles/tokens.css`, component CSS in `components.css`, and Tailwind's theme mapping plus the type-role, `rule-t`/`rule-b` and focus rules in `src/app/globals.css`.
+
+Decisions worth knowing before changing it:
+
+- **Type leads, color maps.** Bricolage Grotesque for anything scanned, Onest for reading. Color has one job: Lemon (`#ffe500`, a warmer `#ffd000` in dark mode) is Frontpage's own, and seven vivid fields (Coral, Sky, Leaf, Lilac, Tangerine, Aqua, Rose) mark categories. Ink text on every field is 7.5:1 or better. No shadows, no gradients.
+- **Category colors are the reader's choice.** Any category can take any field, several can share one, and a new category starts on **No color**, a neutral stone field that behaves exactly like the others. Guests' choices are kept in `localStorage` (`frontpage-category-fields`, via `useCategoryFields` in `features/categories/category-field-store.ts`); signed-in users will need a color column on `categories`.
+- **Every color is written once** with `light-dark()`; the theme switch only sets `color-scheme`. Fields keep their full color in dark mode.
+- **Accessibility is designed in, not bolted on.** Two-tone focus rings (ink outline over a ground halo) that show on any field; a high-contrast tier (system `prefers-contrast` or the reading controls) that raises supporting text to 7:1 and thickens rules; forced-colors fallbacks; 44px hit areas on small controls; state never shown by color alone (check marks, line styles, labels).
+- **Readers tune the column.** Text size, line height, density, line length, reading face and contrast are reader settings applied through CSS custom properties.
+- **Quiet, consistent edges.** 1.5px ink for controls and the rule that opens a list; a 1px `fill-edge` hairline (ink at 40%) inside small color fills so pale fields keep an edge; hover never changes an element's size.
 
 ## Scripts (repo root)
 
