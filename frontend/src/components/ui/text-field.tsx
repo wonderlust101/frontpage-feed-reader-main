@@ -1,6 +1,7 @@
 // Labeled text input with an optional hint and error. The error shows an icon, a thicker border and text, never color alone.
+// `action` is a small control drawn inside the input's right edge, such as the password field's show/hide toggle.
 
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Icon } from './icon';
 
 type TextFieldProps = Omit<ComponentProps<'input'>, 'id'> & {
@@ -8,10 +9,11 @@ type TextFieldProps = Omit<ComponentProps<'input'>, 'id'> & {
     label: string;
     hint?: string;
     error?: string;
+    action?: ReactNode;
 };
 
 // Renders the label, hint, error and input, wiring aria-describedby and aria-invalid for screen readers.
-export function TextField({ id, label, hint, error, className = '', ...inputProps }: TextFieldProps) {
+export function TextField({ id, label, hint, error, action, className = '', ...inputProps }: TextFieldProps) {
     const hintId = hint ? `${id}-hint` : undefined;
     const errorId = error ? `${id}-error` : undefined;
     const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
@@ -33,13 +35,16 @@ export function TextField({ id, label, hint, error, className = '', ...inputProp
                     {error}
                 </p>
             )}
-            <input
-                id={id}
-                aria-invalid={error ? true : undefined}
-                aria-describedby={describedBy}
-                className={`h-12 rounded-control bg-ground px-5 text-ui text-ink placeholder:text-muted ${borderClasses}`}
-                {...inputProps}
-            />
+            <div className="relative">
+                <input
+                    id={id}
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={describedBy}
+                    className={`h-12 w-full rounded-control bg-ground px-5 text-ui text-ink placeholder:text-muted ${action ? 'pr-14' : ''} ${borderClasses}`}
+                    {...inputProps}
+                />
+                {action && <div className="absolute inset-y-0 right-1 flex items-center">{action}</div>}
+            </div>
         </div>
     );
 }

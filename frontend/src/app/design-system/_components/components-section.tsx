@@ -4,6 +4,7 @@ import { AiSummary } from '@/components/ui/ai-summary';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { HealthMark } from '@/components/ui/health-mark';
+import { PasswordField } from '@/components/ui/password-field';
 import { CategoryTag, NewTag } from '@/components/ui/tags';
 import { TextField } from '@/components/ui/text-field';
 import { CategoryFilterDemo } from './category-filter-demo';
@@ -59,6 +60,16 @@ export function ComponentsSection() {
                             defaultValue="https://example.com/blog"
                             error="No feed found at that address. Try the site's homepage."
                         />
+                    </div>
+                </Specimen>
+
+                <Specimen
+                    title="Password field"
+                    description="The text field with a show/hide toggle inside its edge. The toggle is a pressed button with one name, so screen readers hear whether the password is showing."
+                >
+                    <div className="grid max-w-3xl gap-8 md:grid-cols-2">
+                        <PasswordField id="demo-password" label="Password" hint="At least 8 characters." autoComplete="off" />
+                        <PasswordField id="demo-password-error" label="Password" defaultValue="short" autoComplete="off" error="Use at least 8 characters." />
                     </div>
                 </Specimen>
 
