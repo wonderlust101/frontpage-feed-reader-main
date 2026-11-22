@@ -6,8 +6,7 @@
 // The logo and headline have no plate: the sticker slots keep well clear of them. The supporting line and the guest
 // link sit in a sticker note (a real container of sticker paper), which a sticker may tuck under.
 // The form column is framed top and bottom: logo and the page-switch link above, the theme switch and brand line below.
-// Three quiet brand touches on the form side: a Lemon underline on the h1, a Lemon fill on the chosen theme, and the
-// panel's seam sticker, tucked behind the panel's edge (the panel stacks above it) near the footer, never by a field.
+// Two quiet brand touches on the form side: a Lemon underline on the h1 and a Lemon fill on the chosen theme.
 
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
@@ -39,7 +38,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
             <div className="grid w-full lg:min-h-dvh lg:grid-cols-2">
                 <section
                     aria-label="Frontpage"
-                    className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:z-[1] lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
+                    className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
                     style={fieldStyle}
                 >
                     <Stickers stickers={panel.stickers} className="stickers-wobble" />
@@ -81,9 +80,6 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                         <div className="mt-10 text-center lg:hidden">
                             <SwitchLink aside={aside} />
                         </div>
-                    </div>
-                    <div className="pointer-events-none absolute -right-14 bottom-20 hidden size-32 lg:block">
-                        <Stickers stickers={[panel.seam]} className="stickers-wobble" />
                     </div>
                     <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-rule-soft pt-5 text-ink-2">
                         <div className="[&_label:has(:checked)]:bg-(--color-field-lemon) [&_label:has(:checked)]:shadow-[inset_0_0_0_1px_var(--color-fill-edge)]">
