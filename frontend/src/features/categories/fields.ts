@@ -1,5 +1,5 @@
-// The field palette: eight flat colors. Lemon is Frontpage's own color (the home field, "All", brand accents);
-// readers give categories any of the other seven, whatever they are about: "Film" or "Politics" just like "Frontend".
+// The field palette: eight flat colors. Lemon is Frontpage's own color (the home field, "All", brand accents), and
+// readers may give it to categories too, like any of the other seven, whatever they are about: "Film" or "Politics".
 // Categories may share a color. A new category starts on NO_FIELD ("No color"), a neutral stone field that behaves
 // exactly like the colored ones (filled tag, filled dot, filled when on); PICKABLE_FIELDS lists it first for that reason.
 // A field's `onColor` is the text color on a surface filled with it; FieldChoices maps category ids to chosen fields.
@@ -25,8 +25,8 @@ export const FIELDS: Field[] = [
         name: 'Lemon',
         color: 'var(--color-field-lemon)',
         onColor: ON_FIELD,
-        hex: { light: '#FFE500', dark: '#FFD000' },
-        inkContrast: { light: '15.5 : 1', dark: '13.5 : 1' },
+        hex: { light: '#FFD000', dark: '#FFD000' },
+        inkContrast: { light: '13.5 : 1', dark: '13.5 : 1' },
     },
     {
         id: 'coral',
@@ -88,7 +88,7 @@ export const FIELDS: Field[] = [
 
 export const BRAND_FIELD = FIELDS[0];
 
-export const CATEGORY_FIELDS = FIELDS.filter((field) => field.id !== BRAND_FIELD.id);
+export const CATEGORY_FIELDS = FIELDS;
 
 export const NO_FIELD: Field = {
     id: 'none',
@@ -109,7 +109,7 @@ export function assignFields(categoryIds: string[], choices: FieldChoices, prese
     return Object.fromEntries(categoryIds.map((id) => [id, categoryFieldById(choices[id]) ?? categoryFieldById(presets[id]) ?? NO_FIELD]));
 }
 
-// Returns the field a category may be given, or undefined for Lemon (Frontpage's own) and unknown ids.
+// Returns the field a category may be given, or undefined for unknown ids.
 export function categoryFieldById(id: string | undefined): Field | undefined {
     return id ? FIELD_BY_ID.get(id as FieldId) : undefined;
 }

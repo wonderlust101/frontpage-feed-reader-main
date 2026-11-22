@@ -6,6 +6,7 @@ import { ComponentsSection } from './_components/components-section';
 import { ColorSection } from './_components/color-section';
 import { SpaceSection } from './_components/space-section';
 import { TypeSection } from './_components/type-section';
+import { HeroCategorySwitch, HeroChoiceProvider } from './_components/hero-choice';
 import { HeroField } from './_components/hero-field';
 import { IconsSection } from './_components/icons-section';
 import { ImagerySection } from './_components/imagery-section';
@@ -22,27 +23,30 @@ export const metadata: Metadata = {
 
 export default function DesignSystemPage() {
     return (
-        <div className="flex flex-1 flex-col">
-            <HeroField />
-            <ReadingControls>
-                <div className="mx-auto grid w-full max-w-page gap-x-16 px-gutter pt-16 lg:grid-cols-[11rem_minmax(0,1fr)]">
-                    <ContentsNav entries={SECTIONS} />
-                    <main id="main" className="min-w-0">
-                        <LogoSection />
-                        <ColorSection />
-                        <ImagerySection />
-                        <TypeSection />
-                        <SpaceSection />
-                        <IconsSection />
-                        <ComponentsSection />
-                        <StatesSection />
-                        <PatternsSection />
-                    </main>
-                </div>
-                <footer className="mx-auto w-full max-w-page border-t border-rule-soft px-gutter py-8 text-meta text-muted">
-                    Frontpage design system · Sources and categories from the guest sample feeds; item titles are illustrative.
-                </footer>
-            </ReadingControls>
-        </div>
+        <HeroChoiceProvider>
+            <div className="flex flex-1 flex-col">
+                <HeroField />
+                <ReadingControls>
+                    <HeroCategorySwitch />
+                    <div className="mx-auto grid w-full max-w-page gap-x-16 px-gutter pt-16 lg:grid-cols-[11rem_minmax(0,1fr)]">
+                        <ContentsNav entries={SECTIONS} />
+                        <main id="main" className="min-w-0">
+                            <LogoSection />
+                            <ColorSection />
+                            <ImagerySection />
+                            <TypeSection />
+                            <SpaceSection />
+                            <IconsSection />
+                            <ComponentsSection />
+                            <StatesSection />
+                            <PatternsSection />
+                        </main>
+                    </div>
+                    <footer className="mx-auto w-full max-w-page border-t border-rule-soft px-gutter py-8 text-meta text-muted">
+                        Frontpage design system · Sources and categories from the guest sample feeds; item titles are illustrative.
+                    </footer>
+                </ReadingControls>
+            </div>
+        </HeroChoiceProvider>
     );
 }

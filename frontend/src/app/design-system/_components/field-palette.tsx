@@ -30,7 +30,7 @@ export function FieldPalette() {
                                 {field.hex.dark} · {field.inkContrast.dark}
                             </dd>
                             <dt className="font-semibold">Used by</dt>
-                            <dd>{field.id === BRAND_FIELD.id ? 'Frontpage' : holders.join(', ') || 'None yet'}</dd>
+                            <dd>{(field.id === BRAND_FIELD.id ? ['Frontpage', ...holders] : holders).join(', ') || 'None yet'}</dd>
                         </dl>
                     </li>
                 );
