@@ -16,7 +16,7 @@ export default function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
         <AuthFrame
             panel={AUTH_PANELS.signIn}
             title="Sign in"
-            description="Good to see you again. Your front page is right where you left it."
+            description="Good to see you again. Your front page is waiting."
             aside={{ prompt: 'New to Frontpage?', label: 'Create an account', href: '/sign-up' }}
         >
             <Suspense fallback={<FormSkeleton fields={2} />}>
