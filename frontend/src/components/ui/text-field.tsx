@@ -1,5 +1,5 @@
 // Labeled text input with an optional hint and error. The error shows an icon, a thicker border and text, never color alone,
-// and sits under the input in meta size. Focus draws a ring outside the field in its edge colour: ink, or red when invalid.
+// and sits under the input in meta size. Focus thickens the field's own edge by 1px, in its colour: ink, or red when invalid.
 // `action` is a small control drawn inside the input's right edge, such as the password field's show/hide toggle.
 
 import type { ComponentProps, ReactNode } from 'react';
@@ -18,7 +18,7 @@ export function TextField({ id, label, hint, error, action, className = '', ...i
     const hintId = hint ? `${id}-hint` : undefined;
     const errorId = error ? `${id}-error` : undefined;
     const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
-    const borderClasses = error ? 'border-[3px] border-error' : 'border-[1.5px] border-control-edge';
+    const borderClasses = error ? 'border-2 border-error' : 'border-[1.5px] border-control-edge';
 
     return (
         <div className={`flex flex-col gap-2 ${className}`}>
