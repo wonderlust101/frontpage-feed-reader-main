@@ -11,7 +11,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Notice } from '@/components/ui/notice';
+import { FormNotice } from './form-notice';
 import { TextField } from '@/components/ui/text-field';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
@@ -164,9 +164,9 @@ function CodeStep({ email, signedIn, onChangeEmail }: CodeStepProps) {
                 <FormAlert lead="Couldn't confirm your email." message={errors.root.message} />
             ) : (
                 resent && (
-                    <Notice icon="newsletter" lead="New code sent.">
+                    <FormNotice icon="newsletter" lead="New code sent.">
                         Use the code in the newest email; older ones stop working.
-                    </Notice>
+                    </FormNotice>
                 )
             )}
 

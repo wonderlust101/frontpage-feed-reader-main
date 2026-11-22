@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Notice } from '@/components/ui/notice';
+import { FormNotice } from './form-notice';
 import { PasswordField } from '@/components/ui/password-field';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
@@ -73,7 +73,7 @@ export function ChangePasswordForm() {
                 />
             ) : (
                 changed && (
-                    <Notice
+                    <FormNotice
                         icon="healthy"
                         lead="Password changed."
                         action={
@@ -83,7 +83,7 @@ export function ChangePasswordForm() {
                         }
                     >
                         {changed.signedOutOthers ? 'Your other devices are signed out.' : 'Use it next time you sign in.'}
-                    </Notice>
+                    </FormNotice>
                 )
             )}
 

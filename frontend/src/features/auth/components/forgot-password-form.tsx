@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Notice } from '@/components/ui/notice';
+import { FormNotice } from './form-notice';
 import { TextField } from '@/components/ui/text-field';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
@@ -44,9 +44,9 @@ export function ForgotPasswordForm() {
     if (sentTo) {
         return (
             <div className="flex flex-col gap-6">
-                <Notice icon="newsletter" lead="Check your inbox.">
+                <FormNotice icon="newsletter" lead="Check your inbox.">
                     If an account exists for {sentTo}, we&apos;ve sent it a link to choose a new password. The link works once and expires in 60 minutes.
-                </Notice>
+                </FormNotice>
                 <p className="text-ui text-ink-2">Nothing after a few minutes? Peek in your spam folder, or try another address.</p>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <Button variant="secondary" onClick={() => setSentTo(null)}>

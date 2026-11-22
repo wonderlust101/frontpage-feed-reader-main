@@ -5,7 +5,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { Notice } from '@/components/ui/notice';
+import { FormNotice } from '@/features/auth/components/form-notice';
 import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';
@@ -38,9 +38,9 @@ async function ResetFromUrl({ searchParams }: Pick<PageProps<'/reset-password'>,
 
     return (
         <div className="flex flex-col gap-6">
-            <Notice tone="error" icon="error" lead="This link has expired.">
+            <FormNotice tone="error" icon="error" lead="This link has expired.">
                 Reset links work once and expire after 60 minutes. Ask for a new one and use the latest email.
-            </Notice>
+            </FormNotice>
             <Link
                 href="/forgot-password"
                 className="inline-flex h-11 w-full items-center justify-center rounded-control bg-ink px-5 text-ui font-semibold text-ground transition-colors duration-200 hover:bg-ink-2"

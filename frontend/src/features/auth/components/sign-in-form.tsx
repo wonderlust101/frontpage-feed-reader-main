@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Notice } from '@/components/ui/notice';
+import { FormNotice } from './form-notice';
 import { PasswordField } from '@/components/ui/password-field';
 import { TextField } from '@/components/ui/text-field';
 import { authClient } from '../auth-client';
@@ -90,9 +90,9 @@ export function SignInForm({ next, notice }: SignInFormProps) {
                 />
             ) : (
                 noticeCopy && (
-                    <Notice icon="healthy" lead={noticeCopy.lead}>
+                    <FormNotice icon="healthy" lead={noticeCopy.lead}>
                         {noticeCopy.text}
-                    </Notice>
+                    </FormNotice>
                 )
             )}
 
