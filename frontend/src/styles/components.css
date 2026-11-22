@@ -275,11 +275,34 @@
         container-type: inline-size;
     }
 
+    /* Text on a sticker field sits on a plate of the field's own color (--sticker-field-color, set by the field), */
+    /* above the sticker layer: invisible where nothing passes, and a sticker running into the text tucks behind it, */
+    /* so letters are never cut. The plate hugs its text (fit-content) with a little bleed for descenders, and eases */
+    /* with the field when a category recolors it, so it never shows as a box mid-transition. */
+    .sticker-safe {
+        position: relative;
+        z-index: 1;
+        width: fit-content;
+        margin: -0.1em -0.25em;
+        padding: 0.1em 0.25em;
+        border-radius: var(--radius-toggle);
+        background: var(--sticker-field-color, var(--color-field-lemon));
+        transition: background-color var(--duration-field) var(--ease-out);
+    }
+
     .stickers {
         position: absolute;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
+    }
+
+    /* A layout drawn for one width: the layer stops growing at 90rem, anchored right, and becomes the stickers' */
+    /* container, so on wide screens they keep their 1440px arrangement beside type that has stopped growing. */
+    .stickers-capped {
+        left: auto;
+        width: min(100%, 90rem);
+        container-type: inline-size;
     }
 
     .sticker {

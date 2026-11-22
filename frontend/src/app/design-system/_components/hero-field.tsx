@@ -6,7 +6,7 @@
 // The capsules wrap rather than scroll, so every category stays reachable however many a reader has. Category colors
 // come from the guest's saved choices (the Color section's picker), else each sample category's preset.
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers, type Sticker } from '@/components/stickers';
 import { useCategoryFields } from '@/features/categories/category-field-store';
@@ -34,7 +34,7 @@ const HERO_STICKERS: Sticker[] = [
         tilt: -6,
         drift: ['1.4cqi', '1.2cqi'],
     },
-    { shape: 'square', field: 'var(--color-field-lemon)', label: 'New!', size: '6.2cqi', x: '79.5cqi', y: '5cqi', tilt: -9, drift: ['-0.6cqi', '1.6cqi'] },
+    { shape: 'square', field: 'var(--color-field-lemon)', label: 'New!', size: '6.2cqi', x: '79.5cqi', y: '6.4cqi', tilt: -9, drift: ['-0.6cqi', '1.6cqi'] },
     { shape: 'circle', field: 'var(--color-field-rose)', icon: 'ai-summary', size: '6.7cqi', x: '88cqi', y: '6.6cqi', tilt: 12, drift: ['-1.5cqi', '1.5cqi'] },
     { shape: 'square', field: 'var(--color-field-leaf)', label: '24 unread', size: '9cqi', x: '75.5cqi', y: '13.2cqi', tilt: -8, drift: ['-1.3cqi', '0.8cqi'] },
     {
@@ -74,6 +74,7 @@ const HERO_STICKERS: Sticker[] = [
 ];
 
 // Renders the field with its top bar, specimen headline, live caption and stickers, then the capsules below it.
+// Every text block sits on a sticker-safe plate, so a sticker that runs into it at some width or mid-hover tucks behind.
 export function HeroField() {
     const [choice, setChoice] = useState('all');
     const [fields] = useCategoryFields(CATEGORY_IDS, CATEGORY_PRESETS);
@@ -85,15 +86,15 @@ export function HeroField() {
         : `All categories · ${SOURCE_COUNT} sources in ${CATEGORIES.length} categories`;
 
     return (
-        <header className="hero-field relative" style={{ color: field }}>
+        <header className="hero-field relative" style={{ color: field, '--sticker-field-color': field } as CSSProperties}>
             <div className="sticker-field relative overflow-hidden bg-current">
-                <Stickers stickers={HERO_STICKERS} className="hidden lg:block" />
+                <Stickers stickers={HERO_STICKERS} className="stickers-capped hidden lg:block" />
                 <div className="hero-field-ink on-field relative mx-auto max-w-page px-gutter pb-12" style={{ color: 'var(--color-on-field)' }}>
                     <div className="flex flex-wrap items-center gap-x-8 gap-y-3 py-5">
                         <a href="#main" className="sr-only focus:not-sr-only">
                             Skip to content
                         </a>
-                        <p className="flex items-baseline gap-3">
+                        <p className="sticker-safe flex items-baseline gap-3">
                             <Logo size="md" variant="ink" />
                             <span className="text-ui font-medium">Design system</span>
                         </p>
@@ -104,22 +105,22 @@ export function HeroField() {
                                 </a>
                             ))}
                         </nav>
-                        <div className="ml-auto">
+                        <div className="sticker-safe ml-auto">
                             <ThemeSwitch contrast={field} />
                         </div>
                     </div>
 
-                    <h1 className="mt-[clamp(1.5rem,5vw,4.5rem)] type-specimen">
+                    <h1 className="sticker-safe mt-[clamp(1.5rem,5vw,4.5rem)] type-specimen">
                         <span className="sr-only">Frontpage design system: </span>
                         Type leads.
                         <br />
                         Color maps.
                     </h1>
                     <div className="mt-8 grid gap-4 md:grid-cols-[minmax(0,34rem)_1fr] md:items-end">
-                        <p className="text-body leading-[1.55] font-medium">
+                        <p className="sticker-safe text-body leading-[1.55] font-medium">
                             Every token and component on this page is live. Pick a category to recolor this field, tune the reading controls, switch the theme.
                         </p>
-                        <p className="text-meta font-semibold md:text-right">{caption}</p>
+                        <p className="sticker-safe text-meta font-semibold md:ml-auto md:text-right">{caption}</p>
                     </div>
                 </div>
             </div>

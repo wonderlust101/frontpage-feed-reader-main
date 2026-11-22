@@ -2,6 +2,7 @@
 // small accent, empty states. Pure decoration: hidden from assistive tech, never focusable, never beside a real
 // control. Each is tilted and carries the 3px sticker edge, so none can pass for a capsule, tag or button.
 // Hovering the field (any element with the `sticker-field` class) springs them inward and straightens them.
+// Text on the field goes on a `sticker-safe` plate (components.css), so a sticker running into it tucks behind.
 
 import type { CSSProperties } from 'react';
 import { ICONS, type IconName } from '@/components/ui/icon';
