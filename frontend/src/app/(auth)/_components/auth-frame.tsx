@@ -5,12 +5,14 @@
 // panel is a rounded container inset from the screen's edges; the stickers are clipped by its corners.
 // The logo and headline have no plate: the sticker slots keep well clear of them. The supporting line and the guest
 // link sit in a sticker note (a real container of sticker paper), which a sticker may tuck under.
+// The form column is framed top and bottom: logo and the page-switch link above, the theme switch and brand line below.
 
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
 import { BRAND_FIELD } from '@/features/categories/fields';
+import { ThemeSwitch } from '@/features/preferences/components/theme-switch';
 import type { AuthPanel } from '../_data/panels';
 
 type AuthFrameProps = {
@@ -55,23 +57,39 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                     </div>
                 </section>
 
-                <main id="main" tabIndex={-1} className="flex flex-col bg-ground px-gutter pt-10 pb-12 outline-none lg:px-[clamp(2.5rem,5vw,6rem)] lg:py-16">
-                    <Link href="/" className="mb-10 hidden w-fit rounded-toggle text-ink lg:flex">
-                        <Logo size="md" />
-                    </Link>
-                    <div className="mx-auto flex w-full max-w-md flex-1 flex-col lg:justify-center">
-                        <h1 className="type-headline">{title}</h1>
+                <main id="main" tabIndex={-1} className="flex flex-col bg-ground px-gutter pt-10 pb-8 outline-none lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10">
+                    <div className="hidden items-center justify-between gap-6 lg:flex">
+                        <Link href="/" className="w-fit rounded-toggle text-ink">
+                            <Logo size="md" />
+                        </Link>
+                        <SwitchLink aside={aside} />
+                    </div>
+                    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center lg:py-12">
+                        <h1 className="type-headline text-[clamp(2rem,1.4rem+1.4vw,2.75rem)]">{title}</h1>
                         <p className="mt-3 text-ink-2">{description}</p>
                         <div className="mt-8">{children}</div>
-                        <p className="mt-auto pt-10 text-center text-ui text-ink-2 lg:mt-0">
-                            {aside.prompt && <>{aside.prompt} </>}
-                            <Link href={aside.href} className={`text-ink ${LINK_CLASSES}`}>
-                                {aside.label}
-                            </Link>
-                        </p>
+                        <div className="mt-10 text-center lg:hidden">
+                            <SwitchLink aside={aside} />
+                        </div>
+                    </div>
+                    <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-rule-soft pt-5 text-ink-2">
+                        <ThemeSwitch contrast="var(--color-ground)" />
+                        <p className="text-meta">Your front page, for anything you follow.</p>
                     </div>
                 </main>
             </div>
         </div>
+    );
+}
+
+// Renders the "New to Frontpage? Create an account" style link that switches between the auth pages.
+function SwitchLink({ aside }: Pick<AuthFrameProps, 'aside'>) {
+    return (
+        <p className="text-ui text-ink-2">
+            {aside.prompt && <>{aside.prompt} </>}
+            <Link href={aside.href} className={`text-ink ${LINK_CLASSES}`}>
+                {aside.label}
+            </Link>
+        </p>
     );
 }
