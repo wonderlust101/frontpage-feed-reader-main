@@ -33,7 +33,7 @@ const lexend = Lexend({
 
 export const metadata: Metadata = {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
-    title: 'Frontpage',
+    title: { default: 'Frontpage', template: '%s · Frontpage' },
     description: 'Your personalized front page for tech content.',
 };
 
