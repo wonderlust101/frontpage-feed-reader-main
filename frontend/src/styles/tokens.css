@@ -27,7 +27,7 @@
     --color-warning: light-dark(#8a5300, #f2b13b);
 
     --color-focus: var(--color-ink);
-    --color-focus-halo: var(--color-field-lemon);
+    --color-focus-halo: var(--color-ground);
 
     --color-field-lemon: #ffd000;
     --color-field-coral: #ff756e;

@@ -123,22 +123,26 @@ body {
     box-shadow: 0 0 0 3px var(--color-focus-halo);
 }
 
-/* Text fields carry their own focus: no floating outline; the ink edge thickens (an inset ring, so nothing moves) */
-/* inside the Lemon focus glow. The thick ink edge carries the contrast; the glow carries the brand. An invalid */
-/* field keeps its error edge and gains the glow. */
+/* Elements that only take focus from code (tabindex -1: the form alert, the skip link's target) never show a ring: */
+/* focus moves there so screen readers announce them, not for anyone to act on them. */
+[tabindex='-1']:focus,
+[tabindex='-1']:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Text fields carry their own focus: a 2px ring just outside the field, in the field's own edge colour (ink, or */
+/* red when the field is invalid), never the brand Lemon, which is hard to see against the ground. */
 .text-field-input:focus,
 .text-field-input:focus-visible {
-    outline: none;
-    border-color: var(--color-ink);
-    box-shadow:
-        inset 0 0 0 1.5px var(--color-ink),
-        0 0 0 4px var(--color-focus-halo);
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    box-shadow: none;
 }
 
 .text-field-input[aria-invalid='true']:focus,
 .text-field-input[aria-invalid='true']:focus-visible {
-    border-color: var(--color-error);
-    box-shadow: 0 0 0 4px var(--color-focus-halo);
+    outline-color: var(--color-error);
 }
 
 /* Any surface filled with a field: focus rings switch to on-field ink, which every field carries at 7.5:1. */
