@@ -323,7 +323,7 @@
         width: var(--sticker-size);
         aspect-ratio: 1;
         text-align: center;
-        font-size: calc(var(--sticker-size) * 0.21);
+        font-size: max(1rem, calc(var(--sticker-size) * 0.21));
     }
 
     .sticker[data-shape='circle'] {
@@ -346,7 +346,7 @@
         padding: 0.45em 1em 0.45em 0.45em;
         border-radius: 9999px;
         background: var(--color-on-ink);
-        font-size: var(--sticker-size);
+        font-size: max(1rem, var(--sticker-size));
         white-space: nowrap;
     }
 

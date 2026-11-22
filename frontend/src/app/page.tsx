@@ -27,7 +27,7 @@ export default function Home() {
                     </Link>
                 </li>
             </ul>
-            <Suspense fallback={<p className="text-sm text-muted">Checking backend…</p>}>
+            <Suspense fallback={<p className="text-ui text-muted">Checking backend…</p>}>
                 <BackendStatus />
             </Suspense>
         </main>

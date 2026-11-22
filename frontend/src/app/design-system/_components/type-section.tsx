@@ -35,13 +35,13 @@ const TYPE_ROLES = [
     },
     {
         role: 'UI',
-        spec: 'Onest 500–600 · 0.9375rem · 1.45',
+        spec: 'Onest 500–600 · 1rem · 1.45',
         sample: 'Add feed · Import OPML · Mark all as read',
         className: 'text-ui font-semibold',
     },
     {
         role: 'Meta',
-        spec: 'Onest 400 · 0.8125rem · tabular figures',
+        spec: 'Onest 400 · 0.9375rem · tabular figures',
         sample: '09:42 · 23 new · 19 sources',
         className: 'text-meta tabular-nums text-muted',
     },
