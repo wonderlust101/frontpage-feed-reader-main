@@ -388,6 +388,24 @@
         }
     }
 
+    /* Opt-in idle motion (the auth panel): each sticker wobbles a degree and a half either way, out of phase with */
+    /* the next. It turns `transform`, so it adds to the hover's `rotate` instead of fighting it. Off under reduced motion. */
+    @media (prefers-reduced-motion: no-preference) {
+        .stickers-wobble .sticker {
+            animation: sticker-wobble 3.8s ease-in-out infinite alternate;
+            animation-delay: calc(var(--sticker-order) * -0.55s);
+        }
+    }
+
+    @keyframes sticker-wobble {
+        from {
+            transform: rotate(-1.5deg);
+        }
+        to {
+            transform: rotate(1.5deg);
+        }
+    }
+
     .hero-field-ink {
         transition: color var(--duration-field) var(--ease-out);
     }

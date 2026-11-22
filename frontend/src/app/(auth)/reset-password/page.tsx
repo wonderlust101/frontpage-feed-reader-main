@@ -8,6 +8,7 @@ import { Suspense } from 'react';
 import { Notice } from '@/components/ui/notice';
 import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
 import { AuthFrame } from '../_components/auth-frame';
+import { AUTH_PANELS } from '../_data/panels';
 import { FormSkeleton } from '../_components/form-skeleton';
 
 export const metadata: Metadata = { title: 'Choose a new password', referrer: 'no-referrer', robots: { index: false } };
@@ -15,8 +16,9 @@ export const metadata: Metadata = { title: 'Choose a new password', referrer: 'n
 export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-password'>) {
     return (
         <AuthFrame
-            title="Choose a new password."
-            intro="You'll use it to sign in from now on, on every device."
+            panel={AUTH_PANELS.resetPassword}
+            title="Choose a new password"
+            description="You'll use it to sign in from now on, on every device."
             aside={{ prompt: 'Remembered it?', label: 'Sign in', href: '/sign-in' }}
         >
             <Suspense fallback={<FormSkeleton fields={1} />}>

@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 import { SignInForm, type SignInNotice } from '@/features/auth/components/sign-in-form';
 import { safeNextPath } from '@/features/auth/redirect-target';
 import { AuthFrame } from '../_components/auth-frame';
+import { AUTH_PANELS } from '../_data/panels';
 import { FormSkeleton } from '../_components/form-skeleton';
 
 export const metadata: Metadata = { title: 'Sign in' };
@@ -13,9 +14,10 @@ export const metadata: Metadata = { title: 'Sign in' };
 export default function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
     return (
         <AuthFrame
-            title="Welcome back."
-            intro="Sign in to pick up where you left off."
-            aside={{ prompt: 'New here?', label: 'Create account', href: '/sign-up' }}
+            panel={AUTH_PANELS.signIn}
+            title="Sign in"
+            description="Use the email and password you signed up with."
+            aside={{ prompt: 'New to Frontpage?', label: 'Create an account', href: '/sign-up' }}
         >
             <Suspense fallback={<FormSkeleton fields={2} />}>
                 <SignInFormFromUrl searchParams={searchParams} />
