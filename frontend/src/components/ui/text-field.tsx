@@ -1,5 +1,7 @@
 // Labeled text input with an optional hint and error, both under the input in meta size. The error takes the hint's
-// place (the hint returns once the field is fixed) and shows an icon, a thicker border and text, never color alone.
+// place without moving the form: both share one grid cell and the hint only turns invisible, so the row keeps the
+// hint's height (the hint returns once the field is fixed). The error shows an icon, a thicker border and text,
+// never color alone.
 // Focus thickens the field's own edge by 1px, in its colour: ink, or red when invalid.
 // `action` is a small control drawn inside the input's right edge, such as the password field's show/hide toggle.
 
@@ -36,17 +38,20 @@ export function TextField({ id, label, hint, error, action, className = '', ...i
                 />
                 {action && <div className="absolute inset-y-0 right-1 flex items-center">{action}</div>}
             </div>
-            {error ? (
-                <p id={errorId} className="flex items-start gap-1.5 text-meta font-semibold text-error">
-                    <Icon name="error" size="inline" className="mt-0.5" />
-                    {error}
-                </p>
-            ) : (
-                hint && (
-                    <p id={hintId} className="text-meta text-ink-2">
-                        {hint}
-                    </p>
-                )
+            {(hint || error) && (
+                <div className="grid">
+                    {hint && (
+                        <p id={hintId} className={`col-start-1 row-start-1 text-meta text-ink-2 ${error ? 'invisible' : ''}`}>
+                            {hint}
+                        </p>
+                    )}
+                    {error && (
+                        <p id={errorId} className="col-start-1 row-start-1 flex items-start gap-1.5 text-meta font-semibold text-error">
+                            <Icon name="error" size="inline" className="mt-0.5" />
+                            {error}
+                        </p>
+                    )}
+                </div>
             )}
         </div>
     );
