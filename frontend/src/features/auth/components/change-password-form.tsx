@@ -23,7 +23,7 @@ type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
 const SIGN_IN_AGAIN_CODES = ['SESSION_NOT_FRESH', 'SESSION_EXPIRED'];
 
-const LINK_CLASSES = 'text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
+const LINK_CLASSES = 'inline-flex min-h-11 items-center text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
 
 // Renders the form, then a "password changed" notice; a wrong current password is reported on that field.
 export function ChangePasswordForm() {
@@ -88,6 +88,7 @@ export function ChangePasswordForm() {
             )}
 
             <PasswordField
+                aria-required
                 id="current-password"
                 label="Current password"
                 autoComplete="current-password"
@@ -95,6 +96,7 @@ export function ChangePasswordForm() {
                 {...register('currentPassword')}
             />
             <PasswordField
+                aria-required
                 id="new-password"
                 label="New password"
                 hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short phrase beats a hard word.`}

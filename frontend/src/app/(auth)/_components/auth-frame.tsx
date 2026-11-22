@@ -33,12 +33,14 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
 
     return (
         <div className="flex flex-1">
-            <a href="#main" className="sr-only focus:not-sr-only">
+            <a
+                href="#main"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-control focus:bg-ink focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-ground"
+            >
                 Skip to form
             </a>
             <div className="grid w-full lg:min-h-dvh lg:grid-cols-2">
-                <section
-                    aria-label="Frontpage"
+                <aside
                     className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
                     style={fieldStyle}
                 >
@@ -57,7 +59,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                             </p>
                         </div>
                     </div>
-                </section>
+                </aside>
 
                 <main id="main" tabIndex={-1} className="relative flex flex-col bg-ground px-gutter pt-10 pb-8 lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10">
                     <div className="hidden items-center justify-between gap-6 lg:flex">

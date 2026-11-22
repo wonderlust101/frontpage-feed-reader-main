@@ -97,6 +97,7 @@ export function SignInForm({ next, notice }: SignInFormProps) {
             )}
 
             <TextField
+                aria-required
                 id="email"
                 label="Email"
                 type="email"
@@ -106,14 +107,24 @@ export function SignInForm({ next, notice }: SignInFormProps) {
                 error={errors.email?.message}
                 {...register('email')}
             />
-            <PasswordField id="password" label="Password" autoComplete="current-password" error={errors.password?.message} {...register('password')} />
+            <PasswordField
+                aria-required
+                id="password"
+                label="Password"
+                autoComplete="current-password"
+                error={errors.password?.message}
+                {...register('password')}
+            />
 
             <SubmitButton pending={isSubmitting} pendingLabel="Signing in…">
                 Sign in
             </SubmitButton>
 
             <p>
-                <Link href="/forgot-password" className="text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2">
+                <Link
+                    href="/forgot-password"
+                    className="-my-3 inline-flex min-h-11 items-center text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
+                >
                     Forgot your password?
                 </Link>
             </p>

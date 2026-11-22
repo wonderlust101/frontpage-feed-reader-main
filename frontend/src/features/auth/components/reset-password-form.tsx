@@ -64,6 +64,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             )}
 
             <PasswordField
+                aria-required
                 id="password"
                 label="New password"
                 hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short phrase beats a hard word.`}

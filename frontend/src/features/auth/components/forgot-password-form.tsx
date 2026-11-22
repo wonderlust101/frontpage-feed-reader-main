@@ -65,6 +65,7 @@ export function ForgotPasswordForm() {
             {errors.root?.message && <FormAlert lead="Couldn't send the link." message={errors.root.message} />}
 
             <TextField
+                aria-required
                 id="email"
                 label="Email"
                 type="email"

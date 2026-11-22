@@ -94,6 +94,7 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
         <form noValidate onSubmit={handleSubmit(sendCode)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't send a code." message={errors.root.message} />}
             <TextField
+                aria-required
                 id="email"
                 label="Email"
                 hint="We'll send a 6-digit code to this address."
@@ -175,6 +176,7 @@ function CodeStep({ email, signedIn, onChangeEmail }: CodeStepProps) {
             </p>
 
             <TextField
+                aria-required
                 id="code"
                 label="Code"
                 inputMode="numeric"

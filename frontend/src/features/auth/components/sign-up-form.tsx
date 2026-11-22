@@ -46,8 +46,9 @@ export function SignUpForm() {
         <form noValidate onSubmit={handleSubmit(signUp)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't create your account." message={errors.root.message} />}
 
-            <TextField id="name" label="Name" autoComplete="name" error={errors.name?.message} {...register('name')} />
+            <TextField aria-required id="name" label="Name" autoComplete="name" error={errors.name?.message} {...register('name')} />
             <TextField
+                aria-required
                 id="email"
                 label="Email"
                 type="email"
@@ -58,6 +59,7 @@ export function SignUpForm() {
                 {...register('email')}
             />
             <PasswordField
+                aria-required
                 id="password"
                 label="Password"
                 hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short phrase beats a hard word.`}
