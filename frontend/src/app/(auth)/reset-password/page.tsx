@@ -18,7 +18,7 @@ export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-pa
         <AuthFrame
             panel={AUTH_PANELS.resetPassword}
             title="Choose a new password"
-            description="You'll use it to sign in from now on, on every device."
+            description="Make it one you'll remember. It works on every device from now on."
             aside={{ prompt: 'Remembered it?', label: 'Sign in', href: '/sign-in' }}
         >
             <Suspense fallback={<FormSkeleton fields={1} />}>

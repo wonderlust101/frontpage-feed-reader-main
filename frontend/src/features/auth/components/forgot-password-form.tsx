@@ -47,7 +47,7 @@ export function ForgotPasswordForm() {
                 <Notice icon="newsletter" lead="Check your inbox.">
                     If an account exists for {sentTo}, we&apos;ve sent it a link to choose a new password. The link works once and expires in 60 minutes.
                 </Notice>
-                <p className="text-ui text-ink-2">No email after a few minutes? Check your spam folder, or try another address.</p>
+                <p className="text-ui text-ink-2">Nothing after a few minutes? Peek in your spam folder, or try another address.</p>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <Button variant="secondary" onClick={() => setSentTo(null)}>
                         Use another email

@@ -12,7 +12,7 @@ export default function VerifyEmailPage() {
         <AuthFrame
             panel={AUTH_PANELS.verifyEmail}
             title="Confirm your email"
-            description="One quick step, so you can always get back into your account."
+            description="Just checking it's really you, so you can always get back in."
             aside={{ prompt: 'Already confirmed?', label: 'Sign in', href: '/sign-in' }}
         >
             <VerifyEmailForm />

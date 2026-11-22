@@ -82,7 +82,7 @@ export function ChangePasswordForm() {
                             </Link>
                         }
                     >
-                        {changed.signedOutOthers ? 'Your other devices have been signed out.' : 'Use it the next time you sign in.'}
+                        {changed.signedOutOthers ? 'Your other devices are signed out.' : 'Use it next time you sign in.'}
                     </Notice>
                 )
             )}
@@ -97,7 +97,7 @@ export function ChangePasswordForm() {
             <PasswordField
                 id="new-password"
                 label="New password"
-                hint={`At least ${MIN_PASSWORD_LENGTH} characters. A few words you'll remember work well.`}
+                hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short phrase beats a hard word.`}
                 autoComplete="new-password"
                 error={errors.newPassword?.message}
                 {...register('newPassword')}
@@ -105,7 +105,7 @@ export function ChangePasswordForm() {
             <Checkbox
                 id="revoke-other-sessions"
                 label="Sign out other devices"
-                hint="Recommended if you think someone else knows your old password."
+                hint="A good idea if someone else might know your old one."
                 {...register('revokeOtherSessions')}
             />
 

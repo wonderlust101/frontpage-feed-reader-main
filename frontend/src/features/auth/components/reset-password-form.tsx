@@ -66,7 +66,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             <PasswordField
                 id="password"
                 label="New password"
-                hint={`At least ${MIN_PASSWORD_LENGTH} characters. A few words you'll remember work well.`}
+                hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short phrase beats a hard word.`}
                 autoComplete="new-password"
                 error={errors.password?.message}
                 {...register('password')}

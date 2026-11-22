@@ -16,7 +16,7 @@ export default function ChangePasswordPage() {
         <AuthFrame
             panel={AUTH_PANELS.changePassword}
             title="Change your password"
-            description="Pick a new one you don't use anywhere else."
+            description="Pick one you don't use anywhere else. Your feeds stay exactly as they are."
             aside={{ label: 'Back to your account', href: '/user' }}
         >
             <Suspense fallback={<FormSkeleton fields={2} />}>

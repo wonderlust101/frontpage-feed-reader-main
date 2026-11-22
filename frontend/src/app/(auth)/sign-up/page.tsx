@@ -12,7 +12,7 @@ export default function SignUpPage() {
         <AuthFrame
             panel={AUTH_PANELS.signUp}
             title="Create account"
-            description="Keep your feeds, categories and saved items on every device."
+            description="It takes a minute. Your feeds, categories and saved posts follow you to every device."
             aside={{ prompt: 'Already have an account?', label: 'Sign in', href: '/sign-in' }}
         >
             <SignUpForm />

@@ -31,8 +31,8 @@ type SignInFormProps = {
 type SignInValues = z.infer<typeof signInSchema>;
 
 const NOTICES = {
-    reset: { lead: 'Password changed.', text: 'Sign in with your new password.' },
-    verified: { lead: 'Email confirmed.', text: 'Sign in to continue.' },
+    reset: { lead: 'All set.', text: 'Sign in with your new password.' },
+    verified: { lead: 'Email confirmed.', text: 'Sign in and dive back in.' },
 };
 
 // Renders the form, any notice from the page that sent the reader here, and the forgot-password link.

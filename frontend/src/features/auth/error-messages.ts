@@ -14,7 +14,7 @@ const ACCOUNT_EXISTS = 'An account with this email already exists. Sign in inste
 const SIGN_IN_AGAIN = 'For your security, sign in again before changing your password.';
 
 const MESSAGES: Record<string, string> = {
-    INVALID_EMAIL_OR_PASSWORD: 'Email or password is incorrect. Check both and try again.',
+    INVALID_EMAIL_OR_PASSWORD: "That email and password don't match. Check both and try again.",
     USER_ALREADY_EXISTS: ACCOUNT_EXISTS,
     USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: ACCOUNT_EXISTS,
     INVALID_EMAIL: 'Enter an email address like name@example.com.',
@@ -32,8 +32,8 @@ const MESSAGES: Record<string, string> = {
 
 const OFFLINE = "Can't reach Frontpage. Check your connection and try again.";
 const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minutes.';
-const TOO_MANY_REQUESTS = 'Too many attempts. Wait a minute, then try again.';
-const FALLBACK = 'Something went wrong. Try again in a moment.';
+const TOO_MANY_REQUESTS = 'Too many tries in a row. Take a minute, then try again.';
+const FALLBACK = 'Something went wrong on our end. Try again in a moment.';
 
 // Returns the sentence for a failure: offline, rate-limited (with the wait when known), server down, a known code, else a generic retry.
 export function authErrorMessage(failure: AuthFailure): string {
@@ -46,7 +46,7 @@ export function authErrorMessage(failure: AuthFailure): string {
             return TOO_MANY_REQUESTS;
         }
         const wait = seconds === 1 ? '1 second' : `${seconds} seconds`;
-        return `Too many attempts. Try again in ${wait}.`;
+        return `Too many tries in a row. Try again in ${wait}.`;
     }
     if (failure.status >= 500) {
         return UNAVAILABLE;

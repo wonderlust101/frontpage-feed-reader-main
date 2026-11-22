@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
         <AuthFrame
             panel={AUTH_PANELS.forgotPassword}
             title="Forgot your password?"
-            description="Enter your email and we'll send you a link to choose a new one."
+            description="No problem. Tell us your email and we'll send you a reset link."
             aside={{ prompt: 'Remembered it?', label: 'Sign in', href: '/sign-in' }}
         >
             <ForgotPasswordForm />
