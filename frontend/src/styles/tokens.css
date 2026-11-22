@@ -4,8 +4,8 @@
 :root {
     color-scheme: light dark;
 
-    --color-ground: light-dark(#f9f9f7, #1c1c1a);
-    --color-ground-2: light-dark(#efefeb, #2a2a27);
+    --color-ground: light-dark(#f4f2ec, #1c1c1a);
+    --color-ground-2: light-dark(#e9e7e0, #2a2a27);
     --color-ink: light-dark(#0a0a0a, #f3f3ee);
     --color-ink-2: light-dark(#3d3d3a, #c9c9c1);
     --color-meta: light-dark(#64645f, #9b9b93);
@@ -14,7 +14,7 @@
     --rule-width: 1.5px;
     --sticker-edge: 3px;
 
-    --color-rule-soft: light-dark(#e2e2dc, #42423d);
+    --color-rule-soft: light-dark(#dcdad2, #42423d);
     --color-edge: light-dark(color-mix(in srgb, var(--color-ink) 15%, transparent), color-mix(in srgb, var(--color-ink) 20%, transparent));
     --color-fill-edge: color-mix(in srgb, var(--color-ink) 40%, transparent);
     --color-control-edge: light-dark(var(--color-ink), #8a8a83);
