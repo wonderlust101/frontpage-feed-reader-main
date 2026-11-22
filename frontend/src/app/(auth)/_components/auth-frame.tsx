@@ -6,6 +6,8 @@
 // The logo and headline have no plate: the sticker slots keep well clear of them. The supporting line and the guest
 // link sit in a sticker note (a real container of sticker paper), which a sticker may tuck under.
 // The form column is framed top and bottom: logo and the page-switch link above, the theme switch and brand line below.
+// Three quiet brand touches on the form side: a Lemon underline on the h1, a Lemon fill on the chosen theme, and the
+// panel's seam sticker, tucked behind the panel's edge (the panel stacks above it) near the footer, never by a field.
 
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
@@ -37,7 +39,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
             <div className="grid w-full lg:min-h-dvh lg:grid-cols-2">
                 <section
                     aria-label="Frontpage"
-                    className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
+                    className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:z-[1] lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
                     style={fieldStyle}
                 >
                     <Stickers stickers={panel.stickers} className="stickers-wobble" />
@@ -57,7 +59,11 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                     </div>
                 </section>
 
-                <main id="main" tabIndex={-1} className="flex flex-col bg-ground px-gutter pt-10 pb-8 outline-none lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10">
+                <main
+                    id="main"
+                    tabIndex={-1}
+                    className="relative flex flex-col bg-ground px-gutter pt-10 pb-8 outline-none lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10"
+                >
                     <div className="hidden items-center justify-between gap-6 lg:flex">
                         <Link href="/" className="w-fit rounded-toggle text-ink">
                             <Logo size="md" />
@@ -65,15 +71,24 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                         <SwitchLink aside={aside} />
                     </div>
                     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center lg:py-12">
-                        <h1 className="type-headline text-[clamp(2rem,1.4rem+1.4vw,2.75rem)]">{title}</h1>
+                        <h1 className="type-headline text-[clamp(2rem,1.4rem+1.4vw,2.75rem)]">
+                            <span className="underline decoration-(--color-field-lemon) decoration-[0.16em] underline-offset-[0.14em] [text-decoration-skip-ink:none]">
+                                {title}
+                            </span>
+                        </h1>
                         <p className="mt-3 text-ink-2">{description}</p>
                         <div className="mt-8">{children}</div>
                         <div className="mt-10 text-center lg:hidden">
                             <SwitchLink aside={aside} />
                         </div>
                     </div>
+                    <div className="pointer-events-none absolute -right-14 bottom-20 hidden size-32 lg:block">
+                        <Stickers stickers={[panel.seam]} className="stickers-wobble" />
+                    </div>
                     <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-rule-soft pt-5 text-ink-2">
-                        <ThemeSwitch contrast="var(--color-ground)" />
+                        <div className="[&_label:has(:checked)]:bg-(--color-field-lemon) [&_label:has(:checked)]:shadow-[inset_0_0_0_1px_var(--color-fill-edge)]">
+                            <ThemeSwitch contrast="var(--color-on-field)" />
+                        </div>
                         <p className="text-meta">Your front page, for anything you follow.</p>
                     </div>
                 </main>

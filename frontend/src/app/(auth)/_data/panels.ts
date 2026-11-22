@@ -4,6 +4,8 @@
 // share one composition but each has its own decals and lead colour. Slots are in the panel's container units (cqi),
 // so the frame scales with the panel; bottom slots are measured from the bottom so they stay down on tall screens.
 // Wide-only slots drop out on phones, where the panel is a short band and only the right-edge stickers stay.
+// Each panel also lends one sticker to the form column (`seam`): its first icon decal, tucked behind the panel's
+// edge so it peeks into the form half and ties the two together.
 // Headlines carry their own line breaks (\n), so the display type wraps in the same places at every width.
 
 import type { Sticker } from '@/components/stickers';
@@ -14,6 +16,7 @@ export type AuthPanel = {
     line: string;
     guestLink: boolean;
     stickers: Sticker[];
+    seam: Sticker;
 };
 
 type Slot = Omit<Sticker, 'field' | 'icon' | 'label'>;
@@ -35,6 +38,8 @@ const SLOTS: readonly Slot[] = [
     { shape: 'circle', size: '18cqi', x: '-6cqi', y: 'calc(100% - 20cqi)', tilt: 6, drift: ['3cqi', '-3cqi'], wideOnly: true },
     { shape: 'square', size: '13cqi', x: '11cqi', y: 'calc(100% - 9cqi)', tilt: -9, drift: ['2cqi', '-3cqi'], wideOnly: true },
 ];
+
+const SEAM_SLOT: Slot = { shape: 'circle', size: '6.5rem', x: '0.75rem', y: '0.75rem', tilt: -10, drift: ['0rem', '0rem'] };
 
 export const AUTH_PANELS = {
     signIn: panel('Pick up\nwhere you\nleft off.', 'Every site you follow, on one calm front page.', true, [
@@ -111,7 +116,8 @@ function panel(headline: string, line: string, guestLink: boolean, decals: SlotD
         const decal = decals[index];
         return decal ? [{ ...slot, ...decal }] : [];
     });
-    return { headline, line, guestLink, stickers };
+    const seamDecal = decals.find((decal) => decal?.icon) ?? { field: PAPER, icon: 'feed' };
+    return { headline, line, guestLink, stickers, seam: { ...SEAM_SLOT, ...seamDecal } };
 }
 
 // Returns the CSS colour for a field, e.g. field('coral') → 'var(--color-field-coral)'.
