@@ -5,8 +5,9 @@
 // panel is a rounded container inset from the screen's edges; the stickers are clipped by its corners.
 // The logo, headline and flavour line under it have no plate: the sticker slots keep well clear of all three. The
 // flavour line is header-like (display face, a step below the headline) and capped at 62cqi, so the right-edge
-// stickers never come near it. It balances its lines inline, since the global paragraph wrap outranks utilities.
-// The form column is framed top and bottom: logo and the page-switch link above, the guest shortcut and brand line below.
+// stickers never come near it. On desktop the headline and its line sit together in the panel's vertical middle
+// (nudged a little above it, so the heavier bottom stickers keep their distance). It balances its lines inline, since the global paragraph wrap outranks utilities.
+// The form column is framed top and bottom: logo and the page-switch link above, the guest shortcut below (signed-in pages skip it).
 // One quiet brand touch on the form side: a Lemon underline on the h1.
 
 import Link from 'next/link';
@@ -46,13 +47,15 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                         <Link href="/" className="w-fit rounded-toggle lg:hidden">
                             <Logo size="md" variant="ink" />
                         </Link>
-                        <p className="mt-10 type-display text-[clamp(2.75rem,13cqi,6.5rem)] whitespace-pre-line lg:mt-[14cqi]">{panel.headline}</p>
-                        <p
-                            className="mt-5 max-w-[62cqi] font-display text-[clamp(1.25rem,4.2cqi,2.125rem)] leading-[1.15] font-semibold tracking-[-0.015em]"
-                            style={{ textWrap: 'balance' }}
-                        >
-                            {panel.line}
-                        </p>
+                        <div className="mt-10 lg:my-auto lg:pb-[6cqi]">
+                            <p className="type-display text-[clamp(2.75rem,13cqi,6.5rem)] whitespace-pre-line">{panel.headline}</p>
+                            <p
+                                className="mt-5 max-w-[62cqi] font-display text-[clamp(1.25rem,4.2cqi,2.125rem)] leading-[1.15] font-semibold tracking-[-0.015em]"
+                                style={{ textWrap: 'balance' }}
+                            >
+                                {panel.line}
+                            </p>
+                        </div>
                     </div>
                 </section>
 
@@ -79,17 +82,16 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                             <SwitchLink aside={aside} />
                         </div>
                     </div>
-                    <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-rule-soft pt-5 text-ink-2">
-                        {panel.guestLink && (
+                    {panel.guestLink && (
+                        <div className="mt-10 border-t border-rule-soft pt-5 text-ink-2">
                             <p className="text-ui">
                                 Just looking?{' '}
                                 <Link href="/guest" className={`text-ink ${LINK_CLASSES}`}>
                                     Read as a guest
                                 </Link>
                             </p>
-                        )}
-                        <p className="text-meta">Your front page, for anything you follow.</p>
-                    </div>
+                        </div>
+                    )}
                 </main>
             </div>
         </div>
