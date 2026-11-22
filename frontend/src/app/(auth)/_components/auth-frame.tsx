@@ -1,7 +1,8 @@
 // The frame every auth page shares: the full screen split in two. Left, the form under the page's h1; right, a Lemon
 // panel framed by stickers (the page's own set, from _data/panels.ts) with a display headline. On phones the
 // panel becomes a short band above the form and keeps only its right-edge stickers. The logo sits top-left with the
-// form (its wordmark follows the theme's ink); on phones it moves into the band, which comes first.
+// form (its wordmark follows the theme's ink); on phones it moves into the band, which comes first. On desktop the
+// panel is a rounded container inset from the screen's edges; the stickers are clipped by its corners.
 // The logo and headline have no plate: the sticker slots keep well clear of them. The supporting line and the guest
 // link sit in a sticker note (a real container of sticker paper), which a sticker may tuck under.
 
@@ -32,7 +33,11 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                 Skip to form
             </a>
             <div className="grid w-full lg:min-h-dvh lg:grid-cols-2">
-                <section aria-label="Frontpage" className="sticker-field on-field relative flex flex-col text-on-field lg:order-2" style={fieldStyle}>
+                <section
+                    aria-label="Frontpage"
+                    className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
+                    style={fieldStyle}
+                >
                     <Stickers stickers={panel.stickers} className="stickers-wobble" />
                     <div className="relative flex flex-1 flex-col px-gutter pt-6 pb-9 lg:p-14">
                         <Link href="/" className="w-fit rounded-toggle lg:hidden">
