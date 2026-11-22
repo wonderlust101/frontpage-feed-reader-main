@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAuthHeading } from './auth-heading';
 import { FormNotice } from './form-notice';
 import { PasswordField } from '@/components/ui/password-field';
 import { authClient } from '../auth-client';
@@ -25,10 +26,13 @@ const SIGN_IN_AGAIN_CODES = ['SESSION_NOT_FRESH', 'SESSION_EXPIRED'];
 
 const LINK_CLASSES = 'inline-flex min-h-11 items-center text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
 
-// Renders the form, then a "password changed" notice; a wrong current password is reported on that field.
+const CHANGED_HEADING = { title: 'Password changed', description: 'Fresh key, same desk. Use the new one next time you sign in.' };
+
+// Renders the form, then a "password changed" heading and notice (which takes focus); a wrong current password is reported on that field.
 export function ChangePasswordForm() {
     const [changed, setChanged] = useState<{ signedOutOthers: boolean } | null>(null);
     const [needsSignIn, setNeedsSignIn] = useState(false);
+    useAuthHeading(changed ? CHANGED_HEADING : null);
     const {
         register,
         handleSubmit,
@@ -75,7 +79,8 @@ export function ChangePasswordForm() {
                 changed && (
                     <FormNotice
                         icon="healthy"
-                        lead="Password changed."
+                        lead="All set."
+                        focusKey={changed.signedOutOthers}
                         action={
                             <Link href="/user" className={LINK_CLASSES}>
                                 Back to your account

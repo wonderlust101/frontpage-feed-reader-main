@@ -1,12 +1,15 @@
 // The frame every auth page shares: the full screen split in two. Left, the form under the page's h1; right, a Lemon
 // panel framed by stickers (the page's own set, from _data/panels.ts) with a display headline. On phones the
-// panel becomes a short band above the form and keeps only its right-edge stickers. The logo sits top-left with the
+// panel becomes a short band above the form, with a top-right sticker and a small cluster along its bottom edge. The logo sits top-left with the
 // form (its wordmark follows the theme's ink); on phones it moves into the band, which comes first. On desktop the
 // panel is a rounded container inset from the screen's edges; the stickers are clipped by its corners.
 // The logo, headline and flavour line under it have no plate: the sticker slots keep well clear of all three. The
 // flavour line is header-like (display face, a step below the headline) and capped at 62cqi, so the right-edge
 // stickers never come near it. On desktop the headline and its line sit together in the panel's vertical middle
 // (nudged a little above it, so the heavier bottom stickers keep their distance). It balances its lines inline, since the global paragraph wrap outranks utilities.
+// The h1 and description follow the reader's step (AuthHeading): the page passes the default, and a form that moves
+// on in the browser swaps in its own. Between lg and xl the form column takes a little more width than the panel,
+// so the top bar keeps to one line, and the panel headline is capped so the h1 stays the start of the task.
 // The form column is framed top and bottom: logo and the page-switch link above, the guest shortcut below (signed-in pages skip it).
 // One quiet brand touch on the form side: a Lemon underline on the h1.
 
@@ -14,6 +17,7 @@ import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
+import { AuthHeading, AuthHeadingProvider } from '@/features/auth/components/auth-heading';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import type { AuthPanel } from '../_data/panels';
 
@@ -32,67 +36,64 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
     const fieldStyle = { background: BRAND_FIELD.color } as CSSProperties;
 
     return (
-        <div className="flex flex-1">
-            <a
-                href="#main"
-                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-control focus:bg-ink focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-ground"
-            >
-                Skip to form
-            </a>
-            <div className="grid w-full lg:min-h-dvh lg:grid-cols-2">
-                <aside
-                    className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
-                    style={fieldStyle}
+        <AuthHeadingProvider>
+            <div className="flex flex-1">
+                <a
+                    href="#main"
+                    className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-control focus:bg-ink focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-ground"
                 >
-                    <Stickers stickers={panel.stickers} className="stickers-wobble" />
-                    <div className="relative flex flex-1 flex-col px-gutter pt-6 pb-9 lg:p-14">
-                        <Link href="/" className="w-fit rounded-toggle lg:hidden">
-                            <Logo size="md" variant="ink" />
-                        </Link>
-                        <div className="mt-10 lg:my-auto lg:pb-[6cqi]">
-                            <p className="type-display text-[clamp(2.75rem,13cqi,6.5rem)] whitespace-pre-line">{panel.headline}</p>
-                            <p
-                                className="mt-5 max-w-[62cqi] font-display text-[clamp(1.25rem,4.2cqi,2.125rem)] leading-[1.15] font-semibold tracking-[-0.015em]"
-                                style={{ textWrap: 'balance' }}
-                            >
-                                {panel.line}
-                            </p>
+                    Skip to form
+                </a>
+                <div className="grid w-full lg:min-h-dvh lg:grid-cols-[1.1fr_1fr] xl:grid-cols-2">
+                    <aside
+                        className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
+                        style={fieldStyle}
+                    >
+                        <Stickers stickers={panel.stickers} className="stickers-wobble" />
+                        <div className="relative flex flex-1 flex-col px-gutter pt-5 pb-8 lg:p-14">
+                            <Link href="/" className="w-fit rounded-toggle lg:hidden">
+                                <Logo size="md" variant="ink" />
+                            </Link>
+                            <div className="mt-7 lg:my-auto lg:pb-[6cqi]">
+                                <p className="type-display text-[clamp(2.75rem,12cqi,5.75rem)] whitespace-pre-line">{panel.headline}</p>
+                                <p
+                                    className="mt-3 max-w-[62cqi] lg:mt-5 font-display text-[clamp(1.25rem,4.2cqi,2.125rem)] leading-[1.15] font-semibold tracking-[-0.015em]"
+                                    style={{ textWrap: 'balance' }}
+                                >
+                                    {panel.line}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </aside>
+                    </aside>
 
-                <main id="main" tabIndex={-1} className="relative flex flex-col bg-ground px-gutter pt-10 pb-8 lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10">
-                    <div className="hidden items-center justify-between gap-6 lg:flex">
-                        <Link href="/" className="w-fit rounded-toggle text-ink">
-                            <Logo size="md" />
-                        </Link>
-                        <SwitchLink aside={aside} />
-                    </div>
-                    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center lg:py-12">
-                        <h1 className="type-headline text-[clamp(2rem,1.4rem+1.4vw,2.75rem)]">
-                            <span className="underline decoration-(--color-field-lemon) decoration-[0.16em] underline-offset-[0.14em] [text-decoration-skip-ink:none]">
-                                {title}
-                            </span>
-                        </h1>
-                        <p className="mt-3 text-ink-2">{description}</p>
-                        <div className="mt-8">{children}</div>
-                        <div className="mt-10 text-center lg:hidden">
+                    <main id="main" tabIndex={-1} className="relative flex flex-col bg-ground px-gutter pt-8 pb-8 lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10">
+                        <div className="hidden items-center justify-between gap-6 lg:flex">
+                            <Link href="/" className="w-fit rounded-toggle text-ink">
+                                <Logo size="md" />
+                            </Link>
                             <SwitchLink aside={aside} />
                         </div>
-                    </div>
-                    {panel.guestLink && (
-                        <div className="mt-10 border-t border-rule-soft pt-5 text-ink-2">
-                            <p className="text-ui">
-                                Just looking?{' '}
-                                <Link href="/guest" className={`text-ink ${LINK_CLASSES}`}>
-                                    Read as a guest
-                                </Link>
-                            </p>
+                        <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center lg:py-10">
+                            <AuthHeading title={title} description={description} />
+                            <div className="mt-7 lg:mt-8">{children}</div>
+                            <div className="mt-10 text-center lg:hidden">
+                                <SwitchLink aside={aside} />
+                            </div>
                         </div>
-                    )}
-                </main>
+                        {panel.guestLink && (
+                            <div className="mt-8 border-t border-rule-soft pt-5 text-ink-2 lg:mt-10">
+                                <p className="text-ui">
+                                    Just looking?{' '}
+                                    <Link href="/guest" className={`text-ink ${LINK_CLASSES}`}>
+                                        Read as a guest
+                                    </Link>
+                                </p>
+                            </div>
+                        )}
+                    </main>
+                </div>
             </div>
-        </div>
+        </AuthHeadingProvider>
     );
 }
 

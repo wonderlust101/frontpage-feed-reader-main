@@ -3,6 +3,8 @@
 // Verify-email flow: the reader types the 6-digit code from their email. The address comes from sign-up or sign-in
 // (sessionStorage) or from the signed-in session; if neither has it, the page asks for it and sends a code first.
 // Signed-in readers can leave it for later. Until the API's email-code plugin exists, its requests fail with a general error.
+// The email step has its own heading ("Where should it go?"); the code step keeps the page's. Arriving at the code
+// step from the email step puts focus in the code field, and a resent code's notice takes focus.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -11,6 +13,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { useAuthHeading } from './auth-heading';
 import { FormNotice } from './form-notice';
 import { TextField } from '@/components/ui/text-field';
 import { authClient } from '../auth-client';
@@ -28,8 +31,11 @@ type CodeValues = z.input<typeof codeSchema>;
 type CodeStepProps = {
     email: string;
     signedIn: boolean;
+    focusCode: boolean;
     onChangeEmail: () => void;
 };
+
+const EMAIL_STEP_HEADING = { title: 'Where should it go?', description: "Pop in your email and we'll send six digits over." };
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -50,7 +56,7 @@ export function VerifyEmailForm() {
     return (
         <div className="flex flex-col gap-8">
             {email ? (
-                <CodeStep email={email} signedIn={signedIn} onChangeEmail={() => setChangingEmail(true)} />
+                <CodeStep email={email} signedIn={signedIn} focusCode={sentTo !== null} onChangeEmail={() => setChangingEmail(true)} />
             ) : (
                 <EmailStep
                     onSent={(sentTo) => {
@@ -74,6 +80,7 @@ export function VerifyEmailForm() {
 
 // Asks for the address and sends a code to it, then hands the address back through `onSent`.
 function EmailStep({ onSent }: { onSent: (email: string) => void }) {
+    useAuthHeading(EMAIL_STEP_HEADING);
     const {
         register,
         handleSubmit,
@@ -97,7 +104,6 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
                 aria-required
                 id="email"
                 label="Email"
-                hint="We'll send a 6-digit code to this address."
                 type="email"
                 autoComplete="email"
                 autoCapitalize="none"
@@ -113,20 +119,28 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
 }
 
 // Takes the code for `email`, verifies it, and offers a new code (at most once a minute) or a different address.
-function CodeStep({ email, signedIn, onChangeEmail }: CodeStepProps) {
+// `focusCode` puts focus in the code field on arrival (after the email step sent a code).
+function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) {
     const router = useRouter();
     const [cooldown, setCooldown] = useState(0);
-    const [resent, setResent] = useState(false);
+    const [resentCount, setResentCount] = useState(0);
     const {
         register,
         handleSubmit,
         setError,
+        setFocus,
         formState: { errors, isSubmitting },
     } = useForm<CodeValues, unknown, z.output<typeof codeSchema>>({
         resolver: zodResolver(codeSchema),
         defaultValues: { code: '' },
         reValidateMode: 'onChange',
     });
+
+    useEffect(() => {
+        if (focusCode) {
+            setFocus('code');
+        }
+    }, [focusCode, setFocus]);
 
     useEffect(() => {
         if (cooldown === 0) {
@@ -149,13 +163,12 @@ function CodeStep({ email, signedIn, onChangeEmail }: CodeStepProps) {
     }
 
     async function resend() {
-        setResent(false);
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
             return;
         }
-        setResent(true);
+        setResentCount(resentCount + 1);
         setCooldown(RESEND_COOLDOWN_SECONDS);
     }
 
@@ -164,8 +177,8 @@ function CodeStep({ email, signedIn, onChangeEmail }: CodeStepProps) {
             {errors.root?.message ? (
                 <FormAlert lead="Couldn't confirm your email." message={errors.root.message} />
             ) : (
-                resent && (
-                    <FormNotice icon="newsletter" lead="New code sent.">
+                resentCount > 0 && (
+                    <FormNotice icon="newsletter" lead="New code sent." focusKey={resentCount}>
                         Use the code in the newest email; older ones stop working.
                     </FormNotice>
                 )

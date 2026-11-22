@@ -1,7 +1,8 @@
 'use client';
 
 // Sign-in form: email and password. On success it goes to `next` (already checked to be a path on this site). An
-// unverified email gets a "Send a code" action that emails a new code and opens the verify page.
+// unverified email gets a "Send a code" action that emails a new code and opens the verify page. Arriving after a
+// reset or a confirmed email is told by the page's heading (see the sign-in page), not by a notice here.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -10,7 +11,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { FormNotice } from './form-notice';
 import { PasswordField } from '@/components/ui/password-field';
 import { TextField } from '@/components/ui/text-field';
 import { authClient } from '../auth-client';
@@ -21,22 +21,14 @@ import { signInSchema } from '../schemas';
 import { FormAlert } from './form-alert';
 import { SubmitButton } from './submit-button';
 
-export type SignInNotice = 'reset' | 'verified' | null;
-
 type SignInFormProps = {
     next: string;
-    notice: SignInNotice;
 };
 
 type SignInValues = z.infer<typeof signInSchema>;
 
-const NOTICES = {
-    reset: { lead: 'All set.', text: 'Sign in with your new password.' },
-    verified: { lead: 'Email confirmed.', text: 'Sign in and dive back in.' },
-};
-
-// Renders the form, any notice from the page that sent the reader here, and the forgot-password link.
-export function SignInForm({ next, notice }: SignInFormProps) {
+// Renders the form and the forgot-password link.
+export function SignInForm({ next }: SignInFormProps) {
     const router = useRouter();
     const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
     const [sendingCode, setSendingCode] = useState(false);
@@ -72,11 +64,9 @@ export function SignInForm({ next, notice }: SignInFormProps) {
         router.push('/verify-email');
     }
 
-    const noticeCopy = notice ? NOTICES[notice] : null;
-
     return (
         <form noValidate onSubmit={handleSubmit(signIn)} className="flex flex-col gap-6">
-            {errors.root?.message ? (
+            {errors.root?.message && (
                 <FormAlert
                     lead="Couldn't sign you in."
                     message={errors.root.message}
@@ -88,12 +78,6 @@ export function SignInForm({ next, notice }: SignInFormProps) {
                         )
                     }
                 />
-            ) : (
-                noticeCopy && (
-                    <FormNotice icon="healthy" lead={noticeCopy.lead}>
-                        {noticeCopy.text}
-                    </FormNotice>
-                )
             )}
 
             <TextField
