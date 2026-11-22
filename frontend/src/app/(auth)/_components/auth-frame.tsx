@@ -9,7 +9,7 @@
 // (nudged a little above it, so the heavier bottom stickers keep their distance). It balances its lines inline, since the global paragraph wrap outranks utilities.
 // The h1 and description follow the reader's step (AuthHeading): the page passes the default, and a form that moves
 // on in the browser swaps in its own. Between lg and xl the form column takes a little more width than the panel,
-// so the top bar keeps to one line, and the panel headline is capped so the h1 stays the start of the task.
+// and the switch link never wraps, so the top bar keeps to one line, and the panel headline is capped so the h1 stays the start of the task.
 // The form column is framed top and bottom: logo and the page-switch link above, the guest shortcut below (signed-in pages skip it).
 // One quiet brand touch on the form side: a Lemon underline on the h1.
 
@@ -44,7 +44,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                 >
                     Skip to form
                 </a>
-                <div className="grid w-full lg:min-h-dvh lg:grid-cols-[1.1fr_1fr] xl:grid-cols-2">
+                <div className="grid w-full lg:min-h-dvh lg:grid-cols-[1.15fr_1fr] xl:grid-cols-2">
                     <aside
                         className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
                         style={fieldStyle}
@@ -66,7 +66,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                         </div>
                     </aside>
 
-                    <main id="main" tabIndex={-1} className="relative flex flex-col bg-ground px-gutter pt-8 pb-8 lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10">
+                    <main id="main" tabIndex={-1} className="relative flex flex-col bg-ground px-gutter pt-8 pb-8 lg:px-[clamp(2rem,4.5vw,6rem)] lg:pt-10">
                         <div className="hidden items-center justify-between gap-6 lg:flex">
                             <Link href="/" className="w-fit rounded-toggle text-ink">
                                 <Logo size="md" />
@@ -100,7 +100,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
 // Renders the "New to Frontpage? Create an account" style link that switches between the auth pages.
 function SwitchLink({ aside }: Pick<AuthFrameProps, 'aside'>) {
     return (
-        <p className="text-ui text-ink-2">
+        <p className="text-ui text-ink-2 lg:whitespace-nowrap">
             {aside.prompt && <>{aside.prompt} </>}
             <Link href={aside.href} className={`text-ink ${LINK_CLASSES}`}>
                 {aside.label}

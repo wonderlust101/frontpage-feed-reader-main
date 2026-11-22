@@ -88,11 +88,11 @@ export const AUTH_PANELS = {
     ),
     forgotPassword: panel(
         'It happens\nto us all.',
-        'Your feeds will keep. Grab the link from your inbox.',
+        "Your feeds will keep. We'll get you a fresh key.",
         true,
         [
             { field: field('leaf'), icon: 'mark-read' },
-            { field: field('coral'), icon: 'newsletter', label: 'Check your inbox' },
+            { field: field('coral'), icon: 'newsletter', label: 'Reset link' },
             null,
             { field: field('tangerine'), icon: 'account' },
             null,
@@ -120,7 +120,7 @@ export const AUTH_PANELS = {
             { field: field('aqua'), icon: 'refresh' },
             null,
             null,
-            { field: field('leaf'), label: 'New password' },
+            { field: field('leaf'), label: 'Fresh!' },
         ],
         [
             { field: field('lilac'), icon: 'healthy' },

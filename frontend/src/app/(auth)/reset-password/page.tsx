@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: 'Choose a new password', referrer: 'n
 
 const HEADINGS = {
     choose: { title: 'Choose a new password', description: "Make it one you'll remember. It works on every device from now on." },
-    expired: { title: 'This link has expired', description: 'Reset links work once and last 60 minutes. Grab a fresh one, it only takes a moment.' },
+    expired: { title: 'This link no longer works', description: "No harm done. Grab a fresh one and you'll be back in a moment." },
 } satisfies Record<string, Heading>;
 
 export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-password'>) {
@@ -50,8 +50,8 @@ async function ResetFromUrl({ searchParams }: Pick<PageProps<'/reset-password'>,
     return (
         <ResetFrame heading={HEADINGS.expired}>
             <div className="flex flex-col gap-6">
-                <FormNotice tone="error" icon="error" lead="This one's used up.">
-                    Ask for a new link below, then open it from the newest email. Older links stop working.
+                <FormNotice tone="error" icon="error" lead="Links work once and last 60 minutes.">
+                    Open the newest email when it arrives.
                 </FormNotice>
                 <Link
                     href="/forgot-password"
