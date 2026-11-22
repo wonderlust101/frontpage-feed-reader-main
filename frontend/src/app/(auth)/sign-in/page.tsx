@@ -1,12 +1,14 @@
 // Sign-in page. It reads ?next=, ?reset= and ?verified= on the server, so the frame streams in behind <Suspense>
 // (Cache Components keeps the default frame in the static shell). Arriving from a password reset or a confirmed
 // email changes the heading itself, so the first thing a reader (or screen reader) meets says what just happened.
+// The form then fills in the email from that step and returns to the usual heading if an attempt fails.
 
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 import type { Heading } from '@/features/auth/components/auth-heading';
 import { SignInForm } from '@/features/auth/components/sign-in-form';
+import { SIGN_IN_HEADINGS, type SignInArrival } from '@/features/auth/sign-in-headings';
 import { safeNextPath } from '@/features/auth/redirect-target';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';
@@ -14,17 +16,11 @@ import { FormSkeleton } from '../_components/form-skeleton';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
-const HEADINGS = {
-    default: { title: 'Sign in', description: 'Good to see you again. Your front page is waiting.' },
-    reset: { title: 'Password changed', description: "New key, same feeds. Sign in with it and you're back." },
-    verified: { title: "You're confirmed", description: 'Welcome aboard! Sign in to open your front page for the first time.' },
-} satisfies Record<string, Heading>;
-
 export default function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
     return (
         <Suspense
             fallback={
-                <SignInFrame heading={HEADINGS.default}>
+                <SignInFrame heading={SIGN_IN_HEADINGS.default}>
                     <FormSkeleton fields={2} />
                 </SignInFrame>
             }
@@ -38,11 +34,11 @@ export default function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
 async function SignInFromUrl({ searchParams }: Pick<PageProps<'/sign-in'>, 'searchParams'>) {
     const params = await searchParams;
     const next = safeNextPath(typeof params.next === 'string' ? params.next : null);
-    const heading = params.reset ? HEADINGS.reset : params.verified ? HEADINGS.verified : HEADINGS.default;
+    const arrival: SignInArrival = params.reset ? 'reset' : params.verified ? 'verified' : null;
 
     return (
-        <SignInFrame heading={heading}>
-            <SignInForm next={next} />
+        <SignInFrame heading={SIGN_IN_HEADINGS[arrival ?? 'default']}>
+            <SignInForm next={next} arrival={arrival} />
         </SignInFrame>
     );
 }

@@ -34,7 +34,7 @@ export function AuthHeading({ title, description }: Heading) {
                     {heading.title}
                 </span>
             </h1>
-            <p className="mt-3 text-ink-2">{heading.description}</p>
+            <p className="mt-3 [overflow-wrap:anywhere] text-ink-2">{heading.description}</p>
         </>
     );
 }

@@ -3,7 +3,8 @@
 // Verify-email flow: the reader types the 6-digit code from their email. The address comes from sign-up or sign-in
 // (sessionStorage) or from the signed-in session; if neither has it, the page asks for it and sends a code first.
 // Signed-in readers can leave it for later. Until the API's email-code plugin exists, its requests fail with a general error.
-// The email step has its own heading ("Where should it go?"); the code step keeps the page's. Arriving at the code
+// The email step has its own heading ("Where should the code go?"); the code step's description says where the code
+// went and how long it lasts. Arriving at the code
 // step from the email step puts focus in the code field, and a resent code's notice takes focus.
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +22,7 @@ import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { forgetPendingEmail, readPendingEmail, rememberPendingEmail } from '../pending-email';
 import { CODE_LENGTH, codeSchema, emailSchema } from '../schemas';
+import { rememberSignInEmail } from '../sign-in-email';
 import { FormAlert } from './form-alert';
 import { SubmitButton } from './submit-button';
 
@@ -35,7 +37,7 @@ type CodeStepProps = {
     onChangeEmail: () => void;
 };
 
-const EMAIL_STEP_HEADING = { title: 'Where should it go?', description: "Pop in your email and we'll send six digits over." };
+const EMAIL_STEP_HEADING = { title: 'Where should the code go?', description: "Pop in your email and we'll send six digits over." };
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -127,6 +129,10 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
     const router = useRouter();
     const [cooldown, setCooldown] = useState(0);
     const [resentCount, setResentCount] = useState(0);
+    useAuthHeading({
+        title: 'Confirm your email',
+        description: `We sent a ${CODE_LENGTH}-digit code to ${email}. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
+    });
     const {
         register,
         handleSubmit,
@@ -161,7 +167,11 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
             return;
         }
         forgetPendingEmail();
-        router.replace(result.data?.token || signedIn ? '/user' : '/sign-in?verified=1');
+        const signsInNext = !result.data?.token && !signedIn;
+        if (signsInNext) {
+            rememberSignInEmail(email);
+        }
+        router.replace(signsInNext ? '/sign-in?verified=1' : '/user');
         router.refresh();
     }
 
@@ -186,11 +196,6 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
                     </FormNotice>
                 )
             )}
-
-            <p className="text-ui text-ink-2">
-                We sent a {CODE_LENGTH}-digit code to <strong className="font-semibold break-all text-ink">{email}</strong>. It expires in{' '}
-                {CODE_LIFETIME_MINUTES} minutes.
-            </p>
 
             <TextField
                 aria-required

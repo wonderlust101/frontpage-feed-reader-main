@@ -17,6 +17,7 @@ import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { emailSchema } from '../schemas';
+import { rememberSignInEmail } from '../sign-in-email';
 import { FormAlert } from './form-alert';
 import { SubmitButton } from './submit-button';
 
@@ -42,6 +43,7 @@ export function ForgotPasswordForm() {
             setError('root', { message: authErrorMessage(failure) });
             return;
         }
+        rememberSignInEmail(email);
         setSentTo(email);
     }
 
