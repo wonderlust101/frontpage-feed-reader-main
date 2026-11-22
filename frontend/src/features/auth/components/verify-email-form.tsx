@@ -39,6 +39,9 @@ const EMAIL_STEP_HEADING = { title: 'Where should it go?', description: "Pop in 
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
+// How long a code lasts: the API's email-code plugin default (expiresIn, 300 seconds).
+const CODE_LIFETIME_MINUTES = 5;
+
 const CODE_FIELD_CODES = ['INVALID_OTP', 'OTP_EXPIRED', 'TOO_MANY_ATTEMPTS'];
 
 const LINK_CLASSES = 'text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
@@ -185,7 +188,8 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
             )}
 
             <p className="text-ui text-ink-2">
-                We sent a {CODE_LENGTH}-digit code to <strong className="font-semibold break-all text-ink">{email}</strong>. It expires after a few minutes.
+                We sent a {CODE_LENGTH}-digit code to <strong className="font-semibold break-all text-ink">{email}</strong>. It expires in{' '}
+                {CODE_LIFETIME_MINUTES} minutes.
             </p>
 
             <TextField
@@ -205,13 +209,16 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
                 Confirm email
             </SubmitButton>
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                <Button variant="quiet" onClick={resend} disabled={cooldown > 0}>
-                    {cooldown > 0 ? `Send a new code in ${cooldown}s` : 'Send a new code'}
-                </Button>
-                <Button variant="quiet" onClick={onChangeEmail}>
-                    Use a different email
-                </Button>
+            <div className="flex flex-col gap-1">
+                <p className="text-ui text-ink-2">No code yet? Peek in your spam folder, then send a new one or try another address.</p>
+                <div className="flex flex-wrap items-center gap-x-6">
+                    <Button variant="quiet" onClick={resend} disabled={cooldown > 0}>
+                        {cooldown > 0 ? `Send a new code in ${cooldown}s` : 'Send a new code'}
+                    </Button>
+                    <Button variant="quiet" onClick={onChangeEmail}>
+                        Use a different email
+                    </Button>
+                </div>
             </div>
         </form>
     );

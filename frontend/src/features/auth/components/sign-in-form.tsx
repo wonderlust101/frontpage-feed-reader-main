@@ -1,8 +1,9 @@
 'use client';
 
-// Sign-in form: email and password. On success it goes to `next` (already checked to be a path on this site). An
-// unverified email gets a "Send a code" action that emails a new code and opens the verify page. Arriving after a
-// reset or a confirmed email is told by the page's heading (see the sign-in page), not by a notice here.
+// Sign-in form: email and password. On success it goes to `next` (already checked to be a path on this site). The
+// error alert carries the way out: an unverified email gets "Send a code" (it emails a new code and opens the verify
+// page), and a wrong email or password gets "Forgot your password?". Arriving after a reset or a confirmed email is
+// told by the page's heading (see the sign-in page), not by a notice here.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -27,10 +28,13 @@ type SignInFormProps = {
 
 type SignInValues = z.infer<typeof signInSchema>;
 
+const LINK_CLASSES = 'inline-flex min-h-11 items-center text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
+
 // Renders the form and the forgot-password link.
 export function SignInForm({ next }: SignInFormProps) {
     const router = useRouter();
     const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+    const [wrongCredentials, setWrongCredentials] = useState(false);
     const [sendingCode, setSendingCode] = useState(false);
     const {
         register,
@@ -45,6 +49,7 @@ export function SignInForm({ next }: SignInFormProps) {
         if (failure) {
             resetField('password');
             setUnverifiedEmail(failure.code === 'EMAIL_NOT_VERIFIED' ? values.email : null);
+            setWrongCredentials(failure.code === 'INVALID_EMAIL_OR_PASSWORD');
             setError('root', { message: authErrorMessage(failure) });
             return;
         }
@@ -71,10 +76,16 @@ export function SignInForm({ next }: SignInFormProps) {
                     lead="Couldn't sign you in."
                     message={errors.root.message}
                     action={
-                        unverifiedEmail && (
+                        unverifiedEmail ? (
                             <Button variant="secondary" disabled={sendingCode} onClick={() => sendCode(unverifiedEmail)}>
                                 {sendingCode ? 'Sending…' : 'Send a code'}
                             </Button>
+                        ) : (
+                            wrongCredentials && (
+                                <Link href="/forgot-password" className={`-my-3 ${LINK_CLASSES}`}>
+                                    Forgot your password?
+                                </Link>
+                            )
                         )
                     }
                 />
@@ -105,10 +116,7 @@ export function SignInForm({ next }: SignInFormProps) {
             </SubmitButton>
 
             <p>
-                <Link
-                    href="/forgot-password"
-                    className="-my-3 inline-flex min-h-11 items-center text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
-                >
+                <Link href="/forgot-password" className={`-my-3 ${LINK_CLASSES}`}>
                     Forgot your password?
                 </Link>
             </p>

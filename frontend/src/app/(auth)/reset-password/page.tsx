@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: 'Choose a new password', referrer: 'n
 
 const HEADINGS = {
     choose: { title: 'Choose a new password', description: "Make it one you'll remember. It works on every device from now on." },
-    expired: { title: 'This link has expired', description: 'Reset links are good for one use and one hour. Grab a fresh one, it only takes a moment.' },
+    expired: { title: 'This link has expired', description: 'Reset links work once and last 60 minutes. Grab a fresh one, it only takes a moment.' },
 } satisfies Record<string, Heading>;
 
 export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-password'>) {
