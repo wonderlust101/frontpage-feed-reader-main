@@ -1,4 +1,5 @@
-// Labeled text input with an optional hint and error. The error shows an icon, a thicker border and text, never color alone.
+// Labeled text input with an optional hint and error. The error shows an icon, a thicker border and text, never color alone,
+// and sits under the input. Focus thickens the ink edge (an inset ring, so nothing moves) inside a Lemon glow.
 // `action` is a small control drawn inside the input's right edge, such as the password field's show/hide toggle.
 
 import type { ComponentProps, ReactNode } from 'react';
@@ -29,22 +30,22 @@ export function TextField({ id, label, hint, error, action, className = '', ...i
                     {hint}
                 </p>
             )}
-            {error && (
-                <p id={errorId} className="flex items-center gap-2 text-ui font-semibold text-error">
-                    <Icon name="error" size="action" />
-                    {error}
-                </p>
-            )}
             <div className="relative">
                 <input
                     id={id}
                     aria-invalid={error ? true : undefined}
                     aria-describedby={describedBy}
-                    className={`h-12 w-full rounded-control bg-control-fill px-5 text-ui text-ink placeholder:text-muted ${action ? 'pr-14' : ''} ${borderClasses}`}
+                    className={`text-field-input h-12 w-full rounded-control bg-control-fill px-5 text-ui text-ink transition-shadow duration-150 placeholder:text-muted ${action ? 'pr-14' : ''} ${borderClasses}`}
                     {...inputProps}
                 />
                 {action && <div className="absolute inset-y-0 right-1 flex items-center">{action}</div>}
             </div>
+            {error && (
+                <p id={errorId} className="flex items-start gap-2 text-ui font-semibold text-error">
+                    <Icon name="error" size="action" className="mt-0.5" />
+                    {error}
+                </p>
+            )}
         </div>
     );
 }
