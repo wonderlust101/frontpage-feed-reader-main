@@ -16,7 +16,11 @@ All paths are relative to the repo root. Better Auth is 1.7.26 on both sides.
     - `overrideDefaultEmailVerification: true`: use codes instead of links everywhere.
     - `sendVerificationOTP({ email, otp, type })`: build the email and call the existing `sendEmail` from `backend/src/lib/email.ts`. Without Resend it is printed to the console (`[email] to …`), so local testing works with no email service. Escape any user text with `escapeHtml`.
     - Defaults worth knowing: codes expire after 300 seconds (`expiresIn`), allow 3 wrong tries (`allowedAttempts`), and sends are rate-limited to 3 per minute. The page's "Send a new code" button already waits 60 seconds between sends.
+    - The verify page tells readers the code "expires in 5 minutes" (`CODE_LIFETIME_MINUTES` in `frontend/src/features/auth/components/verify-email-form.tsx`). If `expiresIn` is changed from 300 seconds, change that constant too.
 - `emailVerification: { autoSignInAfterVerification: true }`: signs the user in once the code is accepted. The page then goes to `/user`; without it, the page goes to `/sign-in?verified=1`.
+    - **Why this matters (design critique, 2026-11-22):** without it, a brand-new reader creates an account, confirms their email, and then has to type their email and password again on a sign-in form. That is the weakest moment of the most important journey: it ends on a form instead of inside the app. The frontend softens it for now with a "You're confirmed / Welcome aboard!" heading on `/sign-in?verified=1`, but signing in automatically is the real fix.
+    - **Nothing to change on the frontend:** `verify-email-form.tsx` already goes to `/user` whenever the verify response carries a `token` (or the reader is already signed in), so turning this on is backend-only.
+    - **Done when:** after entering a correct code as a signed-out new user, the page lands on `/user` signed in, with no sign-in form in between.
 - **Decide** whether to set `emailAndPassword.requireEmailVerification: true`. If set, unverified users can't sign in. The sign-in page already handles that case (`EMAIL_NOT_VERIFIED`) with a "Send a code" button.
 
 **What the frontend calls** (through its `/api/auth` proxy):
