@@ -297,11 +297,10 @@
         pointer-events: none;
     }
 
-    /* A layout drawn for one width: the layer stops growing at 90rem, anchored right, and becomes the stickers' */
-    /* container, so on wide screens they keep their 1440px arrangement beside type that has stopped growing. */
-    .stickers-capped {
-        left: auto;
-        width: min(100%, 90rem);
+    /* A pile placed in the page grid: the layer is the stickers' own container, so they size and place themselves */
+    /* in its units and keep one arrangement at any width. Tilted corners may cross its edge, so it does not clip. */
+    .stickers-pile {
+        overflow: visible;
         container-type: inline-size;
     }
 
