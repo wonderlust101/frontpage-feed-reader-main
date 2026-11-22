@@ -23,7 +23,7 @@
     --color-on-field: #0a0a0a;
     --color-on-ink: #f3f3ee;
 
-    --color-error: light-dark(#b42318, #ff7a70);
+    --color-error: light-dark(#951c12, #ffa29a);
     --color-warning: light-dark(#8a5300, #f2b13b);
 
     --color-focus: var(--color-ink);
@@ -85,7 +85,7 @@
     --rule-width: 2px;
     --color-edge: var(--color-ink);
     --color-control-edge: var(--color-ink);
-    --color-error: light-dark(#8c1b12, #ff9087);
+    --color-error: light-dark(#7a160e, #ffb3ac);
     --color-warning: light-dark(#6b4000, #f2b13b);
 }
 
@@ -97,7 +97,7 @@
         --rule-width: 2px;
         --color-edge: var(--color-ink);
         --color-control-edge: var(--color-ink);
-        --color-error: light-dark(#8c1b12, #ff9087);
+        --color-error: light-dark(#7a160e, #ffb3ac);
         --color-warning: light-dark(#6b4000, #f2b13b);
     }
 }

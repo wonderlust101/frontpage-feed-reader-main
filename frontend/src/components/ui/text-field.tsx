@@ -2,7 +2,7 @@
 // place without moving the form: both share one grid cell and the hint only turns invisible, so the row keeps the
 // hint's height (the hint returns once the field is fixed). The error shows an icon, a thicker border and text,
 // never color alone.
-// Focus thickens the field's own edge by 1px, in its colour: ink, or red when invalid.
+// Focus thickens the field's own edge by 2px, in its colour: ink, or red when invalid.
 // `action` is a small control drawn inside the input's right edge, such as the password field's show/hide toggle.
 
 import type { ComponentProps, ReactNode } from 'react';
