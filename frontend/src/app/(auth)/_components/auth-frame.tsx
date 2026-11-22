@@ -3,8 +3,9 @@
 // panel becomes a short band above the form and keeps only its right-edge stickers. The logo sits top-left with the
 // form (its wordmark follows the theme's ink); on phones it moves into the band, which comes first. On desktop the
 // panel is a rounded container inset from the screen's edges; the stickers are clipped by its corners.
-// The logo and headline have no plate: the sticker slots keep well clear of them. The supporting line sits in a
-// sticker note (a real container of sticker paper), which a sticker may tuck under.
+// The logo, headline and flavour line under it have no plate: the sticker slots keep well clear of all three. The
+// flavour line is header-like (display face, a step below the headline) and capped at 62cqi, so the right-edge
+// stickers never come near it. It balances its lines inline, since the global paragraph wrap outranks utilities.
 // The form column is framed top and bottom: logo and the page-switch link above, the guest shortcut and brand line below.
 // One quiet brand touch on the form side: a Lemon underline on the h1.
 
@@ -46,7 +47,12 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                             <Logo size="md" variant="ink" />
                         </Link>
                         <p className="mt-10 type-display text-[clamp(2.75rem,13cqi,6.5rem)] whitespace-pre-line lg:mt-[14cqi]">{panel.headline}</p>
-                        <p className="sticker-note mt-8 max-w-[24rem] text-ui font-medium lg:mt-auto lg:mb-[34cqi]">{panel.line}</p>
+                        <p
+                            className="mt-5 max-w-[62cqi] font-display text-[clamp(1.25rem,4.2cqi,2.125rem)] leading-[1.15] font-semibold tracking-[-0.015em]"
+                            style={{ textWrap: 'balance' }}
+                        >
+                            {panel.line}
+                        </p>
                     </div>
                 </section>
 

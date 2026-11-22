@@ -1,4 +1,4 @@
-// Each auth page's left panel: a headline, one supporting line, and its stickers. Every page fills the same nine
+// Each auth page's sticker panel: a headline, one line of flavour text under it, and its stickers. Every page fills the same nine
 // sticker slots (the "grounded frame": light along the top, heavier toward the bottom and the form, and always well
 // clear of the logo and the headline), so the pages
 // share one composition but each has its own decals and lead colour. Slots are in the panel's container units (cqi),
@@ -38,7 +38,7 @@ const SLOTS: readonly Slot[] = [
 ];
 
 export const AUTH_PANELS = {
-    signIn: panel('Your feeds\nmissed you.', 'Everything new since your last visit, waiting on one tidy front page.', true, [
+    signIn: panel('Your feeds\nmissed you.', 'Everything new since you left, already sorted.', true, [
         { field: field('rose'), icon: 'mark-unread' },
         { field: field('sky'), icon: 'newsletter', label: 'Newsletters' },
         { field: field('leaf'), label: '24 unread' },
@@ -49,7 +49,7 @@ export const AUTH_PANELS = {
         { field: field('sky'), icon: 'refresh' },
         { field: PAPER, label: 'New!' },
     ]),
-    signUp: panel('Bring your\nfeeds in.', 'Every blog, newsletter and news site you love, sorted your way.', true, [
+    signUp: panel('Bring your\nfeeds in.', 'Blogs, newsletters, news. One tidy front page.', true, [
         { field: field('leaf'), icon: 'mark-unread' },
         { field: field('coral'), icon: 'add-feed', label: 'Add a site' },
         { field: field('sky'), label: 'Pick a colour' },
@@ -60,7 +60,7 @@ export const AUTH_PANELS = {
         { field: field('sky'), icon: 'newsletter' },
         { field: PAPER, label: 'Yours' },
     ]),
-    forgotPassword: panel('It happens\nto us all.', 'We’ll send a link to your inbox. Your feeds will wait.', true, [
+    forgotPassword: panel('It happens\nto us all.', 'Your feeds will keep. Grab the link from your inbox.', true, [
         { field: field('leaf'), icon: 'mark-read' },
         { field: field('coral'), icon: 'newsletter', label: 'Check your inbox' },
         null,
@@ -71,7 +71,7 @@ export const AUTH_PANELS = {
         null,
         null,
     ]),
-    resetPassword: panel('Same feeds,\nnew key.', 'Everything you saved is right where you left it.', true, [
+    resetPassword: panel('Same feeds,\nnew key.', 'Everything you saved stays right where it was.', true, [
         null,
         null,
         null,
@@ -82,7 +82,7 @@ export const AUTH_PANELS = {
         null,
         { field: field('leaf'), label: 'New password' },
     ]),
-    verifyEmail: panel('One tiny\ncode.', 'Pop in the six digits from your inbox and you’re all set.', true, [
+    verifyEmail: panel('One tiny\ncode.', 'Six digits stand between you and your feeds.', true, [
         null,
         { field: field('sky'), icon: 'newsletter', label: 'Check your inbox' },
         { field: field('coral'), label: '6-digit code' },
@@ -93,7 +93,7 @@ export const AUTH_PANELS = {
         { field: field('lilac'), icon: 'newsletter' },
         null,
     ]),
-    changePassword: panel('Fresh\npassword.', 'Swap it out, and sign out your other devices while you’re at it.', false, [
+    changePassword: panel('Fresh\npassword.', 'New key, same desk. Nothing moves.', false, [
         null,
         { field: field('aqua'), icon: 'sign-out', label: 'Sign out other devices' },
         null,
