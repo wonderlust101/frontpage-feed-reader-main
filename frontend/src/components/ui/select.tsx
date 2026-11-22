@@ -19,7 +19,7 @@ export function Select({ id, label, className = '', children, ...selectProps }: 
             <span className="relative flex items-center">
                 <select
                     id={id}
-                    className="h-12 w-full appearance-none rounded-control border-[1.5px] border-ink bg-ground pr-12 pl-5 text-ui text-ink disabled:cursor-not-allowed disabled:opacity-40"
+                    className="h-12 w-full appearance-none rounded-control border-[1.5px] border-control-edge bg-control-fill pr-12 pl-5 text-ui text-ink disabled:cursor-not-allowed disabled:opacity-40"
                     {...selectProps}
                 >
                     {children}

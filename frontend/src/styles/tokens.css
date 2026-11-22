@@ -4,32 +4,31 @@
 :root {
     color-scheme: light dark;
 
-    --color-ground: light-dark(#f9f9f7, #0e0e0c);
-    --color-ground-2: light-dark(#efefeb, #1b1b18);
+    --color-ground: light-dark(#f9f9f7, #1c1c1a);
+    --color-ground-2: light-dark(#efefeb, #2a2a27);
     --color-ink: light-dark(#0a0a0a, #f3f3ee);
     --color-ink-2: light-dark(#3d3d3a, #c9c9c1);
     --color-meta: light-dark(#64645f, #9b9b93);
     --color-rule: var(--color-ink);
-    /* The ink rule that opens a list or section: 1.5px, the same weight as control edges; 2px in high contrast. */
+
     --rule-width: 1.5px;
-    --color-rule-soft: light-dark(#e2e2dc, #2c2c28);
-    --color-edge: color-mix(in srgb, var(--color-ink) 15%, transparent);
-    /* The 1px hairline inside every small color fill (dots, swatches, tags, fallback tiles), so pale fields keep an */
-    /* edge on any ground, in both themes. Large fields (the hero, palette tiles) stay flat. */
+    --sticker-edge: 3px;
+
+    --color-rule-soft: light-dark(#e2e2dc, #42423d);
+    --color-edge: light-dark(color-mix(in srgb, var(--color-ink) 15%, transparent), color-mix(in srgb, var(--color-ink) 20%, transparent));
     --color-fill-edge: color-mix(in srgb, var(--color-ink) 40%, transparent);
+    --color-control-edge: light-dark(var(--color-ink), #8a8a83);
+    --color-control-fill: light-dark(var(--color-ground), var(--color-ground-2));
+
     --color-on-field: #0a0a0a;
-    /* Text on a fixed near-black surface (the logo's "on ink" lockup), in both themes. */
     --color-on-ink: #f3f3ee;
+
     --color-error: light-dark(#b42318, #ff7a70);
     --color-warning: light-dark(#8a5300, #f2b13b);
 
-    /* Focus is a two-tone ring, an ink outline over a ground halo, so one of the two always stands out from */
-    /* whatever it sits on, fields included. Field surfaces set --color-focus to on-field ink. */
     --color-focus: var(--color-ink);
     --color-focus-halo: var(--color-ground);
 
-    /* Fields keep their full color in both themes. Lemon, which fills the hero, turns a little warmer and golden in */
-    /* dark mode: plain darker yellow drifts to olive, while a warmer yellow sits comfortably on near-black. */
     --color-field-lemon: light-dark(#ffe500, #ffd000);
     --color-field-coral: #ff756e;
     --color-field-sky: #04acfb;
@@ -38,7 +37,6 @@
     --color-field-tangerine: #fd9305;
     --color-field-aqua: #0bdac9;
     --color-field-rose: #fe6ab9;
-    /* "No color": a neutral stone field, the default for new categories; ink on it is 12.1:1. */
     --color-field-none: #cbcbc3;
 
     --text-meta: 0.8125rem;
@@ -63,7 +61,6 @@
     --radius-panel: 12px;
     --radius-stage: 14px;
 
-    /* The measure is in em so it holds about 66 characters of the text it is set on, whatever the size. */
     --measure: 32em;
     --density: 1;
     --gutter: clamp(1rem, 0.4rem + 2.6vw, 4.5rem);
@@ -81,15 +78,14 @@
     color-scheme: dark;
 }
 
-/* High contrast (AAA): supporting text and status colors reach 7:1, rules and container edges turn solid ink. */
-/* It follows the system setting unless the reader picks Standard or More in the reading controls. */
 :root[data-contrast='more'] {
     --color-ink-2: var(--color-ink);
     --color-meta: light-dark(#3d3d3a, #c9c9c1);
     --color-rule-soft: var(--color-ink);
     --rule-width: 2px;
     --color-edge: var(--color-ink);
-    --color-error: light-dark(#8c1b12, #ff7a70);
+    --color-control-edge: var(--color-ink);
+    --color-error: light-dark(#8c1b12, #ff9087);
     --color-warning: light-dark(#6b4000, #f2b13b);
 }
 
@@ -100,7 +96,8 @@
         --color-rule-soft: var(--color-ink);
         --rule-width: 2px;
         --color-edge: var(--color-ink);
-        --color-error: light-dark(#8c1b12, #ff7a70);
+        --color-control-edge: var(--color-ink);
+        --color-error: light-dark(#8c1b12, #ff9087);
         --color-warning: light-dark(#6b4000, #f2b13b);
     }
 }

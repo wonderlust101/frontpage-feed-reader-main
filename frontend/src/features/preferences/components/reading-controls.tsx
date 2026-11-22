@@ -101,7 +101,7 @@ export function ReadingControls({ children }: { children: ReactNode }) {
                                 <select
                                     value={face}
                                     onChange={(event) => setFace(event.target.value as ReadingFace)}
-                                    className="h-8 appearance-none rounded-toggle border-[1.5px] border-ink bg-ground pr-8 pl-3 text-meta font-semibold text-ink"
+                                    className="h-8 appearance-none rounded-toggle border-[1.5px] border-control-edge bg-control-fill pr-8 pl-3 text-meta font-semibold text-ink"
                                 >
                                     {FACE_OPTIONS.map((option) => (
                                         <option key={option.value} value={option.value}>
@@ -138,7 +138,7 @@ function ChoiceControl<Value extends string>({ name, legend, options, value, onC
                 {options.map((option) => (
                     <label
                         key={option.value}
-                        className="relative cursor-pointer rounded-toggle border-[1.5px] border-ink px-3 py-1 text-meta font-semibold after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] has-[:checked]:bg-ink has-[:checked]:text-ground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink"
+                        className="relative cursor-pointer rounded-toggle border-[1.5px] border-control-edge px-3 py-1 text-meta font-semibold has-[:checked]:border-ink after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] has-[:checked]:bg-ink has-[:checked]:text-ground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink"
                     >
                         <input
                             type="radio"
