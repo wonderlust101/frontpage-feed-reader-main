@@ -365,9 +365,16 @@
         height: auto;
     }
 
-    /* Below lg a field is a short band: only the stickers along its right edge stay. */
+    /* Below lg a field is a short band: wide-only stickers drop out, and narrow-only ones (the band's bottom-edge */
+    /* cluster) appear; from lg up it is the other way round. */
     @media (width < 64rem) {
         .sticker[data-wide-only] {
+            display: none;
+        }
+    }
+
+    @media (width >= 64rem) {
+        .sticker[data-narrow-only] {
             display: none;
         }
     }
@@ -388,21 +395,27 @@
         }
     }
 
-    /* Opt-in idle motion (the auth panel): each sticker wobbles a degree and a half either way, out of phase with */
-    /* the next. It turns `transform`, so it adds to the hover's `rotate` instead of fighting it. Off under reduced motion. */
+    /* Opt-in arrival motion (the auth panel): as the page opens, each sticker wobbles three degrees either way and */
+    /* back, three times, a beat after the one before, then settles and stays still. The whole thing is over in about */
+    /* five seconds, so it never needs a pause control (WCAG 2.2.2). It turns `transform`, so it adds to the hover's */
+    /* `rotate` instead of fighting it. Off under reduced motion. */
     @media (prefers-reduced-motion: no-preference) {
         .stickers-wobble .sticker {
-            animation: sticker-wobble 3.8s ease-in-out infinite alternate;
-            animation-delay: calc(var(--sticker-order) * -0.55s);
+            animation: sticker-wobble 1.3s ease-in-out 3;
+            animation-delay: calc(var(--sticker-order) * 70ms);
         }
     }
 
     @keyframes sticker-wobble {
-        from {
-            transform: rotate(-1.5deg);
+        0%,
+        100% {
+            transform: rotate(0deg);
         }
-        to {
-            transform: rotate(1.5deg);
+        25% {
+            transform: rotate(3deg);
+        }
+        75% {
+            transform: rotate(-3deg);
         }
     }
 

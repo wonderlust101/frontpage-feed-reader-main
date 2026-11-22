@@ -19,6 +19,7 @@ export type Sticker = {
     tilt: number;
     drift: [string, string];
     wideOnly?: boolean;
+    narrowOnly?: boolean;
 };
 
 type StickersProps = {
@@ -50,6 +51,7 @@ export function Stickers({ stickers, className = '' }: StickersProps) {
                         className="sticker"
                         data-shape={sticker.shape}
                         data-wide-only={sticker.wideOnly || undefined}
+                        data-narrow-only={sticker.narrowOnly || undefined}
                         style={style}
                     >
                         {sticker.shape === 'pill' ? (
