@@ -21,7 +21,7 @@ export function FormAlert({ lead, message, action }: FormAlertProps) {
     }, [message]);
 
     return (
-        <div ref={alertRef} tabIndex={-1} className="outline-none focus-visible:outline-none">
+        <div ref={alertRef} tabIndex={-1}>
             <Notice tone="error" icon="error" lead={lead} action={action}>
                 {message}
             </Notice>
