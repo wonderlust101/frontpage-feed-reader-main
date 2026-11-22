@@ -11,7 +11,7 @@ import { BRAND_FIELD } from '@/features/categories/fields';
 type AuthFrameProps = {
     title: string;
     intro: ReactNode;
-    aside: { prompt: string; label: string; href: string };
+    aside: { prompt?: string; label: string; href: string };
     children: ReactNode;
 };
 
@@ -30,7 +30,7 @@ export function AuthFrame({ title, intro, aside, children }: AuthFrameProps) {
                                 <Logo size="md" variant="ink" />
                             </Link>
                             <p className="text-ui">
-                                <span className="hidden sm:inline">{aside.prompt} </span>
+                                {aside.prompt && <span className="hidden sm:inline">{aside.prompt} </span>}
                                 <Link href={aside.href} className="font-semibold underline decoration-1 underline-offset-4 hover:decoration-2">
                                     {aside.label}
                                 </Link>
