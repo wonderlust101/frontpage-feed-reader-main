@@ -59,7 +59,7 @@
         color: var(--capsule-on, var(--color-on-field));
     }
 
-    /* Hover darkens the field a clear step at full chroma (so Lemon turns gold, not olive); the edge stays 1.5px, so nothing thickens or shifts. */
+    /* Hover darkens the field a clear step at full chroma (so Lemon deepens to amber, not olive); the edge stays 1.5px, so nothing thickens or shifts. */
     .capsule:is([aria-pressed='true'], [aria-checked='true']):hover {
         background: oklch(from var(--capsule-field) calc(l - 0.1) c h);
     }
@@ -140,7 +140,7 @@
         background: var(--color-field-lemon);
     }
 
-    /* On, hover darkens the Lemon to gold, like an on capsule. */
+    /* On, hover darkens the Lemon a step, like an on capsule. */
     .switch[aria-checked='true']:hover .switch-track {
         background: oklch(from var(--color-field-lemon) calc(l - 0.1) c h);
     }

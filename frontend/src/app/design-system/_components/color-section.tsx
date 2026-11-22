@@ -18,7 +18,7 @@ export function ColorSection() {
             <Specimen
                 title="Field palette"
                 stage="none"
-                description="Flat and unmodulated. All eight go to categories, Lemon included, as many as a reader likes on each, and No color, a neutral stone, is where every new category starts. The fields keep their full color in dark mode; only Lemon turns a little warmer, golden rather than lemon, so the hero sits comfortably on the dark ground."
+                description="Flat and unmodulated. All eight go to categories, Lemon included, as many as a reader likes on each, and No color, a neutral stone, is where every new category starts. Every field keeps one color in both themes. Lemon is a warm gold rather than an acid yellow, so the hero sits as comfortably on the paper ground as on the dark one."
             >
                 <FieldPalette />
             </Specimen>

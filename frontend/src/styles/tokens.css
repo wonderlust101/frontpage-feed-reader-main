@@ -29,7 +29,7 @@
     --color-focus: var(--color-ink);
     --color-focus-halo: var(--color-ground);
 
-    --color-field-lemon: light-dark(#ffe500, #ffd000);
+    --color-field-lemon: #ffd000;
     --color-field-coral: #ff756e;
     --color-field-sky: #04acfb;
     --color-field-leaf: #63de44;

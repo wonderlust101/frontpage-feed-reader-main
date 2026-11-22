@@ -25,8 +25,8 @@ export const FIELDS: Field[] = [
         name: 'Lemon',
         color: 'var(--color-field-lemon)',
         onColor: ON_FIELD,
-        hex: { light: '#FFE500', dark: '#FFD000' },
-        inkContrast: { light: '15.5 : 1', dark: '13.5 : 1' },
+        hex: { light: '#FFD000', dark: '#FFD000' },
+        inkContrast: { light: '13.5 : 1', dark: '13.5 : 1' },
     },
     {
         id: 'coral',
