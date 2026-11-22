@@ -6,6 +6,7 @@
 // come from the guest's saved choices (the Color section's picker), else each sample category's preset.
 
 import { useState } from 'react';
+import { Coastline } from '@/components/coastline';
 import { Logo } from '@/components/logo';
 import { useCategoryFields } from '@/features/categories/category-field-store';
 import { CategorySwitch } from '@/features/categories/components/category-switch';
@@ -15,8 +16,6 @@ import { CATEGORIES, CATEGORY_PRESETS } from '../_data/sample-data';
 import { SECTIONS } from '../_data/sections';
 
 const CATEGORY_IDS = CATEGORIES.map((category) => category.id);
-
-const COAST_PATH = 'M0 0H1440V52C1300 108 1150 148 970 146C790 144 680 84 510 86C340 88 190 146 0 120Z';
 
 const SOURCE_COUNT = CATEGORIES.reduce((total, category) => total + category.sources.length, 0);
 
@@ -70,9 +69,7 @@ export function HeroField() {
                 </div>
             </div>
 
-            <svg aria-hidden="true" className="block h-[clamp(3.5rem,9vw,8.5rem)] w-full" viewBox="0 0 1440 150" preserveAspectRatio="none">
-                <path d={COAST_PATH} fill="currentColor" />
-            </svg>
+            <Coastline className="h-[clamp(3.5rem,9vw,8.5rem)]" />
 
             <CategorySwitch
                 label="Color the field by category"
