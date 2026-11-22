@@ -59,11 +59,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                     </div>
                 </section>
 
-                <main
-                    id="main"
-                    tabIndex={-1}
-                    className="relative flex flex-col bg-ground px-gutter pt-10 pb-8 lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10"
-                >
+                <main id="main" tabIndex={-1} className="relative flex flex-col bg-ground px-gutter pt-10 pb-8 lg:px-[clamp(2.5rem,5vw,6rem)] lg:pt-10">
                     <div className="hidden items-center justify-between gap-6 lg:flex">
                         <Link href="/" className="w-fit rounded-toggle text-ink">
                             <Logo size="md" />
