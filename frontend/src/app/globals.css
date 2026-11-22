@@ -11,6 +11,8 @@
     --color-rule: var(--color-rule);
     --color-rule-soft: var(--color-rule-soft);
     --color-edge: var(--color-edge);
+    --color-control-edge: var(--color-control-edge);
+    --color-control-fill: var(--color-control-fill);
     --color-on-field: var(--color-on-field);
     --color-on-ink: var(--color-on-ink);
     --color-error: var(--color-error);

@@ -13,12 +13,12 @@ export function ColorSection() {
         <DocSection
             id="color"
             title="Color"
-            intro="Lemon is Frontpage's own color: the home field, the All view and the brand. Every other color has one job: it tells you which category you are in. Categories are yours, about anything from frontend to film to politics, and you choose their colors. Everything else is ink on the ground, and text on a field is always ink, in both themes."
+            intro="Lemon is Frontpage's own color: the home field, the All view and the brand. On a category, every color, Lemon included, has one job: it tells you which category you are in. Categories are yours, about anything from frontend to film to politics, and you choose their colors. Everything else is ink on the ground, and text on a field is always ink, in both themes."
         >
             <Specimen
                 title="Field palette"
                 stage="none"
-                description="Flat and unmodulated. Lemon stays with Frontpage. The other seven go to categories, as many as a reader likes on each, and No color, a neutral stone, is where every new category starts. The fields keep their full color in dark mode; only Lemon turns a little warmer, golden rather than lemon, so the hero sits comfortably on the dark ground."
+                description="Flat and unmodulated. All eight go to categories, Lemon included, as many as a reader likes on each, and No color, a neutral stone, is where every new category starts. Every field keeps one color in both themes. Lemon is a warm gold rather than an acid yellow, so the hero sits as comfortably on the paper ground as on the dark one."
             >
                 <FieldPalette />
             </Specimen>

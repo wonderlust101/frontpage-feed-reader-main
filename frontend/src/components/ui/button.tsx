@@ -11,7 +11,7 @@ const BASE_CLASSES = 'inline-flex items-center gap-2 font-semibold text-ui trans
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     primary: 'h-11 rounded-control border-[1.5px] border-transparent bg-ink px-5 text-ground hover:bg-ink-2',
-    secondary: 'h-11 rounded-control border-[1.5px] border-ink px-5 text-ink hover:bg-ground-2',
+    secondary: 'h-11 rounded-control border-[1.5px] border-control-edge px-5 text-ink hover:border-ink hover:bg-ground-2',
     quiet: 'h-11 text-ink underline decoration-1 underline-offset-4 hover:decoration-2',
     destructive: 'h-11 rounded-control border-[1.5px] border-error px-5 text-error hover:bg-ground-2',
 };
