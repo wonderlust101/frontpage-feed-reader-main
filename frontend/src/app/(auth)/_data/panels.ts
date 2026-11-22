@@ -1,5 +1,6 @@
 // Each auth page's left panel: a headline, one supporting line, and its stickers. Every page fills the same nine
-// sticker slots (the "grounded frame": light along the top, heavier toward the bottom and the form), so the pages
+// sticker slots (the "grounded frame": light along the top, heavier toward the bottom and the form, and always well
+// clear of the logo and the headline), so the pages
 // share one composition but each has its own decals and lead colour. Slots are in the panel's container units (cqi),
 // so the frame scales with the panel; bottom slots are measured from the bottom so they stay down on tall screens.
 // Wide-only slots drop out on phones, where the panel is a short band and only the right-edge stickers stay.
@@ -24,15 +25,15 @@ type SlotDecals = readonly [Decal | null, Decal | null, Decal | null, Decal | nu
 const PAPER = 'var(--color-on-ink)';
 
 const SLOTS: readonly Slot[] = [
-    { shape: 'circle', size: '13.5cqi', x: '75.8cqi', y: '-4.8cqi', tilt: 12, drift: ['-4cqi', '5cqi'] },
-    { shape: 'pill', size: '2.9cqi', x: '-6cqi', y: '-2.5cqi', tilt: -6, drift: ['4cqi', '4cqi'], wideOnly: true },
-    { shape: 'square', size: '19.4cqi', x: '80cqi', y: '40cqi', tilt: -8, drift: ['-5cqi', '1.5cqi'] },
-    { shape: 'circle', size: '21cqi', x: '82cqi', y: '50%', tilt: -12, drift: ['-5cqi', '0cqi'], wideOnly: true },
-    { shape: 'pill', size: '3.3cqi', x: '61.3cqi', y: 'calc(100% - 32.3cqi)', tilt: 6, drift: ['-2.5cqi', '-4cqi'], wideOnly: true },
-    { shape: 'circle', size: '24.2cqi', x: '79cqi', y: 'calc(100% - 19.4cqi)', tilt: 10, drift: ['-4.5cqi', '-4.5cqi'] },
-    { shape: 'pill', size: '3.3cqi', x: '30.6cqi', y: 'calc(100% - 9.4cqi)', tilt: -3, drift: ['0cqi', '-4cqi'], wideOnly: true },
-    { shape: 'circle', size: '15.5cqi', x: '-6.5cqi', y: 'calc(100% - 12.9cqi)', tilt: 6, drift: ['4cqi', '-4cqi'], wideOnly: true },
-    { shape: 'square', size: '15.5cqi', x: '-3cqi', y: 'calc(100% - 35.5cqi)', tilt: -9, drift: ['4.5cqi', '-2.5cqi'], wideOnly: true },
+    { shape: 'circle', size: '16cqi', x: '78cqi', y: '-5cqi', tilt: 12, drift: ['-3cqi', '4cqi'] },
+    { shape: 'pill', size: '2.7cqi', x: '40cqi', y: '-1.8cqi', tilt: -5, drift: ['0cqi', '3cqi'], wideOnly: true },
+    { shape: 'square', size: '17cqi', x: '84cqi', y: '32cqi', tilt: -8, drift: ['-3cqi', '1.5cqi'] },
+    { shape: 'circle', size: '18cqi', x: '86cqi', y: '54cqi', tilt: -12, drift: ['-3cqi', '0cqi'], wideOnly: true },
+    { shape: 'pill', size: '3cqi', x: '64cqi', y: 'calc(100% - 40cqi)', tilt: -6, drift: ['-2cqi', '-3cqi'], wideOnly: true },
+    { shape: 'circle', size: '28cqi', x: '72cqi', y: 'calc(100% - 24cqi)', tilt: 10, drift: ['-3cqi', '-3cqi'], wideOnly: true },
+    { shape: 'pill', size: '3cqi', x: '30cqi', y: 'calc(100% - 11cqi)', tilt: 4, drift: ['0cqi', '-3cqi'], wideOnly: true },
+    { shape: 'circle', size: '18cqi', x: '-6cqi', y: 'calc(100% - 20cqi)', tilt: 6, drift: ['3cqi', '-3cqi'], wideOnly: true },
+    { shape: 'square', size: '13cqi', x: '11cqi', y: 'calc(100% - 9cqi)', tilt: -9, drift: ['2cqi', '-3cqi'], wideOnly: true },
 ];
 
 export const AUTH_PANELS = {

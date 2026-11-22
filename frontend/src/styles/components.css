@@ -275,19 +275,19 @@
         container-type: inline-size;
     }
 
-    /* Text on a sticker field sits on a plate of the field's own color (--sticker-field-color, set by the field), */
-    /* above the sticker layer: invisible where nothing passes, and a sticker running into the text tucks behind it, */
-    /* so letters are never cut. The plate hugs its text (fit-content) with a little bleed for descenders, and eases */
-    /* with the field when a category recolors it, so it never shows as a box mid-transition. */
-    .sticker-safe {
+    /* Text and stickers: headers and the logo get no plate; stickers are placed well clear of them instead. Other */
+    /* text that shares the field with stickers sits in a sticker note: a real container of sticker paper with an ink */
+    /* edge, above the sticker layer, so a sticker may tuck under its edge. Paper and ink are fixed in both themes. */
+    .sticker-note {
         position: relative;
         z-index: 1;
         width: fit-content;
-        margin: -0.1em -0.25em;
-        padding: 0.1em 0.25em;
-        border-radius: var(--radius-toggle);
-        background: var(--sticker-field-color, var(--color-field-lemon));
-        transition: background-color var(--duration-field) var(--ease-out);
+        max-width: 100%;
+        padding: 0.875rem 1.125rem;
+        border: 1.5px solid var(--color-on-field);
+        border-radius: var(--radius-panel);
+        background: var(--color-on-ink);
+        color: var(--color-on-field);
     }
 
     .stickers {

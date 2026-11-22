@@ -1,9 +1,8 @@
 // The frame every auth page shares: the full screen split in two. Left, a Lemon panel framed by stickers (the
 // page's own set, from _data/panels.ts) with a display headline; right, the form under the page's h1. On phones the
 // panel becomes a short band above the form and keeps only its right-edge stickers.
-// The panel's small text sits on sticker-safe plates, so a sticker that drifts into it on hover tucks behind the words.
-// The headline has no plate (plates would clip its descenders at this tight leading); it just sits above the stickers,
-// and ink stays readable on every sticker colour.
+// The logo and headline have no plate: the sticker slots keep well clear of them. The supporting line and the guest
+// link sit in a sticker note (a real container of sticker paper), which a sticker may tuck under.
 
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
@@ -24,27 +23,25 @@ const LINK_CLASSES = 'font-semibold underline decoration-1 underline-offset-4 ho
 
 // Renders the sticker panel and the form column; `children` is the form (or a result message) under the h1.
 export function AuthFrame({ panel, title, description, aside, children }: AuthFrameProps) {
-    const fieldStyle = { '--sticker-field-color': BRAND_FIELD.color, background: BRAND_FIELD.color } as CSSProperties;
+    const fieldStyle = { background: BRAND_FIELD.color } as CSSProperties;
 
     return (
         <div className="flex flex-1">
             <div className="grid w-full lg:min-h-dvh lg:grid-cols-2">
                 <section aria-label="Frontpage" className="sticker-field on-field relative flex flex-col text-on-field" style={fieldStyle}>
                     <Stickers stickers={panel.stickers} className="stickers-wobble" />
-                    <div className="flex flex-1 flex-col px-gutter pt-6 pb-9 lg:p-14">
-                        <a href="#main" className="sticker-safe sr-only focus:not-sr-only">
+                    <div className="relative flex flex-1 flex-col px-gutter pt-6 pb-9 lg:p-14">
+                        <a href="#main" className="sr-only focus:not-sr-only">
                             Skip to form
                         </a>
-                        <Link href="/" className="sticker-safe rounded-toggle">
+                        <Link href="/" className="w-fit rounded-toggle">
                             <Logo size="md" variant="ink" />
                         </Link>
-                        <p className="mt-10 type-display text-[clamp(2.75rem,13cqi,6.5rem)] whitespace-pre-line lg:mt-[14cqi]">
-                            <span className="relative z-1">{panel.headline}</span>
-                        </p>
-                        <div className="mt-8 flex flex-col gap-2 lg:mt-auto lg:pb-[30cqi]">
-                            <p className="sticker-safe max-w-[22rem] text-ui font-medium">{panel.line}</p>
+                        <p className="mt-10 type-display text-[clamp(2.75rem,13cqi,6.5rem)] whitespace-pre-line lg:mt-[14cqi]">{panel.headline}</p>
+                        <div className="sticker-note mt-8 flex flex-col gap-1.5 lg:mt-auto lg:mb-[34cqi]">
+                            <p className="max-w-[22rem] text-ui font-medium">{panel.line}</p>
                             {panel.guestLink && (
-                                <Link href="/guest" className={`sticker-safe text-ui ${LINK_CLASSES}`}>
+                                <Link href="/guest" className={`w-fit text-ui ${LINK_CLASSES}`}>
                                     Read as a guest
                                 </Link>
                             )}
