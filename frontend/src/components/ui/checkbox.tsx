@@ -20,7 +20,7 @@ export function Checkbox({ id, label, hint, className = '', ...inputProps }: Che
                     id={id}
                     type="checkbox"
                     aria-describedby={hintId}
-                    className="peer size-5 cursor-pointer appearance-none rounded-tag border-[1.5px] border-ink bg-ground checked:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
+                    className="peer size-5 cursor-pointer appearance-none rounded-tag border-[1.5px] border-control-edge bg-control-fill checked:border-ink checked:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
                     {...inputProps}
                 />
                 <svg aria-hidden="true" viewBox="0 0 14 14" className="pointer-events-none absolute size-3.5 text-ground opacity-0 peer-checked:opacity-100">

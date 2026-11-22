@@ -7,7 +7,14 @@ import { DocSection, Specimen } from './doc-section';
 const GROUNDS = [
     { name: 'On the ground', note: 'Lemon mark, ink wordmark', background: 'var(--color-ground)', ink: 'var(--color-ink)', variant: 'lemon' },
     { name: 'On Lemon or a field', note: 'Ink mark, ink wordmark', background: 'var(--color-field-lemon)', ink: 'var(--color-on-field)', variant: 'ink' },
-    { name: 'On ink', note: 'Lemon mark, light wordmark', background: 'var(--color-on-field)', ink: 'var(--color-on-ink)', variant: 'lemon' },
+    {
+        name: 'On ink',
+        note: 'Lemon mark, light wordmark',
+        background: 'var(--color-on-field)',
+        ink: 'var(--color-on-ink)',
+        variant: 'lemon',
+        edge: 'light-dark(var(--color-edge), var(--color-rule-soft))',
+    },
 ] as const;
 
 const MARK_SIZES = [
@@ -43,7 +50,7 @@ export function LogoSection() {
         <DocSection
             id="logo"
             title="Logo"
-            intro="The mark is an F built from two feed rows, with the unread dot beside the second: a front page with something new on it. It sits on a softly rounded Lemon tile, the brand color no category may use. The wordmark is Bricolage Grotesque ExtraBold, set as real text."
+            intro="The mark is an F built from two feed rows, with the unread dot beside the second: a front page with something new on it. It sits on a softly rounded Lemon tile, Frontpage's own color. The wordmark is Bricolage Grotesque ExtraBold, set as real text."
         >
             <Specimen title="Lockup" stage="none" description="Pick the version by what it sits on, never by taste.">
                 <ul className="grid gap-3 lg:grid-cols-3">
@@ -51,7 +58,7 @@ export function LogoSection() {
                         <li
                             key={ground.name}
                             className="flex min-h-44 flex-col justify-between rounded-stage border border-edge p-6"
-                            style={{ background: ground.background, color: ground.ink }}
+                            style={{ background: ground.background, color: ground.ink, borderColor: 'edge' in ground ? ground.edge : undefined }}
                         >
                             <Logo size="md" variant={ground.variant} />
                             <span className="text-meta">
@@ -96,7 +103,7 @@ export function LogoSection() {
                     <ul className="list-disc space-y-2 pl-5 text-ui text-ink-2 marker:text-ink">
                         <li>Clear space on every side equals the dot&apos;s diameter at the size you use.</li>
                         <li>Smallest mark 16px; smallest lockup 20px tall.</li>
-                        <li>Never recolor the tile with a category field: Lemon belongs to Frontpage.</li>
+                        <li>Never recolor the tile with another field: the mark is always Lemon or ink.</li>
                         <li>Never stretch, rotate, outline or add effects. Never set the wordmark in another face.</li>
                     </ul>
                 </Specimen>
