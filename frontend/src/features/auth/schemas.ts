@@ -8,6 +8,10 @@ export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 128;
 export const CODE_LENGTH = 6;
 
+// The hint under every new-password field. Length is what makes a password strong, and unrelated words make length
+// easy to remember (a familiar phrase or a quote is easy to guess, so the words should not belong together).
+export const NEW_PASSWORD_HINT = `At least ${MIN_PASSWORD_LENGTH} characters. Longer is stronger: try a few unrelated words.`;
+
 const MAX_NAME_LENGTH = 100;
 
 const email = z

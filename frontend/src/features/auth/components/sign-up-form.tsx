@@ -13,7 +13,7 @@ import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { rememberPendingEmail } from '../pending-email';
-import { MIN_PASSWORD_LENGTH, signUpSchema } from '../schemas';
+import { signUpSchema, NEW_PASSWORD_HINT } from '../schemas';
 import { FormAlert } from './form-alert';
 import { SubmitButton } from './submit-button';
 
@@ -62,7 +62,7 @@ export function SignUpForm() {
                 aria-required
                 id="password"
                 label="Password"
-                hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short phrase beats a hard word.`}
+                hint={NEW_PASSWORD_HINT}
                 autoComplete="new-password"
                 error={errors.password?.message}
                 {...register('password')}

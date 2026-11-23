@@ -16,7 +16,7 @@ import { PasswordField } from '@/components/ui/password-field';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
-import { changePasswordSchema, MIN_PASSWORD_LENGTH } from '../schemas';
+import { changePasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
 import { FormAlert } from './form-alert';
 import { SubmitButton } from './submit-button';
 
@@ -104,7 +104,7 @@ export function ChangePasswordForm() {
                 aria-required
                 id="new-password"
                 label="New password"
-                hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short phrase beats a hard word.`}
+                hint={NEW_PASSWORD_HINT}
                 autoComplete="new-password"
                 error={errors.newPassword?.message}
                 {...register('newPassword')}
