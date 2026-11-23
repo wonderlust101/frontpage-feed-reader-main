@@ -34,7 +34,7 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       │   └── design-system/  # /design-system: the living design system page
 │       ├── features/         # app features, mirroring backend/src/modules (auth, categories, items, preferences…)
 │       │   └── <domain>/     #   components/, logic (fields.ts, category-field-store.ts…), later hooks/, actions.ts, types.ts
-│       ├── components/       # shared, feature-agnostic: ui/ primitives (incl. form pieces), logo.tsx, app-sidebar.tsx, stickers.tsx
+│       ├── components/       # shared, feature-agnostic: ui/ primitives (incl. form pieces), logo.tsx, app-shell/ (header, sidebar, drawer, sheet), stickers.tsx
 │       ├── lib/api.ts        # server-side client for the backend
 │       └── styles/           # tokens.css (design tokens), components.css (component layer)
 ├── backend/                  # Express → Railway (built from the repo root)

@@ -71,6 +71,8 @@ export const READER_CATEGORIES: { name: string; field: Field }[] = [
     { name: 'Cooking', field: NO_FIELD },
 ];
 
+export const SAMPLE_READER = { name: 'Alex Morgan', email: 'alex@example.com', emailVerified: false };
+
 export const SAMPLE_ITEMS: SampleItem[] = [
     {
         id: 'local-models',

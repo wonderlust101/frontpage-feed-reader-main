@@ -30,7 +30,7 @@ export function PatternsSection() {
             <Specimen
                 title="App shell"
                 stage="frame"
-                description="Views and categories down the side, each with its unread count; search and the one primary action on top; the feed list below. Categories without a color are stone."
+                description="The ink header with its Lemon stripe, the ground-2 sidebar and the paper sheet. The current entry is a bold paper row with an ink-outlined marker in its field. Below lg the sidebar opens as a drawer. This specimen shows every planned control; the live app shows each one once it works."
             >
                 <AppShellDemo />
             </Specimen>
