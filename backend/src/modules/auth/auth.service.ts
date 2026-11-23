@@ -2,6 +2,7 @@
 // Better Auth serves its own endpoints under /api/auth (see auth.controller.ts); other modules only call getSession().
 // Without a database there is no auth: `auth` is null and auth routes answer 503.
 
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { fromNodeHeaders } from 'better-auth/node';
@@ -17,7 +18,6 @@ type ResetEmailUser = { email: string; name: string };
 
 type SendResetLink = (user: ResetEmailUser, url: string) => Promise<void>;
 
-const MIN_PASSWORD_LENGTH = 8;
 const SESSION_DAYS = 30;
 const SECONDS_PER_DAY = 60 * 60 * 24;
 const RESET_TOKEN_MINUTES = 60;
@@ -52,6 +52,7 @@ export function createAuth(database: AuthDatabase, sendResetLink: SendResetLink 
         emailAndPassword: {
             enabled: true,
             minPasswordLength: MIN_PASSWORD_LENGTH,
+            maxPasswordLength: MAX_PASSWORD_LENGTH,
             resetPasswordTokenExpiresIn: RESET_TOKEN_MINUTES * 60,
             revokeSessionsOnPasswordReset: true,
             sendResetPassword: async ({ user, url }) => {
