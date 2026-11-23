@@ -102,8 +102,12 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
         },
         // Better Auth only rate-limits when NODE_ENV is 'production'; keep it on unless we're running tests.
         rateLimit: { enabled: env.NODE_ENV !== 'test' },
-        // One query per session check (session joined to its user) instead of two; needs the relations in auth.schema.ts.
-        advanced: { database: { joins: true } },
+        advanced: {
+            // One query per session check (session joined to its user) instead of two; needs the relations in auth.schema.ts.
+            database: { joins: true },
+            // Better Auth skips its origin and redirect-address checks when NODE_ENV is 'test'; always run them, so tests prove they work.
+            disableOriginCheck: false,
+        },
     });
 }
 

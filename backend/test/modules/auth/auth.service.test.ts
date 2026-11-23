@@ -227,6 +227,51 @@ describe('email verification by code', () => {
     });
 });
 
+describe('change password', () => {
+    test('a wrong current password fails with INVALID_PASSWORD', async () => {
+        const cookie = await signUp('changer@example.com');
+        await expect(
+            auth.api.changePassword({ body: { currentPassword: 'not my password', newPassword: NEW_PASSWORD }, headers: new Headers({ cookie }) }),
+        ).rejects.toMatchObject({ body: { code: 'INVALID_PASSWORD' } });
+    });
+
+    test('revokeOtherSessions signs out other devices but keeps this one', async () => {
+        const otherDevice = await signUp('two-devices@example.com');
+        const { headers: signInHeaders } = await auth.api.signInEmail({
+            body: { email: 'two-devices@example.com', password: PASSWORD },
+            returnHeaders: true,
+        });
+        const thisDevice = cookieFrom(signInHeaders);
+
+        const { headers } = await auth.api.changePassword({
+            body: { currentPassword: PASSWORD, newPassword: NEW_PASSWORD, revokeOtherSessions: true },
+            headers: new Headers({ cookie: thisDevice }),
+            returnHeaders: true,
+        });
+
+        // Better Auth swaps this device's session for a new one when it revokes the others.
+        const thisDeviceNow = cookieFrom(headers) || thisDevice;
+        expect(await auth.api.getSession({ headers: new Headers({ cookie: otherDevice }) })).toBeNull();
+        expect((await auth.api.getSession({ headers: new Headers({ cookie: thisDeviceNow }) }))?.user.email).toBe('two-devices@example.com');
+    });
+});
+
+describe('untrusted return addresses', () => {
+    test('a reset request whose redirectTo is on an untrusted site is refused', async () => {
+        await signUp('phished@example.com');
+        const res = await auth.handler(
+            new Request('http://localhost:4000/api/auth/request-password-reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:3000' },
+                body: JSON.stringify({ email: 'phished@example.com', redirectTo: 'https://evil.example/reset-password' }),
+            }),
+        );
+        expect(res.status).toBe(403);
+        expect(await res.json()).toMatchObject({ code: 'INVALID_REDIRECT_URL' });
+        expect(lastEmailTo('phished@example.com')?.text ?? '').not.toContain('evil.example');
+    });
+});
+
 describe('verificationCodeEmail', () => {
     test('puts the code in the text and HTML but not in the subject', () => {
         const email = verificationCodeEmail('ada@example.com', '123456');
