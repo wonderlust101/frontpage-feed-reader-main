@@ -12,8 +12,8 @@ import { createContext, use, useEffect, useId, useState, type Dispatch, type Rea
 import { TextLink } from '@/components/ui/text-link';
 import type { Heading, PanelText } from '../headings';
 
-// The page-switch link in the frame's top bar ("New to Frontpage? Create an account").
-export type SwitchLinkTarget = { prompt?: string; label: string; href: string };
+// The page-switch link in the frame's top bar ("New to Frontpage? Create an account"); a form's link may also run `onClick`.
+export type SwitchLinkTarget = { prompt?: string; label: string; href: string; onClick?: () => void };
 
 // What a form can change in the frame: the switch link (null hides it), and whether the guest shortcut shows.
 export type FrameLinks = { switchLink: SwitchLinkTarget | null; guestLink: boolean };
@@ -99,7 +99,7 @@ export function AuthSwitchLink({ target }: { target: SwitchLinkTarget }) {
     return (
         <p className="text-ui text-ink-2 lg:whitespace-nowrap">
             {link.prompt && <>{link.prompt} </>}
-            <TextLink href={link.href} className="text-ink">
+            <TextLink href={link.href} className="text-ink" onClick={link.onClick}>
                 {link.label}
             </TextLink>
         </p>
@@ -150,7 +150,7 @@ export function useAuthDescriptionId(): string | undefined {
 }
 
 // Shows `links` in place of the page's switch link and guest shortcut while the calling component is mounted with
-// them; null keeps the page's.
+// them; null keeps the page's. Pass a stable `onClick` (e.g. from a module constant): a new one each render resets the links.
 export function useAuthFrameLinks(links: FrameLinks | null) {
     const setLinks = use(FrameLinksSetterContext);
     const active = links !== null;
@@ -158,14 +158,15 @@ export function useAuthFrameLinks(links: FrameLinks | null) {
     const prompt = links?.switchLink?.prompt;
     const label = links?.switchLink?.label;
     const href = links?.switchLink?.href;
+    const onClick = links?.switchLink?.onClick;
     const guestLink = links?.guestLink;
 
     useEffect(() => {
         if (!setLinks || !active || guestLink === undefined) {
             return;
         }
-        const switchLink = hidesSwitch || label === undefined || href === undefined ? null : { prompt, label, href };
+        const switchLink = hidesSwitch || label === undefined || href === undefined ? null : { prompt, label, href, onClick };
         setLinks({ switchLink, guestLink });
         return () => setLinks(null);
-    }, [setLinks, active, hidesSwitch, prompt, label, href, guestLink]);
+    }, [setLinks, active, hidesSwitch, prompt, label, href, onClick, guestLink]);
 }
