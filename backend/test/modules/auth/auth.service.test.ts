@@ -62,12 +62,13 @@ function codeFor(to: string) {
 
 // Builds an auth instance as production would (rate limits on, Secure cookies), restoring the real env afterwards.
 // Every required setting is valid unless `overrides` says otherwise.
-function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN' | 'AUTH_COOKIE_PREFIX'>> = {}) {
+function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN' | 'AUTH_COOKIE_PREFIX' | 'WEB_ORIGINS'>> = {}) {
     const saved = {
         NODE_ENV: env.NODE_ENV,
         AUTH_SECRET: env.AUTH_SECRET,
         AUTH_COOKIE_DOMAIN: env.AUTH_COOKIE_DOMAIN,
         AUTH_COOKIE_PREFIX: env.AUTH_COOKIE_PREFIX,
+        WEB_ORIGINS: env.WEB_ORIGINS,
     };
     Object.assign(env, {
         NODE_ENV: 'production',
@@ -103,6 +104,10 @@ describe('production settings guard', () => {
 
     test('refuses an AUTH_SECRET shorter than 32 characters', () => {
         expect(() => createInProduction({ AUTH_SECRET: 'too-short' })).toThrow('AUTH_SECRET is required');
+    });
+
+    test('refuses to start without an allowed site (WEB_ORIGIN)', () => {
+        expect(() => createInProduction({ WEB_ORIGINS: [] })).toThrow('WEB_ORIGIN is required');
     });
 
     test('refuses to start without AUTH_COOKIE_DOMAIN', () => {

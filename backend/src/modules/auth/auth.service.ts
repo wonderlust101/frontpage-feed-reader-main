@@ -53,7 +53,15 @@ export async function getSession(headers: IncomingHttpHeaders) {
 export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliverEmail) {
     // Without a fixed base URL, Better Auth builds reset links from the request's Host header, which a client controls.
     if (env.NODE_ENV === 'production' && !env.AUTH_URL) {
-        throw new Error('AUTH_URL is required in production: password-reset links are built from it');
+        throw new Error(
+            'AUTH_URL is required in production: password-reset links are built from it (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
+        );
+    }
+    // Without an allowed origin, the browser's CORS check and Better Auth's origin check would refuse every sign-in.
+    if (env.NODE_ENV === 'production' && env.WEB_ORIGINS.length === 0) {
+        throw new Error(
+            'WEB_ORIGIN is required in production: the site that may call the API (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
+        );
     }
     // The secret signs session cookies: a missing or short one would let someone forge a sign-in.
     if (env.NODE_ENV === 'production' && (env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH) {
@@ -61,7 +69,9 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
     }
     // Without it the cookie belongs to the API's host only, and the site's pages would never see anyone signed in.
     if (env.NODE_ENV === 'production' && !env.AUTH_COOKIE_DOMAIN) {
-        throw new Error('AUTH_COOKIE_DOMAIN is required in production: the site and the API share the session cookie through it');
+        throw new Error(
+            'AUTH_COOKIE_DOMAIN is required in production: the site and the API share the session cookie through it (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
+        );
     }
 
     return betterAuth({
