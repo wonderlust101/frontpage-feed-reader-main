@@ -10,6 +10,7 @@
     --color-muted: var(--color-meta);
     --color-rule: var(--color-rule);
     --color-rule-soft: var(--color-rule-soft);
+    --color-skeleton: var(--color-skeleton);
     --color-edge: var(--color-edge);
     --color-control-edge: var(--color-control-edge);
     --color-control-fill: var(--color-control-fill);

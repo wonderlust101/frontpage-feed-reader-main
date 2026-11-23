@@ -88,7 +88,7 @@ export const AUTH_PANELS = {
     ),
     forgotPassword: panel(
         'It happens\nto us all.',
-        "Your feeds will keep. We'll get you a fresh key.",
+        "Your feeds will keep. We'll get you back in.",
         true,
         [
             { field: field('leaf'), icon: 'mark-read' },
@@ -151,7 +151,7 @@ export const AUTH_PANELS = {
     ),
     changePassword: panel(
         'Fresh\npassword.',
-        'New key, same desk. Nothing moves.',
+        'Same desk. Nothing moves.',
         false,
         [
             null,
@@ -168,6 +168,27 @@ export const AUTH_PANELS = {
             { field: field('aqua'), icon: 'account' },
             { field: field('tangerine'), icon: 'healthy' },
             { field: field('lilac'), icon: 'sign-out' },
+        ],
+    ),
+    accountUnavailable: panel(
+        'Back in\na moment.',
+        "Your feeds are safe. We just can't reach them right now.",
+        false,
+        [
+            null,
+            null,
+            null,
+            { field: field('sky'), icon: 'refresh' },
+            null,
+            { field: field('leaf'), icon: 'healthy' },
+            null,
+            null,
+            { field: PAPER, label: 'Hang on' },
+        ],
+        [
+            { field: field('sky'), icon: 'refresh' },
+            { field: field('leaf'), icon: 'healthy' },
+            { field: field('tangerine'), icon: 'account' },
         ],
     ),
 } satisfies Record<string, AuthPanel>;

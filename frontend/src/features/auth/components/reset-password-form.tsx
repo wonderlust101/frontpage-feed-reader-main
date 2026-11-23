@@ -7,9 +7,10 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
+import { DocumentTitle } from '@/components/document-title';
 import { TextLink } from '@/components/ui/text-link';
 import { PasswordField } from '@/components/ui/password-field';
 import { FormAlert } from '@/components/ui/form-alert';
@@ -17,7 +18,9 @@ import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
+import { RESET_PASSWORD_HEADINGS } from '../headings';
 import { resetPasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
+import { useAuthHeading } from './auth-heading';
 
 type ResetPasswordFormProps = {
     token: string;
@@ -25,9 +28,12 @@ type ResetPasswordFormProps = {
 
 type ResetValues = z.infer<typeof resetPasswordSchema>;
 
-// Renders the new-password form for `token`; an expired or used link is reported with a way to ask for a new one.
+// Renders the new-password form for `token`; an expired or used link is reported with a way to ask for a new one, and
+// the page's heading and panel turn to the expired ones, as when the link was already known to be stale.
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     const router = useRouter();
+    const [linkExpired, setLinkExpired] = useState(false);
+    useAuthHeading(linkExpired ? RESET_PASSWORD_HEADINGS.expired : null);
     const {
         register,
         handleSubmit,
@@ -44,6 +50,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         const { failure } = await authRequest((fetchOptions) => authClient.resetPassword({ newPassword: password, token }, fetchOptions));
         if (failure) {
             resetField('password');
+            setLinkExpired(failure.code === 'INVALID_TOKEN');
             setError('root', { message: authErrorMessage(failure) });
             return;
         }
@@ -52,6 +59,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
     return (
         <form noValidate method="post" onSubmit={handleSubmit(resetPassword)} className="flex flex-col gap-6">
+            {linkExpired && <DocumentTitle title={RESET_PASSWORD_HEADINGS.expired.title} />}
             {errors.root?.message && (
                 <FormAlert
                     lead="Couldn't change your password."

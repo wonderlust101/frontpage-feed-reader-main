@@ -1,13 +1,19 @@
 'use client';
 
 // Change-password form for signed-in readers: current password, new password, and whether to sign out other devices
-// (on by default, in case the old password leaked). The current password is the security check. If the session has
-// ended meanwhile (signed out in another tab, or expired), the API answers UNAUTHORIZED and the reader is asked to sign in again.
+// (on by default, in case the old password leaked). The current password is the security check; a reader who has
+// forgotten it takes the reset route ("Forgot your current password?", which fills in their email there). If the
+// session has ended meanwhile (signed out in another tab, or expired), the API answers UNAUTHORIZED and the reader is
+// asked to sign in again. Success replaces the form with the result and one way on, so the ending isn't an armed,
+// empty form under a "done" message: the heading says the password changed, one notice says what happened to the
+// other devices, and "Back to your account" is the only link (the frame's own copy of it steps aside).
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
+import { buttonClassName } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TextLink } from '@/components/ui/text-link';
 import { FormNotice } from '@/components/ui/form-notice';
@@ -19,23 +25,26 @@ import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { CHANGE_PASSWORD_HEADINGS } from '../headings';
 import { changePasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
-import { useAuthHeading } from './auth-heading';
+import { useAuthFrameLinks, useAuthHeading, type FrameLinks } from './auth-heading';
 
 type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
 const SIGN_IN_AGAIN_CODES = ['UNAUTHORIZED'];
 
-// Renders the form, then a "password changed" heading and notice (which takes focus); a wrong current password is reported on that field.
+const RESULT_LINKS: FrameLinks = { switchLink: null, guestLink: false };
+
+// Renders the form, then the "password changed" heading, a notice (which takes focus) and a way back to the account;
+// a wrong current password is reported on that field.
 export function ChangePasswordForm() {
     const [changed, setChanged] = useState<{ signedOutOthers: boolean } | null>(null);
     const [needsSignIn, setNeedsSignIn] = useState(false);
     useAuthHeading(changed ? CHANGE_PASSWORD_HEADINGS.changed : null);
+    useAuthFrameLinks(changed ? RESULT_LINKS : null);
     const {
         register,
         handleSubmit,
         setError,
         resetField,
-        reset,
         formState: { errors, isSubmitting },
     } = useForm<ChangePasswordValues>({
         resolver: zodResolver(changePasswordSchema),
@@ -44,7 +53,6 @@ export function ChangePasswordForm() {
     });
 
     async function changePassword(values: ChangePasswordValues) {
-        setChanged(null);
         const { failure } = await authRequest((fetchOptions) => authClient.changePassword(values, fetchOptions));
         if (failure) {
             resetField('currentPassword');
@@ -54,13 +62,25 @@ export function ChangePasswordForm() {
             setError(field, { message: authErrorMessage(failure) }, { shouldFocus: true });
             return;
         }
-        reset();
         setChanged({ signedOutOthers: values.revokeOtherSessions });
+    }
+
+    if (changed) {
+        return (
+            <div className="flex flex-col gap-6">
+                <FormNotice icon="healthy" lead={changed.signedOutOthers ? 'Other devices are signed out.' : 'Other devices stay signed in.'} takesFocus>
+                    {changed.signedOutOthers ? 'This one stays signed in.' : 'They keep working until they sign out.'}
+                </FormNotice>
+                <Link href="/user" className={buttonClassName('primary', 'w-full justify-center')}>
+                    Back to your account
+                </Link>
+            </div>
+        );
     }
 
     return (
         <form noValidate method="post" onSubmit={handleSubmit(changePassword)} className="flex flex-col gap-6">
-            {errors.root?.message ? (
+            {errors.root?.message && (
                 <FormAlert
                     lead="Couldn't change your password."
                     message={errors.root.message}
@@ -72,32 +92,23 @@ export function ChangePasswordForm() {
                         )
                     }
                 />
-            ) : (
-                changed && (
-                    <FormNotice
-                        icon="healthy"
-                        lead="All set."
-                        key={String(changed.signedOutOthers)}
-                        takesFocus
-                        action={
-                            <TextLink href="/user" standalone className="text-ui">
-                                Back to your account
-                            </TextLink>
-                        }
-                    >
-                        {changed.signedOutOthers ? 'Your other devices are signed out.' : 'Use it next time you sign in.'}
-                    </FormNotice>
-                )
             )}
 
-            <PasswordField
-                aria-required
-                id="current-password"
-                label="Current password"
-                autoComplete="current-password"
-                error={errors.currentPassword?.message}
-                {...register('currentPassword')}
-            />
+            <div className="flex flex-col gap-1">
+                <PasswordField
+                    aria-required
+                    id="current-password"
+                    label="Current password"
+                    autoComplete="current-password"
+                    error={errors.currentPassword?.message}
+                    {...register('currentPassword')}
+                />
+                <p>
+                    <TextLink href="/forgot-password" standalone className="text-ui">
+                        Forgot your current password?
+                    </TextLink>
+                </p>
+            </div>
             <PasswordField
                 aria-required
                 id="new-password"

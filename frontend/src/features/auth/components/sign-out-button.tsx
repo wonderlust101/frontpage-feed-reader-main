@@ -32,7 +32,7 @@ export function SignOutButton() {
 
     return (
         <div className="flex flex-col items-start gap-2">
-            <Button variant="secondary" onClick={signOut} disabled={signingOut}>
+            <Button variant="secondary" onClick={signOut} disabled={signingOut} aria-busy={signingOut || undefined}>
                 <Icon name={signingOut ? 'loading' : 'sign-out'} className={signingOut ? 'animate-spin' : ''} />
                 {signingOut ? 'Signing out…' : 'Sign out'}
             </Button>

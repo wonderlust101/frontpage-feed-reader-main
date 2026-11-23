@@ -1,9 +1,11 @@
 // Zod schemas for the auth forms: each form's rules and messages live here, and React Hook Form reads them through
 // zodResolver. Password and code limits come from @frontpage/shared, the same values the API enforces (and checks again).
 // Sign-in only asks for a password, never its length, so accounts made under older rules can still sign in.
+// Written with zod/mini (functional checks instead of methods), so the browser only downloads the checks these forms
+// use rather than all of Zod.
 
 import { CODE_LENGTH, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 // Zod otherwise probes once for `new Function` to compile faster parsers; the Content Security Policy blocks eval, so
 // every page would log a violation. These small forms don't need the speed.
@@ -17,28 +19,31 @@ export const NEW_PASSWORD_HINT = `At least ${MIN_PASSWORD_LENGTH} characters. Lo
 
 const MAX_NAME_LENGTH = 100;
 
-const email = z
-    .string()
-    .min(1, { error: 'Enter your email address.' })
-    .pipe(z.email({ error: 'Enter an email address like name@example.com.' }));
+const email = z.pipe(
+    z.string().check(z.minLength(1, { error: 'Enter your email address.' })),
+    z.email({ error: 'Enter an email address like name@example.com.' }),
+);
 
-const currentPassword = z.string().min(1, { error: 'Enter your password.' });
+const currentPassword = z.string().check(z.minLength(1, { error: 'Enter your password.' }));
 
 const newPassword = z
     .string()
-    .min(MIN_PASSWORD_LENGTH, { error: `Use at least ${MIN_PASSWORD_LENGTH} characters.` })
-    .max(MAX_PASSWORD_LENGTH, { error: `Use at most ${MAX_PASSWORD_LENGTH} characters.` });
+    .check(
+        z.minLength(MIN_PASSWORD_LENGTH, { error: `Use at least ${MIN_PASSWORD_LENGTH} characters.` }),
+        z.maxLength(MAX_PASSWORD_LENGTH, { error: `Use at most ${MAX_PASSWORD_LENGTH} characters.` }),
+    );
 
 const name = z
     .string()
-    .trim()
-    .min(1, { error: 'Enter your name.' })
-    .max(MAX_NAME_LENGTH, { error: `Use at most ${MAX_NAME_LENGTH} characters.` });
+    .check(z.trim(), z.minLength(1, { error: 'Enter your name.' }), z.maxLength(MAX_NAME_LENGTH, { error: `Use at most ${MAX_NAME_LENGTH} characters.` }));
 
-const code = z
-    .string()
-    .transform((value) => value.replace(/\s/g, ''))
-    .pipe(z.string().regex(new RegExp(`^\\d{${CODE_LENGTH}}$`), { error: `Enter the ${CODE_LENGTH}-digit code from the email.` }));
+const code = z.pipe(
+    z.pipe(
+        z.string(),
+        z.transform((value: string) => value.replace(/\s/g, '')),
+    ),
+    z.string().check(z.regex(new RegExp(`^\\d{${CODE_LENGTH}}$`), { error: `Enter the ${CODE_LENGTH}-digit code from the email.` })),
+);
 
 export const signInSchema = z.object({ email, password: currentPassword });
 
@@ -50,9 +55,9 @@ export const codeSchema = z.object({ code });
 
 export const resetPasswordSchema = z.object({ password: newPassword });
 
-export const changePasswordSchema = z
-    .object({ currentPassword, newPassword, revokeOtherSessions: z.boolean() })
-    .refine((values) => values.newPassword !== values.currentPassword, {
+export const changePasswordSchema = z.object({ currentPassword, newPassword, revokeOtherSessions: z.boolean() }).check(
+    z.refine((values) => values.newPassword !== values.currentPassword, {
         path: ['newPassword'],
         error: 'Choose a password that is different from your current one.',
-    });
+    }),
+);

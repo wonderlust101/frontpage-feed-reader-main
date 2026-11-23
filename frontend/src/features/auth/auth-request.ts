@@ -3,10 +3,12 @@
 // which the returned error object doesn't include, so the call gets an onError hook that captures it.
 
 // A failed auth request in one shape: Better Auth's error code, the HTTP status (0 when the request never reached the
-// server, i.e. offline), and the wait in seconds after too many attempts, when the server said.
+// server), whether the browser itself is offline then (otherwise the server is the one that can't be reached), and the
+// wait in seconds after too many attempts, when the server said.
 export type AuthFailure = {
     code?: string;
     status: number;
+    offline?: boolean;
     retryAfterSeconds?: number;
 };
 
@@ -16,7 +18,8 @@ type CallResult<T> = { data: T; error: null } | { data: null; error: { code?: st
 
 type RequestResult<T> = { data: T; failure: null } | { data: null; failure: AuthFailure };
 
-// Returns the call's data, or a failure: the error code and status, the wait in seconds for a 429, status 0 when offline.
+// Returns the call's data, or a failure: the error code and status, the wait in seconds for a 429, status 0 when the
+// request never got an answer (with `offline` when the browser reports no connection).
 // Example: authRequest((fetchOptions) => authClient.signIn.email(values, fetchOptions))
 export async function authRequest<T>(call: (fetchOptions: ErrorHook) => Promise<CallResult<T>>): Promise<RequestResult<T>> {
     let retryAfterSeconds: number | undefined;
@@ -34,6 +37,6 @@ export async function authRequest<T>(call: (fetchOptions: ErrorHook) => Promise<
         }
         return { data: result.data, failure: null };
     } catch {
-        return { data: null, failure: { status: 0 } };
+        return { data: null, failure: { status: 0, offline: typeof navigator !== 'undefined' && navigator.onLine === false } };
     }
 }

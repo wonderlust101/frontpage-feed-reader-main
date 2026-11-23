@@ -2,7 +2,14 @@
 // lasts an hour and is cleared once read. Storage that is blocked must never throw into the page.
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { forgetPendingEmail, readPendingEmail, rememberPendingEmail, rememberSignInEmail, takeSignInEmail } from '../../../src/features/auth/email-storage';
+import {
+    forgetPendingEmail,
+    readPendingEmail,
+    readSignInEmail,
+    rememberPendingEmail,
+    rememberSignInEmail,
+    takeSignInEmail,
+} from '../../../src/features/auth/email-storage';
 
 const SIGN_IN_KEY = 'frontpage-sign-in-email';
 
@@ -62,6 +69,13 @@ describe('sign-in email', () => {
         rememberSignInEmail('ada@example.com');
         expect(takeSignInEmail()).toBe('ada@example.com');
         expect(takeSignInEmail()).toBeNull();
+    });
+
+    test('can be read without clearing it, then taken', () => {
+        rememberSignInEmail('ada@example.com');
+        expect(readSignInEmail()).toBe('ada@example.com');
+        expect(takeSignInEmail()).toBe('ada@example.com');
+        expect(readSignInEmail()).toBeNull();
     });
 
     test('is dropped after an hour', () => {

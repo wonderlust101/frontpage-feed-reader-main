@@ -1,7 +1,7 @@
-// signInArrival: which greeting the sign-in page shows, read from ?reset=.
+// signInArrival: which greeting the sign-in page shows, read from ?reset=. codeStepHeading: what the code step says.
 
 import { describe, expect, test } from 'bun:test';
-import { signInArrival } from '../../../src/features/auth/headings';
+import { codeStepHeading, signInArrival } from '../../../src/features/auth/headings';
 
 describe('signInArrival', () => {
     test('greets a reader back from a password reset', () => {
@@ -12,5 +12,11 @@ describe('signInArrival', () => {
         expect(signInArrival({})).toBeNull();
         expect(signInArrival({ next: '/user' })).toBeNull();
         expect(signInArrival({ verified: '1' })).toBeNull();
+    });
+});
+
+describe('codeStepHeading', () => {
+    test('says where the code went and how long it lasts', () => {
+        expect(codeStepHeading('ada@example.com').description).toBe('We sent a 6-digit code to ada@example.com. It expires in 5 minutes.');
     });
 });

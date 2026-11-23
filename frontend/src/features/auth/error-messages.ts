@@ -23,16 +23,18 @@ const MESSAGES: Record<string, string> = {
     TOO_MANY_ATTEMPTS: 'Too many wrong codes. Send a new one.',
 };
 
-const OFFLINE = "Can't reach Frontpage. Check your connection and try again.";
-// Also shown by the account-unavailable error page when the session can't be checked.
-export const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minutes.';
+const OFFLINE = "You're offline. Check your connection and try again.";
+const UNREACHABLE = "Can't reach Frontpage right now. Try again in a few minutes.";
+const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minutes.';
 const TOO_MANY_REQUESTS = 'Too many tries in a row. Take a minute, then try again.';
 const FALLBACK = 'Something went wrong on our end. Try again in a moment.';
 
-// Returns the sentence for a failure: offline, rate-limited (with the wait when known), server down, a known code, else a generic retry.
+// Returns the sentence for a failure: offline, server unreachable, rate-limited (with the wait when known), server
+// down, a known code, else a generic retry. A request with no answer only blames the connection when the browser says
+// it is offline; otherwise the server is down or unreachable, and the reader shouldn't go checking their wifi.
 export function authErrorMessage(failure: AuthFailure): string {
     if (failure.status === 0) {
-        return OFFLINE;
+        return failure.offline ? OFFLINE : UNREACHABLE;
     }
     if (failure.status === 429) {
         const seconds = failure.retryAfterSeconds;
