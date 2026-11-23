@@ -1,4 +1,5 @@
-/* Component styles that utilities can't express cleanly: filter capsules, range inputs, health lines. */
+/* Component styles that utilities can't express cleanly: filter capsules, range inputs, health lines, and stickers */
+/* (their shapes, the phone-band rules, the hover spring and the arrival wobble). */
 
 @layer components {
     /* Capsules: --capsule-field fills the capsule when it is on; --capsule-on is the text on that fill (on-field ink */
@@ -275,20 +276,7 @@
         container-type: inline-size;
     }
 
-    /* Text on a sticker field sits on a plate of the field's own color (--sticker-field-color, set by the field), */
-    /* above the sticker layer: invisible where nothing passes, and a sticker running into the text tucks behind it, */
-    /* so letters are never cut. The plate hugs its text (fit-content) with a little bleed for descenders, and eases */
-    /* with the field when a category recolors it, so it never shows as a box mid-transition. */
-    .sticker-safe {
-        position: relative;
-        z-index: 1;
-        width: fit-content;
-        margin: -0.1em -0.25em;
-        padding: 0.1em 0.25em;
-        border-radius: var(--radius-toggle);
-        background: var(--sticker-field-color, var(--color-field-lemon));
-        transition: background-color var(--duration-field) var(--ease-out);
-    }
+    /* Text and stickers: text on a field gets no plate; stickers are placed well clear of it instead. */
 
     .stickers {
         position: absolute;
@@ -323,7 +311,7 @@
         width: var(--sticker-size);
         aspect-ratio: 1;
         text-align: center;
-        font-size: calc(var(--sticker-size) * 0.21);
+        font-size: max(1rem, calc(var(--sticker-size) * 0.21));
     }
 
     .sticker[data-shape='circle'] {
@@ -346,7 +334,7 @@
         padding: 0.45em 1em 0.45em 0.45em;
         border-radius: 9999px;
         background: var(--color-on-ink);
-        font-size: var(--sticker-size);
+        font-size: max(1rem, var(--sticker-size));
         white-space: nowrap;
     }
 
@@ -365,9 +353,16 @@
         height: auto;
     }
 
-    /* Below lg a field is a short band: only the stickers along its right edge stay. */
+    /* Below lg a field is a short band: wide-only stickers drop out, and narrow-only ones (the band's bottom-edge */
+    /* cluster) appear; from lg up it is the other way round. */
     @media (width < 64rem) {
         .sticker[data-wide-only] {
+            display: none;
+        }
+    }
+
+    @media (width >= 64rem) {
+        .sticker[data-narrow-only] {
             display: none;
         }
     }
@@ -385,6 +380,30 @@
         .sticker-field:hover .sticker {
             translate: var(--sticker-dx) var(--sticker-dy);
             rotate: calc(var(--sticker-tilt) * 0.4);
+        }
+    }
+
+    /* Opt-in arrival motion (the auth panel): as the page opens, each sticker wobbles three degrees either way and */
+    /* back, three times, a beat after the one before, then settles and stays still. The whole thing is over in about */
+    /* five seconds, so it never needs a pause control (WCAG 2.2.2). It turns `transform`, so it adds to the hover's */
+    /* `rotate` instead of fighting it. Off under reduced motion. */
+    @media (prefers-reduced-motion: no-preference) {
+        .stickers-wobble .sticker {
+            animation: sticker-wobble 1.3s ease-in-out 3;
+            animation-delay: calc(var(--sticker-order) * 70ms);
+        }
+    }
+
+    @keyframes sticker-wobble {
+        0%,
+        100% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(3deg);
+        }
+        75% {
+            transform: rotate(-3deg);
         }
     }
 
