@@ -10,10 +10,13 @@ import {
     rememberSignInEmail,
     takeSignInEmail,
 } from '../../../src/features/auth/email-storage';
+import { CODE_LIFETIME_MINUTES } from '../../../src/features/auth/schemas';
 
 const SIGN_IN_KEY = 'frontpage-sign-in-email';
 
 const HOUR_MS = 60 * 60 * 1000;
+
+const CODE_LIFETIME_MS = CODE_LIFETIME_MINUTES * 60 * 1000;
 
 // A minimal in-memory Storage, enough for the module under test.
 function memoryStorage(): Storage {
@@ -54,6 +57,14 @@ describe('pending email', () => {
         rememberPendingEmail('ada@example.com');
         expect(readPendingEmail()).toBe('ada@example.com');
         forgetPendingEmail();
+        expect(readPendingEmail()).toBeNull();
+    });
+
+    test('lapses once its code has expired', () => {
+        rememberPendingEmail('ada@example.com');
+        Date.now = () => realNow() + CODE_LIFETIME_MS - 1000;
+        expect(readPendingEmail()).toBe('ada@example.com');
+        Date.now = () => realNow() + CODE_LIFETIME_MS + 1;
         expect(readPendingEmail()).toBeNull();
     });
 
