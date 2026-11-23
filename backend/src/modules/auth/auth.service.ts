@@ -132,6 +132,7 @@ async function deliverEmail(email: Email) {
             apiKey: env.RESEND_API_KEY,
             from: env.EMAIL_FROM,
             production: env.NODE_ENV === 'production',
+            mailpitUrl: env.MAILPIT_URL,
         });
     } catch (err) {
         console.error(`Email "${email.subject}" failed:`, err instanceof Error ? err.message : err);
