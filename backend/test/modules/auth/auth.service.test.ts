@@ -1,21 +1,27 @@
 // Better Auth against a real (in-memory) Postgres built from our migrations: proves the hand-written schema matches what Better Auth expects.
 
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { createAuth, passwordResetEmail } from '../../../src/modules/auth/auth.service';
+import { afterAll, afterEach, beforeAll, describe, expect, setSystemTime, test } from 'bun:test';
+import type { Email } from '../../../src/lib/email';
+import { createAuth, passwordResetEmail, verificationCodeEmail } from '../../../src/modules/auth/auth.service';
 import { createTestDb } from '../../helpers/test-db';
 
 const PASSWORD = 'correct horse battery';
 const NEW_PASSWORD = 'staple battery horse';
+const CODE_LIFETIME_MS = 5 * 60 * 1000;
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
 let auth: ReturnType<typeof createAuth>;
-const resetLinks: string[] = [];
+const sentEmails: Email[] = [];
 
 beforeAll(async () => {
     testDb = await createTestDb();
-    auth = createAuth(testDb.db, async (_user, url) => {
-        resetLinks.push(url);
+    auth = createAuth(testDb.db, async (email) => {
+        sentEmails.push(email);
     });
+});
+
+afterEach(() => {
+    setSystemTime();
 });
 
 afterAll(async () => {
@@ -36,9 +42,25 @@ function cookieFrom(headers: Headers) {
         .join('; ');
 }
 
-// The reset token at the end of a reset link (".../reset-password/<token>?callbackURL=...").
-function tokenFrom(link: string | undefined) {
+// The last email sent to `to`, or undefined when none was.
+function lastEmailTo(to: string) {
+    return sentEmails.filter((email) => email.to === to).at(-1);
+}
+
+// The reset token in the last reset email to `to` (its link ends ".../reset-password/<token>?callbackURL=...").
+function resetTokenFor(to: string) {
+    const link = lastEmailTo(to)?.text.match(/https?:\/\/\S+/)?.[0];
     return new URL(link!).pathname.split('/').at(-1)!;
+}
+
+// The 6-digit code in the last verification email to `to`.
+function codeFor(to: string) {
+    return lastEmailTo(to)?.text.match(/\b\d{6}\b/)?.[0];
+}
+
+// A 6-digit code that is not `code`, for wrong-code tests.
+function wrongCode(code: string) {
+    return code === '000000' ? '111111' : '000000';
 }
 
 describe('sign up and sign in', () => {
@@ -85,9 +107,8 @@ describe('password reset', () => {
         const cookie = await signUp('forgetful@example.com');
         await auth.api.requestPasswordReset({ body: { email: 'forgetful@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
 
-        const link = resetLinks.at(-1);
-        expect(link).toContain('/api/auth/reset-password/');
-        const token = tokenFrom(link);
+        expect(lastEmailTo('forgetful@example.com')?.text).toContain('/api/auth/reset-password/');
+        const token = resetTokenFor('forgetful@example.com');
 
         await auth.api.resetPassword({ body: { token, newPassword: NEW_PASSWORD } });
 
@@ -98,17 +119,95 @@ describe('password reset', () => {
     });
 
     test('unknown emails get no link and no error', async () => {
-        const before = resetLinks.length;
         await auth.api.requestPasswordReset({ body: { email: 'nobody@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
-        expect(resetLinks.length).toBe(before);
+        expect(lastEmailTo('nobody@example.com')).toBeUndefined();
     });
 
     test('a used reset token cannot be used again', async () => {
         await signUp('once@example.com');
         await auth.api.requestPasswordReset({ body: { email: 'once@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
-        const token = tokenFrom(resetLinks.at(-1));
+        const token = resetTokenFor('once@example.com');
         await auth.api.resetPassword({ body: { token, newPassword: NEW_PASSWORD } });
         await expect(auth.api.resetPassword({ body: { token, newPassword: 'another new password' } })).rejects.toThrow();
+    });
+});
+
+describe('email verification by code', () => {
+    test('sign-up emails a 6-digit code', async () => {
+        await signUp('coded@example.com');
+        expect(lastEmailTo('coded@example.com')?.subject).toBe('Your Frontpage confirmation code');
+        expect(codeFor('coded@example.com')).toMatch(/^\d{6}$/);
+    });
+
+    test('the right code verifies the email and signs the user in', async () => {
+        await signUp('verify@example.com');
+        const { response, headers } = await auth.api.verifyEmailOTP({
+            body: { email: 'verify@example.com', otp: codeFor('verify@example.com')! },
+            returnHeaders: true,
+        });
+
+        expect(response.status).toBe(true);
+        expect(response.token).toBeTruthy();
+        const session = await auth.api.getSession({ headers: new Headers({ cookie: cookieFrom(headers) }) });
+        expect(session?.user.email).toBe('verify@example.com');
+        expect(session?.user.emailVerified).toBe(true);
+    });
+
+    test('a wrong code fails with INVALID_OTP', async () => {
+        await signUp('typo@example.com');
+        const otp = wrongCode(codeFor('typo@example.com')!);
+        await expect(auth.api.verifyEmailOTP({ body: { email: 'typo@example.com', otp } })).rejects.toMatchObject({ body: { code: 'INVALID_OTP' } });
+    });
+
+    test('a code older than its lifetime fails with OTP_EXPIRED', async () => {
+        await signUp('late@example.com');
+        setSystemTime(new Date(Date.now() + CODE_LIFETIME_MS + 1000));
+        await expect(auth.api.verifyEmailOTP({ body: { email: 'late@example.com', otp: codeFor('late@example.com')! } })).rejects.toMatchObject({
+            body: { code: 'OTP_EXPIRED' },
+        });
+    });
+
+    test('after 3 wrong codes even the right one fails with TOO_MANY_ATTEMPTS', async () => {
+        await signUp('guesser@example.com');
+        const otp = codeFor('guesser@example.com')!;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            await expect(auth.api.verifyEmailOTP({ body: { email: 'guesser@example.com', otp: wrongCode(otp) } })).rejects.toThrow();
+        }
+        await expect(auth.api.verifyEmailOTP({ body: { email: 'guesser@example.com', otp } })).rejects.toMatchObject({ body: { code: 'TOO_MANY_ATTEMPTS' } });
+    });
+
+    test('asking for a code for an unknown email sends nothing and reveals nothing', async () => {
+        const result = await auth.api.sendVerificationOTP({ body: { email: 'ghost@example.com', type: 'email-verification' } });
+        expect(result.success).toBe(true);
+        expect(lastEmailTo('ghost@example.com')).toBeUndefined();
+    });
+
+    test('codes are stored hashed, never as the code itself', async () => {
+        await signUp('hashed@example.com');
+        const code = codeFor('hashed@example.com')!;
+        const rows = await testDb.db.query.verifications.findMany();
+        expect(rows.some((row) => row.value.includes(code))).toBe(false);
+    });
+
+    test('the code flows nothing uses (sign-in by code) are switched off', async () => {
+        const res = await auth.handler(
+            new Request('http://localhost:4000/api/auth/sign-in/email-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:3000' },
+                body: JSON.stringify({ email: 'ada@example.com', otp: '123456' }),
+            }),
+        );
+        expect(res.status).toBe(404);
+    });
+});
+
+describe('verificationCodeEmail', () => {
+    test('puts the code in the text and HTML but not in the subject', () => {
+        const email = verificationCodeEmail('ada@example.com', '123456');
+        expect(email.to).toBe('ada@example.com');
+        expect(email.text).toContain('123456');
+        expect(email.html).toContain('123456');
+        expect(email.subject).not.toContain('123456');
     });
 });
 

@@ -1,11 +1,14 @@
-// The Better Auth instance: email + password sign-up/sign-in, sessions in Postgres, password reset by email.
+// The Better Auth instance: email + password sign-up/sign-in, sessions in Postgres, password reset by email link and
+// email verification by 6-digit code (emailOTP plugin; a correct code also signs the user in).
+// The plugin's other code flows (sign-in, password reset, email change by code) are switched off: nothing uses them.
 // Better Auth serves its own endpoints under /api/auth (see auth.controller.ts); other modules only call getSession().
 // Without a database there is no auth: `auth` is null and auth routes answer 503.
 
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
+import { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { fromNodeHeaders } from 'better-auth/node';
+import { emailOTP } from 'better-auth/plugins/email-otp';
 import type { IncomingHttpHeaders } from 'node:http';
 import { db } from '../../db';
 import { env } from '../../env';
@@ -16,11 +19,21 @@ type AuthDatabase = Parameters<typeof drizzleAdapter>[0];
 
 type ResetEmailUser = { email: string; name: string };
 
-type SendResetLink = (user: ResetEmailUser, url: string) => Promise<void>;
+type SendAuthEmail = (email: Email) => Promise<void>;
 
 const SESSION_DAYS = 30;
 const SECONDS_PER_DAY = 60 * 60 * 24;
 const RESET_TOKEN_MINUTES = 60;
+
+const UNUSED_CODE_PATHS = [
+    '/sign-in/email-otp',
+    '/email-otp/check-verification-otp',
+    '/email-otp/request-password-reset',
+    '/forget-password/email-otp',
+    '/email-otp/reset-password',
+    '/email-otp/request-email-change',
+    '/email-otp/change-email',
+];
 
 export const auth = db ? createAuth(db) : null;
 
@@ -34,7 +47,8 @@ export async function getSession(headers: IncomingHttpHeaders) {
 }
 
 // Builds a Better Auth instance on a Drizzle database: the app's one at startup, an in-memory one in tests.
-export function createAuth(database: AuthDatabase, sendResetLink: SendResetLink = sendPasswordResetEmail) {
+// `send` delivers the reset and code emails; tests pass one that just records them.
+export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliverEmail) {
     // Without a fixed base URL, Better Auth builds reset links from the request's Host header, which a client controls.
     if (env.NODE_ENV === 'production' && !env.AUTH_URL) {
         throw new Error('AUTH_URL is required in production: password-reset links are built from it');
@@ -57,9 +71,26 @@ export function createAuth(database: AuthDatabase, sendResetLink: SendResetLink 
             revokeSessionsOnPasswordReset: true,
             sendResetPassword: async ({ user, url }) => {
                 // Not awaited, so the response time doesn't reveal whether the email exists.
-                void sendResetLink(user, url);
+                void send(passwordResetEmail(user, url));
             },
         },
+        // With overrideDefaultEmailVerification below, this core sendOnSignUp (not the plugin's sendVerificationOnSignUp) emails the code.
+        emailVerification: { sendOnSignUp: true, autoSignInAfterVerification: true },
+        plugins: [
+            emailOTP({
+                otpLength: CODE_LENGTH,
+                expiresIn: CODE_LIFETIME_MINUTES * 60,
+                overrideDefaultEmailVerification: true,
+                storeOTP: 'hashed',
+                sendVerificationOTP: async ({ email, otp, type }) => {
+                    if (type === 'email-verification') {
+                        // Not awaited, for the same reason as the reset email.
+                        void send(verificationCodeEmail(email, otp));
+                    }
+                },
+            }),
+        ],
+        disabledPaths: UNUSED_CODE_PATHS,
         session: {
             expiresIn: SESSION_DAYS * SECONDS_PER_DAY,
             updateAge: SECONDS_PER_DAY,
@@ -83,15 +114,26 @@ export function passwordResetEmail(user: ResetEmailUser, url: string): Email {
     };
 }
 
-// Emails the password-reset link; logs (never throws) when sending fails, because nobody is waiting on it.
-async function sendPasswordResetEmail(user: ResetEmailUser, url: string) {
+// The email-verification email: the code in plain text and HTML (escaped, though Better Auth only makes digits).
+export function verificationCodeEmail(to: string, code: string): Email {
+    return {
+        to,
+        // No code in the subject: subjects are written to the server log when sending fails or is skipped.
+        subject: 'Your Frontpage confirmation code',
+        text: `Your Frontpage code is ${code}\n\nEnter it to confirm your email address. It expires in ${CODE_LIFETIME_MINUTES} minutes.\n\nIf you didn't create an account, you can ignore this email.`,
+        html: `<p>Your Frontpage code is</p><p style="font-size:24px;font-weight:bold;letter-spacing:4px">${escapeHtml(code)}</p><p>Enter it to confirm your email address. It expires in ${CODE_LIFETIME_MINUTES} minutes.</p><p>If you didn't create an account, you can ignore this email.</p>`,
+    };
+}
+
+// Sends an auth email; logs (never throws) when sending fails, because nobody is waiting on it.
+async function deliverEmail(email: Email) {
     try {
-        await sendEmail(passwordResetEmail(user, url), {
+        await sendEmail(email, {
             apiKey: env.RESEND_API_KEY,
             from: env.EMAIL_FROM,
             production: env.NODE_ENV === 'production',
         });
     } catch (err) {
-        console.error('Password reset email failed:', err instanceof Error ? err.message : err);
+        console.error(`Email "${email.subject}" failed:`, err instanceof Error ? err.message : err);
     }
 }
