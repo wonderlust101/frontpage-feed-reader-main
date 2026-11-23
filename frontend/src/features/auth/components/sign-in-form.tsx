@@ -96,7 +96,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(signIn)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(signIn)} className="flex flex-col gap-6">
             {errors.root?.message && (
                 <FormAlert
                     lead="Couldn't sign you in."

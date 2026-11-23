@@ -28,15 +28,7 @@ All paths are relative to `frontend/src` unless they start with `backend/` or `d
 
 **Done when:** `/guest` shows the sample feeds while signed out.
 
-## 3. Content Security Policy
-
-**Why:** `next.config.ts` sends baseline security headers but no CSP. A CSP limits where scripts can come from, a strong second line of defence against XSS.
-
-**What to change:** a CSP needs per-request nonces, which conflict with the static shell Cache Components prerenders, so it needs its own design. Read the bundled Next.js docs on CSP and Cache Components first, and decide between nonces (dynamic rendering) and a hash-based or `strict-dynamic` policy.
-
-**Done when:** every page sends a CSP header, the app works with it (check the browser console for violations), and the choice is written down in the README.
-
-## 4. Breached-password message (only if the backend adds the check)
+## 3. Breached-password message (only if the backend adds the check)
 
 **Why:** the backend may later add Better Auth's `haveibeenpwned` plugin, which rejects passwords known from data breaches. Its error would currently show the generic message.
 
@@ -44,7 +36,7 @@ All paths are relative to `frontend/src` unless they start with `backend/` or `d
 
 **Done when:** signing up with a well-known breached password (e.g. `password123`) shows that sentence.
 
-## 5. An end-to-end test for sign-up and verification (optional)
+## 4. An end-to-end test for sign-up and verification (optional)
 
 **Why:** frontend tests cover pure logic only. The sign-up → code → `/user` journey was checked by hand with a headless browser reading the code from Mailpit's API (`GET http://localhost:8025/api/v1/search?query=to:<email>`, then `/api/v1/message/<ID>`), but nothing runs it automatically.
 
@@ -54,9 +46,13 @@ All paths are relative to `frontend/src` unless they start with `backend/` or `d
 
 ## Deploy checks (frontend side)
 
-Do these on the first deployed preview after PR #12 merges:
+Do these on the first production deploy on `readfrontpage.com` (`*.vercel.app` previews can't sign in; see the README's Deploying section):
 
-- **`API_URL` at build time:** `next.config.ts` reads it when the app is **built** (the `/api/auth` rewrite is fixed then), so it must be set in Vercel's build environment, not only at runtime.
-- **Sign-in survives a refresh:** sign in on the preview, refresh, and check you're still signed in (the cookie belongs to the Vercel site through the proxy).
-- **Emailed links open on the frontend:** request a password reset; the link should start with the Vercel address. If it starts with the Railway address, `AUTH_URL` on Railway is wrong.
-- **Preview origin is trusted:** if auth requests fail with `403 INVALID_ORIGIN`, the preview address is missing from `WEB_ORIGIN` on Railway.
+- **Domains resolve:** `https://www.readfrontpage.com` serves the site (and `readfrontpage.com` redirects to it); `https://api.readfrontpage.com/api/health` answers.
+- **`NEXT_PUBLIC_API_URL` at build time:** it is baked into the browser bundle and the CSP, so it must be set in Vercel's build environment. If sign-in calls `localhost:4000`, it wasn't.
+- **Sign-in survives a refresh:** sign in, refresh, and check you're still signed in. In the browser's cookies, the session cookie's domain should be `readfrontpage.com`; if it is `api.readfrontpage.com`, `AUTH_COOKIE_DOMAIN` is missing on Railway.
+- **Railway sets `X-Real-IP` itself:** temporarily log `x-real-ip` on `/api/auth` and call it with `curl -H 'X-Real-IP: 1.2.3.4' https://api.readfrontpage.com/api/auth/get-session`. Your real IP must arrive, not `1.2.3.4`; otherwise anyone could pick their own rate limit, and the IP needs another source.
+- **Limits are per reader:** from two networks (Wi-Fi and a phone on mobile data), three quick wrong passwords on one must not block the other.
+- **Emailed links:** request a password reset; the link starts with `https://api.readfrontpage.com` and lands on `https://www.readfrontpage.com/reset-password`.
+- **No CSP violations:** open each auth page on the preview with the browser console open. Nothing should say "Refused to … because it violates the following Content Security Policy directive" (Vercel's preview toolbar or analytics may need their origins added).
+- **The site's origin is trusted:** if auth requests fail with `403 INVALID_ORIGIN` or a CORS error in the console, `https://www.readfrontpage.com` is missing from `WEB_ORIGIN` on Railway.

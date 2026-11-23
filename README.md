@@ -154,7 +154,7 @@ docker compose run --rm migrate     # re-sync the Drizzle schema after editing *
 - **Dependencies:** `node_modules` lives inside the containers, not on the bind mount. After `bun add`, run `bun run docker:up` again to reinstall.
 - **Neon stays untouched:** because of the bind mount, `backend/.env` is visible in the containers. Bun runs with `--no-env-file`, and compose sets every database variable explicitly, so the stack only talks to the local Postgres. Keep it that way if you edit `docker-compose.yml`.
 - **File names:** the images are built from `backend/Dockerfile.local` and `frontend/Dockerfile.local`. They're named `.local` so Railway keeps building the backend with Railpack instead of picking up a `Dockerfile`.
-- **Testing on other devices:** open `http://<your machine's LAN IP>:3000` on a phone or another computer on the same network (`ip -4 addr` shows the IP). `allowedDevOrigins` in `frontend/next.config.ts` lets `192.168.*.*` load the dev scripts; without it the page renders but isn't interactive. It affects `next dev` only.
+- **Testing on other devices:** open `http://<your machine's LAN IP>:3000` on a phone or another computer on the same network (`ip -4 addr` shows the IP). `allowedDevOrigins` in `frontend/next.config.ts` lets `192.168.*.*` load the dev scripts; without it the page renders but isn't interactive. It affects `next dev` only. Sign-in calls the API from the browser, so for auth on another device also set `NEXT_PUBLIC_API_URL=http://<LAN IP>:4000` for the frontend and add `http://<LAN IP>:3000` to the backend's `WEB_ORIGIN`.
 - **Stale CSS:** file-change events from the bind mount occasionally don't reach the frontend container, so a CSS edit doesn't show up. `docker restart frontpage-frontend-1` picks it up.
 
 ## Design system
@@ -186,9 +186,10 @@ Accounts use [Better Auth](https://www.better-auth.com) on the backend (`backend
 
 Decisions worth knowing:
 
-- **Auth requests go through the frontend.** The browser calls this site's `/api/auth/*`, and `next.config.ts` forwards it to `API_URL`. In production the frontend (Vercel) and API (Railway) are different sites, and browsers drop cookies set across sites; through the proxy the session cookie belongs to the frontend.
+- **The browser calls the API directly, on a shared domain.** The site is `https://www.readfrontpage.com` (Vercel) and the API `https://api.readfrontpage.com` (Railway). Being subdomains of one site, they can share the session cookie: the API sets it for all of `readfrontpage.com` (`AUTH_COOKIE_DOMAIN`), so `src/proxy.ts` and `requireUser` on the site see it. `authClient` calls `NEXT_PUBLIC_API_URL` with credentials; CORS allows `WEB_ORIGIN`, caches preflights for 2 hours and exposes `X-Retry-After` (the wait shown after too many tries). Locally, `localhost:3000` and `:4000` already share cookies, since cookies ignore the port. With no proxy in between, Railway's edge sees each reader, so Better Auth reads their IP from `X-Real-IP` and every reader gets their own rate limits. Session checks (`/get-session`) are never rate-limited: signed-in pages make them from Vercel's servers, which share a few IPs.
+- **A Content Security Policy guards every page.** `next.config.ts` sends it with the other security headers. Everything the app loads is on its own site, and the browser calls only one other origin, the API, so the policy allows `'self'` plus the API origin for requests (`connect-src`): scripts from other sites, requests to any other site, forms posting elsewhere, a planted `<base>` tag and framing are all blocked. It is a fixed header rather than per-request nonces, because nonces need every page rendered on each request, which would switch off the static shells Cache Components prerenders. Those shells carry inline Next scripts, so `script-src` keeps `'unsafe-inline'`, and `style-src` does too for React's `style={…}` attributes. Development adds `'unsafe-eval'` (React's error overlay); production never allows eval, so Zod runs `jitless` (`features/auth/schemas.ts`). A new third-party script, font, image host or API origin must be added to the policy, or the browser blocks it.
 - **Two checks guard signed-in pages.** `src/proxy.ts` only looks for the session cookie, so signed-out visitors never see the page flash; `requireUser` (`features/auth/require-user.ts`) asks the API whether the session is valid, inside `<Suspense>` as Cache Components requires. If the API can't answer, the page shows its `error.tsx` (a temporary placeholder) instead of treating the reader as signed out.
-- **Forms** use React Hook Form with the Zod schemas in `features/auth/schemas.ts`; `error-messages.ts` turns Better Auth's error codes into one sentence each. Every form clears the password after a failure; it is never put back.
+- **Forms** use React Hook Form with the Zod schemas in `features/auth/schemas.ts`; `error-messages.ts` turns Better Auth's error codes into one sentence each. Every form clears the password after a failure; it is never put back. Every form also has `method="post"`: before React takes over (a slow connection, a script that failed to load), the browser submits the form itself, and without it that would put the password in the URL, and from there in history and server logs.
 - **Email verification is by 6-digit code, and optional.** Sign-up emails a code (Better Auth's email-OTP plugin, codes stored hashed, 5 minutes, 3 tries); the right code verifies the email and signs the reader in. Unverified readers can still sign in ("Do this later"). The plugin's other code flows (sign-in, password reset and email change by code) are switched off. Password and code limits live once in `packages/shared/src/auth.ts`.
 
 ### Testing auth emails with Mailpit
@@ -199,7 +200,7 @@ Without `RESEND_API_KEY`, nothing reaches a real inbox. Outside production the b
 2. Open Mailpit at `http://localhost:8025`, copy the 6-digit code, and enter it: you land on `/user`, signed in and verified.
 3. For a password reset, use `http://localhost:3000/forgot-password`, open the link from Mailpit (it lands on `/reset-password`), and set a new password. Opening the same link again shows the expired state.
 
-Running with `bun dev` instead of Docker: start only Mailpit with `docker compose up -d mailpit`, and set `MAILPIT_URL=http://localhost:8025` and `AUTH_URL=http://localhost:3000` in `backend/.env`.
+Running with `bun dev` instead of Docker: start only Mailpit with `docker compose up -d mailpit`, and set `MAILPIT_URL=http://localhost:8025` and `AUTH_URL=http://localhost:4000` in `backend/.env`. Reset links then open on the API, which sends the reader on to `http://localhost:3000/reset-password`.
 
 ## Scripts (repo root)
 
@@ -274,8 +275,8 @@ Each project has an `.env.example` (committed) documenting every variable, and a
 | Backend  | `backend/.env`        | Railway → backend service → **Variables**               |
 | Frontend | `frontend/.env.local` | Vercel → Project → **Settings → Environment Variables** |
 
-- **Backend:** server (`PORT`, `WEB_ORIGIN`), Neon (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), auth (`AUTH_SECRET`, `AUTH_URL`), email (`RESEND_API_KEY`, `EMAIL_FROM`, local-only `MAILPIT_URL`), feed fetching (`FEED_*`). Read through `backend/src/env.ts`.
-- **Frontend:** `API_URL` (the Railway URL) and `NEXT_PUBLIC_SITE_URL`.
+- **Backend:** server (`PORT`, `WEB_ORIGIN`), Neon (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), auth (`AUTH_SECRET`, `AUTH_URL`, `AUTH_COOKIE_DOMAIN`), email (`RESEND_API_KEY`, `EMAIL_FROM`, local-only `MAILPIT_URL`), feed fetching (`FEED_*`). Read through `backend/src/env.ts`.
+- **Frontend:** `API_URL` (the API for server-side calls), `NEXT_PUBLIC_API_URL` (the API as the browser sees it, baked in at build time) and `NEXT_PUBLIC_SITE_URL`.
 
 Generate production secrets with `openssl rand -base64 32`, and don't reuse your local ones.
 
@@ -308,30 +309,30 @@ Deploy the **backend first**, because the frontend needs its URL.
 1. Railway → **New Project → Deploy from GitHub repo** → pick this repo.
 2. In the service's **Settings**:
 
-    | Setting            | Value                                                                       | Why                                                                                               |
-    | ------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-    | Root Directory     | _(empty: repo root)_                                                        | The backend needs `packages/shared` and the root `bun.lock`                                       |
-    | Build Command      | `bun run build:backend`                                                     | Typechecks the backend. Without it Railpack would run the root `build`, which builds the frontend |
-    | Start Command      | `bun run start:backend`                                                     | Runs `bun src/index.ts` inside `backend/`                                                         |
-    | Watch Paths        | `/backend/**`, `/packages/**`, `/package.json`, `/bun.lock`, `/bunfig.toml` | Frontend-only commits don't redeploy the backend                                                  |
-    | Healthcheck Path   | `/api/health`                                                               | Railway waits for this before switching traffic                                                   |
-    | Pre-deploy Command | `bun run db:migrate`                                                        | _Only once `DATABASE_URL` is set and you use migration files_                                     |
-    | Networking         | **Generate Domain**                                                         | Gives you `https://<name>.up.railway.app`                                                         |
+    | Setting            | Value                                                                       | Why                                                                                                                 |
+    | ------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+    | Root Directory     | _(empty: repo root)_                                                        | The backend needs `packages/shared` and the root `bun.lock`                                                         |
+    | Build Command      | `bun run build:backend`                                                     | Typechecks the backend. Without it Railpack would run the root `build`, which builds the frontend                   |
+    | Start Command      | `bun run start:backend`                                                     | Runs `bun src/index.ts` inside `backend/`                                                                           |
+    | Watch Paths        | `/backend/**`, `/packages/**`, `/package.json`, `/bun.lock`, `/bunfig.toml` | Frontend-only commits don't redeploy the backend                                                                    |
+    | Healthcheck Path   | `/api/health`                                                               | Railway waits for this before switching traffic                                                                     |
+    | Pre-deploy Command | `bun run db:migrate`                                                        | _Only once `DATABASE_URL` is set and you use migration files_                                                       |
+    | Networking         | **Custom Domain** `api.readfrontpage.com`                                   | Add the CNAME Railway shows at your DNS provider (on Cloudflare, "DNS only": another proxy would hide readers' IPs) |
 
     Railpack detects Bun from `packageManager` in the root `package.json` and installs the whole workspace. Railway injects `PORT`.
 
-3. **Variables:** add those from `backend/.env.example`. Leave out `PORT`, and set `WEB_ORIGIN` to your Vercel domain and `NODE_ENV=production`.
+3. **Variables:** add those from `backend/.env.example`. Leave out `PORT`, and set `NODE_ENV=production`, `WEB_ORIGIN=https://www.readfrontpage.com`, `AUTH_URL=https://api.readfrontpage.com` and `AUTH_COOKIE_DOMAIN=readfrontpage.com`. The API refuses to start in production without `AUTH_URL`, `AUTH_SECRET` and `AUTH_COOKIE_DOMAIN`.
 
 ### Frontend → Vercel
 
 1. Vercel → **Add New → Project** → import this repo.
 2. Set **Root Directory** to `frontend`, and keep **Include files outside the root directory in the Build Step** enabled (Settings → Build and Deployment), so the build can see `packages/shared` and the root `bun.lock`. Next.js is detected; `frontend/vercel.json` pins the Bun install and build commands. `bun install` run inside `frontend/` installs from the workspace root.
-3. **Environment Variables:** `API_URL` = the Railway domain, and `NEXT_PUBLIC_SITE_URL` = your Vercel domain. `API_URL` is also read at build time: `next.config.ts` forwards `/api/auth/*` to it.
-4. Deploy, then put the Vercel domain into the backend's `WEB_ORIGIN` on Railway.
+3. **Domains** (Settings → Domains): add `www.readfrontpage.com`, and `readfrontpage.com` redirecting to it, so the site has one origin.
+4. **Environment Variables:** `API_URL` and `NEXT_PUBLIC_API_URL` = `https://api.readfrontpage.com`, and `NEXT_PUBLIC_SITE_URL` = `https://www.readfrontpage.com`. `NEXT_PUBLIC_API_URL` is baked in at build time (the browser bundle and the CSP's `connect-src`), so set it for builds too.
 
 To skip Vercel builds for backend-only commits, add an `ignoreCommand` to `frontend/vercel.json` that also watches the shared code: `git diff --quiet HEAD^ HEAD -- . ../packages ../package.json ../bun.lock`.
 
-> Vercel preview deployments call the same `API_URL` as production unless you set a different value for the _Preview_ environment (for example, a Railway staging environment).
+> Vercel preview deployments call the same API as production unless you set different values for the _Preview_ environment. Sign-in doesn't work on `*.vercel.app` preview addresses: they aren't on `readfrontpage.com`, so the browser treats the API's cookie as another site's and drops it. To test auth before production, give a branch a fixed subdomain (for example `staging.readfrontpage.com`, Settings → Domains → Git branch) and add it to `WEB_ORIGIN`.
 
 ## Ignore files
 

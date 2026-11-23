@@ -51,7 +51,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(resetPassword)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(resetPassword)} className="flex flex-col gap-6">
             {errors.root?.message && (
                 <FormAlert
                     lead="Couldn't change your password."

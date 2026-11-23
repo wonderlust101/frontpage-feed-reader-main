@@ -59,7 +59,7 @@ export function ChangePasswordForm() {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(changePassword)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(changePassword)} className="flex flex-col gap-6">
             {errors.root?.message ? (
                 <FormAlert
                     lead="Couldn't change your password."

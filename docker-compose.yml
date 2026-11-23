@@ -52,7 +52,8 @@ services:
       WEB_ORIGIN: http://localhost:3000
       DATABASE_URL: *database-url
       DATABASE_URL_UNPOOLED: *database-url
-      AUTH_URL: http://localhost:3000
+      # The API's own address: the browser calls it directly, and emailed links open here.
+      AUTH_URL: http://localhost:4000
       # Fake, local-only value so Docker signs cookies like production does. Production refuses to start without its own.
       AUTH_SECRET: local-docker-only-not-a-real-secret-0000
       MAILPIT_URL: http://mailpit:8025
@@ -86,7 +87,9 @@ services:
       context: .
       dockerfile: frontend/Dockerfile.local
     environment:
+      # Server-side calls reach the API inside Docker; the browser (on your machine) reaches it on the published port.
       API_URL: http://backend:4000
+      NEXT_PUBLIC_API_URL: http://localhost:4000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
     volumes:
       - ./frontend:/app/frontend

@@ -63,7 +63,7 @@ export function ForgotPasswordForm() {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(requestLink)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(requestLink)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't send the link." message={errors.root.message} />}
 
             <TextField

@@ -114,7 +114,7 @@ function EmailStep({ defaultEmail, onSent }: EmailStepProps) {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(sendCode)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(sendCode)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't send a code." message={errors.root.message} />}
             <TextField
                 aria-required
@@ -192,7 +192,7 @@ function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(verify)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(verify)} className="flex flex-col gap-6">
             {errors.root?.message ? (
                 <FormAlert lead="Couldn't confirm your email." message={errors.root.message} />
             ) : (
