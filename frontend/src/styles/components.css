@@ -441,10 +441,56 @@
     .health-line[data-health='failing']::after {
         transform: rotate(-45deg);
     }
+
+    /* A header menu (the Aa and account menus): a native popover panel on the ground, under its button. */
+    /* Browsers without anchor positioning get a fixed spot under the header's right edge. */
+    .shell-menu {
+        inset: auto;
+        top: 5.25rem;
+        right: 0.75rem;
+        margin: 0;
+        width: min(20rem, calc(100vw - 1.5rem));
+        padding: 1rem;
+        border: 1.5px solid var(--color-ink);
+        border-radius: var(--radius-panel);
+        background: var(--color-ground);
+        color: var(--color-ink);
+    }
+
+    @supports (position-area: bottom) {
+        .shell-menu {
+            top: auto;
+            right: auto;
+            position-area: bottom span-left;
+            margin-top: 0.5rem;
+        }
+    }
 }
 
 /* The fill-edge hairline for small color fills drawn with utilities: tags, fallback tiles, swatches, sidebar dots. */
 /* An inset ring, so it never changes size. */
 @utility fill-edge {
     box-shadow: inset 0 0 0 1px var(--color-fill-edge);
+}
+
+/* A control on the app header's ink bar: an opaque dark fill and a grey edge that lightens on hover, 44px square or wider. */
+@utility shell-control {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+    border: 1.5px solid var(--color-shell-control-edge);
+    border-radius: var(--radius-control);
+    background: var(--color-shell-control);
+    color: var(--color-on-shell);
+    font-weight: 600;
+    transition: border-color 200ms var(--ease-out);
+
+    &:hover {
+        border-color: var(--color-on-shell);
+    }
 }

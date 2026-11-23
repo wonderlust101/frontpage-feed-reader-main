@@ -16,6 +16,9 @@
     --color-control-fill: var(--color-control-fill);
     --color-on-field: var(--color-on-field);
     --color-on-ink: var(--color-on-ink);
+    --color-shell: var(--color-shell);
+    --color-on-shell: var(--color-on-shell);
+    --color-on-shell-2: var(--color-on-shell-2);
     --color-error: var(--color-error);
     --color-warning: var(--color-warning);
     --color-field-lemon: var(--color-field-lemon);

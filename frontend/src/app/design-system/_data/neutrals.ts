@@ -7,6 +7,7 @@ export const NEUTRALS = [
     { token: 'ink', light: '#0A0A0A', dark: '#F3F3EE', job: 'Everything a reader must read' },
     { token: 'ink-2', light: '#3D3D3A', dark: '#C9C9C1', job: 'Intros and supporting text; ink in high contrast' },
     { token: 'meta', light: '#64645F', dark: '#9B9B93', job: 'Times, counts and source names only; ink-2 in high contrast' },
+    { token: 'shell', light: '#0A0A0A', dark: '#0A0A0A', job: 'The app header, near-black in both themes, with on-shell text' },
     { token: 'rule-soft', light: '#DCDAD2', dark: '#42423D', job: 'Row rules between items; ink in high contrast' },
     { token: 'warning', light: '#8A5300', dark: '#F2B13B', job: 'Stale feeds and cautions, always with a label' },
     { token: 'error', light: '#B42318', dark: '#FF7A70', job: 'Failing feeds and form errors, always with an icon' },

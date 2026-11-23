@@ -25,6 +25,13 @@
     --color-on-field: #0a0a0a;
     --color-on-ink: #f3f3ee;
 
+    /* The app header stays near-black in both themes, like printed ink, so these never use light-dark(). */
+    --color-shell: #0a0a0a;
+    --color-on-shell: #f3f3ee;
+    --color-on-shell-2: #b9b9b1;
+    --color-shell-control: #2a2a27;
+    --color-shell-control-edge: #8a8a83;
+
     --color-error: light-dark(#951c12, #ffa29a);
     --color-warning: light-dark(#8a5300, #f2b13b);
 
@@ -87,6 +94,8 @@
     --rule-width: 2px;
     --color-edge: var(--color-ink);
     --color-control-edge: var(--color-ink);
+    --color-on-shell-2: var(--color-on-shell);
+    --color-shell-control-edge: var(--color-on-shell);
     --color-error: light-dark(#7a160e, #ffb3ac);
     --color-warning: light-dark(#6b4000, #f2b13b);
 }
@@ -99,6 +108,8 @@
         --rule-width: 2px;
         --color-edge: var(--color-ink);
         --color-control-edge: var(--color-ink);
+        --color-on-shell-2: var(--color-on-shell);
+        --color-shell-control-edge: var(--color-on-shell);
         --color-error: light-dark(#7a160e, #ffb3ac);
         --color-warning: light-dark(#6b4000, #f2b13b);
     }
