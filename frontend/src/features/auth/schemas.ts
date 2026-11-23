@@ -1,15 +1,11 @@
 // Zod schemas for the auth forms: each form's rules and messages live here, and React Hook Form reads them through
-// zodResolver. Password limits match the API's Better Auth settings (8 to 128 characters); the API checks them again.
+// zodResolver. Password and code limits come from @frontpage/shared, the same values the API enforces (and checks again).
 // Sign-in only asks for a password, never its length, so accounts made under older rules can still sign in.
 
+import { CODE_LENGTH, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
 import { z } from 'zod';
 
-export const MIN_PASSWORD_LENGTH = 8;
-export const MAX_PASSWORD_LENGTH = 128;
-export const CODE_LENGTH = 6;
-
-// How long an email code lasts: the API's email-code plugin default (expiresIn, 300 seconds).
-export const CODE_LIFETIME_MINUTES = 5;
+export { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
 
 // The hint under every new-password field. Length is what makes a password strong, and unrelated words make length
 // easy to remember (a familiar phrase or a quote is easy to guess, so the words should not belong together).

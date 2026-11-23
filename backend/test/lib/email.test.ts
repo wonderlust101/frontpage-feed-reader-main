@@ -1,9 +1,60 @@
-// sendEmail's no-API-key paths and escapeHtml. Real sending is not tested (it would need the network and a Resend key).
+// sendEmail's no-API-key paths (Mailpit, log, skip) and escapeHtml. Real sending is not tested (it would need the network
+// and a Resend key); Mailpit is a local stub server that records what it receives.
 
-import { describe, expect, spyOn, test } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test';
 import { escapeHtml, sendEmail } from '../../src/lib/email';
 
 const EMAIL = { to: 'a@example.com', subject: 'Hello', text: 'Hi there', html: '<p>Hi there</p>' };
+
+let mailpit: ReturnType<typeof Bun.serve>;
+let mailpitStatus = 200;
+const mailpitRequests: { path: string; body: unknown }[] = [];
+
+beforeAll(() => {
+    mailpit = Bun.serve({
+        port: 0,
+        async fetch(req) {
+            mailpitRequests.push({ path: new URL(req.url).pathname, body: await req.json() });
+            return Response.json({ ID: 'stub' }, { status: mailpitStatus });
+        },
+    });
+});
+
+afterAll(() => {
+    mailpit.stop(true);
+});
+
+describe('sendEmail to Mailpit (no API key, MAILPIT_URL set)', () => {
+    test('posts the email to the send API outside production', async () => {
+        const result = await sendEmail(EMAIL, { apiKey: undefined, from: 'Frontpage <hi@example.com>', production: false, mailpitUrl: mailpit.url.href });
+        expect(result).toBe('captured');
+        expect(mailpitRequests.at(-1)).toEqual({
+            path: '/api/v1/send',
+            body: { From: { Email: 'hi@example.com' }, To: [{ Email: 'a@example.com' }], Subject: 'Hello', Text: 'Hi there', HTML: '<p>Hi there</p>' },
+        });
+    });
+
+    test('uses a local sender address when EMAIL_FROM is unset', async () => {
+        await sendEmail(EMAIL, { apiKey: undefined, from: undefined, production: false, mailpitUrl: mailpit.url.href });
+        expect(mailpitRequests.at(-1)?.body).toMatchObject({ From: { Email: 'frontpage@localhost' } });
+    });
+
+    test('is never used in production', async () => {
+        const before = mailpitRequests.length;
+        const warn = spyOn(console, 'warn').mockImplementation(() => {});
+        expect(await sendEmail(EMAIL, { apiKey: undefined, from: 'x@example.com', production: true, mailpitUrl: mailpit.url.href })).toBe('skipped');
+        expect(mailpitRequests.length).toBe(before);
+        warn.mockRestore();
+    });
+
+    test('throws when Mailpit refuses the email', async () => {
+        mailpitStatus = 400;
+        await expect(sendEmail(EMAIL, { apiKey: undefined, from: undefined, production: false, mailpitUrl: mailpit.url.href })).rejects.toThrow(
+            'Mailpit answered 400',
+        );
+        mailpitStatus = 200;
+    });
+});
 
 describe('sendEmail without an API key', () => {
     test('logs the email outside production', async () => {
