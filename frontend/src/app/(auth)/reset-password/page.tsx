@@ -1,14 +1,15 @@
 // Reset-password page, opened from the emailed link. The API's link checks the token first and arrives here with
 // ?token=… when it is valid, or ?error=INVALID_TOKEN when it expired or was used. The heading and the form each read
 // the URL behind their own <Suspense> while the frame stays in the static shell, so an expired link gets its own
-// heading rather than "Choose a new password" over no field. The page sends no Referer header, so the token can't
+// heading (and a calmer panel: "Links go stale.") rather than "Choose a new password" over no field. The page sends no Referer header, so the token can't
 // leak to other sites, and stays out of search engines.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { FormNotice } from '@/components/ui/form-notice';
-import { AuthHeading } from '@/features/auth/components/auth-heading';
+import { buttonClassName } from '@/components/ui/button';
+import { DocumentTitle } from '@/components/document-title';
+import { AuthHeading, AuthPanelText } from '@/features/auth/components/auth-heading';
 import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
 import { RESET_PASSWORD_HEADINGS } from '@/features/auth/headings';
 import { FormSkeleton } from '@/components/ui/form-skeleton';
@@ -23,6 +24,11 @@ export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-pa
     return (
         <AuthFrame
             panel={AUTH_PANELS.resetPassword}
+            panelText={
+                <Suspense fallback={<AuthPanelText {...AUTH_PANELS.resetPassword} />}>
+                    <ResetPanelText searchParams={searchParams} />
+                </Suspense>
+            }
             heading={
                 <Suspense fallback={<AuthHeading {...RESET_PASSWORD_HEADINGS.choose} />}>
                     <ResetHeading searchParams={searchParams} />
@@ -49,7 +55,14 @@ async function ResetHeading({ searchParams }: ResetPageProps) {
     return <AuthHeading {...(token ? RESET_PASSWORD_HEADINGS.choose : RESET_PASSWORD_HEADINGS.expired)} />;
 }
 
-// Shows the form for a usable link, else a one-line notice and a way to get a new link.
+// Shows the reset panel's own text for a usable link, else the calmer expired one.
+async function ResetPanelText({ searchParams }: ResetPageProps) {
+    const token = await readToken(searchParams);
+    return <AuthPanelText {...(token ? AUTH_PANELS.resetPassword : RESET_PASSWORD_HEADINGS.expired.panel)} />;
+}
+
+// Shows the form for a usable link, else a way to get a new one (the heading and panel already say what went wrong, so
+// no error box repeats it a third time), and retitles the tab to match.
 async function ResetFromUrl({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
 
@@ -58,16 +71,12 @@ async function ResetFromUrl({ searchParams }: ResetPageProps) {
     }
 
     return (
-        <div className="flex flex-col gap-6">
-            <FormNotice tone="error" icon="error" lead="Links work once and last 60 minutes.">
-                Open the newest email when it arrives.
-            </FormNotice>
-            <Link
-                href="/forgot-password"
-                className="inline-flex h-11 w-full items-center justify-center rounded-control bg-ink px-5 text-ui font-semibold text-ground transition-colors duration-200 hover:bg-ink-2"
-            >
+        <div className="flex flex-col gap-4">
+            <DocumentTitle title={RESET_PASSWORD_HEADINGS.expired.title} />
+            <Link href="/forgot-password" className={buttonClassName('primary', 'w-full justify-center')}>
                 Send a new link
             </Link>
+            <p className="text-ui text-ink-2">New links work once and last 60 minutes.</p>
         </div>
     );
 }

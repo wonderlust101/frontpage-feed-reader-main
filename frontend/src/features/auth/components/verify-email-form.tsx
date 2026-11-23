@@ -4,30 +4,34 @@
 // to be on its way: sign-up or sign-in sent one (and saved the address in sessionStorage), or the reader sent one here.
 // Otherwise the page asks for the address first (filled in from the session when signed in) and sends a code. Until
 // the browser has read storage and the session, it shows a skeleton, so neither step flashes before the other.
-// Signed-in readers can leave it for later. The right code also signs the reader in, so it always ends on /user.
+// The right code also signs the reader in, so it always ends on /user.
+// Signed-in readers (straight after sign-up, the usual case) can leave it for later: the frame's switch link becomes
+// "Not now? Do this later" and the guest shortcut goes, since "Sign in" and "Read as a guest" would tell someone who
+// is already in that they aren't. Straight after sign-up, the code step opens with an "Account created." notice.
 // The email step has its own heading ("Where should the code go?"); the code step's description says where the code
-// went and how long it lasts. Arriving at the code step from the email step puts focus in the code field, and a
-// resent code's notice takes focus.
+// went and how long it lasts, and the code field is described by it. Every arrival at a step puts focus in its field,
+// so the reader hears where the code went and can type or paste straight away; a pasted or autofilled 6-digit code
+// confirms itself. A resent code's notice takes focus. The resend wait is plain text at full contrast (a faded button
+// would hide it); while a code is being resent, the button stays (busy) so focus doesn't drop.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { FormAlert } from '@/components/ui/form-alert';
 import { FormNotice } from '@/components/ui/form-notice';
 import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { TextField } from '@/components/ui/text-field';
-import { TextLink } from '@/components/ui/text-link';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { forgetPendingEmail, readPendingEmail, rememberPendingEmail } from '../email-storage';
 import { authErrorMessage } from '../error-messages';
 import { codeStepHeading, VERIFY_EMAIL_HEADINGS } from '../headings';
-import { codeSchema, emailSchema } from '../schemas';
-import { useAuthHeading } from './auth-heading';
+import { CODE_LENGTH, codeSchema, emailSchema } from '../schemas';
+import { useAuthDescriptionId, useAuthFrameLinks, useAuthHeading, type FrameLinks } from './auth-heading';
 
 type EmailValues = z.infer<typeof emailSchema>;
 
@@ -35,12 +39,13 @@ type CodeValues = z.input<typeof codeSchema>;
 
 type EmailStepProps = {
     defaultEmail: string;
+    focusEmail: boolean;
     onSent: (email: string) => void;
 };
 
 type CodeStepProps = {
     email: string;
-    focusCode: boolean;
+    accountReady: boolean;
     onChangeEmail: () => void;
 };
 
@@ -48,8 +53,10 @@ const RESEND_COOLDOWN_SECONDS = 60;
 
 const CODE_FIELD_CODES = ['INVALID_OTP', 'OTP_EXPIRED', 'TOO_MANY_ATTEMPTS'];
 
+const SIGNED_IN_LINKS: FrameLinks = { switchLink: { prompt: 'Not now?', label: 'Do this later', href: '/user' }, guestLink: false };
+
 // Renders a skeleton until storage and the session are read, then the code step when a code was sent, else the email
-// step; offers "Do this later" when signed in.
+// step; signed in, the frame offers "Do this later" in place of sign-in and the guest shortcut.
 export function VerifyEmailForm() {
     const { data: session, isPending } = authClient.useSession();
     const mounted = useSyncExternalStore(
@@ -60,49 +67,47 @@ export function VerifyEmailForm() {
     const storedEmail = useSyncExternalStore(subscribeToNothing, readPendingEmail, () => null);
     const [sentTo, setSentTo] = useState<string | null>(null);
     const [changingEmail, setChangingEmail] = useState(false);
+    const signedIn = Boolean(session);
+    useAuthFrameLinks(signedIn ? SIGNED_IN_LINKS : null);
 
     if (!mounted || isPending) {
         return <FormSkeleton fields={1} />;
     }
 
     const codeSentTo = changingEmail ? null : (sentTo ?? storedEmail);
-    const signedIn = Boolean(session);
 
-    return (
-        <div className="flex flex-col gap-8">
-            {codeSentTo ? (
-                <CodeStep email={codeSentTo} focusCode={sentTo !== null} onChangeEmail={() => setChangingEmail(true)} />
-            ) : (
-                <EmailStep
-                    defaultEmail={session?.user.email ?? ''}
-                    onSent={(address) => {
-                        rememberPendingEmail(address);
-                        setSentTo(address);
-                        setChangingEmail(false);
-                    }}
-                />
-            )}
-            {signedIn && (
-                <p className="text-ui text-ink-2">
-                    Not now?{' '}
-                    <TextLink href="/user" className="text-ink">
-                        Do this later
-                    </TextLink>
-                </p>
-            )}
-        </div>
+    return codeSentTo ? (
+        <CodeStep email={codeSentTo} accountReady={signedIn && sentTo === null} onChangeEmail={() => setChangingEmail(true)} />
+    ) : (
+        <EmailStep
+            defaultEmail={session?.user.email ?? ''}
+            focusEmail={changingEmail}
+            onSent={(address) => {
+                rememberPendingEmail(address);
+                setSentTo(address);
+                setChangingEmail(false);
+            }}
+        />
     );
 }
 
-// Asks for the address (starting from `defaultEmail`) and sends a code to it, then hands the address back through `onSent`.
-function EmailStep({ defaultEmail, onSent }: EmailStepProps) {
+// Asks for the address (starting from `defaultEmail`) and sends a code to it, then hands the address back through
+// `onSent`. `focusEmail` puts focus in the field on arrival from the code step's "Use a different email".
+function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
     useAuthHeading(VERIFY_EMAIL_HEADINGS.emailStep);
     const {
         register,
         handleSubmit,
         setError,
+        setFocus,
         formState: { errors, isSubmitting },
     } = useForm<EmailValues>({ resolver: zodResolver(emailSchema), defaultValues: { email: defaultEmail }, reValidateMode: 'onChange' });
+
+    useEffect(() => {
+        if (focusEmail) {
+            setFocus('email', { shouldSelect: true });
+        }
+    }, [focusEmail, setFocus]);
 
     async function sendCode({ email }: EmailValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
@@ -135,10 +140,12 @@ function EmailStep({ defaultEmail, onSent }: EmailStepProps) {
 }
 
 // Takes the code for `email`, verifies it, and offers a new code (at most once a minute, counting from the code just
-// sent) or a different address. `focusCode` puts focus in the code field on arrival from the email step.
-function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
+// sent) or a different address. `accountReady` (straight after sign-up) shows the "Account created." notice.
+function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
     const router = useRouter();
+    const descriptionId = useAuthDescriptionId();
     const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+    const [resending, setResending] = useState(false);
     const [resentCount, setResentCount] = useState(0);
     useAuthHeading(codeStepHeading(email));
     const {
@@ -155,10 +162,8 @@ function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
     });
 
     useEffect(() => {
-        if (focusCode) {
-            setFocus('code');
-        }
-    }, [focusCode, setFocus]);
+        setFocus('code');
+    }, [setFocus]);
 
     useEffect(() => {
         if (cooldown === 0) {
@@ -182,7 +187,9 @@ function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
 
     async function resend() {
         clearErrors('root');
+        setResending(true);
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+        setResending(false);
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
             return;
@@ -195,10 +202,14 @@ function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
         <form noValidate method="post" onSubmit={handleSubmit(verify)} className="flex flex-col gap-6">
             {errors.root?.message ? (
                 <FormAlert lead="Couldn't confirm your email." message={errors.root.message} />
+            ) : resentCount > 0 ? (
+                <FormNotice key={resentCount} icon="newsletter" lead="New code sent." takesFocus>
+                    Use the code in the newest email; older ones stop working. You can send another in a minute.
+                </FormNotice>
             ) : (
-                resentCount > 0 && (
-                    <FormNotice key={resentCount} icon="newsletter" lead="New code sent." takesFocus>
-                        Use the code in the newest email; older ones stop working.
+                accountReady && (
+                    <FormNotice icon="healthy" lead="Account created.">
+                        One last step: enter the code we emailed you.
                     </FormNotice>
                 )
             )}
@@ -213,7 +224,17 @@ function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
                 spellCheck={false}
                 className="[&_input]:font-semibold [&_input]:tracking-[0.35em] [&_input]:tabular-nums [&_input]:text-title"
                 error={errors.code?.message}
-                {...register('code')}
+                {...register('code', {
+                    // A paste or autofill drops the whole code in at once (it isn't typed text): confirm it straight away.
+                    onChange: (event: { target: { value: string }; nativeEvent?: { inputType?: string } }) => {
+                        const digits = event.target.value.replace(/\s/g, '');
+                        const typed = event.nativeEvent?.inputType?.startsWith('insertText') || event.nativeEvent?.inputType?.startsWith('delete');
+                        if (!typed && digits.length === CODE_LENGTH && /^\d+$/.test(digits) && !isSubmitting) {
+                            void handleSubmit(verify)();
+                        }
+                    },
+                })}
+                aria-describedby={[errors.code ? 'code-error' : null, descriptionId].filter(Boolean).join(' ') || undefined}
             />
 
             <SubmitButton pending={isSubmitting} pendingLabel="Checking…">
@@ -221,11 +242,20 @@ function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
             </SubmitButton>
 
             <div className="flex flex-col gap-1">
-                <p className="text-ui text-ink-2">No code yet? Peek in your spam folder, then send a new one or try another address.</p>
+                <p className="text-ui text-ink-2">Didn&apos;t get it? Check your spam folder.</p>
                 <div className="flex flex-wrap items-center gap-x-6">
-                    <Button variant="quiet" onClick={resend} disabled={cooldown > 0}>
-                        {cooldown > 0 ? `Send a new code in ${cooldown}s` : 'Send a new code'}
-                    </Button>
+                    {cooldown > 0 && !resending ? (
+                        <span className="inline-flex h-11 items-center text-ui text-ink-2 tabular-nums">Send a new code in {cooldown}s</span>
+                    ) : (
+                        <Button
+                            variant="quiet"
+                            aria-disabled={resending || undefined}
+                            aria-busy={resending || undefined}
+                            onClick={resending ? undefined : resend}
+                        >
+                            {resending ? 'Sending a new code…' : 'Send a new code'}
+                        </Button>
+                    )}
                     <Button variant="quiet" onClick={onChangeEmail}>
                         Use a different email
                     </Button>

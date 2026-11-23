@@ -4,15 +4,16 @@
 // error alert carries the way out: an unverified email gets "Send a code" (it emails a new code and opens the verify
 // page; kept for when the API turns on requireEmailVerification, as verification is optional today and the API never
 // sends EMAIL_NOT_VERIFIED), and a wrong email or password gets "Forgot your password?" (the link under the button
-// steps aside meanwhile, so it isn't there twice). Arriving after a reset (`arrival`) is told by the page's heading; the
-// form fills in the email that step saved, puts focus on the password, and drops the arrival from the URL (so a
-// refresh is a plain sign-in). Once an attempt fails, the heading returns to the usual "Sign in".
+// steps aside meanwhile, so it isn't there twice). Arriving after a reset (`arrival`) is told by the page's heading,
+// and the arrival is dropped from the URL (so a refresh is a plain sign-in). An email handed over by the step before
+// (a reset, or sign-up's "already has an account" alert) is filled in, with focus on the password. Once an attempt
+// fails, the heading returns to the usual "Sign in".
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { TextLink } from '@/components/ui/text-link';
 import { PasswordField } from '@/components/ui/password-field';
@@ -54,15 +55,14 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
     useAuthHeading(arrival && attemptFailed ? SIGN_IN_HEADINGS.default : null);
 
     useEffect(() => {
-        // Every visit clears a saved email (so an old one never lingers on a shared device); only an arrival uses it.
+        // Every visit clears a saved email (so an old one never lingers on a shared device) and fills it in when there
+        // was one: after a reset, or from sign-up's "already has an account" alert.
         const email = takeSignInEmail();
-        if (!arrival) {
-            return;
+        if (arrival) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('reset');
+            window.history.replaceState(null, '', url);
         }
-        const url = new URL(window.location.href);
-        url.searchParams.delete('reset');
-        window.history.replaceState(null, '', url);
-
         if (email) {
             setValue('email', email);
             setFocus('password');
@@ -103,7 +103,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
                     message={errors.root.message}
                     action={
                         unverifiedEmail ? (
-                            <Button variant="secondary" disabled={sendingCode} onClick={() => sendCode(unverifiedEmail)}>
+                            <Button variant="secondary" disabled={sendingCode} aria-busy={sendingCode || undefined} onClick={() => sendCode(unverifiedEmail)}>
                                 {sendingCode ? 'Sending…' : 'Send a code'}
                             </Button>
                         ) : (

@@ -1,30 +1,34 @@
 'use client';
 
-// Create-account form: name, email and password. On success the API emails a 6-digit code (once the backend sends one)
-// and the reader goes to the verify page, which gets the address through sessionStorage, not the URL.
+// Create-account form: name, email and password. On success the API emails a 6-digit code and the reader goes to the
+// verify page, which gets the address through sessionStorage, not the URL. An email that already has an account gets
+// an alert with the two ways on, "Sign in" and "Reset password"; either one carries the email over, so it isn't retyped.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
 import { PasswordField } from '@/components/ui/password-field';
+import { TextLink } from '@/components/ui/text-link';
 import { TextField } from '@/components/ui/text-field';
 import { FormAlert } from '@/components/ui/form-alert';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
-import { rememberPendingEmail } from '../email-storage';
+import { rememberPendingEmail, rememberSignInEmail } from '../email-storage';
 import { signUpSchema, NEW_PASSWORD_HINT } from '../schemas';
 
 type SignUpValues = z.infer<typeof signUpSchema>;
 
 const EMAIL_TAKEN_CODES = ['USER_ALREADY_EXISTS', 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL'];
 
-// Renders the form; an email that already has an account is reported on the email field, other failures above the form.
+// Renders the form; failures show above it, an email that already has an account with links to sign in or reset.
 // The password is cleared after any failure, as in the other auth forms.
 export function SignUpForm() {
     const router = useRouter();
+    const [takenEmail, setTakenEmail] = useState<string | null>(null);
     const {
         register,
         handleSubmit,
@@ -37,8 +41,8 @@ export function SignUpForm() {
         const { failure } = await authRequest((fetchOptions) => authClient.signUp.email(values, fetchOptions));
         if (failure) {
             resetField('password');
-            const field = failure.code && EMAIL_TAKEN_CODES.includes(failure.code) ? 'email' : 'root';
-            setError(field, { message: authErrorMessage(failure) }, { shouldFocus: true });
+            setTakenEmail(failure.code && EMAIL_TAKEN_CODES.includes(failure.code) ? values.email : null);
+            setError('root', { message: authErrorMessage(failure) });
             return;
         }
         rememberPendingEmail(values.email);
@@ -47,7 +51,24 @@ export function SignUpForm() {
 
     return (
         <form noValidate method="post" onSubmit={handleSubmit(signUp)} className="flex flex-col gap-6">
-            {errors.root?.message && <FormAlert lead="Couldn't create your account." message={errors.root.message} />}
+            {errors.root?.message && (
+                <FormAlert
+                    lead="Couldn't create your account."
+                    message={errors.root.message}
+                    action={
+                        takenEmail && (
+                            <span className="flex flex-wrap gap-x-6">
+                                <TextLink href="/sign-in" standalone className="text-ui" onClick={() => rememberSignInEmail(takenEmail)}>
+                                    Sign in
+                                </TextLink>
+                                <TextLink href="/forgot-password" standalone className="text-ui" onClick={() => rememberSignInEmail(takenEmail)}>
+                                    Reset password
+                                </TextLink>
+                            </span>
+                        )
+                    }
+                />
+            )}
 
             <TextField aria-required id="name" label="Name" autoComplete="name" error={errors.name?.message} {...register('name')} />
             <TextField
