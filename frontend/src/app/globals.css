@@ -123,6 +123,40 @@ body {
     box-shadow: 0 0 0 3px var(--color-focus-halo);
 }
 
+/* Elements that only take focus from code (tabindex -1: form notices that take focus, the skip link's target) never */
+/* show a ring: focus moves there so screen readers announce them, not for anyone to act on them. */
+[tabindex='-1']:focus,
+[tabindex='-1']:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Text fields carry their own focus inside their own edge: the border thickens by 2px inward (an inset ring, so */
+/* nothing moves), in the field's own colour: ink, or red when the field is invalid. No floating outline, no glow. */
+/* A 2px change at full ink contrast meets WCAG 2.4.13 (focus appearance, AAA). */
+.text-field-input:focus,
+.text-field-input:focus-visible {
+    outline: none;
+    border-color: var(--color-ink);
+    box-shadow: inset 0 0 0 2px var(--color-ink);
+}
+
+.text-field-input[aria-invalid='true']:focus,
+.text-field-input[aria-invalid='true']:focus-visible {
+    border-color: var(--color-error);
+    box-shadow: inset 0 0 0 2px var(--color-error);
+}
+
+/* Forced colours (Windows high contrast) drop box shadows, so the focus edge would vanish: draw it as an outline */
+/* in the system's highlight colour instead. */
+@media (forced-colors: active) {
+    .text-field-input:focus,
+    .text-field-input:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+}
+
 /* Any surface filled with a field: focus rings switch to on-field ink, which every field carries at 7.5:1. */
 .on-field {
     --color-focus: var(--color-on-field);

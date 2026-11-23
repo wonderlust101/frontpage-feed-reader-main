@@ -23,7 +23,7 @@
         "typecheck": "bun run --sequential --no-exit-on-error typecheck:frontend typecheck:backend",
         "typecheck:frontend": "bun run --cwd frontend typecheck",
         "typecheck:backend": "bun run --cwd backend typecheck",
-        "test": "bun run --cwd backend test",
+        "test": "bun run --cwd backend test && bun run --cwd frontend test",
         "test:live": "bun run --cwd backend test:live",
         "fixtures:feeds": "bun run --cwd backend fixtures:feeds",
         "test:watch": "bun run --cwd backend test:watch",

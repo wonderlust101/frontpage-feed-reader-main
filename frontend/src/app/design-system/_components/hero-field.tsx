@@ -5,7 +5,6 @@
 // The capsules that recolor the field sit below the reading controls (HeroCategorySwitch); the choice is shared
 // through HeroChoiceProvider. Category colors come from the guest's saved choices, else each sample category's preset.
 
-import type { CSSProperties } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers, type Sticker } from '@/components/stickers';
 import { useCategoryFields } from '@/features/categories/category-field-store';
@@ -89,7 +88,7 @@ const HERO_STICKERS: Sticker[] = [
 ];
 
 // Renders the field: top bar, then the headline and intro beside the sticker pile, then the live caption.
-// Every text block sits on a sticker-safe plate, so a sticker that reaches it mid-hover tucks behind.
+// The stickers keep to their own column, clear of every text block, so no text needs a note.
 export function HeroField() {
     const { choice } = useHeroChoice();
     const [fields] = useCategoryFields(CATEGORY_IDS, CATEGORY_PRESETS);
@@ -100,14 +99,14 @@ export function HeroField() {
         : `All categories · ${SOURCE_COUNT} sources in ${CATEGORIES.length} categories`;
 
     return (
-        <header className="hero-field relative" style={{ color: field, '--sticker-field-color': field } as CSSProperties}>
+        <header className="hero-field relative" style={{ color: field }}>
             <div className="sticker-field bg-current">
                 <div className="hero-field-ink on-field mx-auto max-w-page px-gutter pb-12" style={{ color: 'var(--color-on-field)' }}>
                     <div className="flex flex-wrap items-center gap-x-8 gap-y-3 py-5">
                         <a href="#main" className="sr-only focus:not-sr-only">
                             Skip to content
                         </a>
-                        <p className="sticker-safe flex items-baseline gap-3">
+                        <p className="flex items-baseline gap-3">
                             <Logo size="md" variant="ink" />
                             <span className="text-ui font-medium">Design system</span>
                         </p>
@@ -118,20 +117,20 @@ export function HeroField() {
                                 </a>
                             ))}
                         </nav>
-                        <div className="sticker-safe ml-auto">
+                        <div className="ml-auto">
                             <ThemeSwitch contrast={field} />
                         </div>
                     </div>
 
                     <div className="mt-[clamp(1.5rem,5vw,4.5rem)] gap-x-[clamp(2rem,4vw,5rem)] lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
                         <div>
-                            <h1 className="sticker-safe type-specimen">
+                            <h1 className="type-specimen">
                                 <span className="sr-only">Frontpage design system: </span>
                                 Type leads.
                                 <br />
                                 Color maps.
                             </h1>
-                            <p className="sticker-safe mt-8 max-w-[34rem] text-body leading-[1.55] font-medium">
+                            <p className="mt-8 max-w-[34rem] text-body leading-[1.55] font-medium">
                                 Every token and component on this page is live. Pick a category to recolor this field, tune the reading controls, switch the
                                 theme.
                             </p>
@@ -140,7 +139,7 @@ export function HeroField() {
                             <Stickers stickers={HERO_STICKERS} className="stickers-pile" />
                         </div>
                     </div>
-                    <p className="sticker-safe mt-6 text-meta font-semibold lg:ml-auto lg:text-right">{caption}</p>
+                    <p className="mt-6 text-meta font-semibold lg:ml-auto lg:text-right">{caption}</p>
                 </div>
             </div>
         </header>

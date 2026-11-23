@@ -159,6 +159,8 @@ export const ICONS = {
     guest: User,
     'sign-in': LogIn,
     'sign-out': LogOut,
+    'show-password': Eye,
+    'hide-password': EyeOff,
     shortcuts: Keyboard,
     help: CircleHelp,
 

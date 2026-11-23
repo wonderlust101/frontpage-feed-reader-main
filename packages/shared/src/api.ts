@@ -72,3 +72,16 @@ export type ApiErrorResponse<C extends string = ApiErrorCode> = {
 };
 
 export type FeedErrorResponse = ApiErrorResponse<FeedErrorCode>;
+
+export type SessionUser = {
+    id: string;
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    image: string | null;
+};
+
+export type SessionResponse = {
+    user: SessionUser;
+    session: { id: string; expiresAt: string };
+} | null;
