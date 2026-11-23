@@ -7,8 +7,11 @@
 // flavour line is header-like (display face, a step below the headline) and capped at 62cqi, so the right-edge
 // stickers never come near it. On desktop the headline and its line sit together in the panel's vertical middle
 // (nudged a little above it, so the heavier bottom stickers keep their distance). It balances its lines inline, since the global paragraph wrap outranks utilities.
-// The h1 and description follow the reader's step (AuthHeading): the page passes the default, and a form that moves
-// on in the browser swaps in its own. Between lg and xl the form column takes a little more width than the panel,
+// The h1 and description, the panel's headline and line, and the switch and guest links follow the reader's step
+// (auth-heading.tsx): the page passes the defaults, and a form that moves on in the browser swaps in its own.
+// The panel is the page's header: on phones it holds the logo link (so that link sits in a landmark); its text is
+// hidden from screen readers (the h1 says what the page is for), so they meet the logo and then the form. "Skip to form" lands on the h1, past the top bar.
+// Between lg and xl the form column takes a little more width than the panel,
 // and the switch link never wraps, so the top bar keeps to one line, and the panel headline is capped so the h1 stays the start of the task.
 // The form column is framed top and bottom: logo and the page-switch link above, the guest shortcut below (signed-in pages skip it).
 // One quiet brand touch on the form side: a Lemon underline on the h1.
@@ -17,32 +20,33 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
-import { TextLink } from '@/components/ui/text-link';
-import { AuthHeadingProvider } from '@/features/auth/components/auth-heading';
+import { AuthGuestLink, AuthHeadingProvider, AuthPanelText, AuthSwitchLink, type SwitchLinkTarget } from '@/features/auth/components/auth-heading';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import type { AuthPanel } from '../_data/panels';
 
 type AuthFrameProps = {
     panel: AuthPanel;
+    panelText?: ReactNode;
     heading: ReactNode;
-    aside: { prompt?: string; label: string; href: string };
+    aside: SwitchLinkTarget;
     children: ReactNode;
 };
 
 // Renders the sticker panel and the form column. `heading` is the page's AuthHeading (or a <Suspense> around one, for
-// a page that picks its heading from the URL); `children` is the form (or a result message) under it.
-export function AuthFrame({ panel, heading, aside, children }: AuthFrameProps) {
+// a page that picks its heading from the URL), and `panelText` likewise replaces the panel's default text when the URL
+// decides the mood; `children` is the form (or a result message) under it.
+export function AuthFrame({ panel, panelText, heading, aside, children }: AuthFrameProps) {
     return (
         <AuthHeadingProvider>
             <div className="flex flex-1">
                 <a
-                    href="#main"
+                    href="#form"
                     className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-control focus:bg-ink focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-ground"
                 >
                     Skip to form
                 </a>
                 <div className="grid w-full lg:min-h-dvh lg:grid-cols-[1.15fr_1fr] xl:grid-cols-2">
-                    <aside
+                    <header
                         className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
                         style={{ background: BRAND_FIELD.color }}
                     >
@@ -51,57 +55,30 @@ export function AuthFrame({ panel, heading, aside, children }: AuthFrameProps) {
                             <Link href="/" className="w-fit rounded-toggle lg:hidden">
                                 <Logo size="md" variant="ink" />
                             </Link>
-                            <div className="mt-7 lg:my-auto lg:pb-[6cqi]">
-                                <p className="type-display text-[clamp(2.75rem,12cqi,5.75rem)] whitespace-pre-line">{panel.headline}</p>
-                                <p
-                                    className="mt-3 max-w-[62cqi] lg:mt-5 font-display text-[clamp(1.25rem,4.2cqi,2.125rem)] leading-[1.15] font-semibold tracking-[-0.015em]"
-                                    style={{ textWrap: 'balance' }}
-                                >
-                                    {panel.line}
-                                </p>
-                            </div>
+                            {panelText ?? <AuthPanelText headline={panel.headline} line={panel.line} />}
                         </div>
-                    </aside>
+                    </header>
 
                     <main id="main" tabIndex={-1} className="relative flex flex-col bg-ground px-gutter pt-8 pb-8 lg:px-[clamp(2rem,4.5vw,6rem)] lg:pt-10">
                         <div className="hidden items-center justify-between gap-6 lg:flex">
                             <Link href="/" className="w-fit rounded-toggle text-ink">
                                 <Logo size="md" />
                             </Link>
-                            <SwitchLink aside={aside} />
+                            <AuthSwitchLink target={aside} />
                         </div>
                         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center lg:py-10">
-                            {heading}
+                            <div id="form" tabIndex={-1} className="outline-none">
+                                {heading}
+                            </div>
                             <div className="mt-7 lg:mt-8">{children}</div>
                             <div className="mt-10 text-center lg:hidden">
-                                <SwitchLink aside={aside} />
+                                <AuthSwitchLink target={aside} />
                             </div>
                         </div>
-                        {panel.guestLink && (
-                            <div className="mt-8 border-t border-rule-soft pt-5 text-ink-2 lg:mt-10">
-                                <p className="text-ui">
-                                    Just looking?{' '}
-                                    <TextLink href="/guest" className="text-ink">
-                                        Read as a guest
-                                    </TextLink>
-                                </p>
-                            </div>
-                        )}
+                        <AuthGuestLink show={panel.guestLink} />
                     </main>
                 </div>
             </div>
         </AuthHeadingProvider>
-    );
-}
-
-// Renders the "New to Frontpage? Create an account" style link that switches between the auth pages.
-function SwitchLink({ aside }: Pick<AuthFrameProps, 'aside'>) {
-    return (
-        <p className="text-ui text-ink-2 lg:whitespace-nowrap">
-            {aside.prompt && <>{aside.prompt} </>}
-            <TextLink href={aside.href} className="text-ink">
-                {aside.label}
-            </TextLink>
-        </p>
     );
 }

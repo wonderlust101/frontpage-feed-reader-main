@@ -1,9 +1,10 @@
 // Remembers the reader's email between auth steps, so it never goes in a URL and they don't retype it. Two hand-offs:
 // - Pending email (sessionStorage): from sign-up or sign-in to the verify page, in the same tab. Saved when a code
 //   is sent, so the verify page knows a code is on its way.
-// - Sign-in email (localStorage): from forgot-password or verify to the sign-in page. A reset link usually opens in a
-//   new tab, which sessionStorage doesn't reach. Just the address and when it was saved, kept for an hour at most
-//   (a reset link's own lifetime) and cleared as soon as the sign-in page reads it.
+// - Sign-in email (localStorage): from forgot-password to the sign-in page (a reset link usually opens in a new tab,
+//   which sessionStorage doesn't reach), and from sign-up's "email already has an account" alert to sign-in or
+//   forgot-password. Just the address and when it was saved, kept for an hour at most (a reset link's own lifetime)
+//   and cleared as soon as the sign-in page reads it; forgot-password only peeks.
 // Storage can be blocked (some private windows); then nothing is remembered and the pages simply ask again.
 
 const PENDING_KEY = 'frontpage-pending-email';
@@ -43,9 +44,15 @@ export function rememberSignInEmail(email: string): void {
 
 // Clears the saved address and returns it, or null when there is none, it is over an hour old, or storage is unavailable.
 export function takeSignInEmail(): string | null {
+    const email = readSignInEmail();
+    tryStorage(() => localStorage.removeItem(SIGN_IN_KEY), undefined);
+    return email;
+}
+
+// Returns the saved address without clearing it, or null when there is none, it is over an hour old, or storage is unavailable.
+export function readSignInEmail(): string | null {
     return tryStorage(() => {
         const saved = localStorage.getItem(SIGN_IN_KEY);
-        localStorage.removeItem(SIGN_IN_KEY);
         if (!saved) {
             return null;
         }

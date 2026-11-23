@@ -44,10 +44,23 @@ describe('authRequest', () => {
         expect(result.failure?.retryAfterSeconds).toBeNaN();
     });
 
-    test('reports status 0 when the call throws (offline)', async () => {
-        const result = await authRequest(async () => {
-            throw new TypeError('Failed to fetch');
-        });
-        expect(result).toEqual({ data: null, failure: { status: 0 } });
+    test('reports status 0 when the call throws, and whether the browser is offline', async () => {
+        const fail = () =>
+            authRequest(async () => {
+                throw new TypeError('Failed to fetch');
+            });
+        const onLine = Object.getOwnPropertyDescriptor(globalThis.navigator, 'onLine');
+        try {
+            Object.defineProperty(globalThis.navigator, 'onLine', { configurable: true, get: () => true });
+            expect(await fail()).toEqual({ data: null, failure: { status: 0, offline: false } });
+            Object.defineProperty(globalThis.navigator, 'onLine', { configurable: true, get: () => false });
+            expect(await fail()).toEqual({ data: null, failure: { status: 0, offline: true } });
+        } finally {
+            if (onLine) {
+                Object.defineProperty(globalThis.navigator, 'onLine', onLine);
+            } else {
+                delete (globalThis.navigator as { onLine?: boolean }).onLine;
+            }
+        }
     });
 });

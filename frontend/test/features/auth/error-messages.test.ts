@@ -34,7 +34,8 @@ describe('authErrorMessage', () => {
     test('reports server and network trouble', () => {
         expect(authErrorMessage({ code: 'database_unavailable', status: 503 })).toContain('unavailable right now');
         expect(authErrorMessage({ status: 500 })).toContain('unavailable right now');
-        expect(authErrorMessage({ status: 0 })).toContain('Check your connection');
+        expect(authErrorMessage({ status: 0, offline: true })).toContain('Check your connection');
+        expect(authErrorMessage({ status: 0, offline: false })).toBe("Can't reach Frontpage right now. Try again in a few minutes.");
     });
 
     test('falls back for unknown codes', () => {
