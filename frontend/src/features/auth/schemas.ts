@@ -5,6 +5,10 @@
 import { CODE_LENGTH, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
 import { z } from 'zod';
 
+// Zod otherwise probes once for `new Function` to compile faster parsers; the Content Security Policy blocks eval, so
+// every page would log a violation. These small forms don't need the speed.
+z.config({ jitless: true });
+
 export { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
 
 // The hint under every new-password field. Length is what makes a password strong, and unrelated words make length

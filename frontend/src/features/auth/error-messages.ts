@@ -6,7 +6,6 @@ import type { AuthFailure } from './auth-request';
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './schemas';
 
 const ACCOUNT_EXISTS = 'An account with this email already exists. Sign in instead, or reset your password if you have forgotten it.';
-const SIGN_IN_AGAIN = 'For your security, sign in again before changing your password.';
 
 const MESSAGES: Record<string, string> = {
     INVALID_EMAIL_OR_PASSWORD: "That email and password don't match. Check both and try again.",
@@ -18,8 +17,7 @@ const MESSAGES: Record<string, string> = {
     INVALID_PASSWORD: 'Your current password is incorrect.',
     INVALID_TOKEN: 'This reset link has expired or was already used. Ask for a new one.',
     EMAIL_NOT_VERIFIED: 'Confirm your email address before signing in.',
-    SESSION_NOT_FRESH: SIGN_IN_AGAIN,
-    SESSION_EXPIRED: SIGN_IN_AGAIN,
+    UNAUTHORIZED: 'Your session has ended. Sign in again to change your password.',
     INVALID_OTP: "That code doesn't match. Check the email and try again.",
     OTP_EXPIRED: 'That code has expired. Send a new one.',
     TOO_MANY_ATTEMPTS: 'Too many wrong codes. Send a new one.',

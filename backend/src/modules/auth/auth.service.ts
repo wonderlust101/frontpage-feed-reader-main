@@ -25,6 +25,7 @@ const SESSION_DAYS = 30;
 const SECONDS_PER_DAY = 60 * 60 * 24;
 const RESET_TOKEN_MINUTES = 60;
 const MIN_SECRET_LENGTH = 32;
+const DEV_RATE_LIMIT_DIVISOR = 10;
 
 const UNUSED_CODE_PATHS = [
     '/sign-in/email-otp',
@@ -57,6 +58,10 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
     // The secret signs session cookies: a missing or short one would let someone forge a sign-in.
     if (env.NODE_ENV === 'production' && (env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH) {
         throw new Error(`AUTH_SECRET is required in production and must be at least ${MIN_SECRET_LENGTH} characters`);
+    }
+    // Without it the cookie belongs to the API's host only, and the site's pages would never see anyone signed in.
+    if (env.NODE_ENV === 'production' && !env.AUTH_COOKIE_DOMAIN) {
+        throw new Error('AUTH_COOKIE_DOMAIN is required in production: the site and the API share the session cookie through it');
     }
 
     return betterAuth({
@@ -100,11 +105,30 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
             expiresIn: SESSION_DAYS * SECONDS_PER_DAY,
             updateAge: SECONDS_PER_DAY,
         },
-        // Better Auth only rate-limits when NODE_ENV is 'production'; keep it on unless we're running tests.
-        rateLimit: { enabled: env.NODE_ENV !== 'test' },
+        // Better Auth only rate-limits when NODE_ENV is 'production'; keep it on unless we're running tests. Outside
+        // production every window is a tenth as long (10 s → 1 s, 60 s → 6 s), so local testing rarely waits but still hits the limits.
+        // Session checks are never limited: they need a valid cookie (nothing to guess), and signed-in pages make them from
+        // the site's servers, whose few shared IPs would soon use up one limit for every reader. The first matching rule wins.
+        rateLimit: {
+            enabled: env.NODE_ENV !== 'test',
+            customRules: {
+                '/get-session': false,
+                ...(env.NODE_ENV === 'production'
+                    ? {}
+                    : { '/**': (_request: Request, rule) => ({ ...rule, window: Math.ceil(rule.window / DEV_RATE_LIMIT_DIVISOR) }) }),
+            },
+        },
         advanced: {
             // One query per session check (session joined to its user) instead of two; needs the relations in auth.schema.ts.
             database: { joins: true },
+            // The site (www.) and the API (api.) share one domain, so the session cookie is set for all of it and the site's
+            // pages see it too. Unset locally: localhost:3000 and :4000 already share cookies (cookies ignore the port).
+            crossSubDomainCookies: env.AUTH_COOKIE_DOMAIN ? { enabled: true, domain: env.AUTH_COOKIE_DOMAIN } : undefined,
+            // Production's cookie (set for all of readfrontpage.com) also reaches staging.readfrontpage.com; a different name on
+            // staging keeps the two apart. Unset in production: the default "better-auth". frontend/src/proxy.ts reads the same value.
+            cookiePrefix: env.AUTH_COOKIE_PREFIX,
+            // Railway's edge puts the reader's IP in X-Real-IP; rate limits and sessions use it (locally it falls back to 127.0.0.1).
+            ipAddress: { ipAddressHeaders: ['x-real-ip'] },
             // Better Auth skips its origin and redirect-address checks when NODE_ENV is 'test'; always run them, so tests prove they work.
             disableOriginCheck: false,
         },

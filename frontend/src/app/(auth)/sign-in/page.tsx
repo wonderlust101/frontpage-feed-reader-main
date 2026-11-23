@@ -1,6 +1,6 @@
-// Sign-in page. It reads ?next=, ?reset= and ?verified= on the server, so the heading and the form each stream in
+// Sign-in page. It reads ?next= and ?reset= on the server, so the heading and the form each stream in
 // behind their own <Suspense> while the frame (and its sticker panel) stays in the static shell (Cache Components).
-// Arriving from a password reset or a confirmed email changes the heading itself, so the first thing a reader (or
+// Arriving from a password reset changes the heading itself, so the first thing a reader (or
 // screen reader) meets says what just happened. The form then fills in the email from that step and returns to the
 // usual heading if an attempt fails.
 
