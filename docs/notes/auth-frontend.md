@@ -46,7 +46,7 @@ All paths are relative to `frontend/src` unless they start with `backend/` or `d
 
 ## Deploy checks (frontend side)
 
-Do these on the first production deploy on `readfrontpage.com` (`*.vercel.app` previews can't sign in; see the README's Deploying section):
+Do these on staging (`staging.readfrontpage.com`, see the README's Staging section) before production, then again on the first production deploy. `*.vercel.app` previews can't sign in. On staging, read every `api.` and `www.` below as `api.staging.` and `staging.`, and also check that the session cookie is named `frontpage-staging.session_token`.
 
 - **Domains resolve:** `https://www.readfrontpage.com` serves the site (and `readfrontpage.com` redirects to it); `https://api.readfrontpage.com/api/health` answers.
 - **`NEXT_PUBLIC_API_URL` at build time:** it is baked into the browser bundle and the CSP, so it must be set in Vercel's build environment. If sign-in calls `localhost:4000`, it wasn't.

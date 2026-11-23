@@ -332,7 +332,23 @@ Deploy the **backend first**, because the frontend needs its URL.
 
 To skip Vercel builds for backend-only commits, add an `ignoreCommand` to `frontend/vercel.json` that also watches the shared code: `git diff --quiet HEAD^ HEAD -- . ../packages ../package.json ../bun.lock`.
 
-> Vercel preview deployments call the same API as production unless you set different values for the _Preview_ environment. Sign-in doesn't work on `*.vercel.app` preview addresses: they aren't on `readfrontpage.com`, so the browser treats the API's cookie as another site's and drops it. To test auth before production, give a branch a fixed subdomain (for example `staging.readfrontpage.com`, Settings → Domains → Git branch) and add it to `WEB_ORIGIN`.
+### Staging (auth on a preview)
+
+Sign-in doesn't work on `*.vercel.app` preview addresses: they aren't on `readfrontpage.com`, so the browser drops the API's cookie. Ordinary previews are still fine for layout and signed-out pages. To test auth before production, merge into a `staging` branch, which deploys a full pair on the domain:
+
+|                                                                   | Production                                                        | Staging                                                                         |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Site (Vercel)                                                     | `www.readfrontpage.com`                                           | `staging.readfrontpage.com` (Settings → Domains, Git branch `staging`)          |
+| API (Railway)                                                     | `api.readfrontpage.com`                                           | `api.staging.readfrontpage.com` (a staging environment on the `staging` branch) |
+| `WEB_ORIGIN` / `AUTH_URL`                                         | `https://www.readfrontpage.com` / `https://api.readfrontpage.com` | `https://staging.readfrontpage.com` / `https://api.staging.readfrontpage.com`   |
+| `AUTH_COOKIE_DOMAIN`                                              | `readfrontpage.com`                                               | `staging.readfrontpage.com`                                                     |
+| `AUTH_COOKIE_PREFIX` (Railway **and** Vercel)                     | unset                                                             | `frontpage-staging`                                                             |
+| `AUTH_SECRET`, database                                           | production's                                                      | a different secret; a Neon staging branch                                       |
+| Vercel `API_URL` / `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_SITE_URL` | production values                                                 | the staging API and site (Preview variables for the `staging` branch)           |
+
+Keep `NODE_ENV=production` on staging so it enforces the same startup checks and full rate limits. The API sits under `staging.` so its cookie covers only the staging hosts. The cookie prefix is needed because production's cookie, set for all of `readfrontpage.com`, also reaches `staging.`.
+
+**Cloudflare DNS:** CNAMEs for `staging` (to Vercel) and `api.staging` (to Railway), plus the production `www`, root and `api` records, all **DNS only** (grey cloud). A proxied API record would put Cloudflare's IP in `X-Real-IP` and share one rate limit among everyone, and Cloudflare's free certificate doesn't cover proxied two-level names like `api.staging`.
 
 ## Ignore files
 

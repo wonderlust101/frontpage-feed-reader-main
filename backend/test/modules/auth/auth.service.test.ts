@@ -62,8 +62,13 @@ function codeFor(to: string) {
 
 // Builds an auth instance as production would (rate limits on, Secure cookies), restoring the real env afterwards.
 // Every required setting is valid unless `overrides` says otherwise.
-function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN'>> = {}) {
-    const saved = { NODE_ENV: env.NODE_ENV, AUTH_SECRET: env.AUTH_SECRET, AUTH_COOKIE_DOMAIN: env.AUTH_COOKIE_DOMAIN };
+function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN' | 'AUTH_COOKIE_PREFIX'>> = {}) {
+    const saved = {
+        NODE_ENV: env.NODE_ENV,
+        AUTH_SECRET: env.AUTH_SECRET,
+        AUTH_COOKIE_DOMAIN: env.AUTH_COOKIE_DOMAIN,
+        AUTH_COOKIE_PREFIX: env.AUTH_COOKIE_PREFIX,
+    };
     Object.assign(env, {
         NODE_ENV: 'production',
         AUTH_SECRET: 'a-long-enough-secret-for-the-guard-0123',
@@ -116,6 +121,14 @@ describe('production cookies and rate limits', () => {
         expect(res.status).toBe(200);
         const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
         expect(sessionCookie).toContain('Domain=readfrontpage.com');
+    });
+
+    test('staging names its cookie with AUTH_COOKIE_PREFIX, so the production cookie is never read as its own', async () => {
+        const stagingAuth = createInProduction({ AUTH_COOKIE_DOMAIN: 'staging.readfrontpage.com', AUTH_COOKIE_PREFIX: 'frontpage-staging' });
+        const res = await stagingAuth.handler(signInRequest('staging@example.com', '203.0.113.2', 'sign-up/email', { name: 'Ada' }));
+        const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
+        expect(sessionCookie).toStartWith('frontpage-staging.session_token=');
+        expect(sessionCookie).toContain('Domain=staging.readfrontpage.com');
     });
 
     test('each reader (X-Real-IP) gets their own sign-in limit', async () => {

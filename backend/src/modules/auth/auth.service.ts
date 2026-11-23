@@ -124,6 +124,9 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
             // The site (www.) and the API (api.) share one domain, so the session cookie is set for all of it and the site's
             // pages see it too. Unset locally: localhost:3000 and :4000 already share cookies (cookies ignore the port).
             crossSubDomainCookies: env.AUTH_COOKIE_DOMAIN ? { enabled: true, domain: env.AUTH_COOKIE_DOMAIN } : undefined,
+            // Production's cookie (set for all of readfrontpage.com) also reaches staging.readfrontpage.com; a different name on
+            // staging keeps the two apart. Unset in production: the default "better-auth". frontend/src/proxy.ts reads the same value.
+            cookiePrefix: env.AUTH_COOKIE_PREFIX,
             // Railway's edge puts the reader's IP in X-Real-IP; rate limits and sessions use it (locally it falls back to 127.0.0.1).
             ipAddress: { ipAddressHeaders: ['x-real-ip'] },
             // Better Auth skips its origin and redirect-address checks when NODE_ENV is 'test'; always run them, so tests prove they work.
