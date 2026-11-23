@@ -42,7 +42,7 @@ const lexend = Lexend({
 const SAVED_PREFERENCES_SCRIPT = `try{var d=document.documentElement,t=localStorage.getItem('frontpage-theme'),c=localStorage.getItem('frontpage-contrast');if(t==='light'||t==='dark')d.dataset.theme=t;if(c==='standard'||c==='more')d.dataset.contrast=c}catch(e){}`;
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL),
     title: { default: 'Frontpage', template: '%s · Frontpage' },
     description: 'Your personalized front page for tech content.',
 };

@@ -1,9 +1,10 @@
-// Server-side client for the Express API (API_URL: Railway in production, localhost in development).
+// Server-side client for the Express API (API_URL, set for each deployment by next.config.ts: Railway when deployed,
+// localhost in development, the API's address inside Docker's network there).
 
 import 'server-only';
 import type { HealthResponse, SessionResponse } from '@frontpage/shared';
 
-const API_URL = process.env.API_URL ?? 'http://localhost:4000';
+const API_URL = process.env.API_URL;
 
 // Asks the API for its health from the server side; null instead of throwing if it's down, answers with an error, or takes over 5 seconds.
 export async function getHealth(): Promise<HealthResponse | null> {

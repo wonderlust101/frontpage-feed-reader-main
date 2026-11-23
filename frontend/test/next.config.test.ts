@@ -1,8 +1,9 @@
 // next.config headers: every route gets the Content Security Policy, and outside development it never allows eval
 // and keeps everything on this site. bun test runs with NODE_ENV=test, so this reads the production policy.
+// vercelDeployment: which committed deployment a Vercel build takes its URLs from.
 
 import { describe, expect, test } from 'bun:test';
-import nextConfig from '../next.config';
+import nextConfig, { vercelDeployment } from '../next.config';
 
 // Returns the CSP directives sent for every path, keyed by name, e.g. { 'script-src': "'self' 'unsafe-inline'" }.
 async function readPolicy(): Promise<Record<string, string>> {
@@ -42,5 +43,21 @@ describe('Content Security Policy', () => {
         ['frame-ancestors', "'none'"],
     ])('limits %s to %s', async (directive, sources) => {
         expect((await readPolicy())[directive]).toBe(sources);
+    });
+});
+
+describe('vercelDeployment', () => {
+    test('builds off Vercel (local, Docker, CI) are local', () => {
+        expect(vercelDeployment(undefined)).toBe('local');
+        expect(vercelDeployment('development')).toBe('local');
+    });
+
+    test('production is production, and previews (the staging branch included) use staging', () => {
+        expect(vercelDeployment('production')).toBe('production');
+        expect(vercelDeployment('preview')).toBe('staging');
+    });
+
+    test('refuses a value it does not know rather than guessing', () => {
+        expect(() => vercelDeployment('something-new')).toThrow('Unknown VERCEL_ENV');
     });
 });
