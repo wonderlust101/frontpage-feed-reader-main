@@ -26,12 +26,15 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 ├── frontend/                 # Next.js → Vercel (Root Directory: frontend)
 │   ├── vercel.json
 │   ├── .env.example
+│   ├── test/                 # bun:test tests mirroring src/ (pure logic: schemas, redirect guard, error messages)
 │   └── src/
+│       ├── proxy.ts          # sends signed-out visitors from /user and /account to sign-in
 │       ├── app/              # routes, layout, globals.css; route-private code in _components/ _data/ _assets/
+│       │   ├── (auth)/       #   sign-in, sign-up, verify-email, forgot/reset-password, account/password
 │       │   └── design-system/  # /design-system: the living design system page
-│       ├── features/         # app features, mirroring backend/src/modules (categories, items, preferences…)
+│       ├── features/         # app features, mirroring backend/src/modules (auth, categories, items, preferences…)
 │       │   └── <domain>/     #   components/, logic (fields.ts, category-field-store.ts…), later hooks/, actions.ts, types.ts
-│       ├── components/       # shared, feature-agnostic: ui/ primitives, logo.tsx, app-sidebar.tsx
+│       ├── components/       # shared, feature-agnostic: ui/ primitives (incl. form pieces), logo.tsx, app-sidebar.tsx, stickers.tsx
 │       ├── lib/api.ts        # server-side client for the backend
 │       └── styles/           # tokens.css (design tokens), components.css (component layer)
 ├── backend/                  # Express → Railway (built from the repo root)
@@ -63,7 +66,7 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
 │       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
 │       └── scripts/          # one-off scripts run with `bun src/scripts/<name>.ts` (e.g. seeding)
-├── docs/                     # challenge spec, guidance, brief (local reference, git-ignored)
+├── docs/                     # notes/: hand-off notes for planned work (tracked); spec, guidance, brief (local, git-ignored)
 ├── package.json              # workspace definition + root scripts
 ├── bun.lock · bunfig.toml    # single lockfile; hoisted node_modules
 ├── AGENTS.md / CLAUDE.md     # AI collaboration context
@@ -159,12 +162,41 @@ The living reference is **`/design-system`** (`frontend/src/app/design-system/`)
 
 Decisions worth knowing before changing it:
 
-- **Type leads, color maps.** Bricolage Grotesque for anything scanned, Onest for reading. Color has one job: Lemon (`#ffe500`, a warmer `#ffd000` in dark mode) is Frontpage's own, and seven vivid fields (Coral, Sky, Leaf, Lilac, Tangerine, Aqua, Rose) mark categories. Ink text on every field is 7.5:1 or better. No shadows, no gradients.
+- **Type leads, color maps.** Bricolage Grotesque for anything scanned, Onest for reading. Color has one job: Lemon (`#ffd000`, the same in both themes) is Frontpage's own, and seven vivid fields (Coral, Sky, Leaf, Lilac, Tangerine, Aqua, Rose) mark categories. Ink text on every field is 7.5:1 or better. No shadows, no gradients.
 - **Category colors are the reader's choice.** Any category can take any field, several can share one, and a new category starts on **No color**, a neutral stone field that behaves exactly like the others. Guests' choices are kept in `localStorage` (`frontpage-category-fields`, via `useCategoryFields` in `features/categories/category-field-store.ts`); signed-in users will need a color column on `categories`.
 - **Every color is written once** with `light-dark()`; the theme switch only sets `color-scheme`. Fields keep their full color in dark mode.
-- **Accessibility is designed in, not bolted on.** Two-tone focus rings (ink outline over a ground halo) that show on any field; a high-contrast tier (system `prefers-contrast` or the reading controls) that raises supporting text to 7:1 and thickens rules; forced-colors fallbacks; 44px hit areas on small controls; state never shown by color alone (check marks, line styles, labels).
+- **Accessibility is designed in, not bolted on.** Two-tone focus rings (ink outline over a ground halo) that show on any field, while text inputs thicken their own edge instead; a high-contrast tier (system `prefers-contrast` or the reading controls) that raises supporting text to 7:1 and thickens rules; forced-colors fallbacks; 44px hit areas on small controls; state never shown by color alone (check marks, line styles, labels).
 - **Readers tune the column.** Text size, line height, density, line length, reading face and contrast are reader settings applied through CSS custom properties.
 - **Quiet, consistent edges.** 1.5px ink for controls and the rule that opens a list; a 1px `fill-edge` hairline (ink at 40%) inside small color fills so pale fields keep an edge; hover never changes an element's size.
+
+## Auth
+
+Accounts use [Better Auth](https://www.better-auth.com) on the backend (`backend/src/modules/auth/`) and its React client on the frontend (`frontend/src/features/auth/`).
+
+| Route                  | What it does                                                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/sign-in`             | Email and password. `?next=` (same-site paths only) says where to go after; `?reset=1` / `?verified=1` greet a reader back from a reset or a confirmed email and fill in their email    |
+| `/sign-up`             | Name, email and password, then `/verify-email`                                                                                                                                          |
+| `/verify-email`        | The 6-digit code from the email (it asks for the address first when no code was sent yet); then `/user`, or `/sign-in?verified=1` when not signed in; signed-in readers can do it later |
+| `/forgot-password`     | Emails a reset link; always answers the same, so it never reveals who has an account                                                                                                    |
+| `/reset-password`      | Opened from the link: choose a new password (the API then signs every session out)                                                                                                      |
+| `/account/password`    | Signed in: change the password, optionally signing out other devices                                                                                                                    |
+| `/`, `/guest`, `/user` | Placeholders for the marketing page, guest mode and the signed-in home                                                                                                                  |
+
+Decisions worth knowing:
+
+- **Auth requests go through the frontend.** The browser calls this site's `/api/auth/*`, and `next.config.ts` forwards it to `API_URL`. In production the frontend (Vercel) and API (Railway) are different sites, and browsers drop cookies set across sites; through the proxy the session cookie belongs to the frontend.
+- **Two checks guard signed-in pages.** `src/proxy.ts` only looks for the session cookie, so signed-out visitors never see the page flash; `requireUser` (`features/auth/require-user.ts`) asks the API whether the session is valid, inside `<Suspense>` as Cache Components requires. If the API can't answer, the page shows its `error.tsx` (a temporary placeholder) instead of treating the reader as signed out.
+- **Forms** use React Hook Form with the Zod schemas in `features/auth/schemas.ts`; `error-messages.ts` turns Better Auth's error codes into one sentence each. Every form clears the password after a failure; it is never put back.
+- **Email verification needs backend work first**: the API doesn't have Better Auth's email-OTP plugin yet. The code page is built and fails with a general error until then; the work is noted on the `feat/auth-backend` branch.
+
+### Testing auth without Resend
+
+Without `RESEND_API_KEY` or `EMAIL_FROM`, the backend prints every email to its console outside production instead of sending it, link included. To test a password reset:
+
+1. `bun run docker:up` (or `bun dev` with the local database URLs), then open `http://localhost:3000/forgot-password`.
+2. Find the email in `bun run docker:logs` (search for `[email] to`) and open its link: it checks the token and lands on `/reset-password`.
+3. Set a new password and sign in with it. Opening the same link again shows the expired state.
 
 ## Scripts (repo root)
 
@@ -176,7 +208,8 @@ Decisions worth knowing before changing it:
 | `bun run build:backend`                                        | Type-check the backend (Railway's build step; the backend runs from source) |
 | `bun run start:frontend` / `start:backend`                     | Production servers                                                          |
 | `bun run typecheck`                                            | Type-check both projects                                                    |
-| `bun run test` / `test:watch`                                  | Backend API tests (`bun test`)                                              |
+| `bun run test`                                                 | Backend and frontend tests (`bun test` in each)                             |
+| `bun run test:watch`                                           | Backend tests, re-run on save                                               |
 | `bun run lint`                                                 | Lint frontend and backend (ESLint; Prettier handles formatting)             |
 | `bun run db:generate` / `db:migrate` / `db:push` / `db:studio` | Drizzle Kit (backend)                                                       |
 | `bun run docker:up` / `docker:down` / `docker:logs`            | Local Docker stack (see above)                                              |
@@ -196,6 +229,7 @@ bun run fixtures:feeds  # re-download the curated feed snapshots used by the tes
 
 - Tests live in `backend/test/` and use Bun's built-in runner (`bun:test`). No extra dependencies. The folder mirrors `backend/src/` (the test for `src/x/y.ts` is `test/x/y.test.ts`). See [`backend/test/README.md`](backend/test/README.md) for the layout rules, which `test/structure.test.ts` enforces in CI.
 - `startTestServer()` (`backend/test/helpers/test-server.ts`) starts the real Express app on a random free port, so tests call it with plain `fetch`. You don't need `bun dev` running.
+- Frontend tests live in `frontend/test/` (also `bun:test`, mirroring `frontend/src/`) and cover pure logic: the auth form schemas, the post-sign-in redirect guard, the error messages, the auth request wrapper, the email hand-off storage and the sign-in greeting. `bun run test` runs both suites.
 - `backend/test/setup.ts` runs before every test file (via `backend/bunfig.toml`). It blanks `DATABASE_URL` and pins `WEB_ORIGIN`, so tests behave the same on every machine and never touch your real Neon database, even though `bun test` auto-loads `backend/.env`.
 
 Template for a new endpoint test, e.g. `backend/test/modules/feeds/feeds.routes.test.ts`:
@@ -289,7 +323,7 @@ Deploy the **backend first**, because the frontend needs its URL.
 
 1. Vercel → **Add New → Project** → import this repo.
 2. Set **Root Directory** to `frontend`, and keep **Include files outside the root directory in the Build Step** enabled (Settings → Build and Deployment), so the build can see `packages/shared` and the root `bun.lock`. Next.js is detected; `frontend/vercel.json` pins the Bun install and build commands. `bun install` run inside `frontend/` installs from the workspace root.
-3. **Environment Variables:** `API_URL` = the Railway domain, and `NEXT_PUBLIC_SITE_URL` = your Vercel domain.
+3. **Environment Variables:** `API_URL` = the Railway domain, and `NEXT_PUBLIC_SITE_URL` = your Vercel domain. `API_URL` is also read at build time: `next.config.ts` forwards `/api/auth/*` to it.
 4. Deploy, then put the Vercel domain into the backend's `WEB_ORIGIN` on Railway.
 
 To skip Vercel builds for backend-only commits, add an `ignoreCommand` to `frontend/vercel.json` that also watches the shared code: `git diff --quiet HEAD^ HEAD -- . ../packages ../package.json ../bun.lock`.

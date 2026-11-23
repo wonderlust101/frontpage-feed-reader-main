@@ -29,7 +29,7 @@ export function SearchField({ id, label, value, onChange, className = '', ...inp
                 type="search"
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
-                className="h-11 w-full rounded-control border-[1.5px] border-ink bg-ground pr-12 pl-12 text-ui text-ink placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
+                className="h-11 w-full rounded-control border-[1.5px] border-control-edge bg-control-fill pr-12 pl-12 text-ui text-ink placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
                 {...inputProps}
             />
             {value && (

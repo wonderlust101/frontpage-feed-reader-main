@@ -1,4 +1,4 @@
-// Field picker: "No color" and the seven category colors as a row of round swatches, one radio group per category.
+// Field picker: "No color" and the eight category colors as a row of round swatches, one radio group per category.
 // Native radios, so Tab enters on the chosen swatch and the arrow keys move and choose. The chosen swatch shows a check.
 
 import type { CSSProperties } from 'react';
