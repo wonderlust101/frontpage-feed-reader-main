@@ -7,15 +7,14 @@
 
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Icon } from '@/components/ui/icon';
-import { createHtmlPreference } from '../html-preference';
+import { CONTRAST_OPTIONS, useContrast } from '../html-preference';
+import { ChoiceControl } from './choice-control';
 
 type Density = 'compact' | 'comfortable' | 'spacious';
 
 type Measure = 'narrow' | 'standard' | 'wide';
 
 type ReadingFace = 'onest' | 'atkinson' | 'lexend';
-
-const useContrast = createHtmlPreference('frontpage-contrast', 'contrast', ['standard', 'more'] as const);
 
 const DENSITY_OPTIONS: { value: Density; label: string; scale: number }[] = [
     { value: 'compact', label: 'Compact', scale: 0.7 },
@@ -28,12 +27,6 @@ const MEASURE_OPTIONS: { value: Measure; label: string; width: string }[] = [
     { value: 'standard', label: 'Standard', width: '32em' },
     { value: 'wide', label: 'Wide', width: '38em' },
 ];
-
-const CONTRAST_OPTIONS = [
-    { value: 'auto', label: 'Auto' },
-    { value: 'standard', label: 'Standard' },
-    { value: 'more', label: 'High' },
-] as const;
 
 const FACE_OPTIONS: { value: ReadingFace; label: string; variable: string }[] = [
     { value: 'onest', label: 'Onest', variable: 'var(--font-onest)' },
@@ -118,41 +111,6 @@ export function ReadingControls({ children }: { children: ReactNode }) {
             </section>
             {children}
         </div>
-    );
-}
-
-type ChoiceControlProps<Value extends string> = {
-    name: string;
-    legend: string;
-    options: readonly { value: Value; label: string }[];
-    value: Value;
-    onChange: (value: Value) => void;
-};
-
-// Renders a labeled row of radio pills; used for density, line length and contrast.
-function ChoiceControl<Value extends string>({ name, legend, options, value, onChange }: ChoiceControlProps<Value>) {
-    return (
-        <fieldset className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <legend className="float-left mr-3 w-20 text-meta font-semibold text-ink-2 md:w-auto">{legend}</legend>
-            <span className="flex gap-1">
-                {options.map((option) => (
-                    <label
-                        key={option.value}
-                        className="relative cursor-pointer rounded-toggle border-[1.5px] border-control-edge px-3 py-1 text-meta font-semibold has-[:checked]:border-ink after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] has-[:checked]:bg-ink has-[:checked]:text-ground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink"
-                    >
-                        <input
-                            type="radio"
-                            name={name}
-                            value={option.value}
-                            checked={value === option.value}
-                            onChange={() => onChange(option.value)}
-                            className="sr-only"
-                        />
-                        {option.label}
-                    </label>
-                ))}
-            </span>
-        </fieldset>
     );
 }
 

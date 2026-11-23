@@ -2,8 +2,26 @@
 
 // A reader preference stored on <html> as a data attribute (data-theme, data-contrast) and in localStorage when storage
 // is available. "Auto" removes the attribute, so the CSS falls back to the system setting.
+// Theme and contrast are created here once: each call makes its own store, so every control for a setting must share
+// one hook to stay in step. The storage keys are mirrored in the root layout's early script.
 
 import { useEffect, useSyncExternalStore } from 'react';
+
+export const useTheme = createHtmlPreference('frontpage-theme', 'theme', ['light', 'dark'] as const);
+
+export const useContrast = createHtmlPreference('frontpage-contrast', 'contrast', ['standard', 'more'] as const);
+
+export const THEME_OPTIONS = [
+    { value: 'auto', label: 'Auto' },
+    { value: 'light', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+] as const;
+
+export const CONTRAST_OPTIONS = [
+    { value: 'auto', label: 'Auto' },
+    { value: 'standard', label: 'Standard' },
+    { value: 'more', label: 'High' },
+] as const;
 
 // Returns the hook for one preference: `attribute` is the data-* name, `values` the stored (non-auto) choices.
 export function createHtmlPreference<Value extends string>(storageKey: string, attribute: string, values: readonly Value[]) {

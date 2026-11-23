@@ -38,7 +38,7 @@ const lexend = Lexend({
     preload: false,
 });
 
-// Keep the keys and values in step with theme-switch.tsx and reading-controls.tsx.
+// Keep the keys and values in step with useTheme and useContrast in features/preferences/html-preference.ts.
 const SAVED_PREFERENCES_SCRIPT = `try{var d=document.documentElement,t=localStorage.getItem('frontpage-theme'),c=localStorage.getItem('frontpage-contrast');if(t==='light'||t==='dark')d.dataset.theme=t;if(c==='standard'||c==='more')d.dataset.contrast=c}catch(e){}`;
 
 export const metadata: Metadata = {

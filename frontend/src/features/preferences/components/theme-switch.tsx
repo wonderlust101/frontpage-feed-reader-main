@@ -3,15 +3,7 @@
 // Auto / light / dark theme switch. The choice lives on <html data-theme> and in localStorage when storage is available.
 
 import type { CSSProperties } from 'react';
-import { createHtmlPreference } from '../html-preference';
-
-const useTheme = createHtmlPreference('frontpage-theme', 'theme', ['light', 'dark'] as const);
-
-const THEME_OPTIONS = [
-    { value: 'auto', label: 'Auto' },
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' },
-] as const;
+import { THEME_OPTIONS, useTheme } from '../html-preference';
 
 // Renders the switch as a radio group of pills in the surrounding text color; `contrast` colors the checked pill's label.
 export function ThemeSwitch({ contrast }: { contrast: string }) {
