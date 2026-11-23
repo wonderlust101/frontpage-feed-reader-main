@@ -1,6 +1,7 @@
 // Better Auth against a real (in-memory) Postgres built from our migrations: proves the hand-written schema matches what Better Auth expects.
 
 import { afterAll, afterEach, beforeAll, describe, expect, setSystemTime, test } from 'bun:test';
+import { env } from '../../../src/env';
 import type { Email } from '../../../src/lib/email';
 import { createAuth, passwordResetEmail, verificationCodeEmail } from '../../../src/modules/auth/auth.service';
 import { createTestDb } from '../../helpers/test-db';
@@ -62,6 +63,31 @@ function codeFor(to: string) {
 function wrongCode(code: string) {
     return code === '000000' ? '111111' : '000000';
 }
+
+describe('production settings guard', () => {
+    // Runs createAuth with NODE_ENV=production and the given AUTH_SECRET, restoring the real values afterwards.
+    function createInProduction(secret: string | undefined) {
+        const saved = { NODE_ENV: env.NODE_ENV, AUTH_SECRET: env.AUTH_SECRET };
+        Object.assign(env, { NODE_ENV: 'production', AUTH_SECRET: secret });
+        try {
+            return createAuth(testDb.db);
+        } finally {
+            Object.assign(env, saved);
+        }
+    }
+
+    test('refuses to start without AUTH_SECRET', () => {
+        expect(() => createInProduction(undefined)).toThrow('AUTH_SECRET is required');
+    });
+
+    test('refuses an AUTH_SECRET shorter than 32 characters', () => {
+        expect(() => createInProduction('too-short')).toThrow('AUTH_SECRET is required');
+    });
+
+    test('starts with a long enough AUTH_SECRET', () => {
+        expect(() => createInProduction('a-long-enough-secret-for-the-guard-0123')).not.toThrow();
+    });
+});
 
 describe('sign up and sign in', () => {
     test('sign-up creates a user and a session cookie that getSession accepts', async () => {

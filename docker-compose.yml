@@ -53,6 +53,8 @@ services:
       DATABASE_URL: *database-url
       DATABASE_URL_UNPOOLED: *database-url
       AUTH_URL: http://localhost:3000
+      # Fake, local-only value so Docker signs cookies like production does. Production refuses to start without its own.
+      AUTH_SECRET: local-docker-only-not-a-real-secret-0000
       MAILPIT_URL: http://mailpit:8025
     command: ['bun', '--no-env-file', '--watch', 'src/index.ts']
     volumes:

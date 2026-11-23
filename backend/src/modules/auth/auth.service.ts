@@ -24,6 +24,7 @@ type SendAuthEmail = (email: Email) => Promise<void>;
 const SESSION_DAYS = 30;
 const SECONDS_PER_DAY = 60 * 60 * 24;
 const RESET_TOKEN_MINUTES = 60;
+const MIN_SECRET_LENGTH = 32;
 
 const UNUSED_CODE_PATHS = [
     '/sign-in/email-otp',
@@ -52,6 +53,10 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
     // Without a fixed base URL, Better Auth builds reset links from the request's Host header, which a client controls.
     if (env.NODE_ENV === 'production' && !env.AUTH_URL) {
         throw new Error('AUTH_URL is required in production: password-reset links are built from it');
+    }
+    // The secret signs session cookies: a missing or short one would let someone forge a sign-in.
+    if (env.NODE_ENV === 'production' && (env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH) {
+        throw new Error(`AUTH_SECRET is required in production and must be at least ${MIN_SECRET_LENGTH} characters`);
     }
 
     return betterAuth({
