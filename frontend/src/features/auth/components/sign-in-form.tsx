@@ -8,24 +8,24 @@
 // refresh is a plain sign-in). Once an attempt fails, the heading returns to the usual "Sign in".
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { TextLink } from '@/components/ui/text-link';
 import { PasswordField } from '@/components/ui/password-field';
 import { TextField } from '@/components/ui/text-field';
+import { FormAlert } from '@/components/ui/form-alert';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
-import { rememberPendingEmail } from '../pending-email';
+import { rememberPendingEmail } from '../email-storage';
 import { signInSchema } from '../schemas';
-import { takeSignInEmail } from '../sign-in-email';
-import { SIGN_IN_HEADINGS, type SignInArrival } from '../sign-in-headings';
+import { takeSignInEmail } from '../email-storage';
+import { SIGN_IN_HEADINGS, type SignInArrival } from '../headings';
 import { useAuthHeading } from './auth-heading';
-import { FormAlert } from './form-alert';
-import { SubmitButton } from './submit-button';
 
 type SignInFormProps = {
     next: string;
@@ -33,8 +33,6 @@ type SignInFormProps = {
 };
 
 type SignInValues = z.infer<typeof signInSchema>;
-
-const LINK_CLASSES = 'inline-flex min-h-11 items-center text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
 
 // Renders the form and the forgot-password link.
 export function SignInForm({ next, arrival }: SignInFormProps) {
@@ -55,15 +53,16 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
     useAuthHeading(arrival && attemptFailed ? SIGN_IN_HEADINGS.default : null);
 
     useEffect(() => {
+        // Every visit clears a saved email (so an old one never lingers on a shared device); only an arrival uses it.
+        const email = takeSignInEmail();
         if (!arrival) {
             return;
         }
         const url = new URL(window.location.href);
         url.searchParams.delete('reset');
         url.searchParams.delete('verified');
-        window.history.replaceState(window.history.state, '', url);
+        window.history.replaceState(null, '', url);
 
-        const email = takeSignInEmail();
         if (email) {
             setValue('email', email);
             setFocus('password');
@@ -109,9 +108,9 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
                             </Button>
                         ) : (
                             wrongCredentials && (
-                                <Link href="/forgot-password" className={`-my-3 ${LINK_CLASSES}`}>
+                                <TextLink href="/forgot-password" standalone className="-my-3 text-ui">
                                     Forgot your password?
-                                </Link>
+                                </TextLink>
                             )
                         )
                     }
@@ -144,9 +143,9 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
 
             {!(errors.root && wrongCredentials) && (
                 <p>
-                    <Link href="/forgot-password" className={`-my-3 ${LINK_CLASSES}`}>
+                    <TextLink href="/forgot-password" standalone className="-my-3 text-ui">
                         Forgot your password?
-                    </Link>
+                    </TextLink>
                 </p>
             )}
         </form>

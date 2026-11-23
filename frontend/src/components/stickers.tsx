@@ -1,9 +1,9 @@
 // Stickers: Frontpage's die-cut decals, stuck onto a brand field (the auth panel, the design system hero) and, as a
 // small accent, empty states. Pure decoration: hidden from assistive tech, never focusable, never beside a real
 // control. Each is tilted and carries the 3px sticker edge, so none can pass for a capsule, tag or button.
-// Hovering the field (any element with the `sticker-field` class) springs them inward and straightens them.
-// Stickers are placed well clear of headers and the logo; other text sharing the field sits in a `sticker-note`
-// container (components.css), which a sticker may tuck under.
+// Hovering the field (any element with the `sticker-field` class) springs them inward and eases their tilt. With the
+// `stickers-wobble` class (the auth panel), they also wobble briefly as the page opens, then settle for good.
+// Stickers are placed well clear of the text on the field (headline, supporting line, logo); the text gets no plate.
 
 import type { CSSProperties } from 'react';
 import { ICONS, type IconName } from '@/components/ui/icon';

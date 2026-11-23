@@ -8,6 +8,8 @@
 
 import type { NextConfig } from 'next';
 
+// Read when the app is built, not when it runs: rewrites() below is fixed at build time, so API_URL must be set in
+// the build environment (Vercel) as well as at runtime. lib/api.ts keeps its own copy, as it is server-only code.
 const API_URL = process.env.API_URL ?? 'http://localhost:4000';
 
 const SECURITY_HEADERS = [

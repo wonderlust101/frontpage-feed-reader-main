@@ -10,25 +10,24 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { useAuthHeading } from './auth-heading';
-import { FormNotice } from './form-notice';
+import { FormNotice } from '@/components/ui/form-notice';
 import { TextField } from '@/components/ui/text-field';
+import { FormAlert } from '@/components/ui/form-alert';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
+import { FORGOT_PASSWORD_HEADINGS } from '../headings';
 import { emailSchema } from '../schemas';
-import { rememberSignInEmail } from '../sign-in-email';
-import { FormAlert } from './form-alert';
-import { SubmitButton } from './submit-button';
+import { rememberSignInEmail } from '../email-storage';
+import { useAuthHeading } from './auth-heading';
 
 type EmailValues = z.infer<typeof emailSchema>;
-
-const SENT_HEADING = { title: 'Check your inbox', description: "One click on the link and you're picking a new password." };
 
 // Renders the email form, then "check your inbox" once the request is accepted, with a way to try another address.
 export function ForgotPasswordForm() {
     const [sentTo, setSentTo] = useState<string | null>(null);
-    useAuthHeading(sentTo ? SENT_HEADING : null);
+    useAuthHeading(sentTo ? FORGOT_PASSWORD_HEADINGS.sent : null);
     const {
         register,
         handleSubmit,
@@ -50,7 +49,7 @@ export function ForgotPasswordForm() {
     if (sentTo) {
         return (
             <div className="flex flex-col gap-6">
-                <FormNotice icon="newsletter" lead={`Sent to ${sentTo}`} focusKey={sentTo}>
+                <FormNotice icon="newsletter" lead={`Sent to ${sentTo}`} takesFocus>
                     If that address has an account, the link is waiting there now. It works once and lasts 60 minutes.
                 </FormNotice>
                 <p className="text-ui text-ink-2">Nothing after a few minutes? Peek in your spam folder, or try another address.</p>

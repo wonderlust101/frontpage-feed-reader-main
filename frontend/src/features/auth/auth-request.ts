@@ -2,7 +2,13 @@
 // It also reads how long to wait after too many attempts: Better Auth only sends that in a 429's X-Retry-After header,
 // which the returned error object doesn't include, so the call gets an onError hook that captures it.
 
-import type { AuthFailure } from './error-messages';
+// A failed auth request in one shape: Better Auth's error code, the HTTP status (0 when the request never reached the
+// server, i.e. offline), and the wait in seconds after too many attempts, when the server said.
+export type AuthFailure = {
+    code?: string;
+    status: number;
+    retryAfterSeconds?: number;
+};
 
 type ErrorHook = { onError: (context: { response: Response }) => void };
 

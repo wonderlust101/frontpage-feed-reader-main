@@ -1,34 +1,42 @@
 'use client';
 
-// Verify-email flow: the reader types the 6-digit code from their email. The address comes from sign-up or sign-in
-// (sessionStorage) or from the signed-in session; if neither has it, the page asks for it and sends a code first.
+// Verify-email flow: the reader types the 6-digit code from their email. The code step only shows when a code is known
+// to be on its way: sign-up or sign-in sent one (and saved the address in sessionStorage), or the reader sent one here.
+// Otherwise the page asks for the address first (filled in from the session when signed in) and sends a code. Until
+// the browser has read storage and the session, it shows a skeleton, so neither step flashes before the other.
 // Signed-in readers can leave it for later. Until the API's email-code plugin exists, its requests fail with a general error.
 // The email step has its own heading ("Where should the code go?"); the code step's description says where the code
-// went and how long it lasts. Arriving at the code
-// step from the email step puts focus in the code field, and a resent code's notice takes focus.
+// went and how long it lasts. Arriving at the code step from the email step puts focus in the code field, and a
+// resent code's notice takes focus.
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { useAuthHeading } from './auth-heading';
-import { FormNotice } from './form-notice';
+import { FormAlert } from '@/components/ui/form-alert';
+import { FormNotice } from '@/components/ui/form-notice';
+import { FormSkeleton } from '@/components/ui/form-skeleton';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { TextField } from '@/components/ui/text-field';
+import { TextLink } from '@/components/ui/text-link';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
+import { forgetPendingEmail, readPendingEmail, rememberPendingEmail, rememberSignInEmail } from '../email-storage';
 import { authErrorMessage } from '../error-messages';
-import { forgetPendingEmail, readPendingEmail, rememberPendingEmail } from '../pending-email';
-import { CODE_LENGTH, codeSchema, emailSchema } from '../schemas';
-import { rememberSignInEmail } from '../sign-in-email';
-import { FormAlert } from './form-alert';
-import { SubmitButton } from './submit-button';
+import { codeStepHeading, VERIFY_EMAIL_HEADINGS } from '../headings';
+import { codeSchema, emailSchema } from '../schemas';
+import { useAuthHeading } from './auth-heading';
 
 type EmailValues = z.infer<typeof emailSchema>;
 
 type CodeValues = z.input<typeof codeSchema>;
+
+type EmailStepProps = {
+    defaultEmail: string;
+    onSent: (email: string) => void;
+};
 
 type CodeStepProps = {
     email: string;
@@ -37,36 +45,40 @@ type CodeStepProps = {
     onChangeEmail: () => void;
 };
 
-const EMAIL_STEP_HEADING = { title: 'Where should the code go?', description: "Pop in your email and we'll send six digits over." };
-
 const RESEND_COOLDOWN_SECONDS = 60;
-
-// How long a code lasts: the API's email-code plugin default (expiresIn, 300 seconds).
-const CODE_LIFETIME_MINUTES = 5;
 
 const CODE_FIELD_CODES = ['INVALID_OTP', 'OTP_EXPIRED', 'TOO_MANY_ATTEMPTS'];
 
-const LINK_CLASSES = 'text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
-
-// Renders the code step when the address is known, else the email step; offers "Do this later" when signed in.
+// Renders a skeleton until storage and the session are read, then the code step when a code was sent, else the email
+// step; offers "Do this later" when signed in.
 export function VerifyEmailForm() {
-    const { data: session } = authClient.useSession();
+    const { data: session, isPending } = authClient.useSession();
+    const mounted = useSyncExternalStore(
+        subscribeToNothing,
+        () => true,
+        () => false,
+    );
     const storedEmail = useSyncExternalStore(subscribeToNothing, readPendingEmail, () => null);
     const [sentTo, setSentTo] = useState<string | null>(null);
     const [changingEmail, setChangingEmail] = useState(false);
 
-    const email = changingEmail ? null : (sentTo ?? storedEmail ?? session?.user.email ?? null);
+    if (!mounted || isPending) {
+        return <FormSkeleton fields={1} />;
+    }
+
+    const codeSentTo = changingEmail ? null : (sentTo ?? storedEmail);
     const signedIn = Boolean(session);
 
     return (
         <div className="flex flex-col gap-8">
-            {email ? (
-                <CodeStep email={email} signedIn={signedIn} focusCode={sentTo !== null} onChangeEmail={() => setChangingEmail(true)} />
+            {codeSentTo ? (
+                <CodeStep email={codeSentTo} signedIn={signedIn} focusCode={sentTo !== null} onChangeEmail={() => setChangingEmail(true)} />
             ) : (
                 <EmailStep
-                    onSent={(sentTo) => {
-                        rememberPendingEmail(sentTo);
-                        setSentTo(sentTo);
+                    defaultEmail={session?.user.email ?? ''}
+                    onSent={(address) => {
+                        rememberPendingEmail(address);
+                        setSentTo(address);
                         setChangingEmail(false);
                     }}
                 />
@@ -74,24 +86,24 @@ export function VerifyEmailForm() {
             {signedIn && (
                 <p className="text-ui text-ink-2">
                     Not now?{' '}
-                    <Link href="/user" className={LINK_CLASSES}>
+                    <TextLink href="/user" className="text-ink">
                         Do this later
-                    </Link>
+                    </TextLink>
                 </p>
             )}
         </div>
     );
 }
 
-// Asks for the address and sends a code to it, then hands the address back through `onSent`.
-function EmailStep({ onSent }: { onSent: (email: string) => void }) {
-    useAuthHeading(EMAIL_STEP_HEADING);
+// Asks for the address (starting from `defaultEmail`) and sends a code to it, then hands the address back through `onSent`.
+function EmailStep({ defaultEmail, onSent }: EmailStepProps) {
+    useAuthHeading(VERIFY_EMAIL_HEADINGS.emailStep);
     const {
         register,
         handleSubmit,
         setError,
         formState: { errors, isSubmitting },
-    } = useForm<EmailValues>({ resolver: zodResolver(emailSchema), defaultValues: { email: '' }, reValidateMode: 'onChange' });
+    } = useForm<EmailValues>({ resolver: zodResolver(emailSchema), defaultValues: { email: defaultEmail }, reValidateMode: 'onChange' });
 
     async function sendCode({ email }: EmailValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
@@ -123,20 +135,18 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
     );
 }
 
-// Takes the code for `email`, verifies it, and offers a new code (at most once a minute) or a different address.
-// `focusCode` puts focus in the code field on arrival (after the email step sent a code).
+// Takes the code for `email`, verifies it, and offers a new code (at most once a minute, counting from the code just
+// sent) or a different address. `focusCode` puts focus in the code field on arrival from the email step.
 function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) {
     const router = useRouter();
-    const [cooldown, setCooldown] = useState(0);
+    const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
     const [resentCount, setResentCount] = useState(0);
-    useAuthHeading({
-        title: 'Confirm your email',
-        description: `We sent a ${CODE_LENGTH}-digit code to ${email}. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
-    });
+    useAuthHeading(codeStepHeading(email));
     const {
         register,
         handleSubmit,
         setError,
+        clearErrors,
         setFocus,
         formState: { errors, isSubmitting },
     } = useForm<CodeValues, unknown, z.output<typeof codeSchema>>({
@@ -176,12 +186,13 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
     }
 
     async function resend() {
+        clearErrors('root');
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
             return;
         }
-        setResentCount(resentCount + 1);
+        setResentCount((count) => count + 1);
         setCooldown(RESEND_COOLDOWN_SECONDS);
     }
 
@@ -191,7 +202,7 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
                 <FormAlert lead="Couldn't confirm your email." message={errors.root.message} />
             ) : (
                 resentCount > 0 && (
-                    <FormNotice icon="newsletter" lead="New code sent." focusKey={resentCount}>
+                    <FormNotice key={resentCount} icon="newsletter" lead="New code sent." takesFocus>
                         Use the code in the newest email; older ones stop working.
                     </FormNotice>
                 )
@@ -230,7 +241,8 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
 }
 
 // sessionStorage has no change events within a tab, so there is nothing to subscribe to; useSyncExternalStore still
-// reads it safely (null on the server, the stored address once the page runs in the browser).
+// reads it safely (null on the server, the stored address once the page runs in the browser), and the same trick
+// tells the component whether it is running in the browser yet.
 function subscribeToNothing(): () => void {
     return () => {};
 }

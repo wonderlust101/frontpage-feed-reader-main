@@ -2,13 +2,8 @@
 // Sign-in failures stay vague on purpose ("email or password"), so the form never reveals which emails have accounts.
 // `code` is Better Auth's error code; `status` 0 means the request never reached the server (offline).
 
+import type { AuthFailure } from './auth-request';
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './schemas';
-
-export type AuthFailure = {
-    code?: string;
-    status: number;
-    retryAfterSeconds?: number;
-};
 
 const ACCOUNT_EXISTS = 'An account with this email already exists. Sign in instead, or reset your password if you have forgotten it.';
 const SIGN_IN_AGAIN = 'For your security, sign in again before changing your password.';
@@ -31,7 +26,8 @@ const MESSAGES: Record<string, string> = {
 };
 
 const OFFLINE = "Can't reach Frontpage. Check your connection and try again.";
-const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minutes.';
+// Also shown by the account-unavailable error page when the session can't be checked.
+export const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minutes.';
 const TOO_MANY_REQUESTS = 'Too many tries in a row. Take a minute, then try again.';
 const FALLBACK = 'Something went wrong on our end. Try again in a moment.';
 

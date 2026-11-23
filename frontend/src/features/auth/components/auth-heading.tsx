@@ -5,8 +5,7 @@
 // inbox", "Password changed") swaps in its own heading with useAuthHeading, and the default returns when it unmounts.
 
 import { createContext, use, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
-
-export type Heading = { title: string; description: string };
+import type { Heading } from '../headings';
 
 const HeadingContext = createContext<Dispatch<SetStateAction<Heading | null>> | null>(null);
 

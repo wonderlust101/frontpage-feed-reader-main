@@ -1,5 +1,5 @@
-// What an auth form shows for the moment its page reads the URL on the server: rule-soft bars in the form's shape,
-// so nothing jumps when the real fields arrive.
+// What a form shows while it can't render yet (its page is reading the URL on the server, or it is waiting for the
+// session in the browser): rule-soft bars in the form's shape, so nothing jumps when the real fields arrive.
 
 type FormSkeletonProps = {
     fields: number;

@@ -123,8 +123,8 @@ body {
     box-shadow: 0 0 0 3px var(--color-focus-halo);
 }
 
-/* Elements that only take focus from code (tabindex -1: the form alert, the skip link's target) never show a ring: */
-/* focus moves there so screen readers announce them, not for anyone to act on them. */
+/* Elements that only take focus from code (tabindex -1: form notices that take focus, the skip link's target) never */
+/* show a ring: focus moves there so screen readers announce them, not for anyone to act on them. */
 [tabindex='-1']:focus,
 [tabindex='-1']:focus-visible {
     outline: none;

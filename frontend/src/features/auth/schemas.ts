@@ -8,6 +8,9 @@ export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 128;
 export const CODE_LENGTH = 6;
 
+// How long an email code lasts: the API's email-code plugin default (expiresIn, 300 seconds).
+export const CODE_LIFETIME_MINUTES = 5;
+
 // The hint under every new-password field. Length is what makes a password strong, and unrelated words make length
 // easy to remember (a familiar phrase or a quote is easy to guess, so the words should not belong together).
 export const NEW_PASSWORD_HINT = `At least ${MIN_PASSWORD_LENGTH} characters. Longer is stronger: try a few unrelated words.`;

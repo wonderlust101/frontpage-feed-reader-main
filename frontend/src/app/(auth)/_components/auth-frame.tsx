@@ -14,27 +14,24 @@
 // One quiet brand touch on the form side: a Lemon underline on the h1.
 
 import Link from 'next/link';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
-import { AuthHeading, AuthHeadingProvider } from '@/features/auth/components/auth-heading';
+import { TextLink } from '@/components/ui/text-link';
+import { AuthHeadingProvider } from '@/features/auth/components/auth-heading';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import type { AuthPanel } from '../_data/panels';
 
 type AuthFrameProps = {
     panel: AuthPanel;
-    title: string;
-    description: string;
+    heading: ReactNode;
     aside: { prompt?: string; label: string; href: string };
     children: ReactNode;
 };
 
-const LINK_CLASSES = 'font-semibold underline decoration-1 underline-offset-4 hover:decoration-2';
-
-// Renders the sticker panel and the form column; `children` is the form (or a result message) under the h1.
-export function AuthFrame({ panel, title, description, aside, children }: AuthFrameProps) {
-    const fieldStyle = { background: BRAND_FIELD.color } as CSSProperties;
-
+// Renders the sticker panel and the form column. `heading` is the page's AuthHeading (or a <Suspense> around one, for
+// a page that picks its heading from the URL); `children` is the form (or a result message) under it.
+export function AuthFrame({ panel, heading, aside, children }: AuthFrameProps) {
     return (
         <AuthHeadingProvider>
             <div className="flex flex-1">
@@ -47,7 +44,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                 <div className="grid w-full lg:min-h-dvh lg:grid-cols-[1.15fr_1fr] xl:grid-cols-2">
                     <aside
                         className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"
-                        style={fieldStyle}
+                        style={{ background: BRAND_FIELD.color }}
                     >
                         <Stickers stickers={panel.stickers} className="stickers-wobble" />
                         <div className="relative flex flex-1 flex-col px-gutter pt-5 pb-8 lg:p-14">
@@ -74,7 +71,7 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                             <SwitchLink aside={aside} />
                         </div>
                         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center lg:py-10">
-                            <AuthHeading title={title} description={description} />
+                            {heading}
                             <div className="mt-7 lg:mt-8">{children}</div>
                             <div className="mt-10 text-center lg:hidden">
                                 <SwitchLink aside={aside} />
@@ -84,9 +81,9 @@ export function AuthFrame({ panel, title, description, aside, children }: AuthFr
                             <div className="mt-8 border-t border-rule-soft pt-5 text-ink-2 lg:mt-10">
                                 <p className="text-ui">
                                     Just looking?{' '}
-                                    <Link href="/guest" className={`text-ink ${LINK_CLASSES}`}>
+                                    <TextLink href="/guest" className="text-ink">
                                         Read as a guest
-                                    </Link>
+                                    </TextLink>
                                 </p>
                             </div>
                         )}
@@ -102,9 +99,9 @@ function SwitchLink({ aside }: Pick<AuthFrameProps, 'aside'>) {
     return (
         <p className="text-ui text-ink-2 lg:whitespace-nowrap">
             {aside.prompt && <>{aside.prompt} </>}
-            <Link href={aside.href} className={`text-ink ${LINK_CLASSES}`}>
+            <TextLink href={aside.href} className="text-ink">
                 {aside.label}
-            </Link>
+            </TextLink>
         </p>
     );
 }

@@ -1,4 +1,5 @@
-/* Component styles that utilities can't express cleanly: filter capsules, range inputs, health lines. */
+/* Component styles that utilities can't express cleanly: filter capsules, range inputs, health lines, and stickers */
+/* (their shapes, the phone-band rules, the hover spring and the arrival wobble). */
 
 @layer components {
     /* Capsules: --capsule-field fills the capsule when it is on; --capsule-on is the text on that fill (on-field ink */
@@ -275,20 +276,7 @@
         container-type: inline-size;
     }
 
-    /* Text and stickers: headers and the logo get no plate; stickers are placed well clear of them instead. Other */
-    /* text that shares the field with stickers sits in a sticker note: a real container of sticker paper with an ink */
-    /* edge, above the sticker layer, so a sticker may tuck under its edge. Paper and ink are fixed in both themes. */
-    .sticker-note {
-        position: relative;
-        z-index: 1;
-        width: fit-content;
-        max-width: 100%;
-        padding: 0.875rem 1.125rem;
-        border: 1.5px solid var(--color-on-field);
-        border-radius: var(--radius-panel);
-        background: var(--color-on-ink);
-        color: var(--color-on-field);
-    }
+    /* Text and stickers: text on a field gets no plate; stickers are placed well clear of it instead. */
 
     .stickers {
         position: absolute;

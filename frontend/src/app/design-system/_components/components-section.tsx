@@ -2,15 +2,16 @@
 
 import { AiSummary } from '@/components/ui/ai-summary';
 import { Button } from '@/components/ui/button';
+import { FormNotice } from '@/components/ui/form-notice';
 import { Icon } from '@/components/ui/icon';
 import { HealthMark } from '@/components/ui/health-mark';
 import { PasswordField } from '@/components/ui/password-field';
 import { CategoryTag, NewTag } from '@/components/ui/tags';
 import { TextField } from '@/components/ui/text-field';
+import { CATEGORIES } from '../_data/sample-data';
 import { CategoryFilterDemo } from './category-filter-demo';
 import { FormControlsDemo } from './form-controls-demo';
 import { DocSection, Specimen } from './doc-section';
-import { CATEGORIES } from '../_data/sample-data';
 
 // Renders buttons, capsules, inputs, tags, feed health and the AI summary panel.
 export function ComponentsSection() {
@@ -70,6 +71,20 @@ export function ComponentsSection() {
                     <div className="grid max-w-3xl gap-8 md:grid-cols-2">
                         <PasswordField id="demo-password" label="Password" hint="At least 8 characters." autoComplete="off" />
                         <PasswordField id="demo-password-error" label="Password" defaultValue="short" autoComplete="off" error="Use at least 8 characters." />
+                    </div>
+                </Specimen>
+
+                <Specimen
+                    title="Form notice"
+                    description="A message at the top of a form, in the fields' language: a field's edge (red and heavier for errors), the icon lined up with the text inside the fields, and the lead on its own line. One brought in by a step takes focus; an error offers the way out."
+                >
+                    <div className="grid max-w-3xl gap-8 md:grid-cols-2">
+                        <FormNotice icon="newsletter" lead="Sent to ada@example.com">
+                            If that address has an account, the link is waiting there now.
+                        </FormNotice>
+                        <FormNotice tone="error" icon="error" lead="Couldn't sign you in.">
+                            That email and password don&apos;t match. Check both and try again.
+                        </FormNotice>
                     </div>
                 </Specimen>
 

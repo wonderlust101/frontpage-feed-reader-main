@@ -4,7 +4,7 @@
 // button with one fixed name ("Show password"), so screen readers hear whether the password is showing.
 // While Caps Lock is on and the field has focus, the hint row says so (an error still takes its place).
 
-import { useState, type ComponentProps, type FocusEvent, type KeyboardEvent } from 'react';
+import { useState, type ComponentProps, type KeyboardEvent } from 'react';
 import { Icon } from './icon';
 import { TextField } from './text-field';
 
@@ -23,15 +23,15 @@ export function PasswordField({ hint, onKeyDown, onKeyUp, onBlur, ...props }: Pa
         <TextField
             {...props}
             hint={capsLock ? 'Caps Lock is on.' : hint}
-            onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+            onKeyDown={(event) => {
                 readCapsLock(event);
                 onKeyDown?.(event);
             }}
-            onKeyUp={(event: KeyboardEvent<HTMLInputElement>) => {
+            onKeyUp={(event) => {
                 readCapsLock(event);
                 onKeyUp?.(event);
             }}
-            onBlur={(event: FocusEvent<HTMLInputElement>) => {
+            onBlur={(event) => {
                 setCapsLock(false);
                 onBlur?.(event);
             }}

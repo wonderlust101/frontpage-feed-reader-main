@@ -9,31 +9,34 @@ import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { PasswordField } from '@/components/ui/password-field';
 import { TextField } from '@/components/ui/text-field';
+import { FormAlert } from '@/components/ui/form-alert';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
-import { rememberPendingEmail } from '../pending-email';
+import { rememberPendingEmail } from '../email-storage';
 import { signUpSchema, NEW_PASSWORD_HINT } from '../schemas';
-import { FormAlert } from './form-alert';
-import { SubmitButton } from './submit-button';
 
 type SignUpValues = z.infer<typeof signUpSchema>;
 
 const EMAIL_TAKEN_CODES = ['USER_ALREADY_EXISTS', 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL'];
 
 // Renders the form; an email that already has an account is reported on the email field, other failures above the form.
+// The password is cleared after any failure, as in the other auth forms.
 export function SignUpForm() {
     const router = useRouter();
     const {
         register,
         handleSubmit,
         setError,
+        resetField,
         formState: { errors, isSubmitting },
     } = useForm<SignUpValues>({ resolver: zodResolver(signUpSchema), defaultValues: { name: '', email: '', password: '' }, reValidateMode: 'onChange' });
 
     async function signUp(values: SignUpValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.signUp.email(values, fetchOptions));
         if (failure) {
+            resetField('password');
             const field = failure.code && EMAIL_TAKEN_CODES.includes(failure.code) ? 'email' : 'root';
             setError(field, { message: authErrorMessage(failure) }, { shouldFocus: true });
             return;

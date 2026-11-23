@@ -1,13 +1,17 @@
 // Change-password page for signed-in readers. proxy.ts already sent visitors without a session cookie to sign-in;
-// requireUser checks the session is still valid, inside <Suspense> because it reads the request.
+// requireUser checks the session is still valid, inside <Suspense> because it reads the request; if the API can't
+// answer, error.tsx here shows instead. It sits in the (auth) group because it uses the auth frame; /user doesn't,
+// so it lives outside the group.
 
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ChangePasswordForm } from '@/features/auth/components/change-password-form';
 import { requireUser } from '@/features/auth/require-user';
+import { AuthHeading } from '@/features/auth/components/auth-heading';
+import { CHANGE_PASSWORD_HEADINGS } from '@/features/auth/headings';
+import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { AuthFrame } from '../../_components/auth-frame';
 import { AUTH_PANELS } from '../../_data/panels';
-import { FormSkeleton } from '../../_components/form-skeleton';
 
 export const metadata: Metadata = { title: 'Change your password', robots: { index: false } };
 
@@ -15,8 +19,7 @@ export default function ChangePasswordPage() {
     return (
         <AuthFrame
             panel={AUTH_PANELS.changePassword}
-            title="Change your password"
-            description="Pick one you don't use anywhere else. Your feeds stay exactly as they are."
+            heading={<AuthHeading {...CHANGE_PASSWORD_HEADINGS.default} />}
             aside={{ label: 'Back to your account', href: '/user' }}
         >
             <Suspense fallback={<FormSkeleton fields={2} />}>

@@ -2,21 +2,22 @@
 
 // Reset-password form, opened from the emailed link. The token arrives in the URL; once read, it is removed from the
 // address bar so it doesn't linger in history or get copied along with the address. Success signs every session out
-// (the API revokes them), so the reader goes to sign-in with a "password changed" notice.
+// (the API revokes them), so the reader goes to sign-in, whose heading says the password changed and whose email
+// field is filled in from the forgot-password step.
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
+import { TextLink } from '@/components/ui/text-link';
 import { PasswordField } from '@/components/ui/password-field';
+import { FormAlert } from '@/components/ui/form-alert';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { resetPasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
-import { FormAlert } from './form-alert';
-import { SubmitButton } from './submit-button';
 
 type ResetPasswordFormProps = {
     token: string;
@@ -56,9 +57,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                     lead="Couldn't change your password."
                     message={errors.root.message}
                     action={
-                        <Link href="/forgot-password" className="text-ui font-semibold underline decoration-1 underline-offset-4 hover:decoration-2">
+                        <TextLink href="/forgot-password" standalone className="text-ui">
                             Get a new link
-                        </Link>
+                        </TextLink>
                     }
                 />
             )}
