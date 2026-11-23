@@ -6,7 +6,7 @@
 // the browser has read storage and the session, it shows a skeleton, so neither step flashes before the other.
 // The right code also signs the reader in, so it always ends on /user.
 // Signed-in readers (straight after sign-up, the usual case) can leave it for later: the frame's switch link becomes
-// "Not now? Do this later" and the guest shortcut goes, since "Sign in" and "Read as a guest" would tell someone who
+// "Not now? Do this later" (which forgets the pending code, so coming back asks to send a new one) and the guest shortcut goes, since "Sign in" and "Read as a guest" would tell someone who
 // is already in that they aren't. Straight after sign-up, the code step opens with an "Account created." notice.
 // The email step has its own heading ("Where should the code go?"); the code step's description says where the code
 // went and how long it lasts, and the code field is described by it. Every arrival at a step puts focus in its field,
@@ -16,7 +16,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useState, useSyncExternalStore } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
 import { Button } from '@/components/ui/button';
@@ -53,7 +53,10 @@ const RESEND_COOLDOWN_SECONDS = 60;
 
 const CODE_FIELD_CODES = ['INVALID_OTP', 'OTP_EXPIRED', 'TOO_MANY_ATTEMPTS'];
 
-const SIGNED_IN_LINKS: FrameLinks = { switchLink: { prompt: 'Not now?', label: 'Do this later', href: '/user' }, guestLink: false };
+const SIGNED_IN_LINKS: FrameLinks = {
+    switchLink: { prompt: 'Not now?', label: 'Do this later', href: '/user', onClick: forgetPendingEmail },
+    guestLink: false,
+};
 
 // Renders a skeleton until storage and the session are read, then the code step when a code was sent, else the email
 // step; signed in, the frame offers "Do this later" in place of sign-in and the guest shortcut.
@@ -69,6 +72,16 @@ export function VerifyEmailForm() {
     const [changingEmail, setChangingEmail] = useState(false);
     const signedIn = Boolean(session);
     useAuthFrameLinks(signedIn ? SIGNED_IN_LINKS : null);
+
+    // Next keeps a visited page alive (hidden) after the reader leaves; forget this visit's code so the next visit
+    // goes by storage alone and sends a new one when none is pending.
+    useLayoutEffect(
+        () => () => {
+            setSentTo(null);
+            setChangingEmail(false);
+        },
+        [],
+    );
 
     if (!mounted || isPending) {
         return <FormSkeleton fields={1} />;
@@ -194,6 +207,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
             setError('root', { message: authErrorMessage(failure) });
             return;
         }
+        rememberPendingEmail(email);
         setResentCount((count) => count + 1);
         setCooldown(RESEND_COOLDOWN_SECONDS);
     }
