@@ -200,7 +200,7 @@ Without `RESEND_API_KEY`, nothing reaches a real inbox. Outside production the b
 2. Open Mailpit at `http://localhost:8025`, copy the 6-digit code, and enter it: you land on `/user`, signed in and verified.
 3. For a password reset, use `http://localhost:3000/forgot-password`, open the link from Mailpit (it lands on `/reset-password`), and set a new password. Opening the same link again shows the expired state.
 
-Running with `bun dev` instead of Docker: start only Mailpit with `docker compose up -d mailpit`, and set `MAILPIT_URL=http://localhost:8025` and `AUTH_URL=http://localhost:4000` in `backend/.env`. Reset links then open on the API, which sends the reader on to `http://localhost:3000/reset-password`.
+Running with `bun dev` instead of Docker: start only Mailpit with `docker compose up -d mailpit`, and set `MAILPIT_URL=http://localhost:8025` in `backend/.env` (the local URLs come from `deployments.ts`). Reset links open on the API, which sends the reader on to `http://localhost:3000/reset-password`.
 
 ## Scripts (repo root)
 
@@ -275,8 +275,15 @@ Each project has an `.env.example` (committed) documenting every variable, and a
 | Backend  | `backend/.env`        | Railway → backend service → **Variables**               |
 | Frontend | `frontend/.env.local` | Vercel → Project → **Settings → Environment Variables** |
 
-- **Backend:** server (`PORT`, `WEB_ORIGIN`), Neon (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), auth (`AUTH_SECRET`, `AUTH_URL`, `AUTH_COOKIE_DOMAIN`), email (`RESEND_API_KEY`, `EMAIL_FROM`, local-only `MAILPIT_URL`), feed fetching (`FEED_*`). Read through `backend/src/env.ts`.
-- **Frontend:** `API_URL` (the API for server-side calls), `NEXT_PUBLIC_API_URL` (the API as the browser sees it, baked in at build time) and `NEXT_PUBLIC_SITE_URL`.
+**Deployment URLs are not variables.** The site and API address, the allowed origin, and the session cookie's domain and prefix for production, staging and local live in one committed map, `packages/shared/src/deployments.ts`. Each side picks its row from what its platform already says:
+
+- the frontend (`next.config.ts`, at build time) from Vercel's `VERCEL_ENV`: production, or staging for every preview,
+- the backend (`backend/src/env.ts`) from Railway's `RAILWAY_ENVIRONMENT_NAME`: `production` or `staging`.
+
+Anywhere else, Docker and `bun dev` included, gets the local row. A variable that is set still overrides its value. An unknown Vercel or Railway environment stops the build or start rather than falling back to localhost. The dashboards hold only secrets:
+
+- **Backend:** Neon (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), `AUTH_SECRET`, email (`RESEND_API_KEY`, `EMAIL_FROM`; local-only `MAILPIT_URL`), `NODE_ENV=production`, and optional feed tuning (`FEED_*`). Read through `backend/src/env.ts`.
+- **Frontend:** nothing. `API_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL` and `AUTH_COOKIE_PREFIX` are optional local overrides (`frontend/.env.example`).
 
 Generate production secrets with `openssl rand -base64 32`, and don't reuse your local ones.
 
@@ -321,14 +328,14 @@ Deploy the **backend first**, because the frontend needs its URL.
 
     Railpack detects Bun from `packageManager` in the root `package.json` and installs the whole workspace. Railway injects `PORT`.
 
-3. **Variables:** add those from `backend/.env.example`. Leave out `PORT`, and set `NODE_ENV=production`, `WEB_ORIGIN=https://www.readfrontpage.com`, `AUTH_URL=https://api.readfrontpage.com` and `AUTH_COOKIE_DOMAIN=readfrontpage.com`. The API refuses to start in production without `AUTH_URL`, `AUTH_SECRET` and `AUTH_COOKIE_DOMAIN`.
+3. **Variables:** only `NODE_ENV=production`, `AUTH_SECRET`, the database URLs and the email settings. The URLs come from the environment's row in `deployments.ts`; Railway's environment must be named `production` (or `staging`). Don't set `WEB_ORIGIN`, `AUTH_URL`, `AUTH_COOKIE_DOMAIN` or `AUTH_COOKIE_PREFIX` unless you mean to override the map; a stale one wins over it. The API refuses to start in production without `AUTH_SECRET` and a resolved `AUTH_URL`, `WEB_ORIGIN` and `AUTH_COOKIE_DOMAIN`.
 
 ### Frontend → Vercel
 
 1. Vercel → **Add New → Project** → import this repo.
 2. Set **Root Directory** to `frontend`, and keep **Include files outside the root directory in the Build Step** enabled (Settings → Build and Deployment), so the build can see `packages/shared` and the root `bun.lock`. Next.js is detected; `frontend/vercel.json` pins the Bun install and build commands. `bun install` run inside `frontend/` installs from the workspace root.
 3. **Domains** (Settings → Domains): add `www.readfrontpage.com`, and `readfrontpage.com` redirecting to it, so the site has one origin.
-4. **Environment Variables:** `API_URL` and `NEXT_PUBLIC_API_URL` = `https://api.readfrontpage.com`, and `NEXT_PUBLIC_SITE_URL` = `https://www.readfrontpage.com`. `NEXT_PUBLIC_API_URL` is baked in at build time (the browser bundle and the CSP's `connect-src`), so set it for builds too.
+4. **Environment Variables:** none needed. `next.config.ts` reads `VERCEL_ENV` at build time and fixes the production or staging URLs into the build (the browser bundle and the CSP's `connect-src`). Keep **Automatically expose System Environment Variables** on (the default), and remove any old `API_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL` or `AUTH_COOKIE_PREFIX`, since a set variable overrides the map.
 
 To skip Vercel builds for backend-only commits, add an `ignoreCommand` to `frontend/vercel.json` that also watches the shared code: `git diff --quiet HEAD^ HEAD -- . ../packages ../package.json ../bun.lock`.
 
@@ -336,15 +343,15 @@ To skip Vercel builds for backend-only commits, add an `ignoreCommand` to `front
 
 Sign-in doesn't work on `*.vercel.app` preview addresses: they aren't on `readfrontpage.com`, so the browser drops the API's cookie. Ordinary previews are still fine for layout and signed-out pages. To test auth before production, merge into a `staging` branch, which deploys a full pair on the domain:
 
-|                                                                   | Production                                                        | Staging                                                                         |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Site (Vercel)                                                     | `www.readfrontpage.com`                                           | `staging.readfrontpage.com` (Settings → Domains, Git branch `staging`)          |
-| API (Railway)                                                     | `api.readfrontpage.com`                                           | `api.staging.readfrontpage.com` (a staging environment on the `staging` branch) |
-| `WEB_ORIGIN` / `AUTH_URL`                                         | `https://www.readfrontpage.com` / `https://api.readfrontpage.com` | `https://staging.readfrontpage.com` / `https://api.staging.readfrontpage.com`   |
-| `AUTH_COOKIE_DOMAIN`                                              | `readfrontpage.com`                                               | `staging.readfrontpage.com`                                                     |
-| `AUTH_COOKIE_PREFIX` (Railway **and** Vercel)                     | unset                                                             | `frontpage-staging`                                                             |
-| `AUTH_SECRET`, database                                           | production's                                                      | a different secret; a Neon staging branch                                       |
-| Vercel `API_URL` / `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_SITE_URL` | production values                                                 | the staging API and site (Preview variables for the `staging` branch)           |
+|                                                | Production                                             | Staging                                                                         |
+| ---------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Site (Vercel)                                  | `www.readfrontpage.com`                                | `staging.readfrontpage.com` (Settings → Domains, Git branch `staging`)          |
+| API (Railway)                                  | `api.readfrontpage.com`                                | `api.staging.readfrontpage.com` (a staging environment on the `staging` branch) |
+| URLs, allowed origin, cookie domain and prefix | the `production` row of `deployments.ts`               | the `staging` row (picked automatically; nothing to set)                        |
+| Railway environment name                       | `production`                                           | `staging`                                                                       |
+| Railway variables                              | `NODE_ENV=production`, its own secret, database, email | `NODE_ENV=production`, a different secret, a Neon staging branch, email         |
+| Vercel variables                               | none                                                   | none (every preview, `staging` included, builds with the staging row)           |
+| Vercel Deployment Protection                   | n/a                                                    | turn **Vercel Authentication** off for previews, or only your team can open it  |
 
 Keep `NODE_ENV=production` on staging so it enforces the same startup checks and full rate limits. The API sits under `staging.` so its cookie covers only the staging hosts. The cookie prefix is needed because production's cookie, set for all of `readfrontpage.com`, also reaches `staging.`.
 
