@@ -64,12 +64,47 @@ Origin: http://localhost:3000
 ### Auth — current session (null when signed out; 503 without a database)
 GET {{baseUrl}}/api/auth/get-session
 
-### Auth — request a password reset (without RESEND_API_KEY the link is logged by the backend)
+### Auth — request a password reset (without RESEND_API_KEY the email goes to Mailpit, http://localhost:8025, or the backend log)
 POST {{baseUrl}}/api/auth/request-password-reset
 Content-Type: application/json
 Origin: http://localhost:3000
 
 { "email": "ada@example.com", "redirectTo": "http://localhost:3000/reset-password" }
+
+### Auth — reset password with the token from the reset link (the part after /reset-password/)
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "token": "paste-token-here", "newPassword": "staple battery horse" }
+
+### Auth — untrusted return address → 403 { code: "INVALID_REDIRECT_URL" }
+POST {{baseUrl}}/api/auth/request-password-reset
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "email": "ada@example.com", "redirectTo": "https://evil.example/reset-password" }
+
+### Auth — send an email-verification code (sign-up sends one too; read it in Mailpit)
+POST {{baseUrl}}/api/auth/email-otp/send-verification-otp
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "email": "ada@example.com", "type": "email-verification" }
+
+### Auth — verify the email with the code (signs the user in; errors: INVALID_OTP, OTP_EXPIRED, TOO_MANY_ATTEMPTS)
+POST {{baseUrl}}/api/auth/email-otp/verify-email
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "email": "ada@example.com", "otp": "123456" }
+
+### Auth — change password (signed in; wrong current password → INVALID_PASSWORD)
+POST {{baseUrl}}/api/auth/change-password
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{ "currentPassword": "correct horse battery", "newPassword": "staple battery horse", "revokeOtherSessions": true }
 
 ### Auth — sign out
 POST {{baseUrl}}/api/auth/sign-out

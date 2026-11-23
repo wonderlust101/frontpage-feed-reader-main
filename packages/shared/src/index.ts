@@ -2,3 +2,4 @@
 // no Node- or browser-only APIs, so it runs in both.
 
 export * from './api';
+export * from './auth';
