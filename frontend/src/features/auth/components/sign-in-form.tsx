@@ -2,8 +2,9 @@
 
 // Sign-in form: email and password. On success it goes to `next` (already checked to be a path on this site). The
 // error alert carries the way out: an unverified email gets "Send a code" (it emails a new code and opens the verify
-// page), and a wrong email or password gets "Forgot your password?" (the link under the button steps aside meanwhile,
-// so it isn't there twice). Arriving after a reset or a confirmed email (`arrival`) is told by the page's heading; the
+// page; kept for when the API turns on requireEmailVerification, as verification is optional today and the API never
+// sends EMAIL_NOT_VERIFIED), and a wrong email or password gets "Forgot your password?" (the link under the button
+// steps aside meanwhile, so it isn't there twice). Arriving after a reset (`arrival`) is told by the page's heading; the
 // form fills in the email that step saved, puts focus on the password, and drops the arrival from the URL (so a
 // refresh is a plain sign-in). Once an attempt fails, the heading returns to the usual "Sign in".
 
@@ -60,7 +61,6 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
         }
         const url = new URL(window.location.href);
         url.searchParams.delete('reset');
-        url.searchParams.delete('verified');
         window.history.replaceState(null, '', url);
 
         if (email) {

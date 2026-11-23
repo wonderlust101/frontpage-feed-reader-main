@@ -174,15 +174,15 @@ Decisions worth knowing before changing it:
 
 Accounts use [Better Auth](https://www.better-auth.com) on the backend (`backend/src/modules/auth/`) and its React client on the frontend (`frontend/src/features/auth/`).
 
-| Route                  | What it does                                                                                                                                                                            |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/sign-in`             | Email and password. `?next=` (same-site paths only) says where to go after; `?reset=1` / `?verified=1` greet a reader back from a reset or a confirmed email and fill in their email    |
-| `/sign-up`             | Name, email and password, then `/verify-email`                                                                                                                                          |
-| `/verify-email`        | The 6-digit code from the email (it asks for the address first when no code was sent yet); then `/user`, or `/sign-in?verified=1` when not signed in; signed-in readers can do it later |
-| `/forgot-password`     | Emails a reset link; always answers the same, so it never reveals who has an account                                                                                                    |
-| `/reset-password`      | Opened from the link: choose a new password (the API then signs every session out)                                                                                                      |
-| `/account/password`    | Signed in: change the password, optionally signing out other devices                                                                                                                    |
-| `/`, `/guest`, `/user` | Placeholders for the marketing page, guest mode and the signed-in home                                                                                                                  |
+| Route                  | What it does                                                                                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/sign-in`             | Email and password. `?next=` (same-site paths only) says where to go after; `?reset=1` greets a reader back from a password reset and fills in their email                         |
+| `/sign-up`             | Name, email and password, then `/verify-email`                                                                                                                                     |
+| `/verify-email`        | The 6-digit code from the email (it asks for the address first when no code was sent yet); the right code signs the reader in and opens `/user`; signed-in readers can do it later |
+| `/forgot-password`     | Emails a reset link; always answers the same, so it never reveals who has an account                                                                                               |
+| `/reset-password`      | Opened from the link: choose a new password (the API then signs every session out)                                                                                                 |
+| `/account/password`    | Signed in: change the password, optionally signing out other devices                                                                                                               |
+| `/`, `/guest`, `/user` | Placeholders for the marketing page, guest mode and the signed-in home                                                                                                             |
 
 Decisions worth knowing:
 
