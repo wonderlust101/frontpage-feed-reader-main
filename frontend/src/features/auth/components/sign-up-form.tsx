@@ -46,7 +46,7 @@ export function SignUpForm() {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(signUp)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(signUp)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't create your account." message={errors.root.message} />}
 
             <TextField aria-required id="name" label="Name" autoComplete="name" error={errors.name?.message} {...register('name')} />

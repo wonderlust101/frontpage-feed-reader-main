@@ -1,8 +1,8 @@
 'use client';
 
 // Change-password form for signed-in readers: current password, new password, and whether to sign out other devices
-// (on by default, in case the old password leaked). Better Auth only allows this on a recent sign-in; an older session
-// is asked to sign in again first.
+// (on by default, in case the old password leaked). The current password is the security check. If the session has
+// ended meanwhile (signed out in another tab, or expired), the API answers UNAUTHORIZED and the reader is asked to sign in again.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -23,7 +23,7 @@ import { useAuthHeading } from './auth-heading';
 
 type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
-const SIGN_IN_AGAIN_CODES = ['SESSION_NOT_FRESH', 'SESSION_EXPIRED'];
+const SIGN_IN_AGAIN_CODES = ['UNAUTHORIZED'];
 
 // Renders the form, then a "password changed" heading and notice (which takes focus); a wrong current password is reported on that field.
 export function ChangePasswordForm() {
@@ -59,7 +59,7 @@ export function ChangePasswordForm() {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(changePassword)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(changePassword)} className="flex flex-col gap-6">
             {errors.root?.message ? (
                 <FormAlert
                     lead="Couldn't change your password."

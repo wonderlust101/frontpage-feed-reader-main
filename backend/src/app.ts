@@ -10,11 +10,24 @@ import { authRouter } from './modules/auth/auth.routes';
 import { healthRouter } from './modules/health/health.routes';
 import { feedsRouter } from './modules/feeds/feeds.routes';
 
+const CORS_PREFLIGHT_CACHE_SECONDS = 2 * 60 * 60;
+
 export const app = express();
 
 app.set('trust proxy', 1);
 
-app.use(cors({ origin: env.WEB_ORIGINS, credentials: true }));
+// The site calls the API from another origin (www. → api.), so each auth POST is preceded by a CORS preflight; browsers
+// may cache its answer for up to 2 hours (Chrome's cap), which saves that extra round trip on later requests.
+// Cross-origin pages can only read response headers listed in exposedHeaders: X-Retry-After is how long a rate-limited
+// form tells the reader to wait.
+app.use(
+    cors({
+        origin: env.WEB_ORIGINS,
+        credentials: true,
+        maxAge: CORS_PREFLIGHT_CACHE_SECONDS,
+        exposedHeaders: ['X-Retry-After'],
+    }),
+);
 app.use(authRouter);
 app.use(express.json());
 

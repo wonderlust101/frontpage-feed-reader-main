@@ -9,6 +9,7 @@ import { createTestDb } from '../../helpers/test-db';
 const PASSWORD = 'correct horse battery';
 const NEW_PASSWORD = 'staple battery horse';
 const CODE_LIFETIME_MS = 5 * 60 * 1000;
+const API = 'http://localhost:4000';
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
 let auth: ReturnType<typeof createAuth>;
@@ -59,33 +60,96 @@ function codeFor(to: string) {
     return lastEmailTo(to)?.text.match(/\b\d{6}\b/)?.[0];
 }
 
+// Builds an auth instance as production would (rate limits on, Secure cookies), restoring the real env afterwards.
+// Every required setting is valid unless `overrides` says otherwise.
+function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN' | 'AUTH_COOKIE_PREFIX'>> = {}) {
+    const saved = {
+        NODE_ENV: env.NODE_ENV,
+        AUTH_SECRET: env.AUTH_SECRET,
+        AUTH_COOKIE_DOMAIN: env.AUTH_COOKIE_DOMAIN,
+        AUTH_COOKIE_PREFIX: env.AUTH_COOKIE_PREFIX,
+    };
+    Object.assign(env, {
+        NODE_ENV: 'production',
+        AUTH_SECRET: 'a-long-enough-secret-for-the-guard-0123',
+        AUTH_COOKIE_DOMAIN: 'readfrontpage.com',
+        ...overrides,
+    });
+    try {
+        return createAuth(testDb.db, async () => {});
+    } finally {
+        Object.assign(env, saved);
+    }
+}
+
+// A browser request from the site to an auth endpoint (sign-in by default), with the reader's IP as Railway's edge sets it.
+function signInRequest(email: string, ip: string, path = 'sign-in/email', extra: Record<string, string> = {}) {
+    return new Request(`${API}/api/auth/${path}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'http://localhost:3000', 'x-real-ip': ip },
+        body: JSON.stringify({ email, password: PASSWORD, ...extra }),
+    });
+}
+
 // A 6-digit code that is not `code`, for wrong-code tests.
 function wrongCode(code: string) {
     return code === '000000' ? '111111' : '000000';
 }
 
 describe('production settings guard', () => {
-    // Runs createAuth with NODE_ENV=production and the given AUTH_SECRET, restoring the real values afterwards.
-    function createInProduction(secret: string | undefined) {
-        const saved = { NODE_ENV: env.NODE_ENV, AUTH_SECRET: env.AUTH_SECRET };
-        Object.assign(env, { NODE_ENV: 'production', AUTH_SECRET: secret });
-        try {
-            return createAuth(testDb.db);
-        } finally {
-            Object.assign(env, saved);
-        }
-    }
-
     test('refuses to start without AUTH_SECRET', () => {
-        expect(() => createInProduction(undefined)).toThrow('AUTH_SECRET is required');
+        expect(() => createInProduction({ AUTH_SECRET: undefined })).toThrow('AUTH_SECRET is required');
     });
 
     test('refuses an AUTH_SECRET shorter than 32 characters', () => {
-        expect(() => createInProduction('too-short')).toThrow('AUTH_SECRET is required');
+        expect(() => createInProduction({ AUTH_SECRET: 'too-short' })).toThrow('AUTH_SECRET is required');
     });
 
-    test('starts with a long enough AUTH_SECRET', () => {
-        expect(() => createInProduction('a-long-enough-secret-for-the-guard-0123')).not.toThrow();
+    test('refuses to start without AUTH_COOKIE_DOMAIN', () => {
+        expect(() => createInProduction({ AUTH_COOKIE_DOMAIN: undefined })).toThrow('AUTH_COOKIE_DOMAIN is required');
+    });
+
+    test('starts with a long enough AUTH_SECRET and a cookie domain', () => {
+        expect(() => createInProduction()).not.toThrow();
+    });
+});
+
+describe('production cookies and rate limits', () => {
+    test('the session cookie is set for the whole shared domain, so the site sees it too', async () => {
+        const prodAuth = createInProduction();
+        const res = await prodAuth.handler(signInRequest('nobody-yet@example.com', '203.0.113.1', 'sign-up/email', { name: 'Ada' }));
+        expect(res.status).toBe(200);
+        const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
+        expect(sessionCookie).toContain('Domain=readfrontpage.com');
+    });
+
+    test('staging names its cookie with AUTH_COOKIE_PREFIX, so the production cookie is never read as its own', async () => {
+        const stagingAuth = createInProduction({ AUTH_COOKIE_DOMAIN: 'staging.readfrontpage.com', AUTH_COOKIE_PREFIX: 'frontpage-staging' });
+        const res = await stagingAuth.handler(signInRequest('staging@example.com', '203.0.113.2', 'sign-up/email', { name: 'Ada' }));
+        const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
+        expect(sessionCookie).toStartWith('frontpage-staging.session_token=');
+        expect(sessionCookie).toContain('Domain=staging.readfrontpage.com');
+    });
+
+    test('each reader (X-Real-IP) gets their own sign-in limit', async () => {
+        const prodAuth = createInProduction();
+        const statuses = [];
+        for (let i = 0; i < 4; i += 1) {
+            statuses.push((await prodAuth.handler(signInRequest('ada@example.com', '203.0.113.10'))).status);
+        }
+        expect(statuses).toEqual([401, 401, 401, 429]);
+        expect((await prodAuth.handler(signInRequest('ada@example.com', '203.0.113.11'))).status).toBe(401);
+    });
+
+    test('session checks are never rate-limited, even from one IP (the site servers)', async () => {
+        const prodAuth = createInProduction();
+        const SESSION_CHECKS = 150;
+        const statuses = new Set<number>();
+        for (let i = 0; i < SESSION_CHECKS; i += 1) {
+            const res = await prodAuth.handler(new Request(`${API}/api/auth/get-session`, { headers: { 'x-real-ip': '198.51.100.1' } }));
+            statuses.add(res.status);
+        }
+        expect(statuses.has(429)).toBe(false);
     });
 });
 

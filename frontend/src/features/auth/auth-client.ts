@@ -1,9 +1,14 @@
-// Better Auth's browser client. It has no baseURL, so in the browser it calls this site's /api/auth, which
-// next.config.ts forwards to the API; that keeps the session cookie on this site. emailOTPClient adds authClient.emailOtp.
+// Better Auth's browser client. It calls the API directly (NEXT_PUBLIC_API_URL, e.g. https://api.readfrontpage.com):
+// the site and the API share one domain, so the session cookie the API sets reaches this site's pages too, and the
+// client sends it along with every request (credentials: 'include' is Better Auth's default). The address is baked in
+// when the app is built. emailOTPClient adds authClient.emailOtp.
 // Browser-only ('client-only'): importing it from server code fails the build, as require-user.ts does the reverse.
 
 import 'client-only';
 import { emailOTPClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
 
-export const authClient = createAuthClient({ plugins: [emailOTPClient()] });
+export const authClient = createAuthClient({
+    baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000',
+    plugins: [emailOTPClient()],
+});

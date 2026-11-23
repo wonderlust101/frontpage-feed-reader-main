@@ -4,7 +4,7 @@
 // to be on its way: sign-up or sign-in sent one (and saved the address in sessionStorage), or the reader sent one here.
 // Otherwise the page asks for the address first (filled in from the session when signed in) and sends a code. Until
 // the browser has read storage and the session, it shows a skeleton, so neither step flashes before the other.
-// Signed-in readers can leave it for later. Until the API's email-code plugin exists, its requests fail with a general error.
+// Signed-in readers can leave it for later. The right code also signs the reader in, so it always ends on /user.
 // The email step has its own heading ("Where should the code go?"); the code step's description says where the code
 // went and how long it lasts. Arriving at the code step from the email step puts focus in the code field, and a
 // resent code's notice takes focus.
@@ -23,7 +23,7 @@ import { TextField } from '@/components/ui/text-field';
 import { TextLink } from '@/components/ui/text-link';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
-import { forgetPendingEmail, readPendingEmail, rememberPendingEmail, rememberSignInEmail } from '../email-storage';
+import { forgetPendingEmail, readPendingEmail, rememberPendingEmail } from '../email-storage';
 import { authErrorMessage } from '../error-messages';
 import { codeStepHeading, VERIFY_EMAIL_HEADINGS } from '../headings';
 import { codeSchema, emailSchema } from '../schemas';
@@ -40,7 +40,6 @@ type EmailStepProps = {
 
 type CodeStepProps = {
     email: string;
-    signedIn: boolean;
     focusCode: boolean;
     onChangeEmail: () => void;
 };
@@ -72,7 +71,7 @@ export function VerifyEmailForm() {
     return (
         <div className="flex flex-col gap-8">
             {codeSentTo ? (
-                <CodeStep email={codeSentTo} signedIn={signedIn} focusCode={sentTo !== null} onChangeEmail={() => setChangingEmail(true)} />
+                <CodeStep email={codeSentTo} focusCode={sentTo !== null} onChangeEmail={() => setChangingEmail(true)} />
             ) : (
                 <EmailStep
                     defaultEmail={session?.user.email ?? ''}
@@ -115,7 +114,7 @@ function EmailStep({ defaultEmail, onSent }: EmailStepProps) {
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(sendCode)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(sendCode)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't send a code." message={errors.root.message} />}
             <TextField
                 aria-required
@@ -137,7 +136,7 @@ function EmailStep({ defaultEmail, onSent }: EmailStepProps) {
 
 // Takes the code for `email`, verifies it, and offers a new code (at most once a minute, counting from the code just
 // sent) or a different address. `focusCode` puts focus in the code field on arrival from the email step.
-function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) {
+function CodeStep({ email, focusCode, onChangeEmail }: CodeStepProps) {
     const router = useRouter();
     const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
     const [resentCount, setResentCount] = useState(0);
@@ -177,11 +176,7 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
             return;
         }
         forgetPendingEmail();
-        const signsInNext = !result.data?.token && !signedIn;
-        if (signsInNext) {
-            rememberSignInEmail(email);
-        }
-        router.replace(signsInNext ? '/sign-in?verified=1' : '/user');
+        router.replace('/user');
         router.refresh();
     }
 
@@ -197,7 +192,7 @@ function CodeStep({ email, signedIn, focusCode, onChangeEmail }: CodeStepProps) 
     }
 
     return (
-        <form noValidate onSubmit={handleSubmit(verify)} className="flex flex-col gap-6">
+        <form noValidate method="post" onSubmit={handleSubmit(verify)} className="flex flex-col gap-6">
             {errors.root?.message ? (
                 <FormAlert lead="Couldn't confirm your email." message={errors.root.message} />
             ) : (

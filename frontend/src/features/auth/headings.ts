@@ -10,10 +10,9 @@ export type Heading = { title: string; description: string };
 export const SIGN_IN_HEADINGS = {
     default: { title: 'Sign in', description: 'Good to see you again. Your front page is waiting.' },
     reset: { title: 'Password changed', description: "New key, same feeds. Sign in with it and you're back." },
-    verified: { title: "You're confirmed", description: 'Welcome aboard! Sign in to open your front page for the first time.' },
 } satisfies Record<string, Heading>;
 
-// How the reader arrived at sign-in: from a password reset, a confirmed email, or neither.
+// How the reader arrived at sign-in: from a password reset, or not.
 export type SignInArrival = Exclude<keyof typeof SIGN_IN_HEADINGS, 'default'> | null;
 
 export const SIGN_UP_HEADING = {
@@ -49,10 +48,7 @@ export const CHANGE_PASSWORD_HEADINGS = {
     changed: { title: 'Password changed', description: 'Fresh key, same desk. Use the new one next time you sign in.' },
 } satisfies Record<string, Heading>;
 
-// Reads the arrival from the sign-in page's URL parameters (?reset=1 or ?verified=1).
+// Reads the arrival from the sign-in page's URL parameters (?reset=1).
 export function signInArrival(params: Record<string, string | string[] | undefined>): SignInArrival {
-    if (params.reset) {
-        return 'reset';
-    }
-    return params.verified ? 'verified' : null;
+    return params.reset ? 'reset' : null;
 }

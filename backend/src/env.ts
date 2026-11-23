@@ -12,6 +12,8 @@ export const env = {
 
     AUTH_SECRET: optional(process.env.AUTH_SECRET),
     AUTH_URL: optional(process.env.AUTH_URL),
+    AUTH_COOKIE_DOMAIN: optional(process.env.AUTH_COOKIE_DOMAIN),
+    AUTH_COOKIE_PREFIX: optional(process.env.AUTH_COOKIE_PREFIX),
 
     RESEND_API_KEY: optional(process.env.RESEND_API_KEY),
     EMAIL_FROM: optional(process.env.EMAIL_FROM),
