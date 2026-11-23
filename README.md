@@ -148,6 +148,7 @@ docker compose run --rm migrate     # re-sync the Drizzle schema after editing *
 | `frontend` | http://localhost:3000                                     | `next dev`; calls the API at `http://backend:4000`                      |
 | `backend`  | http://localhost:4000                                     | `bun --watch`                                                           |
 | `db`       | `postgres://frontpage:frontpage@localhost:5432/frontpage` | Data persists in the `frontpage_db-data` volume                         |
+| `mailpit`  | http://localhost:8025                                     | Local test inbox: every email the API sends lands here                  |
 | `migrate`  | —                                                         | One-shot `drizzle-kit push` that syncs the schema before the API starts |
 
 - **Dependencies:** `node_modules` lives inside the containers, not on the bind mount. After `bun add`, run `bun run docker:up` again to reinstall.
@@ -188,15 +189,17 @@ Decisions worth knowing:
 - **Auth requests go through the frontend.** The browser calls this site's `/api/auth/*`, and `next.config.ts` forwards it to `API_URL`. In production the frontend (Vercel) and API (Railway) are different sites, and browsers drop cookies set across sites; through the proxy the session cookie belongs to the frontend.
 - **Two checks guard signed-in pages.** `src/proxy.ts` only looks for the session cookie, so signed-out visitors never see the page flash; `requireUser` (`features/auth/require-user.ts`) asks the API whether the session is valid, inside `<Suspense>` as Cache Components requires. If the API can't answer, the page shows its `error.tsx` (a temporary placeholder) instead of treating the reader as signed out.
 - **Forms** use React Hook Form with the Zod schemas in `features/auth/schemas.ts`; `error-messages.ts` turns Better Auth's error codes into one sentence each. Every form clears the password after a failure; it is never put back.
-- **Email verification needs backend work first**: the API doesn't have Better Auth's email-OTP plugin yet. The code page is built and fails with a general error until then; the work is noted on the `feat/auth-backend` branch.
+- **Email verification is by 6-digit code, and optional.** Sign-up emails a code (Better Auth's email-OTP plugin, codes stored hashed, 5 minutes, 3 tries); the right code verifies the email and signs the reader in. Unverified readers can still sign in ("Do this later"). The plugin's other code flows (sign-in, password reset and email change by code) are switched off. Password and code limits live once in `packages/shared/src/auth.ts`.
 
-### Testing auth without Resend
+### Testing auth emails with Mailpit
 
-Without `RESEND_API_KEY` or `EMAIL_FROM`, the backend prints every email to its console outside production instead of sending it, link included. To test a password reset:
+Without `RESEND_API_KEY`, nothing reaches a real inbox. Outside production the backend sends every email to **Mailpit**, a local test inbox, when `MAILPIT_URL` is set (Docker sets it); otherwise it prints the email to its console. Production never uses Mailpit.
 
-1. `bun run docker:up` (or `bun dev` with the local database URLs), then open `http://localhost:3000/forgot-password`.
-2. Find the email in `bun run docker:logs` (search for `[email] to`) and open its link: it checks the token and lands on `/reset-password`.
-3. Set a new password and sign in with it. Opening the same link again shows the expired state.
+1. `bun run docker:up`, then open `http://localhost:3000/sign-up` and create an account.
+2. Open Mailpit at `http://localhost:8025`, copy the 6-digit code, and enter it: you land on `/user`, signed in and verified.
+3. For a password reset, use `http://localhost:3000/forgot-password`, open the link from Mailpit (it lands on `/reset-password`), and set a new password. Opening the same link again shows the expired state.
+
+Running with `bun dev` instead of Docker: start only Mailpit with `docker compose up -d mailpit`, and set `MAILPIT_URL=http://localhost:8025` and `AUTH_URL=http://localhost:3000` in `backend/.env`.
 
 ## Scripts (repo root)
 
@@ -271,7 +274,7 @@ Each project has an `.env.example` (committed) documenting every variable, and a
 | Backend  | `backend/.env`        | Railway → backend service → **Variables**               |
 | Frontend | `frontend/.env.local` | Vercel → Project → **Settings → Environment Variables** |
 
-- **Backend:** server (`PORT`, `WEB_ORIGIN`), Neon (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), auth (`AUTH_SECRET`, `AUTH_URL`), password-reset email (`RESEND_API_KEY`, `EMAIL_FROM`), feed fetching (`FEED_*`). Read through `backend/src/env.ts`.
+- **Backend:** server (`PORT`, `WEB_ORIGIN`), Neon (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), auth (`AUTH_SECRET`, `AUTH_URL`), email (`RESEND_API_KEY`, `EMAIL_FROM`, local-only `MAILPIT_URL`), feed fetching (`FEED_*`). Read through `backend/src/env.ts`.
 - **Frontend:** `API_URL` (the Railway URL) and `NEXT_PUBLIC_SITE_URL`.
 
 Generate production secrets with `openssl rand -base64 32`, and don't reuse your local ones.
