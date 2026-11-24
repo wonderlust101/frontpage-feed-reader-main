@@ -72,7 +72,7 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 ├── package.json              # workspace definition + root scripts
 ├── bun.lock · bunfig.toml    # single lockfile; hoisted node_modules
 ├── AGENTS.md / CLAUDE.md     # AI collaboration context
-└── .gitignore · .cursorignore · .aiignore · .claude/settings.json
+└── .gitignore · .cursorignore · .aiignore
 ```
 
 ### Backend modules
@@ -390,12 +390,12 @@ Keep `NODE_ENV=production` on staging so it enforces the same startup checks and
 
 ## Ignore files
 
-| File                    | Read by                        | Purpose                                                                                                          |
-| ----------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `.gitignore`            | Git                            | Dependencies, builds, env files and secrets, IDE files, local AI settings, challenge reference docs              |
-| `.claude/settings.json` | Claude Code                    | `permissions.deny` stops Claude from reading env files and secrets, or printing them via the Vercel/Railway CLIs |
-| `.cursorignore`         | Cursor                         | Hides secrets and generated noise from indexing and AI                                                           |
-| `.aiignore`             | JetBrains AI Assistant / Junie | Same list as `.cursorignore`                                                                                     |
+| File                    | Read by                        | Purpose                                                                                                                                                            |
+| ----------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.gitignore`            | Git                            | Dependencies, builds, env files and secrets, IDE files, local AI settings, challenge reference docs                                                                |
+| `.claude/settings.json` | Claude Code                    | Local, not committed (`.claude/` is git-ignored): `permissions.deny` stops Claude from reading env files and secrets, or printing them via the Vercel/Railway CLIs |
+| `.cursorignore`         | Cursor                         | Hides secrets and generated noise from indexing and AI                                                                                                             |
+| `.aiignore`             | JetBrains AI Assistant / Junie | Same list as `.cursorignore`                                                                                                                                       |
 
 The AI ignore lists deliberately **don't** hide `docs/`, `AGENTS.md` or `CLAUDE.md`. Git ignores those, but AI tools need them. GitHub Copilot has no ignore file: configure content exclusion in the repository's GitHub settings.
 
