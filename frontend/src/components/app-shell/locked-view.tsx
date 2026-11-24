@@ -34,8 +34,8 @@ export function LockedView({ view, preview, variant }: LockedViewProps) {
                 variant === 'rail' ? (
                     <>
                         <Icon name={view.icon} />
-                        <span aria-hidden="true" className="absolute right-1 bottom-1 grid size-4 place-items-center rounded-full bg-rail text-ink-2">
-                            <Icon name="locked" size="inline" className="size-3" />
+                        <span aria-hidden="true" className="absolute right-0.5 bottom-0.5 grid size-3.5 place-items-center rounded-full bg-rail text-ink-2">
+                            <Icon name="locked" size="inline" className="size-2.5!" />
                         </span>
                         <span className="sr-only">{view.label}, with an account</span>
                         <RailTooltip>
