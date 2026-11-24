@@ -14,21 +14,21 @@ Chosen on 2026-11-23 through the Impeccable decision page. A first version (an i
 
 **Three neutral steps toward the content, colour marks the place.**
 
-- **Rail (64px, `--color-rail`):** the Lemon logo tile linking home, the views as icon links with tooltips (the current one on a workspace square with a Lemon dot), the toggle for the category panel, and the account at the foot.
-- **Category panel (232px, `--color-panel`):** "Categories", then each category with its field dot and unread count. The rail's All items is the only "all", and only one entry is ever current. Guests see the five sample categories, each with its own page. It collapses away, leaving the rail (the toggle in the rail, or the `[` key), remembered per device with no flash on load.
-- **Workspace (`--color-workspace`):** a hairline toolbar (the location tag, the search button, Aa on the right) above the page.
+- **Rail (64px, `--color-rail`):** the Lemon logo tile linking home, the views as icon links with tooltips (the current one a Lemon square with an ink edge; a guest's account-only views, Saved, Weekly digest and Reading, show muted with a lock and lead to sign-up), the toggle for the category panel, and the account at the foot.
+- **Category panel (232px, `--color-panel`):** "Categories" (a Bricolage title, clearly bigger than the rows), an "All categories" row (a stack of the category dots) that returns home, then each category with its field dot and unread count. The panel marks the current category, or "All categories" on the home page; the rail marks the current view. Guests see the five sample categories, each with its own page. It collapses away, leaving the rail (the toggle in the rail, or the `[` key), remembered per device with no flash on load.
+- **Workspace (`--color-workspace`):** a hairline toolbar above the page, in three columns so the search button stays centred and never moves: the location tag ("Viewing:" and the category or view) on the left, search in the middle, Aa on the right.
 - **Tones:** light rail `#d9d7ce`, panel `#e9e7e0`, workspace `#fafaf7`; dark rail `#0d0d0c`, panel `#171716`, workspace `#232220`. Each step is lighter toward what you read, in both themes.
 - **Colour thread:** the selected category's field shows three times: its row in the panel is tinted with the field and carries a 3px field bar (with bold text and `aria-current`); the toolbar's location tag is filled with it; and the page title takes a field underline (pages pick this up as they are designed). Views use Lemon.
 
 ## 3. Search: the command palette
 
-- Ctrl/Cmd + K from anywhere, or the toolbar's "Search and jump" button, opens a centred palette (a native modal `<dialog>`): the query field, one "Search in" select (starting on the current category), and results grouped as Go to (views and categories), Articles and Sources, matches marked in solid Lemon, with keycap hints (↑ ↓ move, ↵ open, Esc close). On touch, a Cancel button replaces the keycaps.
+- Ctrl/Cmd + K from anywhere, or the toolbar's "Search and jump" button, opens a centred palette (a native modal `<dialog>`): the query field, one "Search in" select (starting on All, so nothing is hidden; the current category's sources rank first), and results grouped as Go to (views and categories), Articles and Sources, matches marked in solid Lemon, with keycap hints (↑ ↓ move, ↵ open, Esc close). On touch, a Cancel button replaces the keycaps.
 - **Data:** "Go to" always works; guests' sources come from the curated catalogue. Article search waits for the items, and the palette says so ("Article search arrives with the feeds"). `/design-system` shows articles too, with sample data.
 - Below md the button is a search icon; the palette sits near the top of the screen.
 
 ## 4. Reader settings: Aa
 
-- The Aa button at the toolbar's right opens a light popover: a sample line that reflows as you change things, text size (17 / 19 / 21 / 23px, with smaller and larger buttons), line height (Tight, Normal, Loose), reading width (Narrow, Standard, Wide), density (Compact, Comfortable, Spacious), typeface (Onest, Atkinson, Lexend), theme and contrast.
+- The Aa button at the toolbar's right opens a light popover: a sample line that reflows as you change things, text size (17 / 19 / 21 / 23px, with smaller and larger buttons), line height (Tight, Normal, Loose), reading width (Narrow, Standard, Wide), density (Compact, Comfortable, Spacious), typeface (Onest, Atkinson, Lexend) under "Reading"; theme, contrast and density sit in a collapsed "Display" section; "Reset to defaults" at the foot.
 - Every change applies at once and is saved; an early script copies the choices onto `<html>` before the first paint. The same popover replaces the old reading-controls bar on `/design-system`, so there is one settings UI across the site.
 
 ## 5. Account

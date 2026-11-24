@@ -3,13 +3,14 @@
 // Search, the shell's one global utility: a button in the workspace toolbar and Ctrl/Cmd + K from anywhere open a
 // palette (a native modal <dialog>) that both searches and navigates. Typing finds views and categories to jump to
 // ("Go to"), articles (when a `search` function is given) and sources (from `search`, or the plain `sources` list).
-// One "Search in" select scopes articles and sources to a category; it starts on the current category. The query
+// It searches everything, with the current category's sources first; a "Search in" select narrows articles and sources
+// to one category when the reader wants that. The query
 // field is a combobox: arrow keys move through the results, Enter opens one, Escape (or Cancel on touch) closes.
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import { Icon, type IconName } from '@/components/ui/icon';
-import { currentEntry, type ShellCategory, type ShellView } from './nav-entries';
+import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
 import { matchParts } from './search-match';
 
 export type SearchResults = {
@@ -20,6 +21,7 @@ export type SearchResults = {
 export type SearchSource = { href: string; name: string; detail: string; categoryHref: string };
 
 type SearchPaletteProps = {
+    homeHref: string;
     views: ShellView[];
     categories: ShellCategory[];
     sources?: SearchSource[];
@@ -31,7 +33,7 @@ type ResultOption = { href: string; title: string; detail: string; aside?: strin
 type ResultGroup = { label: string; options: ResultOption[] };
 
 // Renders the toolbar's search button and the palette.
-export function SearchPalette({ views, categories, sources = [], search }: SearchPaletteProps) {
+export function SearchPalette({ homeHref, views, categories, sources = [], search }: SearchPaletteProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
     const router = useRouter();
     const pathname = usePathname();
@@ -41,18 +43,20 @@ export function SearchPalette({ views, categories, sources = [], search }: Searc
     const [query, setQuery] = useState('');
     const [scopeHref, setScopeHref] = useState<string | null>(null);
     const [activeIndex, setActiveIndex] = useState(0);
-    const current = currentEntry(
+    const place = shellPlace(
         pathname,
+        homeHref,
         views.map((view) => view.href),
         categories.map((category) => category.href),
     );
-    const currentCategoryHref = current?.kind === 'category' ? current.href : null;
+    const currentCategoryHref = place.category !== homeHref ? place.category : null;
     const trimmedQuery = query.trim();
     const needle = trimmedQuery.toLowerCase();
     const searched = search && trimmedQuery ? search(trimmedQuery, scopeHref) : null;
-    const scopedSources = searched
+    const matchedSources = searched
         ? searched.sources
         : sources.filter((source) => needle && source.name.toLowerCase().includes(needle) && (!scopeHref || source.categoryHref === scopeHref));
+    const scopedSources = [...matchedSources].sort((a, b) => Number(b.categoryHref === currentCategoryHref) - Number(a.categoryHref === currentCategoryHref));
     const groups: ResultGroup[] = [
         {
             label: 'Go to',
@@ -92,23 +96,16 @@ export function SearchPalette({ views, categories, sources = [], search }: Searc
     const shortcut = isMac ? '⌘K' : 'Ctrl K';
 
     useEffect(() => {
-        // Opens the palette on Ctrl/Cmd + K anywhere, scoped to the current category, taking the shortcut from the browser.
+        // Opens the palette on Ctrl/Cmd + K anywhere, taking the shortcut from the browser.
         function openOnShortcut(event: globalThis.KeyboardEvent) {
             if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
                 event.preventDefault();
-                setScopeHref(currentCategoryHref);
                 dialogRef.current?.showModal();
             }
         }
         window.addEventListener('keydown', openOnShortcut);
         return () => window.removeEventListener('keydown', openOnShortcut);
-    }, [currentCategoryHref]);
-
-    // Opens the palette from the toolbar button, scoped to the current category.
-    function open() {
-        setScopeHref(currentCategoryHref);
-        dialogRef.current?.showModal();
-    }
+    }, []);
 
     // Opens the chosen result and closes the palette.
     function openResult(option: ResultOption) {
@@ -138,7 +135,7 @@ export function SearchPalette({ views, categories, sources = [], search }: Searc
                 type="button"
                 aria-haspopup="dialog"
                 aria-keyshortcuts="Meta+K Control+K"
-                onClick={open}
+                onClick={() => dialogRef.current?.showModal()}
                 className="tool-button max-w-full min-w-0 shrink justify-start text-ink-2 max-md:min-w-11 md:w-88 md:px-3"
             >
                 <Icon name="search" />

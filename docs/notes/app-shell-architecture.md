@@ -43,7 +43,7 @@ src/lib/
   saved-preferences.ts             every saved preference (key, data attribute, values) + the early script built from them
   html-preference.ts               client: createHtmlPreference(preference) → a shared hook for one preference
 src/components/app-shell/          feature-agnostic: plain data and ReactNode slots, never imports features/
-  nav-entries.ts                   ShellView, ShellCategory, currentHref(), currentEntry(), formatCount(): pure, tested
+  nav-entries.ts                   ShellView, ShellCategory, currentHref(), shellPlace(), formatCount(): pure, tested
   nav-row.tsx                      a panel/drawer row: field tint (.nav-current), field bar, count; FieldDot
   category-list.tsx                the categories as navigation (panel and drawer), with the empty and caught-up notes
   shell-sidebar.tsx                server: the desktop grid of rail, panel and account (account last in tab order)
@@ -121,8 +121,8 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 
 - **Status:** Accepted (revised after the second critique)
 - **Context:** the rail's "All items" and a panel "All categories" row named one URL twice and were both `aria-current`; the live guest shell showed no categories, and search said "nothing to search yet" to a guest with sample feeds.
-- **Decision:** the rail's All items is the only "all". `currentEntry()` marks exactly one entry: a category when the path is inside one, else the view. Guests get the five curated categories from `features/categories/guest-categories.ts` (a frontend mirror of `backend/data/sample-feeds.json`), each with a static page at `/guest/c/<id>` (`generateStaticParams`; an unknown id is a 404; Cache Components rejects `dynamicParams`, and `notFound()` covers it). The palette finds views and categories ("Go to") and, from plain `sources` data, the guests' sources; articles wait for the items. Readers' categories, counts and article search still wait for their endpoints.
-- **Consequences:** guest category colours are the presets (a guest's recolouring in localStorage isn't read by the shell yet). Because the category route has `generateStaticParams`, `usePathname` resolves at prerender and needs no Suspense.
+- **Decision:** `shellPlace()` returns the current view and the current category separately: the rail marks the view (`aria-current="true"`), the panel marks the category, or its "All categories" row on the home page (`aria-current="page"`); the drawer tints one row. Guests' account-only views are listed as `locked` and lead to sign-up. Guests get the five curated categories from `features/categories/guest-categories.ts` (a frontend mirror of `backend/data/sample-feeds.json`), each with a static page at `/guest/c/<id>` (`generateStaticParams`; an unknown id is a 404; Cache Components rejects `dynamicParams`, and `notFound()` covers it). The palette finds views and categories ("Go to") and, from plain `sources` data, the guests' sources; articles wait for the items. Readers' categories, counts and article search still wait for their endpoints.
+- **Consequences:** guest category colours are the presets (a guest's recolouring in localStorage isn't read by the shell yet). Because the category route has `generateStaticParams`, `usePathname` resolves at prerender and needs no Suspense; the page itself reads `params` inside a `<Suspense>` child so the static shell never waits on them.
 
 ## Risks
 

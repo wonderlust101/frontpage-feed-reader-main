@@ -1,7 +1,7 @@
 'use client';
 
 // The reader's settings behind the Aa button: text size, line height, reading width, density, typeface, theme and
-// contrast, in one light popover. Each change applies at once to every reading surface and is saved (see
+// contrast, in one light popover: Reading open, Display (theme, contrast, density) folded away, and a reset. Each change applies at once to every reading surface and is saved (see
 // reader-preferences.ts), and a sample line at the top reflows as you go, so a setting is seen before it's read.
 
 import { useId } from 'react';
@@ -50,6 +50,7 @@ export function ReaderSettings() {
             }
         >
             <div className="flex flex-col gap-4">
+                <h2 className="font-display text-title leading-none font-bold tracking-[-0.02em]">Reading</h2>
                 <p className="rounded-panel bg-ground-2 px-4 py-3 type-body transition-[font-size,line-height] duration-200 ease-out">
                     Your front page, set the way you like to read.
                 </p>
@@ -83,12 +84,27 @@ export function ReaderSettings() {
                 </div>
                 <ChoiceControl name={`${id}-leading`} legend="Line height" options={LEADING_OPTIONS} value={leading} onChange={setLeading} />
                 <ChoiceControl name={`${id}-measure`} legend="Reading width" options={MEASURE_OPTIONS} value={measure} onChange={setMeasure} />
-                <ChoiceControl name={`${id}-density`} legend="Density" options={DENSITY_OPTIONS} value={density} onChange={setDensity} />
                 <ChoiceControl name={`${id}-face`} legend="Typeface" options={READING_FACE_OPTIONS} value={readingFace} onChange={setReadingFace} />
-                <div className="flex flex-col gap-4 border-t border-edge pt-4">
-                    <ChoiceControl name={`${id}-theme`} legend="Theme" options={THEME_OPTIONS} value={theme} onChange={setTheme} />
-                    <ChoiceControl name={`${id}-contrast`} legend="Contrast" options={CONTRAST_OPTIONS} value={contrast} onChange={setContrast} />
-                </div>
+                <details className="group border-t border-edge pt-3">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between font-display text-title leading-none font-bold tracking-[-0.02em] [&::-webkit-details-marker]:hidden">
+                        Display
+                        <Icon name="expand" className="text-ink-2 transition-transform duration-200 group-open:rotate-180" />
+                    </summary>
+                    <div className="mt-3 flex flex-col gap-4">
+                        <ChoiceControl name={`${id}-theme`} legend="Theme" options={THEME_OPTIONS} value={theme} onChange={setTheme} />
+                        <ChoiceControl name={`${id}-contrast`} legend="Contrast" options={CONTRAST_OPTIONS} value={contrast} onChange={setContrast} />
+                        <ChoiceControl name={`${id}-density`} legend="Density" options={DENSITY_OPTIONS} value={density} onChange={setDensity} />
+                    </div>
+                </details>
+                <button
+                    type="button"
+                    onClick={() => {
+                        [setTextSize, setLeading, setMeasure, setDensity, setReadingFace, setTheme, setContrast].forEach((reset) => reset('auto'));
+                    }}
+                    className="self-start text-meta font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
+                >
+                    Reset to defaults
+                </button>
             </div>
         </ShellMenu>
     );

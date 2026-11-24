@@ -1,16 +1,16 @@
 'use client';
 
-// The shell's navigation in the drawer (below lg): the logo, the views with their names, the categories, and the
-// account pinned to the foot, where the rail would put it. The same rows, labels and single current entry as the
-// desktop rail and panel.
+// The shell's navigation in the drawer (below lg): the logo, the views with their names, the categories ("All
+// categories" first), and the account pinned to the foot, where the rail would put it. The same rows, labels and
+// markers as the desktop rail and panel: the current view, and the current category or "all".
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useId, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
 import { CategoryList } from './category-list';
-import { currentEntry, type ShellCategory, type ShellView } from './nav-entries';
+import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
 import { NavRow } from './nav-row';
 
 type ShellNavProps = {
@@ -22,11 +22,11 @@ type ShellNavProps = {
 
 const VIEW_COLOR = 'var(--color-field-lemon)';
 
-// Renders the drawer's contents; the current entry comes from the URL.
+// Renders the drawer's contents; where the reader is comes from the URL.
 export function ShellNav({ homeHref, views, categories, account }: ShellNavProps) {
-    const categoriesLabelId = useId();
-    const current = currentEntry(
+    const place = shellPlace(
         usePathname(),
+        homeHref,
         views.map((view) => view.href),
         categories.map((category) => category.href),
     );
@@ -39,25 +39,21 @@ export function ShellNav({ homeHref, views, categories, account }: ShellNavProps
             <nav aria-label="Views">
                 <ul className="flex flex-col gap-0.5">
                     {views.map((view) => (
-                        <li key={view.href}>
+                        <li key={view.label}>
                             <NavRow
                                 href={view.href}
                                 label={view.label}
                                 lead={<Icon name={view.icon} />}
                                 color={VIEW_COLOR}
-                                isCurrent={current?.kind === 'view' && current.href === view.href}
+                                isCurrent={view.href === place.view && place.category === null}
                                 count={view.count}
+                                locked={view.locked}
                             />
                         </li>
                     ))}
                 </ul>
             </nav>
-            <div>
-                <p id={categoriesLabelId} className="px-3 pb-2 text-meta font-semibold text-ink-2">
-                    Categories
-                </p>
-                <CategoryList labelId={categoriesLabelId} categories={categories} currentHref={current?.kind === 'category' ? current.href : null} />
-            </div>
+            <CategoryList homeHref={homeHref} categories={categories} currentHref={place.category} />
             <div data-account="row" className="mt-auto border-t border-edge pt-3">
                 {account}
             </div>

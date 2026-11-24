@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { currentEntry, currentHref, formatCount } from '../../../src/components/app-shell/nav-entries';
+import { currentHref, formatCount, shellPlace } from '../../../src/components/app-shell/nav-entries';
 
 describe('currentHref', () => {
     test('matches the href that is the pathname', () => {
@@ -23,17 +23,17 @@ describe('currentHref', () => {
     });
 });
 
-describe('currentEntry', () => {
-    test('picks the category over the view whose path contains it', () => {
-        expect(currentEntry('/guest/c/design', ['/guest'], ['/guest/c/design'])).toEqual({ kind: 'category', href: '/guest/c/design' });
+describe('shellPlace', () => {
+    test('marks the view and the category the path is in', () => {
+        expect(shellPlace('/guest/c/design', '/guest', ['/guest'], ['/guest/c/design'])).toEqual({ view: '/guest', category: '/guest/c/design' });
     });
 
-    test('falls back to the view when no category matches', () => {
-        expect(currentEntry('/guest', ['/guest'], ['/guest/c/design'])).toEqual({ kind: 'view', href: '/guest' });
+    test('marks "all categories" on the home page itself', () => {
+        expect(shellPlace('/guest', '/guest', ['/guest'], ['/guest/c/design'])).toEqual({ view: '/guest', category: '/guest' });
     });
 
-    test('returns null when nothing matches', () => {
-        expect(currentEntry('/user', ['/guest'], [])).toBeNull();
+    test('marks no category on another view', () => {
+        expect(shellPlace('/guest/saved', '/guest', ['/guest', '/guest/saved'], ['/guest/c/design'])).toEqual({ view: '/guest/saved', category: null });
     });
 });
 

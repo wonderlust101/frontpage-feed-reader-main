@@ -86,6 +86,7 @@ export function AppShellDemo() {
                 />
                 <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
                     <ShellToolbar
+                        homeHref={homeHref}
                         views={VIEWS}
                         categories={categories}
                         drawer={

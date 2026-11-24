@@ -48,6 +48,7 @@ export function AppShell({ homeHref, views, categories = [], sources, account, u
             />
             <div className="flex min-w-0 flex-1 flex-col">
                 <ShellToolbar
+                    homeHref={homeHref}
                     views={views}
                     categories={categories}
                     sources={sources}
