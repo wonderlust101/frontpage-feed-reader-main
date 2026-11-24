@@ -35,12 +35,11 @@ Thumbs.db
 .vscode/
 .fuse_hidden*
 
-# ── AI tooling: personal/local files only ──────────────────────
-# (shared config like .claude/settings.json, .cursorignore, .aiignore IS committed)
-.claude/settings.local.json
+# ── AI tooling: local files only ───────────────────────────────
+# (.cursorignore and .aiignore ARE committed; .claude/, including settings.json, stays local)
+.claude/
 CLAUDE.local.md
 .aider*
-.claude
 
 # ── Challenge reference material ───────────────────────────────
 # Kept locally for planning and AI sessions; not part of the shipped solution.
