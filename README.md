@@ -67,7 +67,7 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
 │       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
 │       └── scripts/          # one-off scripts run with `bun src/scripts/<name>.ts` (e.g. seeding)
-├── docs/                     # notes/: hand-off notes for planned work (tracked); spec, guidance, brief (local, git-ignored)
+├── docs/                     # notes/: design records (tracked; planned work is in Jira); spec, guidance, brief (local, git-ignored)
 ├── package.json              # workspace definition + root scripts
 ├── bun.lock · bunfig.toml    # single lockfile; hoisted node_modules
 ├── AGENTS.md / CLAUDE.md     # AI collaboration context
@@ -121,6 +121,20 @@ You meet a file's main function first and read down into the details. Write help
 - **Every function:** one line saying what it does, what it returns and its edge cases (when it returns null, what it throws); two lines only for unusually complex functions. Comment lines may run past Prettier's `printWidth`, since Prettier never wraps comments.
 - **Nowhere else**, except a one-line _why_ on a genuinely complex line (a regex, a workaround, non-obvious library behaviour). No section dividers and no comments on constants, types or fields.
 - **Names first:** if code needs a comment to be understood, rename the variable or extract a named constant instead (`MAX_OFFSET_HOURS = 14`, not `14 // max offset`).
+
+## Planning and tracking
+
+Planned work, bugs and open decisions live in Jira, project **KAN** ([open the project](https://sergeiborja.atlassian.net/browse/KAN)), not in Markdown. Each epic follows a part of the challenge spec; dependencies are "blocks" links. Bugs are Tasks labelled `bug`; work waiting on a product choice is labelled `decision-needed`. Name branches after the issue (e.g. `feat/KAN-7-reading-experience`) so Jira links them.
+
+`docs/notes/` keeps only lasting design records (the app shell's design brief and its architecture decisions), not to-do lists.
+
+**Definition of done**, for every issue:
+
+- Looks right at 1440, 1024, 390 and 320px wide, in light and dark mode, with no horizontal scroll.
+- Works with the keyboard alone, with a visible focus ring; one `h1` per page.
+- `bun run format:check && bun run typecheck && bun run lint && bun run test` pass, and `bun run --cwd frontend build` succeeds.
+- A new endpoint has a route test (`startTestServer()`), its type in `packages/shared/src/api.ts` and a request in `backend/requests/api.http`.
+- Tests and manual checks run against local resources only, never Neon (see "Testing the API locally").
 
 ## Getting started
 

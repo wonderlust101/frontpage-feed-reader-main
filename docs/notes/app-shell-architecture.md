@@ -149,9 +149,14 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 | The API down or slow (5-second timeout in `lib/api.ts`)                                                                                                            | The account slot shows "Try again"; the page shows `user/error.tsx`; navigation still works                                                                                                      |
 | The Tailwind Turbopack loader caches a failed CSS compile and doesn't watch `@import`ed files after a failure                                                      | If a CSS error persists after the fix, touch `src/app/globals.css` to force a rebuild                                                                                                            |
 
-## Later (not built now)
+## Planned work
 
-- **Navigation data:** a shared `NavigationResponse = { categories: { id: string; name: string; unread: number | null }[]; unreadTotal: number | null }` (`null` = not known yet) and a `navigation` backend module with `GET /api/navigation` (reader, `requireAuth`) and a public guest endpoint. The guest catalogue can import `backend/data/sample-feeds.json` directly; the `starter_feeds` table is never seeded.
-- **Categories and subscriptions:** endpoints to list, add, rename, recolour (a `color` column on `categories`), reorder and delete categories, and to subscribe, move and unsubscribe feeds; then the reader's quick actions, Add feed in the palette, and a Settings page with the reader settings, category management and OPML import and export.
-- **Search:** an endpoint over articles and sources, per reader, with a category filter; the palette's `search` becomes async when it lands.
-- **Caching:** the default `'use cache'` handler is in-memory per server instance, fine for guest navigation (`cacheLife('days')`); a reader's data is per person and stays uncached, inside `<Suspense>`.
+Tracked in Jira (project KAN), not here:
+
+- **Navigation data and reader categories in the shell:** [KAN-28](https://sergeiborja.atlassian.net/browse/KAN-28)
+- **Guest catalogue endpoint** (one source for the curated feeds; seed or drop `starter_feeds`): [KAN-34](https://sergeiborja.atlassian.net/browse/KAN-34)
+- **Categories and subscriptions endpoints:** [KAN-27](https://sergeiborja.atlassian.net/browse/KAN-27), [KAN-23](https://sergeiborja.atlassian.net/browse/KAN-23)
+- **Settings page** (category and feed management, reader settings, OPML): [KAN-29](https://sergeiborja.atlassian.net/browse/KAN-29), [KAN-48](https://sergeiborja.atlassian.net/browse/KAN-48), [KAN-45](https://sergeiborja.atlassian.net/browse/KAN-45)
+- **Search endpoint** (the palette's `search` becomes async): [KAN-44](https://sergeiborja.atlassian.net/browse/KAN-44)
+
+**Caching** stays a rule for that work: the default `'use cache'` handler is in-memory per server instance, fine for guest navigation (`cacheLife('days')`); a reader's data is per person and stays uncached, inside `<Suspense>`.
