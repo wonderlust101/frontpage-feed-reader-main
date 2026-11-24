@@ -12,7 +12,6 @@ const DEAD_MIN_FAILURES = 5;
 const DEAD_MIN_DAYS = 7;
 const STALE_DAYS = 30;
 
-// The feed's health at `now`, e.g. 'stale' for a working feed whose newest item is 40 days old.
 // A feed with no items counts from when it was first stored; a missing last success counts as infinitely long ago.
 export function deriveHealth(feed: FeedHealthInput, now: Date): FeedHealth {
     if (feed.lastErrorCode) {

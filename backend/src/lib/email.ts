@@ -20,8 +20,7 @@ const RESEND_URL = 'https://api.resend.com/emails';
 const SEND_TIMEOUT_MS = 10_000;
 const MAILPIT_FALLBACK_FROM = 'frontpage@localhost';
 
-// Sends one email. Returns 'sent' (Resend), 'captured' (Mailpit, not production), 'logged' (no API key, not production)
-// or 'skipped' (no API key in production). Throws if Resend or Mailpit rejects the message or can't be reached.
+// Throws if Resend or Mailpit rejects the message or can't be reached; without an API key it logs or skips instead.
 export async function sendEmail(email: Email, config: EmailConfig): Promise<'sent' | 'captured' | 'logged' | 'skipped'> {
     if (!config.apiKey || !config.from) {
         if (!config.production && config.mailpitUrl) {
@@ -54,12 +53,11 @@ export async function sendEmail(email: Email, config: EmailConfig): Promise<'sen
     return 'sent';
 }
 
-// Escapes text for use inside HTML, e.g. a user's name in an email body.
 export function escapeHtml(text: string): string {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// Hands the email to Mailpit's send API, which shows it in the local inbox (http://localhost:8025). Throws if Mailpit refuses it.
+// Mailpit shows the message in the local inbox (http://localhost:8025).
 async function sendToMailpit(email: Email, mailpitUrl: string, from: string | undefined) {
     const res = await fetch(new URL('/api/v1/send', mailpitUrl), {
         method: 'POST',
@@ -78,7 +76,7 @@ async function sendToMailpit(email: Email, mailpitUrl: string, from: string | un
         throw new Error(`Mailpit answered ${res.status}: ${await res.text()}`);
 }
 
-// The bare address from EMAIL_FROM ("Frontpage <hi@example.com>" → "hi@example.com"), or a local fallback when it's unset.
+// "Frontpage <hi@example.com>" → "hi@example.com"; a local fallback when EMAIL_FROM is unset.
 function senderAddress(from: string | undefined) {
     if (!from)
         return MAILPIT_FALLBACK_FROM;

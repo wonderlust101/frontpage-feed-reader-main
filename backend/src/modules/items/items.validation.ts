@@ -1,7 +1,5 @@
-// Checks the items routes' query parameters and ids and turns them into the backend's ItemListQuery; unknown parameters are ignored.
-// Every 400 (a malformed or repeated parameter, or feed and category together) is found before any 404 (a filter that can't be
-// an id), so a request with both kinds of problem always gets the 400. Whether a valid feed or category id is the reader's own
-// is the service's job. An id that isn't a UUID is "not found" (404), the same answer as for something the reader can't see.
+// Every 400 is found before any 404, so a request with both kinds of problem always gets the 400. An id that isn't
+// a UUID is "not found" (404), the same answer as for something the reader can't see.
 
 import { ITEM_PAGE_SIZE, MAX_ITEM_PAGE_SIZE, UNCATEGORIZED, type ItemOrder } from '@frontpage/shared';
 import { isUuid } from '../../lib/uuid';
@@ -14,8 +12,7 @@ type ListParameter = (typeof LIST_PARAMETERS)[number];
 const LIST_PARAMETERS = ['feed', 'category', 'unread', 'order', 'limit', 'cursor'] as const;
 const WHOLE_NUMBER = /^\d+$/;
 
-// The query of GET /api/items, e.g. { category: 'uncategorized', unread: 'true' } → Uncategorized, unread only, newest first, 30 per page.
-// Throws `bad_request` (400) for a malformed or repeated parameter or both filters, then `feed_not_found` / `category_not_found` (404).
+// Example: { category: 'uncategorized', unread: 'true' } → Uncategorized, unread only, newest first, 30 per page.
 export function parseItemListQuery(query: Record<string, unknown>): ItemListQuery {
     const params = singleValues(query);
 
@@ -107,8 +104,7 @@ function parseCursor(value: string | undefined, order: ItemOrder): ItemCursor | 
     return cursor;
 }
 
-// Which items to list: one feed, one category ("uncategorized" = no category) or, with neither, everything.
-// Throws `feed_not_found` / `category_not_found` (404) for a value that can't be an id.
+// "uncategorized" means no category; throws `feed_not_found` / `category_not_found` (404) for a value that can't be an id.
 function parseScope(feed: string | undefined, category: string | undefined): ItemScope {
     if (feed !== undefined) {
         if (!isUuid(feed))

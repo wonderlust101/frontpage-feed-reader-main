@@ -13,7 +13,6 @@ type PerUserRateLimitOptions = {
     message: string;
 };
 
-// Lets each signed-in user make `limit` requests per `windowMs`; the next one gets X-Retry-After and a 429 `rate_limited` with `message`.
 // Put it after requireAuth: the counter is keyed by the user's id.
 export function perUserRateLimit({ limit, windowMs, message }: PerUserRateLimitOptions): RequestHandler {
     return rateLimit({

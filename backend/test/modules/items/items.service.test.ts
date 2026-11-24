@@ -1,6 +1,4 @@
-// The items service against an in-memory Postgres (PGlite): listing by scope, order and unread, cursor paging (including
-// items that share a millisecond and items read mid-paging), the read rule, counts that agree with the lists, the single
-// item, that a reader only ever sees their own data, and how many queries each call makes.
+// The items service against in-memory Postgres (PGlite), including that a reader only ever sees their own data.
 
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { and, eq, sql } from 'drizzle-orm';

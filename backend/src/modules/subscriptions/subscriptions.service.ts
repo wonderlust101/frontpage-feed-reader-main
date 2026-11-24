@@ -1,8 +1,5 @@
-// Subscriptions: a reader following a global feed, with their own title and category for it. Subscribing checks the feed
-// first: it reuses a stored copy whose last fetch succeeded in the last 15 minutes, and otherwise runs ingestFeed.
-// Every query is scoped by the reader's id, so another reader's subscription or category is simply "not found" (404).
-// Duplicates are caught by the (user, feed) unique key with `on conflict do nothing`, so two racing subscribes, or a URL
-// that redirects to a feed the reader already follows, also get 409 `already_subscribed`.
+// Subscribing reuses a stored feed whose last fetch succeeded in the last 15 minutes, else runs ingestFeed. Every
+// query is scoped by the reader's id, and the (user, feed) unique key turns racing duplicates into 409 `already_subscribed`.
 
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { SubscribeRequest, Subscription, UpdateSubscriptionRequest } from '@frontpage/shared';
@@ -49,8 +46,7 @@ export async function listSubscriptions(db: Database, userId: string, now = new 
     return rows.map((row) => toSubscription(row, now));
 }
 
-// Subscribes the reader to the feed at `input.url` (optionally into one of their categories) and returns the new subscription.
-// Throws the feed's error (e.g. `invalid_url`, `not_a_feed`, `http_4xx`), `category_not_found` (404) or `already_subscribed` (409).
+// Throws the feed's error (e.g. `invalid_url`, `not_a_feed`), `category_not_found` (404) or `already_subscribed` (409).
 export async function subscribe(db: Database, userId: string, input: SubscribeRequest, now = new Date()): Promise<Subscription> {
     const url = parseFeedUrl(input.url).href;
     const categoryId = input.categoryId ?? null;
@@ -83,8 +79,7 @@ export async function subscribe(db: Database, userId: string, input: SubscribeRe
     return findSubscription(db, userId, created.id, now);
 }
 
-// Renames the reader's subscription and/or moves it to another of their categories (null = Uncategorized), then returns it.
-// Fields missing from `changes` stay as they are. Throws `category_not_found` (404) or `not_found` (404) for anything not theirs.
+// Fields missing from `changes` stay as they are. Throws `category_not_found` or `not_found` (404) for anything not theirs.
 export async function updateSubscription(
     db: Database,
     userId: string,
@@ -107,8 +102,7 @@ export async function updateSubscription(
     return findSubscription(db, userId, updated.id, now);
 }
 
-// Deletes the reader's subscription and their read/unread marks on that feed's items, in one transaction.
-// Bookmarks, the feed and its items stay. Throws `not_found` (404) if the subscription isn't theirs.
+// Also deletes their read marks on that feed, in one transaction; bookmarks, the feed and its items stay.
 export async function unsubscribe(db: Database, userId: string, id: string): Promise<void> {
     await db.transaction(async (tx) => {
         const [deleted] = await tx

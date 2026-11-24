@@ -23,8 +23,7 @@ export function resolveUrl(value: string | null | undefined, base?: string, prot
     }
 }
 
-// The icon to show for a feed: its own image, else the site's /favicon.ico (unchecked: it may not exist). Null when it has neither.
-// e.g. no image and site "https://site.example/blog/" → "https://site.example/favicon.ico"; a site that isn't http(s) gives null.
+// The feed's own image, else the site's /favicon.ico (unchecked: it may not exist); null when it has neither.
 export function feedIconUrl(imageUrl: string | null, siteUrl: string | null): string | null {
     return imageUrl ?? resolveUrl('/favicon.ico', siteUrl ?? undefined);
 }

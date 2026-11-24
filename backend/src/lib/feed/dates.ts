@@ -84,8 +84,7 @@ const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
 
 const TWO_DIGIT_YEAR_PIVOT = 70;
 
-// Turns a feed date ("Wed, 02 Oct 2024 15:00:00 GMT" or "2024-10-02T15:00:00Z") into an ISO 8601 UTC string.
-// Returns null rather than guessing: unknown formats or zones, impossible dates, dates before 1995 or over a day ahead.
+// Returns null rather than guessing: unknown formats or zones, impossible dates, before 1995 or over a day ahead.
 export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
     const input = value?.replace(/\s+/g, ' ').trim() ?? '';
     const groups = input.match(ISO)?.groups ?? input.match(RFC822)?.groups;
@@ -147,8 +146,7 @@ function toMonth(value: string): number | undefined {
     return index >= 0 ? index + 1 : undefined;
 }
 
-// Offset from UTC in minutes: "GMT" → 0, "PDT" → -420, "+0530" / "+05:30" / "+05" / "GMT+0530" → 330; no zone means UTC.
-// Returns undefined for unknown or ambiguous names ("IST") and offsets that can't exist ("+2500").
+// "GMT" → 0, "PDT" → -420, "+05:30" → 330; undefined for ambiguous names ("IST") or impossible offsets ("+2500").
 function toOffsetMinutes(zone: string | undefined): number | undefined {
     if (!zone)
         return 0;
@@ -201,7 +199,6 @@ function toFullYear(value: string): number {
     return year < TWO_DIGIT_YEAR_PIVOT ? 2000 + year : 1900 + year;
 }
 
-// Joins regex pieces into one case-insensitive regex that must match the whole string.
 // Lets each part of a date format sit on its own line with an example next to it.
 function pattern(...parts: RegExp[]) {
     return new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');

@@ -14,8 +14,7 @@ export function parseSubscriptionId(value: string): string {
     return value;
 }
 
-// The body of POST /api/subscriptions, e.g. { url: "css-tricks.com/feed", categoryId: null }.
-// A url that isn't a string becomes "", which parseFeedUrl rejects as `invalid_url`. Throws `bad_request` for a non-object body or a bad categoryId.
+// A url that isn't a string becomes "", which parseFeedUrl rejects as `invalid_url`.
 export function parseSubscribeRequest(body: unknown): SubscribeRequest {
     const fields = toObject(body);
     const request: SubscribeRequest = { url: typeof fields.url === 'string' ? fields.url : '' };
@@ -26,8 +25,7 @@ export function parseSubscribeRequest(body: unknown): SubscribeRequest {
     return request;
 }
 
-// The body of PATCH /api/subscriptions/:id: customTitle, categoryId or both. The title is trimmed and "" becomes null
-// (the feed's own title shows again). Throws `bad_request` for a wrong type, a title over 200 characters or neither field.
+// The title is trimmed and "" becomes null, so the feed's own title shows again.
 export function parseUpdateSubscriptionRequest(body: unknown): UpdateSubscriptionRequest {
     const fields = toObject(body);
     const changes: UpdateSubscriptionRequest = {};

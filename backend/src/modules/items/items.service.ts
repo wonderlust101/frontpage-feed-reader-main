@@ -1,9 +1,6 @@
-// Items: the articles of the feeds a reader follows, for the list pages, the sidebar counts and the reader view.
-// Lists use keyset pagination ("the items after this one", not "skip 60"): for each followed feed, a LATERAL subquery reads
-// at most limit+1 items in index order (items_feed_id_sort_at_idx), and the outer query keeps the best limit+1 of those. So no
-// query sorts all of a reader's items, and page 50 costs the same as page 1. Every query starts from the reader's own
-// subscriptions, so nothing they don't follow can appear; that is also why a non-empty page proves its feed or category is
-// theirs, and only an empty page needs the ownership check. IS_READ is the one read rule, shared with KAN-25.
+// Lists use keyset pagination: a LATERAL subquery reads at most limit+1 items per followed feed in index order, so page
+// 50 costs the same as page 1. Every query starts from the reader's own subscriptions, so only an empty page needs
+// the ownership check.
 
 import { and, asc, count, desc, eq, isNull, not, sql, type SQL } from 'drizzle-orm';
 import type { ItemCount, ItemCountsResponse, ItemDetail, ItemListResponse, ItemSummary } from '@frontpage/shared';
@@ -22,9 +19,8 @@ import type { ItemListQuery, ItemScope } from './items.types';
 type PageRow = Awaited<ReturnType<typeof selectPage>>[number];
 type SummaryRow = Omit<PageRow, 'cursorSortAt'>;
 
-// An item is read for this reader if they marked it either way; otherwise if it was first seen before their read cutoff.
-// A query using it needs `items`, the reader's `subscriptions` row for the item's feed, and `item_read_states` LEFT JOINed
-// on (this item, this reader). Never call .mapWith() on it: that would change it for every query (.as() makes a copy).
+// Read if the reader marked it either way, else if first seen before their read cutoff. Needs `subscriptions` and a
+// LEFT JOINed `item_read_states`; never call .mapWith() on it, which would change it for every query.
 export const IS_READ = sql<boolean>`coalesce(${itemReadStates.isRead}, ${subscriptions.readCutoff} is not null and ${items.firstSeenAt} < ${subscriptions.readCutoff})`;
 
 // How each order sorts, and which side of the cursor the next page is on.
@@ -61,8 +57,7 @@ const SUMMARY_COLUMNS = {
     hasFullContent: items.hasFullContent,
 };
 
-// One page of the reader's items in the query's scope, order and filters, and the cursor for the next page (null on the last).
-// Throws `feed_not_found` or `category_not_found` (404) when the page is empty because the feed or category isn't the reader's.
+// Throws `feed_not_found` or `category_not_found` (404) when the page is empty because the scope isn't the reader's.
 export async function listItems(db: Database, userId: string, query: ItemListQuery, now = new Date()): Promise<ItemListResponse> {
     const rows = await selectPage(db, userId, query);
 
@@ -76,8 +71,7 @@ export async function listItems(db: Database, userId: string, query: ItemListQue
     return { items: rows.slice(0, query.limit).map((row) => toItemSummary(row, now)), nextCursor };
 }
 
-// The reader's item and unread counts per feed, per category (every category, zeros included, in sidebar order, then
-// Uncategorized when a feed has no category) and in total. Two queries, run together.
+// Categories come in sidebar order with zeros included, then Uncategorized when a feed has no category.
 export async function countItems(db: Database, userId: string): Promise<ItemCountsResponse> {
     const [feedCounts, readerCategories] = await Promise.all([
         db
@@ -116,8 +110,7 @@ export async function countItems(db: Database, userId: string): Promise<ItemCoun
     };
 }
 
-// One item with its full (already sanitized) content, for the reader view. Reading it doesn't mark it read.
-// Throws `not_found` (404) unless the reader follows the item's feed, the same answer as for an id that doesn't exist.
+// Reading it doesn't mark it read. Throws `not_found` (404) unless the reader follows the item's feed.
 export async function getItem(db: Database, userId: string, id: string, now = new Date()): Promise<ItemDetail> {
     const [row] = await db
         .select({ ...FEED_COLUMNS, ...SUMMARY_COLUMNS, isRead: IS_READ, contentHtml: items.contentHtml, updatedAt: items.updatedAt })
@@ -133,8 +126,7 @@ export async function getItem(db: Database, userId: string, id: string, now = ne
     return { ...toItemSummary(row, now), contentHtml: row.contentHtml, updatedAt: row.updatedAt?.toISOString() ?? null };
 }
 
-// The page query: for each subscription in scope (LATERAL), that feed's next limit+1 matching items in index order, then the
-// best limit+1 of all of them. Each row carries its sort time as microsecond text for the cursor.
+// Each row carries its sort time as microsecond text for the cursor.
 function selectPage(db: Database, userId: string, query: ItemListQuery) {
     const { direction, after } = KEYSET[query.order];
     const { cursor } = query;
@@ -191,8 +183,7 @@ function scopeCondition(scope: ItemScope): SQL | undefined {
     }
 }
 
-// Throws `feed_not_found` or `category_not_found` (404) unless the scope's feed is followed by the reader or its category is
-// theirs. "All" and Uncategorized always belong to the reader. Only needed for an empty page (see the top of the file).
+// Only needed for an empty page (see the top of the file); "All" and Uncategorized always belong to the reader.
 async function assertScopeBelongsToReader(db: Database, userId: string, scope: ItemScope): Promise<void> {
     if (scope.kind === 'category' && scope.categoryId !== null) {
         await assertOwnCategory(db, userId, scope.categoryId);

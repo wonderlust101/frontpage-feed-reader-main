@@ -72,8 +72,7 @@ export const verifications = pgTable(
     (t) => [index('verifications_identifier_idx').on(t.identifier)],
 );
 
-// How the tables relate, for Better Auth's joins (advanced.database.joins in auth.service.ts): with these, reading a session
-// fetches its user in the same query instead of a second one.
+// For Better Auth's joins: reading a session fetches its user in the same query.
 export const usersRelations = relations(users, ({ many }) => ({ sessions: many(sessions), accounts: many(accounts) }));
 export const sessionsRelations = relations(sessions, ({ one }) => ({ user: one(users, { fields: [sessions.userId], references: [users.id] }) }));
 export const accountsRelations = relations(accounts, ({ one }) => ({ user: one(users, { fields: [accounts.userId], references: [users.id] }) }));

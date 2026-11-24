@@ -6,8 +6,7 @@ import * as schema from '../../src/db/schema';
 
 const MIGRATIONS_DIR = join(import.meta.dir, '../../drizzle');
 
-// A fresh in-memory Postgres (PGlite) with every committed migration applied, so DB tests run offline; call `close()` in afterAll.
-// `queries` records the SQL of every query run through `db` (migrations excluded), for tests that check how many a call makes.
+// In-memory Postgres with every committed migration; `queries` records each query's SQL for tests that count them.
 export async function createTestDb() {
     const client = new PGlite();
     const queries: string[] = [];

@@ -11,8 +11,7 @@ type NotModifiedResult = Extract<FetchFeedResult, { notModified: true }>;
 type FreshResult = Extract<FetchFeedResult, { notModified: false }>;
 type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
 
-// Fetches, decodes and normalizes one feed for the API, caching it under both the requested and the final (after redirects) URL.
-// Sends the client's ETag/Last-Modified, or the last ones we saw, so an unchanged feed is just a 304 answered from the cache.
+// Caches under both the requested and the final URL, so an unchanged feed is just a 304 answered from the cache.
 export async function getFeed(input: string | undefined, clientValidators: Validators = {}): Promise<FetchFeedResponse> {
     const url = parseFeedUrl(input);
     const cached = recall(url.href);
@@ -28,8 +27,7 @@ export async function getFeed(input: string | undefined, clientValidators: Valid
     if (entry)
         return answerNotModified(result, entry);
 
-    // Upstream says the client's copy is current, but we have no copy to answer with: ask again without validators.
-    // (If we sent none, asking again can't help: the 304 we already have stands.)
+    // Upstream says the client's copy is current but we have none, so ask again without validators (if we sent any).
     const full = hasValidators(validators) ? await fetchUpstream(url, {}) : result;
 
     if (full.notModified)
@@ -81,8 +79,6 @@ function answerNotModified(result: NotModifiedResult, entry: CacheEntry): FetchF
 function hasValidators(validators: Validators): boolean {
     return Boolean(validators.etag || validators.lastModified);
 }
-
-// --- LRU cache of the last good result per URL ---
 
 const CACHE_LIMIT = 200;
 const cache = new Map<string, CacheEntry>();

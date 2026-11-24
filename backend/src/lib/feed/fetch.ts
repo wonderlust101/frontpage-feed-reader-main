@@ -102,8 +102,7 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     return url;
 }
 
-// Downloads one feed: follows up to 5 redirects itself (to report permanent moves), sends ETag / Last-Modified so an unchanged feed is a 304,
-// and enforces the timeout and size cap. Every failure is thrown as an HttpError with a code such as `timeout`, `http_4xx` or `blocked_url`.
+// Follows up to 5 redirects itself, to report permanent moves. Every failure is an HttpError (`timeout`, `http_4xx`…).
 export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const {
         timeoutMs = DEFAULT_TIMEOUT_MS,
@@ -153,7 +152,6 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
     }
 }
 
-// Sends the GET and follows redirects itself, up to `maxRedirects`, so a moved feed can be reported.
 // The move counts as permanent only if every hop was (301 or 308).
 async function followRedirects(startUrl: URL, ctx: RequestContext, maxRedirects: number): Promise<Arrival> {
     let url = startUrl;
@@ -209,8 +207,7 @@ function requestHeaders(userAgent: string, validators: Partial<FeedCacheValidato
     return headers;
 }
 
-// Sends one GET and resolves once the response headers arrive; doesn't follow redirects (followRedirects does that).
-// Connection errors are mapped here, where we still know which URL (which redirect hop) failed.
+// Connection errors are mapped here, where we still know which redirect hop failed.
 function request(url: URL, ctx: RequestContext) {
     const [client, agent] = url.protocol === 'https:' ? [https, ctx.agents.https] : [http, ctx.agents.http];
 

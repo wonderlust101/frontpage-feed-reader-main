@@ -29,7 +29,7 @@ pool?.on('error', (err) => {
 
 export const db = pool ? drizzle({ client: pool, schema }) : null;
 
-// The database, for routes that can't work without one; throws `database_unavailable` (503) when there is no DATABASE_URL.
+// For routes that can't work without a database; throws `database_unavailable` (503) when there is none.
 export function requireDatabase(): Database {
     if (!db)
         throw new ServiceUnavailableError('database_unavailable', 'This feature is unavailable: the API has no database');
@@ -37,7 +37,7 @@ export function requireDatabase(): Database {
     return db;
 }
 
-// Checks the database with `select 1` for /api/health: 'connected', 'skipped' (no DATABASE_URL) or 'error' with the driver's message.
+// For /api/health: 'connected', 'skipped' (no DATABASE_URL) or 'error' with the driver's message.
 export async function checkDatabase(): Promise<{ status: DbStatus; error?: string }> {
     if (!db)
         return { status: 'skipped' };
@@ -54,7 +54,6 @@ export async function checkDatabase(): Promise<{ status: DbStatus; error?: strin
     }
 }
 
-// Closes every pooled connection so the process can exit cleanly; called on shutdown.
 export async function closeDatabase() {
     await pool?.end();
 }

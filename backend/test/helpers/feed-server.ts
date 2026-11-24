@@ -4,8 +4,7 @@ import { readFixture } from './fixtures';
 export const ETAG = '"v1"';
 export const LAST_MODIFIED = 'Tue, 10 Jun 2025 09:00:00 GMT';
 
-// A fake feed server where each path acts out one HTTP behaviour (redirect, 304, timeout, 500…); `hits` and `lastHeaders` record requests.
-// `serve(path, body, init)` makes a path answer with that body instead (replacing any earlier serve), so a test can change a feed between fetches.
+// Each path acts out one HTTP behaviour (redirect, 304, timeout, 500…); `serve()` lets a test change a feed between fetches.
 export function startFeedServer() {
     const hits: Record<string, number> = {};
     const served = new Map<string, { body: Uint8Array | string; init: ResponseInit }>();

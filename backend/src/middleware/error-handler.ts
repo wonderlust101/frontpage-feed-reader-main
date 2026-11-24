@@ -4,7 +4,6 @@ import type { ErrorRequestHandler } from 'express';
 import type { ApiErrorResponse } from '@frontpage/shared';
 import { HttpError } from './errors';
 
-// Sends any thrown error as { error: { code, message, retryable } }, so controllers never need try/catch.
 // Unexpected errors (bugs) are logged and answered with a generic 500 that hides the details.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     const error = toHttpError(err);

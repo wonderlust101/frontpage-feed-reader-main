@@ -62,8 +62,7 @@ function codeFor(to: string) {
     return lastEmailTo(to)?.text.match(/\b\d{6}\b/)?.[0];
 }
 
-// Builds an auth instance as production would (rate limits on, Secure cookies), restoring the real env afterwards.
-// Every required setting is valid unless `overrides` says otherwise.
+// As production would build it (rate limits on, Secure cookies); restores the real env afterwards.
 function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN' | 'AUTH_COOKIE_PREFIX' | 'WEB_ORIGINS'>> = {}) {
     const saved = {
         NODE_ENV: env.NODE_ENV,

@@ -65,7 +65,6 @@ const HEAD_CHARS = 4096;
 const PUBLISHED_TAGS = ['pubdate', 'published', 'issued', 'created', 'date', 'updated', 'modified'];
 const UPDATED_TAGS = ['updated', 'modified', 'date'];
 
-// Parses RSS 2.0, RSS 1.0 or Atom into one NormalizedFeed (items newest first, duplicates removed, non-fatal problems in `warnings`).
 // Throws `not_a_feed` for empty responses, web pages and other XML, and `parse_error` if nothing can be read.
 export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFeed {
     const now = opts.now ?? Date.now();
@@ -107,8 +106,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     };
 }
 
-// Keeps only the first `max` items (RSS) or entries (Atom) and re-closes the document so it stays valid XML; `limited` says if anything was cut.
-// A quick text scan before parsing, because the parser slows down badly on huge feeds.
+// A text scan before parsing, because the parser slows down badly on huge feeds; re-closes the document so it stays valid.
 export function limitItems(xml: string, max: number): { xml: string; limited: boolean } {
     const closingTag = /<\/(item|entry)\s*>/gi;
     let lastKeptItem: RegExpExecArray | null = null;
@@ -246,7 +244,6 @@ function isRdf(xml: string): boolean {
     return /<rdf:rdf[\s>]/i.test(xml.slice(0, HEAD_CHARS));
 }
 
-// Turns one parsed item into a NormalizedItem: sanitizes its HTML, builds a plain-text summary, parses dates and cuts long fields.
 // Gaps get fallbacks: title from the summary, author from the feed, thumbnail from the first image, id from a hash.
 function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): NormalizedItem {
     const url = resolveUrl(item.url, ctx.siteUrl);
@@ -285,8 +282,7 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
     };
 }
 
-// The feed's own id for an item (guid, else link) when it's short enough; otherwise a stable hash of it,
-// or, for items with neither, a hash of `fallbackKey` (title, date and position).
+// The feed's own id (guid, else link) when short enough; otherwise a stable hash of it, or of `fallbackKey`.
 function itemId(ownId: string | null | undefined, fallbackKey: string): string {
     if (!ownId)
         return hashedId(fallbackKey);

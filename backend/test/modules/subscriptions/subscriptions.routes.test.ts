@@ -1,6 +1,5 @@
-// /api/subscriptions over HTTP. Tests run without a database, so nobody can be signed in: every route must answer
-// 401 before reading the body or the id. Signed-in behaviour (ownership included) is in subscriptions.service.test.ts.
-// (A body that isn't a JSON object or array is refused even earlier, by the app-wide express.json(), as 400 invalid_json.)
+// Tests run without a database, so nobody can be signed in: every route must answer 401 before reading the body or
+// the id. Signed-in behaviour is in subscriptions.service.test.ts.
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { startTestServer } from '../../helpers/test-server';

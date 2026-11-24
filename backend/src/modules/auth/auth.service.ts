@@ -1,7 +1,4 @@
-// The Better Auth instance: email + password sign-up/sign-in, sessions in Postgres, password reset by email link and
-// email verification by 6-digit code (emailOTP plugin; a correct code also signs the user in).
-// The plugin's other code flows (sign-in, password reset, email change by code) are switched off: nothing uses them.
-// Better Auth serves its own endpoints under /api/auth (see auth.controller.ts); other modules only call getSession().
+// The Better Auth instance: email + password, sessions in Postgres, reset by link and email verification by code.
 // Without a database there is no auth: `auth` is null and auth routes answer 503.
 
 import { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
@@ -47,8 +44,7 @@ export async function getSession(headers: IncomingHttpHeaders) {
     return auth.api.getSession({ headers: fromNodeHeaders(headers) });
 }
 
-// Builds a Better Auth instance on a Drizzle database: the app's one at startup, an in-memory one in tests.
-// `send` delivers the reset and code emails; tests pass one that just records them.
+// `send` delivers the reset and code emails; tests pass one that records them.
 export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliverEmail) {
     // Without a fixed base URL, Better Auth builds reset links from the request's Host header, which a client controls.
     if (env.NODE_ENV === 'production' && !env.AUTH_URL) {
@@ -116,10 +112,8 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
             expiresIn: SESSION_DAYS * SECONDS_PER_DAY,
             updateAge: SECONDS_PER_DAY,
         },
-        // Better Auth only rate-limits when NODE_ENV is 'production'; keep it on unless we're running tests. Outside
-        // production every window is a tenth as long (10 s → 1 s, 60 s → 6 s), so local testing rarely waits but still hits the limits.
-        // Session checks are never limited: they need a valid cookie (nothing to guess), and signed-in pages make them from
-        // the site's servers, whose few shared IPs would soon use up one limit for every reader. The first matching rule wins.
+        // Better Auth only rate-limits in production, so keep it on outside tests, with windows a tenth as long locally.
+        // Session checks are never limited: they come from the site's few server IPs and need a valid cookie anyway.
         rateLimit: {
             enabled: env.NODE_ENV !== 'test',
             customRules: {
@@ -132,11 +126,9 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
         advanced: {
             // One query per session check (session joined to its user) instead of two; needs the relations in auth.schema.ts.
             database: { joins: true },
-            // The site (www.) and the API (api.) share one domain, so the session cookie is set for all of it and the site's
-            // pages see it too. Unset locally: localhost:3000 and :4000 already share cookies (cookies ignore the port).
+            // Site and API share one domain, so the cookie is set for all of it; unset locally, where ports already share cookies.
             crossSubDomainCookies: env.AUTH_COOKIE_DOMAIN ? { enabled: true, domain: env.AUTH_COOKIE_DOMAIN } : undefined,
-            // Production's cookie (set for all of readfrontpage.com) also reaches staging.readfrontpage.com; a different name on
-            // staging keeps the two apart. Unset in production: the default "better-auth". frontend/src/proxy.ts reads the same value.
+            // A different name on staging keeps production's cookie (set for all of readfrontpage.com) out; proxy.ts reads it too.
             cookiePrefix: env.AUTH_COOKIE_PREFIX,
             // Railway's edge puts the reader's IP in X-Real-IP; rate limits and sessions use it (locally it falls back to 127.0.0.1).
             ipAddress: { ipAddressHeaders: ['x-real-ip'] },

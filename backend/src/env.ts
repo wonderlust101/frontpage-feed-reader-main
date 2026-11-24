@@ -1,9 +1,6 @@
-// Typed access to environment variables. Each one is documented in backend/.env.example.
-// The deployment's URLs (allowed site origin, the API's own address, the session cookie's domain and prefix) come from
-// the committed map in packages/shared (deployments.ts): Railway names the environment (RAILWAY_ENVIRONMENT_NAME,
-// "production" or "staging"), and anywhere else is local. A variable that is set still wins. A Railway environment
-// with no row in the map gets no defaults, so production's startup checks (auth.service.ts) stop it instead of
-// letting it run with local URLs.
+// Typed environment variables, each documented in backend/.env.example. Deployment URLs default from the committed
+// map in packages/shared by RAILWAY_ENVIRONMENT_NAME; an unknown Railway environment gets no defaults, so production's
+// startup checks stop it instead of letting it run with local URLs.
 
 import { DEPLOYMENTS, type Deployment } from '@frontpage/shared';
 
@@ -37,8 +34,7 @@ export const env = {
     FEED_REFRESH_INTERVAL_MINUTES: int(process.env.FEED_REFRESH_INTERVAL_MINUTES, 30),
 };
 
-// Returns the committed settings for the Railway environment `name` ("production" or "staging"), the local ones when
-// not on Railway (no name), or undefined for a Railway environment the map doesn't know (e.g. a PR environment).
+// undefined for a Railway environment the map doesn't know (e.g. a PR environment); not on Railway means local.
 export function deploymentDefaults(name: string | undefined): Deployment | undefined {
     if (!name)
         return DEPLOYMENTS.local;
@@ -46,12 +42,11 @@ export function deploymentDefaults(name: string | undefined): Deployment | undef
     return name === 'production' || name === 'staging' ? DEPLOYMENTS[name] : undefined;
 }
 
-// An env var with surrounding spaces trimmed, or undefined when it's missing or blank.
 function optional(value: string | undefined) {
     return value?.trim() || undefined;
 }
 
-// Reads a whole-number env var. Returns `fallback` when it's missing or not a number (e.g. "abc").
+// `fallback` when missing or not a number (e.g. "abc").
 function int(value: string | undefined, fallback: number) {
     const n = Number.parseInt(value ?? '', 10);
 

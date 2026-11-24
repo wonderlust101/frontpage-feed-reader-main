@@ -9,9 +9,7 @@ export type HttpErrorOptions = {
     subscriptionId?: string;
 };
 
-// An error that's safe to show API clients: an HTTP status, a machine-readable `code` and a message.
-// `upstreamStatus` is a feed server's own error status (e.g. 404), sent to clients as `status`;
-// `subscriptionId` points an `already_subscribed` client at the subscription that already exists.
+// `upstreamStatus` is a feed server's own status (sent as `status`); `subscriptionId` points at an existing subscription.
 export class HttpError extends Error {
     readonly status: number;
     readonly code: ApiErrorCode;

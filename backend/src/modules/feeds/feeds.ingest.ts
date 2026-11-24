@@ -1,7 +1,5 @@
-// Stores fetched feeds: one `feeds` row per URL, one `items` row per (feed, guid). Callers: the scheduler, subscribe and retry.
-// The fetch runs outside any transaction, so a slow feed never holds one open. Items are compared with their stored
-// content_hash first and only new or edited ones are written, so an unchanged feed sends no item rows to the database.
-// A 304 counts as a success. Feed errors are recorded on feeds we already store; an unknown URL that fails stores nothing.
+// Stores fetched feeds: one `feeds` row per URL, one `items` row per (feed, guid). The fetch runs outside any
+// transaction, so a slow feed never holds one open; only new or edited items (by content_hash) are written.
 
 import { createHash } from 'node:crypto';
 import { and, eq, inArray, sql } from 'drizzle-orm';
@@ -38,8 +36,7 @@ type ItemCounts = {
 
 const ERROR_MESSAGE_MAX = 500;
 
-// Fetches one feed and stores it: feed metadata, new and edited items, and how the fetch went. Returns what changed.
-// Throws the feed error (e.g. `http_4xx`, `timeout`, `not_a_feed`) after recording it on the stored feed; other errors are rethrown with nothing written.
+// Throws the feed error after recording it on the stored feed; other errors are rethrown with nothing written.
 export async function ingestFeed(db: Database, url: string, opts: IngestOptions = {}): Promise<IngestResult> {
     const now = opts.now ?? new Date();
     const key = parseFeedUrl(url).href;
@@ -94,7 +91,6 @@ async function recordFailure(db: Database, feedId: string, err: HttpError, now: 
         .where(eq(feeds.id, feedId));
 }
 
-// Applies a permanent redirect: renames the stored feed to the new URL, or merges it into the feed already stored there.
 // Returns the URL to store the result under. Temporary redirects change nothing.
 async function resolveTarget(tx: Transaction, stored: StoredFeed | null, key: string, redirect: FeedRedirect | null): Promise<Target> {
     if (!redirect?.permanent)
@@ -117,8 +113,7 @@ async function resolveTarget(tx: Transaction, stored: StoredFeed | null, key: st
     return { url: redirect.to, movedFrom: key, mergedFeedId: null };
 }
 
-// Moves everything that points at feed `fromId` onto feed `intoId`, then deletes `fromId`. Where both hold the same thing
-// (an item guid, a user's subscription, a bookmark or read state), the copy on `intoId` wins.
+// Where both feeds hold the same thing (an item guid, a subscription, a bookmark or read state), `intoId`'s copy wins.
 async function mergeFeeds(tx: Transaction, fromId: string, intoId: string) {
     // Lock both rows in a fixed order so two merges of the same pair can't deadlock.
     await tx.execute(sql`select id from ${feeds} where id in (${fromId}, ${intoId}) order by id for update`);
@@ -201,8 +196,7 @@ async function upsertFeed(tx: Transaction, url: string, feed: NormalizedFeed, va
     return row!.id;
 }
 
-// Writes the new and edited items of one fetch in a single statement, skipping those whose stored hash already matches,
-// then refreshes the feed's latest_item_at. Items missing from the fetch are kept. Returns how many were inserted, updated or unchanged.
+// Skips items whose stored hash already matches; items missing from the fetch are kept.
 async function writeItems(tx: Transaction, feedId: string, fetched: NormalizedItem[], now: Date): Promise<ItemCounts> {
     if (fetched.length === 0)
         return { inserted: 0, updated: 0, unchanged: 0 };

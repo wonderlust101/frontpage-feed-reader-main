@@ -1,9 +1,5 @@
-// Where each deployment of Frontpage lives, in one place for both sides. None of it is secret, so it is committed
-// rather than repeated as variables in every Vercel and Railway environment: each side works out which deployment it
-// is from what its platform already tells it (the frontend from Vercel's VERCEL_ENV, the backend from Railway's
-// RAILWAY_ENVIRONMENT_NAME) and takes its URLs from here. An explicit environment variable still overrides any value.
-// Staging lives under staging.readfrontpage.com, so its cookie (domain and name) never mixes with production's.
-// Adding a deployment means adding a row here (and its DNS, Vercel domain and Railway environment).
+// Where each deployment lives, committed because none of it is secret. Each side picks its row from what its platform
+// says (VERCEL_ENV, RAILWAY_ENVIRONMENT_NAME), and an explicit environment variable still overrides any value.
 
 export type DeploymentName = 'production' | 'staging' | 'local';
 
