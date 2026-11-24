@@ -54,6 +54,7 @@ src/components/app-shell/          feature-agnostic: plain data and ReactNode sl
   search-palette.tsx               client: Ctrl/Cmd + K search and jump (native <dialog>, combobox, "Search in" scope)
   search-match.ts                  matchParts(): marks query matches, pure, unit tested
   shell-menu.tsx                   client: a button and a native popover panel (account, guest, a category's actions)
+  locked-view.tsx                  client: an account-only view (rail icon or drawer row) opening a preview of the feature
   shell-drawer.tsx                 client: menu button + native <dialog> holding ShellNav, below lg
   shell-nav.tsx                    client: the drawer's contents (logo, views, categories, account row)
   app-shell.tsx                    server: skip link, rail + panel (lg up), toolbar, <main id="main">
@@ -62,6 +63,7 @@ src/features/preferences/
   components/choice-control.tsx    stacked radio pills (the reader settings, the design system's switches)
   components/reader-settings.tsx   client: the reader settings popover (on /design-system until its home in the app)
 src/features/auth/
+  account-features.ts              the account-only views guests see locked, with their preview text
   require-user.ts                  currentUser() (no redirect) and requireUser() (redirects)
   components/account-menu.tsx      avatar button and menu: name, email, Verify email, Change password, Sign out
   components/guest-menu.tsx        "Guest" button and menu: what an account keeps, Create account, Sign in
@@ -73,7 +75,7 @@ src/features/categories/
   library.ts                       a reader's categories and feeds and the pure edits the quick actions make: tested
   components/category-row-menu.tsx client: a category's quick actions (color swatches; rename and delete when allowed)
 src/app/guest/_components/guest-shell.tsx  client: AppShell with the guest's colors and color menus
-src/app/guest/layout.tsx           GuestShell for guests (static), with the sample sources and one locked view
+src/app/guest/layout.tsx           GuestShell for guests (static), with the sample sources and the account features
 src/app/guest/c/[category]/page.tsx a guest category's page, prerendered per category (generateStaticParams)
 src/app/user/layout.tsx            AppShell for readers; metadata robots noindex
 ```
@@ -126,7 +128,7 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 
 - **Status:** Accepted (revised after the fourth critique)
 - **Context:** the rail, the panel and the drawer named the home page differently ("All items", "All categories") and disagreed on what was current inside a category; the live guest shell once showed no categories.
-- **Decision:** one name, "All items", for the home page in the rail and the panel, always Lemon. `shellPlace()` returns the category (a category, or `homeHref` on the home page) and the view, which is null inside a category, so only one place is ever marked; the drawer leaves the home view out of its views, since "All items" leads its categories. Guests get the five curated categories from `features/categories/guest-categories.ts` (a frontend mirror of `backend/data/sample-feeds.json`), each with a static page at `/guest/c/<id>` (`generateStaticParams`; an unknown id is a 404), recolourable on this device. What only an account adds is one locked view leading to sign-up. Readers' categories, counts and article search still wait for their endpoints.
+- **Decision:** one name, "All items", for the home page in the rail and the panel, always Lemon. `shellPlace()` returns the category (a category, or `homeHref` on the home page) and the view, which is null inside a category, so only one place is ever marked; the drawer leaves the home view out of its views, since "All items" leads its categories. Guests get the five curated categories from `features/categories/guest-categories.ts` (a frontend mirror of `backend/data/sample-feeds.json`), each with a static page at `/guest/c/<id>` (`generateStaticParams`; an unknown id is a 404), recolourable on this device. What only an account adds (features/auth/account-features.ts) is listed as locked views; each opens a preview (`LockedView`) with Create account rather than navigating. Readers' categories, counts and article search still wait for their endpoints.
 - **Consequences:** guest colours are CSS properties (`--category-<id>`) the root layout's early script copies from localStorage before the first paint, and every place that draws a guest category uses `categoryColor(id, preset)`, so nothing flashes and server and client render the same markup. The rail's Lemon square for the home view shows only while the panel is collapsed (and `aria-current` with it), so the place is never marked twice. Because the category route has `generateStaticParams`, `usePathname` resolves at prerender and needs no Suspense; the page reads `params` inside a `<Suspense>` child.
 
 ### ADR-007: Quick actions on category rows; Add feed and Manage deferred

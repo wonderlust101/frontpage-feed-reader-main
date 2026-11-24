@@ -4,11 +4,13 @@
 // the category panel; ShellSidebar puts the account at its foot. The current view is a Lemon square with an ink edge,
 // the brand's own colour marking where you are (aria-current="true": the panel marks the page), and none is current
 // inside a category. The home view's square shows only while the panel is collapsed: when the panel is open, its "All
-// items" row already marks the place, so the two never say it twice. A locked view (a guest's account-only ones) carries a lock badge and a tooltip saying why.
+// items" row already marks the place, so the two never say it twice. An account-only view (a guest's) carries a lock
+// badge and opens a preview of the feature (LockedView).
 
 import Link from 'next/link';
 import { LogoMark } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
+import { LockedView } from './locked-view';
 import { formatCount, type ShellView } from './nav-entries';
 import { RailTooltip, SidebarToggle, useSidebar } from './sidebar-toggle';
 
@@ -44,31 +46,25 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                         const shownCount = formatCount(view.count);
                         return (
                             <li key={view.label}>
-                                <Link
-                                    href={view.href}
-                                    aria-current={isCurrent && (!isHome || sidebar === 'collapsed') ? 'true' : undefined}
-                                    className={`group relative grid size-11 place-items-center rounded-control transition-colors duration-150 ${marks}`}
-                                >
-                                    <Icon name={view.icon} />
-                                    {view.locked && (
-                                        <span
-                                            aria-hidden="true"
-                                            className="absolute right-1 bottom-1 grid size-4 place-items-center rounded-full bg-rail text-ink-2"
-                                        >
-                                            <Icon name="locked" size="inline" className="size-3" />
+                                {view.preview ? (
+                                    <LockedView view={view} preview={view.preview} variant="rail" />
+                                ) : (
+                                    <Link
+                                        href={view.href}
+                                        aria-current={isCurrent && (!isHome || sidebar === 'collapsed') ? 'true' : undefined}
+                                        className={`group relative grid size-11 place-items-center rounded-control transition-colors duration-150 ${marks}`}
+                                    >
+                                        <Icon name={view.icon} />
+                                        <span className="sr-only">
+                                            {view.label}
+                                            {shownCount && `, ${shownCount} unread`}
                                         </span>
-                                    )}
-                                    <span className="sr-only">
-                                        {view.label}
-                                        {view.locked && ', with an account'}
-                                        {shownCount && `, ${shownCount} unread`}
-                                    </span>
-                                    <RailTooltip>
-                                        {view.label}
-                                        {view.locked && <span className="ml-1.5 font-normal">· with an account</span>}
-                                        {shownCount && <span className="ml-1.5 font-normal">{shownCount}</span>}
-                                    </RailTooltip>
-                                </Link>
+                                        <RailTooltip>
+                                            {view.label}
+                                            {shownCount && <span className="ml-1.5 font-normal">{shownCount}</span>}
+                                        </RailTooltip>
+                                    </Link>
+                                )}
                             </li>
                         );
                     })}

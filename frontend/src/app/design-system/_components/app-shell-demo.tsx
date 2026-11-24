@@ -15,6 +15,7 @@ import { ShellNav } from '@/components/app-shell/shell-nav';
 import { ShellSidebar } from '@/components/app-shell/shell-sidebar';
 import { ShellToolbar } from '@/components/app-shell/shell-toolbar';
 import { Toast } from '@/components/ui/toast';
+import { ACCOUNT_FEATURE_VIEWS } from '@/features/auth/account-features';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
@@ -48,10 +49,7 @@ const VIEWS = [
     { href: '#reading', label: 'Reading stats', icon: 'analytics' },
 ] satisfies ShellView[];
 
-const GUEST_VIEWS = [
-    { href: THIS_PAGE, label: 'All items', icon: 'all-items' },
-    { href: '#sign-up', label: 'Saved, digest and stats', icon: 'saved', locked: true },
-] satisfies ShellView[];
+const GUEST_VIEWS = [{ href: THIS_PAGE, label: 'All items', icon: 'all-items' }, ...ACCOUNT_FEATURE_VIEWS] satisfies ShellView[];
 
 const FIRST_CATEGORY = 'category-0';
 

@@ -1,5 +1,6 @@
 // The shell's navigation entries and the two rules the sidebar follows: which entry is the current page, and how an
-// unread count is shown. Hrefs identify entries, so they must be unique within one navigation.
+// unread count is shown. Hrefs identify entries, so they must be unique within one navigation. A view with a `preview`
+// is account-only (a guest's, locked): never current, and its href is where its Create account button leads.
 
 import type { IconName } from '@/components/ui/icon';
 
@@ -8,7 +9,7 @@ export type ShellView = {
     label: string;
     icon: IconName;
     count?: number | null;
-    locked?: boolean;
+    preview?: string;
 };
 
 export type ShellCategory = {

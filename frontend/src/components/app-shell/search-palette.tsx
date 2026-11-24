@@ -76,8 +76,8 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                     .map((view) => ({
                         href: view.href,
                         title: view.label,
-                        detail: view.locked ? 'View · with an account' : 'View',
-                        locked: view.locked,
+                        detail: view.preview ? 'View · with an account' : 'View',
+                        locked: Boolean(view.preview),
                         lead: { icon: view.icon },
                     })),
                 ...categories

@@ -1,13 +1,11 @@
 // One entry in the shell's category panel or drawer. The current entry is tinted with its field (.nav-current), carries
 // a field bar that grows into place, is bold and has aria-current, so the place never rests on colour alone. Unread
-// counts are small Bricolage chips (ink on the current row). A locked entry (a guest's account-only views) carries a
-// lock, at full contrast. A row may carry a quick-actions `menu`, beside the link rather than in it: with a mouse it replaces the count
-// while the row is hovered or focused; on touch it stays in view. Labels truncate; the full name stays the link's
-// accessible name.
+// counts are small Bricolage chips (ink on the current row). A row may carry a quick-actions `menu`, beside the link
+// rather than in it: with a mouse it replaces the count while the row is hovered or focused; on touch it stays in view.
+// Labels truncate; the full name stays the link's accessible name.
 
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
-import { Icon } from '@/components/ui/icon';
 import { formatCount } from './nav-entries';
 
 type NavRowProps = {
@@ -17,12 +15,11 @@ type NavRowProps = {
     color: string;
     isCurrent: boolean;
     count?: number | null;
-    locked?: boolean;
     menu?: ReactNode;
 };
 
 // Renders the row; `lead` is its icon or field dot, `color` its field (Lemon for a view).
-export function NavRow({ href, label, lead, color, isCurrent, count, locked = false, menu }: NavRowProps) {
+export function NavRow({ href, label, lead, color, isCurrent, count, menu }: NavRowProps) {
     const shownCount = formatCount(count);
     const link = (
         <Link
@@ -34,12 +31,6 @@ export function NavRow({ href, label, lead, color, isCurrent, count, locked = fa
             {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" />}
             {lead}
             <span className="min-w-0 truncate">{label}</span>
-            {locked && (
-                <span className="ml-auto flex items-center gap-1 text-meta text-ink-2">
-                    <Icon name="locked" size="inline" />
-                    <span className="sr-only">, with an account</span>
-                </span>
-            )}
             {shownCount && (
                 <span
                     className={`ml-auto rounded-full px-2 font-display text-meta leading-6 font-semibold ${isCurrent ? 'bg-ink text-ground' : 'bg-ink/8 text-ink-2'} ${menu ? 'pointer-fine:group-focus-within/row:invisible pointer-fine:group-hover/row:invisible' : ''}`}

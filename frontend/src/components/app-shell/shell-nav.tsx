@@ -10,6 +10,7 @@ import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
 import { CategoryList, type RowMenu } from './category-list';
+import { LockedView } from './locked-view';
 import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
 import { NavRow } from './nav-row';
 
@@ -43,15 +44,18 @@ export function ShellNav({ homeHref, views, categories, account, rowMenu }: Shel
                         .filter((view) => view.href !== homeHref)
                         .map((view) => (
                             <li key={view.label}>
-                                <NavRow
-                                    href={view.href}
-                                    label={view.label}
-                                    lead={<Icon name={view.icon} />}
-                                    color={VIEW_COLOR}
-                                    isCurrent={view.href === place.view}
-                                    count={view.count}
-                                    locked={view.locked}
-                                />
+                                {view.preview ? (
+                                    <LockedView view={view} preview={view.preview} variant="row" />
+                                ) : (
+                                    <NavRow
+                                        href={view.href}
+                                        label={view.label}
+                                        lead={<Icon name={view.icon} />}
+                                        color={VIEW_COLOR}
+                                        isCurrent={view.href === place.view}
+                                        count={view.count}
+                                    />
+                                )}
                             </li>
                         ))}
                 </ul>
