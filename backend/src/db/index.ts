@@ -31,9 +31,9 @@ export const db = pool ? drizzle({ client: pool, schema }) : null;
 
 // The database, for routes that can't work without one; throws `database_unavailable` (503) when there is no DATABASE_URL.
 export function requireDatabase(): Database {
-    if (!db)
+    if (!db) {
         throw new ServiceUnavailableError('database_unavailable', 'This feature is unavailable: the API has no database');
-
+    }
 
     return db;
 }
