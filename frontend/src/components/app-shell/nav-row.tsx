@@ -1,8 +1,5 @@
-// One entry in the shell's category panel or drawer. The current entry is tinted with its field (.nav-current), carries
-// a field bar that grows into place, is bold and has aria-current, so the place never rests on colour alone. Unread
-// counts are small Bricolage chips (ink on the current row). A row may carry a quick-actions `menu`, beside the link
-// rather than in it: with a mouse it replaces the count while the row is hovered or focused; on touch it stays in view.
-// Labels truncate; the full name stays the link's accessible name.
+// The current row is tinted, bold and has a field bar and aria-current, so the place never rests on colour alone. A
+// row's quick-actions `menu` sits beside the link, never inside it.
 
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
@@ -18,7 +15,6 @@ type NavRowProps = {
     menu?: ReactNode;
 };
 
-// Renders the row; `lead` is its icon or field dot, `color` its field (Lemon for a view).
 export function NavRow({ href, label, lead, color, isCurrent, count, menu }: NavRowProps) {
     const shownCount = formatCount(count);
     const link = (
@@ -55,7 +51,7 @@ export function NavRow({ href, label, lead, color, isCurrent, count, menu }: Nav
     );
 }
 
-// Renders a category's field dot, with the hairline that keeps pale fields visible.
+// The hairline keeps pale fields visible.
 export function FieldDot({ color }: { color: string }) {
     return <span aria-hidden="true" className="fill-edge mx-[3px] size-3 flex-none rounded-full" style={{ background: color }} />;
 }

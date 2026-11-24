@@ -5,8 +5,7 @@ type MatchPart = {
     isMatch: boolean;
 };
 
-// Returns `text` in order as parts, each flagged when it matches `query` (ignoring case and surrounding spaces). An
-// empty query gives one unmatched part. Example: ("Container queries", "con") → [{Con, match}, {tainer queries}].
+// Example: ("Container queries", "con") → [{Con, match}, {tainer queries}]; an empty query gives one unmatched part.
 export function matchParts(text: string, query: string): MatchPart[] {
     const needle = query.trim().toLowerCase();
 

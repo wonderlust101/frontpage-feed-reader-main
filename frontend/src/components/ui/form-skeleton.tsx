@@ -1,11 +1,9 @@
-// What a form shows while it can't render yet (its page is reading the URL on the server, or it is waiting for the
-// session in the browser): skeleton bars in the form's shape (a soft tint in every contrast mode), so nothing jumps when the real fields arrive.
+// Skeleton bars in the form's shape while the form can't render yet, so nothing jumps when the fields arrive.
 
 type FormSkeletonProps = {
     fields: number;
 };
 
-// Renders `fields` label-and-input bars and a button bar, hidden from screen readers.
 export function FormSkeleton({ fields }: FormSkeletonProps) {
     return (
         <div aria-hidden="true" className="flex flex-col gap-6">

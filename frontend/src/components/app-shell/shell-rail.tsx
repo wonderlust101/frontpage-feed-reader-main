@@ -1,11 +1,7 @@
 'use client';
 
-// The shell's rail (lg up): the Lemon logo tile linking home, the views as icon links with tooltips, and the toggle for
-// the category panel; ShellSidebar puts the account at its foot. The current view is a Lemon square with an ink edge,
-// the brand's own colour marking where you are (aria-current="true": the panel marks the page), and none is current
-// inside a category. The home view's square shows only while the panel is collapsed: when the panel is open, its "All
-// items" row already marks the place, so the two never say it twice. An account-only view (a guest's) carries a lock
-// badge and opens a preview of the feature (LockedView).
+// The rail (lg up): logo, view icons and the panel toggle. The home view's mark shows only while the panel is
+// collapsed, because the open panel's "All items" row already marks the place.
 
 import Link from 'next/link';
 import { LogoMark } from '@/components/logo';
@@ -27,7 +23,6 @@ const IDLE_CLASSES = 'text-ink-2 hover:bg-ink/6 hover:text-ink';
 
 const HOME_MARK_CLASSES = `${IDLE_CLASSES} sidebar-collapsed:bg-field-lemon sidebar-collapsed:text-on-field sidebar-collapsed:shadow-[inset_0_0_0_1.5px_var(--color-on-field)]`;
 
-// Renders the rail's top: the logo, the views and the panel toggle.
 export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailProps) {
     const [sidebar] = useSidebar();
 

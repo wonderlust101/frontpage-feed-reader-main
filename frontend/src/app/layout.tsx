@@ -1,9 +1,5 @@
-// The root layout: fonts, metadata, and the reader's saved preferences (theme, contrast, the reading settings, the
-// collapsed sidebar and a guest's category colors), stored in localStorage (lib/saved-preferences.ts,
-// features/categories/category-field-vars.ts). A tiny inline script copies them onto <html>
-// before the first paint, so every page, including one opened from an email link, starts in the reader's choice
-// instead of flashing the default. The Content Security Policy allows inline scripts (next.config.ts). React leaves the
-// attributes alone (suppressHydrationWarning).
+// A tiny inline script copies the saved preferences onto <html> before the first paint, so no page flashes the
+// default; React leaves those attributes alone (suppressHydrationWarning).
 
 import type { Metadata } from 'next';
 import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque, JetBrains_Mono, Lexend, Onest } from 'next/font/google';
@@ -17,7 +13,7 @@ const bricolage = Bricolage_Grotesque({
     axes: ['opsz', 'wdth'],
 });
 
-// Only used for code and data, which few pages show, so it isn't preloaded.
+// Not preloaded: only code and data use it, and few pages show those.
 const jetbrainsMono = JetBrains_Mono({
     variable: '--font-jetbrains-mono',
     subsets: ['latin'],
@@ -29,7 +25,7 @@ const onest = Onest({
     subsets: ['latin'],
 });
 
-// Reading faces readers can switch to; not preloaded, so they download only when chosen.
+// Not preloaded: they download only when a reader picks them.
 const atkinson = Atkinson_Hyperlegible_Next({
     variable: '--font-atkinson',
     subsets: ['latin'],

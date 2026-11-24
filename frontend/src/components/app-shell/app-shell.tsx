@@ -1,10 +1,5 @@
-// The app shell around guest mode and the signed-in home, sidebar first: a rail (logo, views, the panel toggle, the
-// account), the category panel beside it, and the workspace with its toolbar header (search, then where you are) above
-// the page's <main>. Three neutral steps get lighter toward the content. Below lg the rail and panel move into a drawer
-// opened from the toolbar. Two skip links come first: to the content, and to search, which follows the sidebar in the
-// tab order. Feature-agnostic: views, categories and search sources are plain data; each route's layout passes in
-// `account` (shown in the rail's foot and the drawer's) and, from a client component, an optional `rowMenu` that gives
-// each category row its quick actions.
+// The app shell around /guest and /user: rail, category panel and workspace toolbar, with a drawer below lg.
+// Feature-agnostic: views, categories and sources are plain data; layouts pass `account` and an optional `rowMenu`.
 
 import type { ReactNode } from 'react';
 import type { RowMenu } from './category-list';
@@ -30,7 +25,6 @@ const PANEL_ID = 'shell-categories';
 const SKIP_LINK_CLASSES =
     'sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-control focus:bg-ink focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-ground';
 
-// Renders the shell with the page (`children`) in the workspace.
 export function AppShell({ homeHref, views, categories = [], sources, account, rowMenu, children }: AppShellProps) {
     return (
         <div className="flex flex-1 bg-workspace">

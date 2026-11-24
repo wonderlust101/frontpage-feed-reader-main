@@ -1,5 +1,4 @@
-// Checkbox: a native input drawn as a 20px ink square that fills with ink and shows a check when on. The whole label
-// is the hit area, and a hint can sit under the label.
+// A native checkbox drawn as an ink square; the whole label is the hit area.
 
 import type { ComponentProps } from 'react';
 
@@ -9,7 +8,6 @@ type CheckboxProps = Omit<ComponentProps<'input'>, 'type' | 'id'> & {
     hint?: string;
 };
 
-// Renders the checkbox with its label and optional hint, wired through aria-describedby.
 export function Checkbox({ id, label, hint, className = '', ...inputProps }: CheckboxProps) {
     const hintId = hint ? `${id}-hint` : undefined;
 

@@ -1,9 +1,7 @@
 'use client';
 
-// An account-only view as a guest sees it (Saved, Weekly digest, Reading stats): its icon with a lock, in the rail or
-// as a drawer row, that opens a preview of the feature instead of leading straight to sign-up. The preview names the
-// feature, says what it does and offers Create account (the view's href), so a guest can look through everything an
-// account adds without leaving the page.
+// An account-only view as a guest sees it: a locked icon or row that opens a preview of the feature, so a guest can
+// see what an account adds without leaving the page.
 
 import Link from 'next/link';
 import { buttonClassName } from '@/components/ui/button';
@@ -23,7 +21,6 @@ const TRIGGER_CLASSES = {
     row: 'flex min-h-11 w-full items-center gap-3 rounded-toggle px-3 text-left text-ui font-medium text-ink-2 transition-colors duration-150 hover:bg-ink/6 hover:text-ink',
 };
 
-// Renders the trigger (`variant` picks the rail's icon or the drawer's row) and the feature's `preview`.
 export function LockedView({ view, preview, variant }: LockedViewProps) {
     return (
         <ShellMenu

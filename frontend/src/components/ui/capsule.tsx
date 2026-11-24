@@ -1,6 +1,5 @@
-// Category capsule: an outlined pill with the category's dot when off, filled with the category field and showing a
-// check mark when on, so the state never rests on color alone. A filter capsule is a toggle (any number on); a
-// switch capsule is a radio (exactly one on), and its group owns the arrow keys.
+// A filter capsule is a toggle (any number on); a switch capsule is a radio (exactly one on). A check shows when on,
+// so the state never rests on colour alone.
 
 import type { ComponentProps, CSSProperties } from 'react';
 
@@ -10,8 +9,7 @@ type CapsuleProps = Omit<ComponentProps<'button'>, 'type' | 'role'> & {
     kind?: 'toggle' | 'radio';
 };
 
-// Renders the capsule; `field.color` fills the dot and the on state, `field.onColor` is the text on that fill, `kind` picks
-// toggle (aria-pressed) or radio (aria-checked).
+// `kind` picks toggle (aria-pressed) or radio (aria-checked).
 export function Capsule({ field, on, kind = 'toggle', className = '', style, children, ...props }: CapsuleProps) {
     const capsuleColors = { '--capsule-field': field.color, '--capsule-on': field.onColor, ...style } as CSSProperties;
     const stateProps = kind === 'radio' ? { role: 'radio', 'aria-checked': on } : { 'aria-pressed': on };

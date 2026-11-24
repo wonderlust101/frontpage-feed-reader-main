@@ -1,5 +1,4 @@
-// Field picker: "No color" and the eight category colors as a row of round swatches, one radio group per category.
-// Native radios, so Tab enters on the chosen swatch and the arrow keys move and choose. The chosen swatch shows a check.
+// Native radios, so Tab enters on the chosen swatch and the arrow keys move and choose.
 
 import type { CSSProperties } from 'react';
 import { PICKABLE_FIELDS, type FieldId } from '../fields';
@@ -11,7 +10,7 @@ type FieldPickerProps = {
     onChange: (fieldId: FieldId) => void;
 };
 
-// Renders the radio group; `name` must be unique on the page, `legend` is the category's name.
+// `name` must be unique on the page.
 export function FieldPicker({ name, legend, value, onChange }: FieldPickerProps) {
     return (
         <fieldset className="min-w-0">

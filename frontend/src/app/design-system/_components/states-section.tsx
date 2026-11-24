@@ -1,6 +1,3 @@
-// States section of the design system page: what lists and actions look like when they are empty, loading, offline,
-// failing, confirming or asking first. Every state names what happened and what to do next.
-
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Icon } from '@/components/ui/icon';
@@ -12,7 +9,6 @@ import { ConfirmDemo, ToastDemo } from './feedback-demo';
 
 const SELECTION_ITEMS = SAMPLE_ITEMS.slice(0, 3);
 
-// Renders empty, loading, notice, toast, confirm and selection specimens.
 export function StatesSection() {
     return (
         <DocSection

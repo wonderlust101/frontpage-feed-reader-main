@@ -1,19 +1,7 @@
 'use client';
 
-// Verify-email flow: the reader types the 6-digit code from their email. The code step only shows when a code is known
-// to be on its way: sign-up or sign-in sent one (and saved the address in sessionStorage), or the reader sent one here.
-// Otherwise the page asks for the address first (filled in from the session when signed in) and sends a code. Until
-// the browser has read storage and the session, it shows a skeleton, so neither step flashes before the other.
-// The right code also signs the reader in, so it always ends on /user.
-// Signed-in readers (straight after sign-up, the usual case) can leave it for later: the frame's switch link becomes
-// "Not now? Do this later" (which forgets the pending code, so coming back asks to send a new one) and the guest
-// shortcut goes, since "Sign in" and "Read as a guest" would tell someone who
-// is already in that they aren't. Straight after sign-up, the code step opens with an "Account created." notice.
-// The email step has its own heading ("Where should the code go?"); the code step's description says where the code
-// went and how long it lasts, and the code field is described by it. Every arrival at a step puts focus in its field,
-// so the reader hears where the code went and can type or paste straight away; a pasted or autofilled 6-digit code
-// confirms itself. A resent code's notice takes focus. The resend wait is plain text at full contrast (a faded button
-// would hide it); while a code is being resent, the button stays (busy) so focus doesn't drop.
+// The code step shows only when a code is known to be on its way; otherwise the reader first gives an address. While
+// a code is being resent the button stays (busy), so focus doesn't drop.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -59,8 +47,7 @@ const SIGNED_IN_LINKS: FrameLinks = {
     guestLink: false,
 };
 
-// Renders a skeleton until storage and the session are read, then the code step when a code was sent, else the email
-// step; signed in, the frame offers "Do this later" in place of sign-in and the guest shortcut.
+// A skeleton shows until storage and the session are read, so neither step flashes before the other.
 export function VerifyEmailForm() {
     const { data: session, isPending } = authClient.useSession();
     const mounted = useSyncExternalStore(
@@ -76,7 +63,7 @@ export function VerifyEmailForm() {
     useAuthFrameLinks(signedIn ? SIGNED_IN_LINKS : null);
 
     // Next keeps a visited page alive (hidden) after the reader leaves; forget this visit's code so the next visit
-    // goes by storage alone and sends a new one when none is pending.
+    // goes by storage alone.
     useLayoutEffect(
         () => () => {
             setSentTo(null);
@@ -105,8 +92,6 @@ export function VerifyEmailForm() {
     );
 }
 
-// Asks for the address (starting from `defaultEmail`) and sends a code to it, then hands the address back through
-// `onSent`. `focusEmail` puts focus in the field on arrival from the code step's "Use a different email".
 function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
     useAuthHeading(VERIFY_EMAIL_HEADINGS.emailStep);
     const {
@@ -155,8 +140,6 @@ function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
     );
 }
 
-// Takes the code for `email`, verifies it, and offers a new code (at most once a minute, counting from the code just
-// sent) or a different address. `accountReady` (straight after sign-up) shows the "Account created." notice.
 function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
     const router = useRouter();
     const descriptionId = useAuthDescriptionId();
@@ -292,9 +275,8 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
     );
 }
 
-// sessionStorage has no change events within a tab, so there is nothing to subscribe to; useSyncExternalStore still
-// reads it safely (null on the server, the stored address once the page runs in the browser), and the same trick
-// tells the component whether it is running in the browser yet.
+// sessionStorage has no change events within a tab; useSyncExternalStore still reads it safely (null on the server),
+// and the same trick tells the component whether it is running in the browser yet.
 function subscribeToNothing(): () => void {
     return () => {};
 }

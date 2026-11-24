@@ -1,4 +1,3 @@
-// The article reading column: category and source line, title, optional AI summary, then the body.
 // The body follows the reader settings (face, size, line height) and is capped at the 66-character measure.
 
 import type { ReactNode } from 'react';
@@ -16,7 +15,7 @@ type ArticleViewProps = {
     children: ReactNode;
 };
 
-// Renders the article; `titleAs` sets the heading level (h1 on an article page, lower when embedded), `meta` is the date and reading time.
+// `titleAs` sets the heading level: h1 on an article page, lower when embedded.
 export function ArticleView({ id, title, titleAs: Title = 'h1', category, source, meta, summary, children }: ArticleViewProps) {
     return (
         <article id={id} className="max-w-measure scroll-mt-24">

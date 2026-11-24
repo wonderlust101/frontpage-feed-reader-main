@@ -1,7 +1,5 @@
-// Frontpage logo: the mark (a Lemon tile holding an ink F built from two feed rows and an unread dot),
-// the wordmark (Bricolage Grotesque ExtraBold), and the lockup of both.
-// Mark variants keep it visible on any ground: "lemon" on plain grounds, "ink" on Lemon or category fields,
-// "mono" (glyph only, current text color) for one-color uses such as print or embossing.
+// Mark variants keep the logo visible on any ground: "lemon" on plain grounds, "ink" on Lemon or category fields,
+// "mono" (current text colour) for one-colour uses.
 
 type MarkVariant = 'lemon' | 'ink' | 'mono';
 
@@ -32,7 +30,7 @@ const LOCKUP_SIZES: Record<LogoSize, { mark: number; text: string; gap: string }
     lg: { mark: 56, text: '3rem', gap: '0.875rem' },
 };
 
-// Renders the mark at `size` px. Decorative unless `label` is given, then it is announced as an image.
+// Decorative unless `label` is given.
 export function LogoMark({ size = 32, variant = 'lemon', label, className = '' }: LogoMarkProps) {
     const colors = MARK_COLORS[variant];
 
@@ -58,7 +56,7 @@ export function LogoMark({ size = 32, variant = 'lemon', label, className = '' }
     );
 }
 
-// Renders the lockup: mark plus wordmark. The wordmark is real text, so the lockup reads as "Frontpage".
+// The wordmark is real text, so the lockup reads as "Frontpage".
 export function Logo({ size = 'md', variant = 'lemon', className = '' }: LogoProps) {
     const lockup = LOCKUP_SIZES[size];
 

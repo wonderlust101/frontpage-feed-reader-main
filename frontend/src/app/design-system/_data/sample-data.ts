@@ -1,8 +1,4 @@
-// Sample categories and items for the design system page.
-// The guest categories and their sources come from features/categories/guest-categories.ts; item titles are illustrative.
-// The guest categories come with preset colors (part of the curated sample); a reader can change them in the Color
-// section. New categories start with "No color". READER_CATEGORIES adds example categories a reader might add (not
-// guest feeds): two still on No color, and Football sharing Leaf with Backend & DevOps, since categories may share.
+// Item titles are illustrative. READER_CATEGORIES adds categories a reader might make, two still on "No color".
 
 import type { FeedHealth } from '@/components/ui/health-mark';
 import { NO_FIELD, categoryFieldById, type Field, type FieldChoices } from '@/features/categories/fields';
@@ -102,7 +98,7 @@ export const SAMPLE_ITEMS: SampleItem[] = [
     },
 ];
 
-// Looks up a category by id; throws when the id is unknown, which only happens if the sample data is edited wrongly.
+// Throws on an unknown id, which only happens if the sample data is edited wrongly.
 export function getCategory(id: CategoryId): Category {
     const category = CATEGORIES.find((candidate) => candidate.id === id);
 

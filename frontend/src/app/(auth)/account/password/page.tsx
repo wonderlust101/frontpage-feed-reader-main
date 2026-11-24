@@ -1,7 +1,4 @@
-// Change-password page for signed-in readers. proxy.ts already sent visitors without a session cookie to sign-in;
-// requireUser checks the session is still valid, inside <Suspense> because it reads the request; if the API can't
-// answer, error.tsx here shows instead. It sits in the (auth) group because it uses the auth frame; /user doesn't,
-// so it lives outside the group.
+// In the (auth) group because it uses the auth frame. requireUser reads the request, so it sits in <Suspense>.
 
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
@@ -29,7 +26,6 @@ export default function ChangePasswordPage() {
     );
 }
 
-// Renders the form only for a valid session; otherwise requireUser redirects to sign-in.
 async function SignedInChangePasswordForm() {
     await requireUser('/account/password');
 

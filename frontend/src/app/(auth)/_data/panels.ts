@@ -1,13 +1,5 @@
-// Each auth page's sticker panel: a headline, one line of flavour text under it, and its stickers. Every page uses the
-// same twelve sticker slots: nine for wide screens (the "grounded frame": light along the top, heavier toward the
-// bottom and the form, and always well clear of the logo and the headline) and three for the phone band. A page may
-// leave wide slots empty (null), so the pages share one composition but each has its own decals and lead colour. Slots
-// are in the panel's container units (cqi),
-// so the frame scales with the panel; bottom slots are measured from the bottom so they stay down on tall screens.
-// Wide-only slots drop out on phones, where the panel is a short band: the top-right sticker stays, and three small
-// narrow-only slots (the last three) cluster along the band's bottom edge, right of the flavour line (capped at 62cqi)
-// and partly cut off by the edge, so the band reads as the brand rather than a yellow header.
-// Headlines carry their own line breaks (\n), so the display type wraps in the same places at every width.
+// Every page shares twelve sticker slots: nine for wide screens and three for the phone band, in the panel's container
+// units (cqi) so the frame scales with it. Bottom slots are measured from the bottom, so they stay down on tall screens.
 
 import type { Sticker } from '@/components/stickers';
 import { FIELDS, type FieldId } from '@/features/categories/fields';
@@ -194,7 +186,7 @@ export const AUTH_PANELS = {
     ),
 } satisfies Record<string, AuthPanel>;
 
-// Builds a panel, placing each decal in its slot (same index; the band decals fill the last three) and skipping empty slots.
+// Each decal goes in the slot with its index; the band decals fill the last three.
 function panel(headline: string, line: string, guestLink: boolean, wide: WideDecals, band: BandDecals): AuthPanel {
     const decals = [...wide, ...band];
     const stickers = SLOTS.flatMap((slot, index) => {
@@ -206,7 +198,6 @@ function panel(headline: string, line: string, guestLink: boolean, wide: WideDec
     return { headline, line, guestLink, stickers };
 }
 
-// Returns the CSS colour for a field, e.g. field('coral') → 'var(--color-field-coral)', from the shared field list.
 function field(id: Exclude<FieldId, 'none'>): string {
     const match = FIELDS.find((candidate) => candidate.id === id);
 

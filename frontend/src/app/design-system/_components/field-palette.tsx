@@ -1,15 +1,11 @@
 'use client';
 
-// The eight-field palette tiles for the color section: each field's light and dark values, ink contrast, and which
-// guest categories use it now (following the colors chosen in the picker below).
-
 import { useCategoryFields } from '@/features/categories/category-field-store';
 import { BRAND_FIELD, FIELDS, NO_FIELD } from '@/features/categories/fields';
 import { CATEGORIES, CATEGORY_PRESETS } from '../_data/sample-data';
 
 const CATEGORY_IDS = CATEGORIES.map((category) => category.id);
 
-// Renders the palette grid.
 export function FieldPalette() {
     const [fields] = useCategoryFields(CATEGORY_IDS, CATEGORY_PRESETS);
 

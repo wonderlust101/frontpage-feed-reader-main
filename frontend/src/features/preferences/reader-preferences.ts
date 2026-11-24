@@ -1,8 +1,7 @@
 'use client';
 
-// The reader's settings as shared hooks, one store each, and the options the Aa menu offers. "auto" is each setting's
-// default (19px text, normal line height, standard width, comfortable density, Onest, the system's theme and
-// contrast); the CSS for the other values lives in styles/tokens.css, keyed on the attributes in saved-preferences.
+// The reader settings as shared hooks, one store each. "auto" is each setting's default; the CSS for the other
+// values lives in styles/tokens.css.
 
 import { createHtmlPreference } from '@/lib/html-preference';
 import { SAVED_PREFERENCES } from '@/lib/saved-preferences';

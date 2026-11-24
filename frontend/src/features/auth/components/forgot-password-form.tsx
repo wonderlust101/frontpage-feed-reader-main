@@ -1,11 +1,7 @@
 'use client';
 
-// Forgot-password form: asks for an email and has the API send a reset link. The result is the same whether or not
-// the address has an account, so the page never reveals who is signed up. The link returns to this site's
-// /reset-password; the address must be absolute because Better Auth resolves relative ones against the API's domain.
-// Once sent, the page's heading and panel turn to "Check your inbox" and the notice takes focus, so the change is
-// announced. "Use another email" brings the form back with focus in the field. The email starts filled in when it is
-// known: handed over by sign-up's "already has an account" alert, or the signed-in reader's own (from change password).
+// The result is the same whether or not the address has an account, so the page never reveals who is signed up.
+// The reset link must be absolute: Better Auth resolves relative ones against the API's domain.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -26,7 +22,6 @@ import { useAuthHeading } from './auth-heading';
 
 type EmailValues = z.infer<typeof emailSchema>;
 
-// Renders the email form, then "check your inbox" once the request is accepted, with a way to try another address.
 export function ForgotPasswordForm() {
     const [sentTo, setSentTo] = useState<string | null>(null);
     const [returning, setReturning] = useState(false);

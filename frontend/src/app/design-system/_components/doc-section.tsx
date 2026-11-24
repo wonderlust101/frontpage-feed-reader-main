@@ -1,5 +1,3 @@
-// Shared building blocks for design system sections: the section shell with its opener, and a titled specimen block.
-
 import type { ReactNode } from 'react';
 
 type DocSectionProps = {
@@ -25,7 +23,6 @@ const STAGE_CLASSES: Record<SpecimenStage, string> = {
     none: 'mt-6',
 };
 
-// Renders a page section: an ink rule, a display heading, a reading-face intro, then the section's content.
 export function DocSection({ id, title, intro, children }: DocSectionProps) {
     return (
         <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-24 rule-t pt-8 pb-24">
@@ -38,8 +35,7 @@ export function DocSection({ id, title, intro, children }: DocSectionProps) {
     );
 }
 
-// Renders one specimen inside a section: a headline, an optional description and the live example on its stage.
-// Stages: "panel" (tinted, for controls), "frame" (plain ground, for examples that hold tinted panels), "none" (ruled lists).
+// Stages: "panel" (tinted, for controls), "frame" (plain ground, for tinted examples), "none" (ruled lists).
 export function Specimen({ title, description, stage = 'panel', children, className = '' }: SpecimenProps) {
     return (
         <div className={`flex min-w-0 flex-col ${className}`}>

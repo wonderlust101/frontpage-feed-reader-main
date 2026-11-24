@@ -1,7 +1,6 @@
 'use client';
 
-// Category switch: one capsule per view ("All" plus each category), exactly one on. It is a radio group, so Tab
-// enters on the chosen capsule and the arrow keys move and choose, the way a native radio group behaves.
+// A radio group, so Tab enters on the chosen capsule and the arrow keys move and choose, like native radios.
 
 import { useRef, type KeyboardEvent } from 'react';
 import { Capsule } from '@/components/ui/capsule';
@@ -25,11 +24,9 @@ const NEXT_KEYS = ['ArrowRight', 'ArrowDown'];
 
 const PREVIOUS_KEYS = ['ArrowLeft', 'ArrowUp'];
 
-// Renders the radio group; `value` is the chosen option's id and `onChange` receives the newly chosen id.
 export function CategorySwitch({ options, value, onChange, label, className = '' }: CategorySwitchProps) {
     const groupRef = useRef<HTMLDivElement>(null);
 
-    // Moves the choice one option along (wrapping at either end) and focuses it.
     function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
         const step = NEXT_KEYS.includes(event.key) ? 1 : PREVIOUS_KEYS.includes(event.key) ? -1 : 0;
 

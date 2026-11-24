@@ -1,13 +1,10 @@
 'use client';
 
-// Sticky contents rail for the design system page. It marks the section currently in view (scroll-spy),
-// so the reader always sees where they are.
-
 import { useEffect, useState } from 'react';
 
 type ContentsEntry = { id: string; label: string };
 
-// Renders the contents list; the section nearest the top of the viewport gets aria-current and a Lemon marker.
+// The section nearest the top of the viewport is current.
 export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
     const [currentId, setCurrentId] = useState(entries[0]?.id);
 

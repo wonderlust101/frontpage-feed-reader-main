@@ -1,14 +1,7 @@
 'use client';
 
-// Search, the shell's one global utility: a button in the workspace toolbar and Ctrl/Cmd + K from anywhere open a
-// palette (a native modal <dialog>) that both searches and navigates. Typing finds views and categories to jump to
-// ("Go to"), articles (when a `search` function is given) and sources (from `search`, or the plain `sources` list).
-// Before anything is typed it lists every view and category, so arrow keys and Enter work at once. It searches
-// everything, with the current category's sources first; once there is a query, a "Search in" select appears in the
-// query's own row (so the results never move) and narrows articles and sources to one category when the reader wants
-// that. Locked views (a guest's account-only ones) say so, with a lock. Reopening selects the last query, so typing
-// replaces it. The query field is a combobox: arrow
-// keys move through the results, Enter opens one, Escape (or Cancel on touch) closes.
+// Search, the shell's one global utility: Ctrl/Cmd + K or the toolbar button opens a native modal <dialog> that both
+// searches and navigates. The "Search in" select sits in the query's own row, so the results never move.
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
@@ -42,7 +35,6 @@ type ResultOption = {
 
 type ResultGroup = { label: string; options: ResultOption[] };
 
-// Renders the toolbar's search button and the palette.
 export function SearchPalette({ homeHref, views, categories, sources = [], search }: SearchPaletteProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +103,6 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
     const shortcut = isMac ? '⌘K' : 'Ctrl K';
 
     useEffect(() => {
-        // Opens the palette on Ctrl/Cmd + K anywhere, taking the shortcut from the browser.
         function openOnShortcut(event: globalThis.KeyboardEvent) {
             if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
                 event.preventDefault();
@@ -123,19 +114,18 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
         return () => window.removeEventListener('keydown', openOnShortcut);
     }, []);
 
-    // Opens the palette with the last query selected, so typing starts a new search.
+    // Selects the last query, so typing starts a new search.
     function openPalette() {
         dialogRef.current?.showModal();
         inputRef.current?.select();
     }
 
-    // Opens the chosen result and closes the palette.
     function openResult(option: ResultOption) {
         dialogRef.current?.close();
         router.push(option.href);
     }
 
-    // Moves through the results with the arrow keys (wrapping at either end) and opens the active one on Enter.
+    // Arrow keys wrap at either end.
     function moveOrOpen(event: KeyboardEvent<HTMLInputElement>) {
         if (options.length === 0)
             return;
@@ -256,8 +246,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
         </>
     );
 
-    // Renders one titled group of options, numbered from `offset` in the whole list so ids and the active row line up.
-    // The visible label is for sighted readers; the group's aria-label names it for screen readers.
+    // The group's aria-label names it for screen readers; the visible label is for sighted readers.
     function renderGroup({ label, options: groupOptions }: ResultGroup, offset: number) {
         if (groupOptions.length === 0)
             return null;
@@ -306,8 +295,6 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
         );
     }
 
-    // Says what to do or why there is nothing: a prompt before typing (noting article search when it doesn't exist yet),
-    // or no match, with a way to widen the search when a category is chosen.
     function renderEmpty() {
         const [title, hint] = !trimmedQuery
             ? [
@@ -331,7 +318,6 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
     }
 }
 
-// Renders a result's lead: a view's icon, a category's field dot, or a source's initial on the panel tone.
 function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
     const box = 'grid size-7 flex-none place-items-center rounded-tag';
 
@@ -358,17 +344,15 @@ function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
     );
 }
 
-// Renders one keycap in the palette's footer.
 function Keycap({ children }: { children: string }) {
     return <kbd className="rounded-tag border border-edge px-1.5 font-sans font-semibold text-ink-2">{children}</kbd>;
 }
 
-// Subscribes to nothing: the platform never changes while the page is open.
+// The platform never changes while the page is open.
 function subscribeToNothing() {
     return () => {};
 }
 
-// Returns true on Apple platforms, where the shortcut is ⌘K rather than Ctrl K.
 function isApplePlatform() {
     return /Mac|iPhone|iPad/.test(navigator.platform);
 }

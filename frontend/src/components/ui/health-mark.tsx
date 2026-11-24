@@ -1,5 +1,4 @@
-// Feed health shown as line form and color: a neutral solid line when healthy (nothing to do), an amber dashed line
-// when stale, a red cross when failing. The label always spells the state out.
+// Feed health as line form and colour, with a label that always spells the state out.
 
 export type FeedHealth = 'healthy' | 'stale' | 'failing';
 
@@ -15,7 +14,6 @@ const HEALTH_LABELS: Record<FeedHealth, string> = {
     failing: 'Failing',
 };
 
-// Renders the health mark with a visible label, or with a screen-reader-only label when `showLabel` is false.
 export function HealthMark({ health, showLabel = true }: { health: FeedHealth; showLabel?: boolean }) {
     const label = HEALTH_LABELS[health];
 

@@ -1,9 +1,6 @@
 'use client';
 
-// The app shell as guests see it: the curated categories in the colors this guest chose (their presets until then,
-// painted from CSS properties the early script sets, so there is no flash), each row with a color menu that saves the
-// choice on this device. A client component, because the row menu is a function; the page and the guest menu still
-// render on the server, passed in.
+// A client component because the row menu is a function; the page and guest menu still render on the server.
 
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/app-shell/app-shell';
@@ -22,7 +19,6 @@ type GuestShellProps = {
     children: ReactNode;
 };
 
-// Renders the shell for /guest with the guest's category colors and color menus.
 export function GuestShell({ views, sources, account, children }: GuestShellProps) {
     const [fields, choose] = useGuestCategoryFields();
     const categories = GUEST_CATEGORIES.map((category) => ({
@@ -31,7 +27,6 @@ export function GuestShell({ views, sources, account, children }: GuestShellProp
         color: categoryColor(category.id, (categoryFieldById(category.preset) ?? NO_FIELD).color),
     })) satisfies ShellCategory[];
 
-    // Renders a category's color menu.
     function colorMenu(shellCategory: ShellCategory) {
         const category = GUEST_CATEGORIES.find((entry) => `/guest/c/${entry.id}` === shellCategory.href);
 

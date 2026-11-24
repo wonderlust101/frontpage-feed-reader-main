@@ -1,11 +1,7 @@
 'use client';
 
-// The app shell at specimen scale, built from the same parts as the real shell (rail, category panel, toolbar, drawer)
-// with sample data: categories with counts, a signed-in reader or a guest, and a search palette that searches the
-// sample items and sources. Each category row's quick actions work here: a reader renames, recolors and deletes on a
-// sample library, with Undo in a toast (or Ctrl/⌘ + Z); a guest recolors, saved on this device like the real guest
-// shell. Readers get these in the app when the categories endpoints exist. One view and one category link to this
-// page, so the matcher marks them current.
+// The app shell at specimen scale, built from the real shell's parts with sample data. One view and one category
+// link to this page, so the matcher marks them current.
 
 import { useEffect, useState, type CSSProperties } from 'react';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
@@ -71,7 +67,6 @@ const CATEGORY_BY_HREF = new Map<string, CategoryId>([
     ...CATEGORIES.map((category, index): [string, CategoryId] => [`#category-${index}`, category.id]),
 ]);
 
-// Renders the specimen: a mode switch, then the framed shell. Reader mode is on Frontend, guest mode on All items.
 export function AppShellDemo() {
     const [mode, setMode] = useState<DemoMode>('reader');
     const [library, setLibrary] = useState(START_LIBRARY);
@@ -100,7 +95,7 @@ export function AppShellDemo() {
     const items = isReader ? SAMPLE_ITEMS.filter((item) => item.category === 'frontend') : SAMPLE_ITEMS.slice(0, 4);
 
     useEffect(() => {
-        // Takes the last edit back on Ctrl/⌘ + Z while its toast shows, outside text fields.
+        // Outside text fields only, so Ctrl/⌘ + Z still undoes typing.
         function undoOnShortcut(event: KeyboardEvent) {
             const inField = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
 
@@ -114,19 +109,16 @@ export function AppShellDemo() {
         return () => window.removeEventListener('keydown', undoOnShortcut);
     }, [toast]);
 
-    // Applies an edit and says what changed, keeping the library before it for Undo.
     function change(next: Library, message: string) {
         setToast({ message, undo: library });
         setLibrary(next);
     }
 
-    // Puts the library back as it was before the last edit.
     function undo(previous: Library) {
         setLibrary(previous);
         setToast(null);
     }
 
-    // Renders a row's quick actions: rename, recolor and delete for a reader, recolor for a guest.
     function rowMenu(shellCategory: ShellCategory) {
         if (!isReader) {
             const guestCategory = CATEGORIES.find((entry) => `#category-${entry.id}` === shellCategory.href);
@@ -234,12 +226,11 @@ export function AppShellDemo() {
     );
 }
 
-// Returns a sample category's link: this page for the first, so the matcher marks it current, an anchor for the rest.
+// This page for the first category, so the matcher marks it current; an anchor for the rest.
 function categoryHref(id: string): string {
     return id === FIRST_CATEGORY ? THIS_PAGE : `#${id}`;
 }
 
-// Searches the sample items (by title) and sources (by name) for the palette, within one sample category when given.
 function searchSamples(query: string, categoryHref: string | null): SearchResults {
     const needle = query.toLowerCase();
     const categoryId = categoryHref ? CATEGORY_BY_HREF.get(categoryHref) : undefined;

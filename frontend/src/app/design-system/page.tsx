@@ -1,6 +1,3 @@
-// The Frontpage design system page: every token and component, live, framed by the category color field. The Aa
-// button in the hero holds the reader settings, saved and applied site-wide like everywhere else.
-
 import type { Metadata } from 'next';
 import { ContentsNav } from './_components/contents-nav';
 import { ComponentsSection } from './_components/components-section';

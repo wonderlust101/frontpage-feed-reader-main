@@ -1,6 +1,5 @@
-// Every preference saved in localStorage and mirrored onto <html> as a data attribute (data-theme, data-text-size, …),
-// written once here so the early script in the root layout and the hooks that change them can never drift apart.
-// A preference stores only its non-default values; no attribute means the default, so the CSS needs no rule for it.
+// Every preference saved in localStorage and mirrored onto <html> as a data attribute, defined once so the early
+// script and the hooks can't drift apart. No attribute means the default, so the CSS needs no rule for it.
 
 export type SavedPreference = {
     key: string;
@@ -21,8 +20,7 @@ export const SAVED_PREFERENCES = {
 
 export const SAVED_PREFERENCES_SCRIPT = savedPreferencesScript(Object.values(SAVED_PREFERENCES));
 
-// Returns the inline script that copies each saved choice onto <html> before the first paint, ignoring unknown values
-// and doing nothing when storage is blocked. Example output: try{var d=…;v=localStorage.getItem("frontpage-theme");…}
+// The script copies each saved choice onto <html> before the first paint; it ignores unknown values and blocked storage.
 export function savedPreferencesScript(preferences: readonly SavedPreference[]): string {
     const copies = preferences
         .map(

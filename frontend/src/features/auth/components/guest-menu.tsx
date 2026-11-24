@@ -1,5 +1,4 @@
-// The guest's menu, where a reader's account menu sits (the rail's foot, the drawer's): a "Guest" button opening what
-// an account keeps and the ways in. A gentle nudge that never blocks; guests read freely without it.
+// A gentle nudge where a reader's account menu sits; it never blocks, and guests read freely without it.
 
 import Link from 'next/link';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
@@ -9,7 +8,6 @@ import { Icon } from '@/components/ui/icon';
 import { TextLink } from '@/components/ui/text-link';
 import { ACCOUNT_TRIGGER_CLASSES } from './account-menu';
 
-// Renders the guest button and its panel.
 export function GuestMenu() {
     return (
         <ShellMenu

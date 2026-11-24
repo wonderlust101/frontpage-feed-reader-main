@@ -4,7 +4,6 @@
 import { describe, expect, test } from 'bun:test';
 import { authRequest } from '../../../src/features/auth/auth-request';
 
-// Builds a response whose only interesting part is its X-Retry-After header.
 function responseWithRetryAfter(value: string | null): Response {
     return new Response(null, { status: 429, headers: value === null ? {} : { 'X-Retry-After': value } });
 }

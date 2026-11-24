@@ -1,8 +1,4 @@
-// The app shell for guests, around every /guest page. Guests get the curated sample categories (each with its own
-// static page), recolor them on this device, and search their sources, so a first visit shows a full shell. What only
-// an account adds (Saved, Weekly digest, Reading stats) is listed too, each locked and opening a preview of the
-// feature. It reads nothing per request, so guest pages stay static. The rail's foot (the drawer's, on phones) holds
-// the guest menu.
+// The app shell for guests. It reads nothing per request, so guest pages stay static.
 
 import type { ShellView } from '@/components/app-shell/nav-entries';
 import type { SearchSource } from '@/components/app-shell/search-palette';

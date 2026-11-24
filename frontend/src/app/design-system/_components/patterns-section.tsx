@@ -1,6 +1,3 @@
-// Patterns section of the design system page: the feed list and the article view, rendered with the app's own
-// item components and sample data.
-
 import { ArticleView } from '@/features/items/components/article-view';
 import { FeedItemRow } from '@/features/items/components/feed-item-row';
 import { SAMPLE_ITEMS, getCategory } from '../_data/sample-data';
@@ -19,7 +16,6 @@ const CODE_SAMPLE = `.card-grid {
   }
 }`;
 
-// Renders the feed list and the article specimen; both follow the reader settings.
 export function PatternsSection() {
     return (
         <DocSection

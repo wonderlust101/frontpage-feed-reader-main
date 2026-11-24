@@ -1,5 +1,3 @@
-// Icons section of the design system page: the size scale, then every app scenario's icon, grouped by where it appears.
-
 import { Icon, type IconName } from '@/components/ui/icon';
 import { DocSection, Specimen } from './doc-section';
 
@@ -138,7 +136,6 @@ const SIZE_SCALE: { size: 'inline' | 'action' | 'nav'; px: number; use: string }
     { size: 'nav', px: 24, use: 'Navigation and empty states' },
 ];
 
-// Renders the icon size scale and every scenario group as a grid of labeled icons.
 export function IconsSection() {
     return (
         <DocSection

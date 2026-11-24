@@ -1,7 +1,6 @@
 'use client';
 
-// Shows and hides the category panel, leaving the rail. The choice is a saved preference (data-sidebar on <html>, set
-// before the first paint), so the panel never flashes open. The [ key toggles it too, unless the reader is typing.
+// The choice is a saved preference set on <html> before the first paint, so the panel never flashes open.
 
 import { useEffect, type ReactNode } from 'react';
 import { Icon } from '@/components/ui/icon';
@@ -10,7 +9,6 @@ import { SAVED_PREFERENCES } from '@/lib/saved-preferences';
 
 export const useSidebar = createHtmlPreference(SAVED_PREFERENCES.sidebar);
 
-// Renders the toggle for the panel `panelId`; its tooltip names the action and the [ shortcut.
 export function SidebarToggle({ panelId }: { panelId: string }) {
     const [sidebar, setSidebar] = useSidebar();
     const isCollapsed = sidebar === 'collapsed';
@@ -48,8 +46,7 @@ export function SidebarToggle({ panelId }: { panelId: string }) {
     );
 }
 
-// Renders a tooltip to the right of a rail control, shown on hover and keyboard focus; hidden from screen readers,
-// which get the control's own name.
+// Hidden from screen readers, which get the control's own name.
 export function RailTooltip({ children }: { children: ReactNode }) {
     return (
         <span

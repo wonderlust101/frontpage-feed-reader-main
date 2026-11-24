@@ -1,10 +1,5 @@
 'use client';
 
-// The design system page's hero: a full-width color field with a straight edge. Inside the page grid, the specimen
-// headline and intro take the left column and a sticker pile the right, both within the header row's gutters.
-// The capsules that recolor the field sit just below it (HeroCategorySwitch); the choice is shared
-// through HeroChoiceProvider. Category colors come from the guest's saved choices, else each sample category's preset.
-
 import { Logo } from '@/components/logo';
 import { Stickers, type Sticker } from '@/components/stickers';
 import { useCategoryFields } from '@/features/categories/category-field-store';
@@ -16,8 +11,7 @@ import { CATEGORY_IDS, useHeroChoice } from './hero-choice';
 
 const SOURCE_COUNT = CATEGORIES.reduce((total, category) => total + category.sources.length, 0);
 
-// Positions, sizes and drift are in container units of the pile (a 4:3 box filling the right column), so the pile
-// keeps its arrangement at any width and never leaves the column.
+// In the pile's container units (a 4:3 box), so it keeps its arrangement at any width and never leaves its column.
 const HERO_STICKERS: Sticker[] = [
     {
         shape: 'pill',
@@ -87,8 +81,6 @@ const HERO_STICKERS: Sticker[] = [
     { shape: 'circle', field: 'var(--color-field-sky)', icon: 'mark-unread', size: '13.8cqi', x: '86.2cqi', y: '55.8cqi', tilt: 6, drift: ['-4cqi', '-2cqi'] },
 ];
 
-// Renders the field: top bar, then the headline and intro beside the sticker pile, then the live caption.
-// The stickers keep to their own column, clear of every text block, so no text needs a note.
 export function HeroField() {
     const { choice } = useHeroChoice();
     const [fields] = useCategoryFields(CATEGORY_IDS, CATEGORY_PRESETS);

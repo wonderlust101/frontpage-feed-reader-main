@@ -1,14 +1,11 @@
 'use client';
 
-// Working form controls for the components section: checkboxes, a switch, a select and the search field, with demo state.
-
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SearchField } from '@/components/ui/search-field';
 import { Select } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 
-// Renders the controls in two columns: choices (checkbox, switch) beside fields (select, search).
 export function FormControlsDemo() {
     const [hideRead, setHideRead] = useState(true);
     const [query, setQuery] = useState('container queries');

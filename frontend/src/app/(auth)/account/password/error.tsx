@@ -1,10 +1,7 @@
 'use client';
 
-// Shown when this signed-in page can't check the session because the API is down, slow or erroring (getSession
-// throws), instead of sending the reader to sign-in as if they were signed out: the auth frame with a calm panel,
-// "Can't reach your account", and a way to try again. Next's retry() returns nothing to wait on, so the button stays
-// busy ("Trying again…") from the click until the boundary receives a new error (the retry failed) or the page loads
-// in its place (this unmounts).
+// Next's retry() returns nothing to wait on, so the button stays busy from the click until a new error arrives or
+// the page loads in its place.
 
 import { useState } from 'react';
 import { DocumentTitle } from '@/components/document-title';

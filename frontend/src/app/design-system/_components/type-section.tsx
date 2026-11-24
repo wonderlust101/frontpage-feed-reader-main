@@ -1,5 +1,3 @@
-// Type section of the design system page: every role at its real size next to its spec.
-
 import { DocSection } from './doc-section';
 
 const TYPE_ROLES = [
@@ -47,7 +45,6 @@ const TYPE_ROLES = [
     },
 ];
 
-// Renders the type section: every role at its real size next to its spec.
 export function TypeSection() {
     return (
         <DocSection

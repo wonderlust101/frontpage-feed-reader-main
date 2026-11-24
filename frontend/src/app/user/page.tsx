@@ -1,6 +1,4 @@
-// User page placeholder: no design yet. The signed-in reader's home will go here, inside the app shell (user/layout.tsx),
-// whose account menu now holds the account actions. The page still checks the session itself, so it streams in behind
-// <Suspense> and sends a signed-out visitor to sign-in with the right return path.
+// Placeholder: the signed-in reader's home will go here.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -25,7 +23,6 @@ export default function UserPage() {
     );
 }
 
-// Says who is signed in; redirects to sign-in if nobody is.
 async function SignedInAs() {
     const user = await requireUser('/user');
 

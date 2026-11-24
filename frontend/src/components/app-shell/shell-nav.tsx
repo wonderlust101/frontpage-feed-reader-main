@@ -1,8 +1,6 @@
 'use client';
 
-// The shell's navigation in the drawer (below lg): the logo, the views with their names (all but the home view, which
-// leads the categories as "All items"), the categories, and the account pinned to the foot, where the rail would put
-// it. The same rows, labels and markers as the desktop rail and panel, so one row is current.
+// The drawer's navigation (below lg): the same rows and markers as the desktop rail and panel, account at the foot.
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -24,7 +22,6 @@ type ShellNavProps = {
 
 const VIEW_COLOR = 'var(--color-field-lemon)';
 
-// Renders the drawer's contents; where the reader is comes from the URL.
 export function ShellNav({ homeHref, views, categories, account, rowMenu }: ShellNavProps) {
     const place = shellPlace(
         usePathname(),

@@ -1,6 +1,4 @@
-// Turns a failed auth request into one sentence that says what happened and what to do next.
 // Sign-in failures stay vague on purpose ("email or password"), so the form never reveals which emails have accounts.
-// `code` is Better Auth's error code; `status` 0 means the request never reached the server (offline).
 
 import type { AuthFailure } from './auth-request';
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './schemas';
@@ -29,9 +27,7 @@ const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minu
 const TOO_MANY_REQUESTS = 'Too many tries in a row. Take a minute, then try again.';
 const FALLBACK = 'Something went wrong on our end. Try again in a moment.';
 
-// Returns the sentence for a failure: offline, server unreachable, rate-limited (with the wait when known), server
-// down, a known code, else a generic retry. A request with no answer only blames the connection when the browser says
-// it is offline; otherwise the server is down or unreachable, and the reader shouldn't go checking their wifi.
+// A request with no answer only blames the connection when the browser says it is offline.
 export function authErrorMessage(failure: AuthFailure): string {
     if (failure.status === 0)
         return failure.offline ? OFFLINE : UNREACHABLE;

@@ -1,5 +1,4 @@
-// The signed-in reader's account menu, anchored to the foot of the shell's rail (and of the drawer, where the button
-// also shows the name and email): who is signed in, verify email (until verified), change password, and sign out.
+// The signed-in reader's account menu at the foot of the rail and the drawer.
 
 import type { SessionUser } from '@frontpage/shared';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
@@ -15,7 +14,6 @@ type AccountMenuProps = {
 export const ACCOUNT_TRIGGER_CLASSES =
     'group relative flex items-center gap-3 rounded-control p-1 text-left transition-colors duration-150 hover:bg-ink/6 in-data-[account=row]:w-full in-data-[account=row]:p-2';
 
-// Renders the avatar button and its panel for `user`.
 export function AccountMenu({ user }: AccountMenuProps) {
     const initials = user.name
         .split(/\s+/)

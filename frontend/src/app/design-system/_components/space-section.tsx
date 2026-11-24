@@ -1,5 +1,3 @@
-// Space and shape section of the design system page: the spacing scale, density, and the three shapes the system uses.
-
 import { Button } from '@/components/ui/button';
 import { Capsule } from '@/components/ui/capsule';
 import { CategoryTag } from '@/components/ui/tags';
@@ -8,7 +6,6 @@ import { DocSection, Specimen } from './doc-section';
 
 const SPACE_STEPS = [4, 8, 12, 16, 24, 32, 48, 64, 96];
 
-// Renders the space and shape section: the spacing scale, density, and the three shapes the system uses.
 export function SpaceSection() {
     return (
         <DocSection

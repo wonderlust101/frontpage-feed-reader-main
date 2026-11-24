@@ -1,5 +1,3 @@
-// Components section of the design system page: every shared UI primitive, live, with its states.
-
 import { AiSummary } from '@/components/ui/ai-summary';
 import { Button } from '@/components/ui/button';
 import { FormNotice } from '@/components/ui/form-notice';
@@ -13,7 +11,6 @@ import { CategoryFilterDemo } from './category-filter-demo';
 import { FormControlsDemo } from './form-controls-demo';
 import { DocSection, Specimen } from './doc-section';
 
-// Renders buttons, capsules, inputs, tags, feed health and the AI summary panel.
 export function ComponentsSection() {
     return (
         <DocSection

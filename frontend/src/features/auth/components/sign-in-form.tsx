@@ -1,13 +1,7 @@
 'use client';
 
-// Sign-in form: email and password. On success it goes to `next` (already checked to be a path on this site). The
-// error alert carries the way out: an unverified email gets "Send a code" (it emails a new code and opens the verify
-// page; kept for when the API turns on requireEmailVerification, as verification is optional today and the API never
-// sends EMAIL_NOT_VERIFIED), and a wrong email or password gets "Forgot your password?" (the link under the button
-// steps aside meanwhile, so it isn't there twice). Arriving after a reset (`arrival`) is told by the page's heading,
-// and the arrival is dropped from the URL (so a refresh is a plain sign-in). An email handed over by the step before
-// (a reset, or sign-up's "already has an account" alert) is filled in, with focus on the password. Once an attempt
-// fails, the heading returns to the usual "Sign in".
+// "Send a code" for an unverified email is kept for when the API turns on requireEmailVerification; today it never
+// sends EMAIL_NOT_VERIFIED. The arrival (?reset=1) is dropped from the URL, so a refresh is a plain sign-in.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -36,7 +30,6 @@ type SignInFormProps = {
 
 type SignInValues = z.infer<typeof signInSchema>;
 
-// Renders the form and the forgot-password link.
 export function SignInForm({ next, arrival }: SignInFormProps) {
     const router = useRouter();
     const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
@@ -56,8 +49,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
     useAuthHeading(arrival && attemptFailed ? SIGN_IN_HEADINGS.default : null);
 
     useEffect(() => {
-        // Every visit clears a saved email (so an old one never lingers on a shared device) and fills it in when there
-        // was one: after a reset, or from sign-up's "already has an account" alert.
+        // Every visit clears a saved email, so an old one never lingers on a shared device.
         const email = takeSignInEmail();
 
         if (arrival) {

@@ -1,12 +1,7 @@
 'use client';
 
-// Change-password form for signed-in readers: current password, new password, and whether to sign out other devices
-// (on by default, in case the old password leaked). The current password is the security check; a reader who has
-// forgotten it takes the reset route ("Forgot your current password?", which fills in their email there). If the
-// session has ended meanwhile (signed out in another tab, or expired), the API answers UNAUTHORIZED and the reader is
-// asked to sign in again. Success replaces the form with the result and one way on, so the ending isn't an armed,
-// empty form under a "done" message: the heading says the password changed, one notice says what happened to the
-// other devices, and "Back to your account" is the only link (the frame's own copy of it steps aside).
+// Signing out other devices is on by default, in case the old password leaked. Success replaces the form with the
+// result and one way on, so the ending isn't an armed, empty form under a "done" message.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -33,8 +28,6 @@ const SIGN_IN_AGAIN_CODES = ['UNAUTHORIZED'];
 
 const RESULT_LINKS: FrameLinks = { switchLink: null, guestLink: false };
 
-// Renders the form, then the "password changed" heading, a notice (which takes focus) and a way back to the account;
-// a wrong current password is reported on that field.
 export function ChangePasswordForm() {
     const [changed, setChanged] = useState<{ signedOutOthers: boolean } | null>(null);
     const [needsSignIn, setNeedsSignIn] = useState(false);

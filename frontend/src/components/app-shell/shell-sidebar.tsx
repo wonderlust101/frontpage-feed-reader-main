@@ -1,8 +1,6 @@
 'use client';
 
-// The desktop sidebar (lg up): the rail beside the category panel, with the account at the rail's foot. It is a grid,
-// so the account sits at the bottom of the rail yet comes after the categories in the tab order: navigation first,
-// personal settings last, the way the eye reads it. It works out where the reader is for both columns.
+// A grid, so the account sits at the rail's foot yet comes after the categories in the tab order.
 
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -21,7 +19,6 @@ type ShellSidebarProps = {
     className?: string;
 };
 
-// Renders the rail, the panel and the account; `panelId` is what the rail's toggle controls.
 export function ShellSidebar({ homeHref, views, categories, panelId, account, rowMenu, className = '' }: ShellSidebarProps) {
     const place = shellPlace(
         usePathname(),

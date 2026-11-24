@@ -1,8 +1,5 @@
 'use client';
 
-// Category colors settings: each category with its tag as it looks now and a field picker. Any number of categories
-// may share a color; a category without a choice keeps its preset, or "No color". Guests' choices are saved on this device.
-
 import { useState } from 'react';
 import { CategoryTag } from '@/components/ui/tags';
 import { useCategoryFields } from '../category-field-store';
@@ -11,7 +8,6 @@ import { FieldPicker } from './field-picker';
 
 type ColorCategory = { id: string; name: string };
 
-// Renders one row per category; `presets` are the fields categories start with (sample data).
 export function CategoryColors({ categories, presets }: { categories: ColorCategory[]; presets?: FieldChoices }) {
     const [fields, choose] = useCategoryFields(
         categories.map((category) => category.id),
@@ -19,7 +15,6 @@ export function CategoryColors({ categories, presets }: { categories: ColorCateg
     );
     const [announcement, setAnnouncement] = useState('');
 
-    // Applies the choice and says what happened.
     function handleChange(category: ColorCategory, fieldId: FieldId) {
         choose(category.id, fieldId);
         setAnnouncement(fieldId === 'none' ? `${category.name} now has no color.` : `${category.name} now uses ${categoryFieldById(fieldId)?.name}.`);

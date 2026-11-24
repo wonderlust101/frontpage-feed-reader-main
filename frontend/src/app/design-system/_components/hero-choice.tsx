@@ -1,7 +1,6 @@
 'use client';
 
-// The hero's chosen view ("All" or one category), shared between the field it colors and the capsules that choose it.
-// They sit apart on the page: the field in the hero, the capsules just below it.
+// The hero field and the capsules that recolor it sit apart on the page, so they share the choice through context.
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { useCategoryFields } from '@/features/categories/category-field-store';
@@ -15,14 +14,12 @@ const HeroChoiceContext = createContext<HeroChoice | null>(null);
 
 export const CATEGORY_IDS = CATEGORIES.map((category) => category.id);
 
-// Holds the choice for everything inside it; starts on "All".
 export function HeroChoiceProvider({ children }: { children: ReactNode }) {
     const [choice, setChoice] = useState('all');
 
     return <HeroChoiceContext value={{ choice, setChoice }}>{children}</HeroChoiceContext>;
 }
 
-// Reads the choice; only valid inside HeroChoiceProvider.
 export function useHeroChoice() {
     const context = useContext(HeroChoiceContext);
 
@@ -32,7 +29,6 @@ export function useHeroChoice() {
     return context;
 }
 
-// Renders the capsules that recolor the hero field: "All" (Lemon) and one per sample category, in its saved color.
 export function HeroCategorySwitch() {
     const { choice, setChoice } = useHeroChoice();
     const [fields] = useCategoryFields(CATEGORY_IDS, CATEGORY_PRESETS);

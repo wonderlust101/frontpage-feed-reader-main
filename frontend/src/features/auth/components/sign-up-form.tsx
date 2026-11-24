@@ -1,8 +1,7 @@
 'use client';
 
-// Create-account form: name, email and password. On success the API emails a 6-digit code and the reader goes to the
-// verify page, which gets the address through sessionStorage, not the URL. An email that already has an account gets
-// an alert with the two ways on, "Sign in" and "Reset password"; either one carries the email over, so it isn't retyped.
+// The verify page gets the address through sessionStorage, not the URL. An email that already has an account gets
+// links to sign in or reset, and either one carries the email over.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -24,7 +23,6 @@ type SignUpValues = z.infer<typeof signUpSchema>;
 
 const EMAIL_TAKEN_CODES = ['USER_ALREADY_EXISTS', 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL'];
 
-// Renders the form; failures show above it, an email that already has an account with links to sign in or reset.
 // The password is cleared after any failure, as in the other auth forms.
 export function SignUpForm() {
     const router = useRouter();

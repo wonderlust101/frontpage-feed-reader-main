@@ -1,4 +1,3 @@
-// Imagery section of the design system page: the moodboard, how photos from feeds are treated, and the no-image fallback.
 // Moodboard photos are Unsplash stock (credited below); in the app every image comes from the feeds themselves.
 
 import Image, { type StaticImageData } from 'next/image';
@@ -43,7 +42,6 @@ const IMAGE_RULES = [
     'No image? The item shows its category field with the source initial, never a gray box.',
 ];
 
-// Renders the moodboard, the image rules and the thumbnail and fallback specimens.
 export function ImagerySection() {
     const design = getCategory('design');
 
@@ -111,7 +109,6 @@ export function ImagerySection() {
     );
 }
 
-// Renders one moodboard photo, cropped to fill its grid cell.
 function MoodTile({ photo }: { photo: MoodPhoto }) {
     return (
         <div className={`relative overflow-hidden rounded-control ${photo.className}`}>

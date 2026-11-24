@@ -1,7 +1,5 @@
-// The app shell for signed-in readers, around every /user page, none of which search engines should index. The account
-// menu (the rail's foot, the drawer's on phones) reads the session, so it streams in behind <Suspense> (Cache
-// Components), inside its own error boundary: this route's error.tsx doesn't wrap this layout, and the page shows that
-// error when the API is down.
+// The account menu reads the session, so it streams in behind <Suspense> inside its own error boundary: this
+// route's error.tsx doesn't wrap this layout.
 
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
@@ -33,7 +31,7 @@ export default function UserLayout({ children }: LayoutProps<'/user'>) {
     );
 }
 
-// Renders the account menu for the signed-in reader, or nothing when the session has ended (the page redirects).
+// Nothing when the session has ended; the page redirects.
 async function Account() {
     const user = await currentUser();
 

@@ -1,8 +1,5 @@
-// The field palette: eight flat colors. Lemon is Frontpage's own color (the home field, "All", brand accents), and
-// readers may give it to categories too, like any of the other seven, whatever they are about: "Film" or "Politics".
-// Categories may share a color. A new category starts on NO_FIELD ("No color"), a neutral stone field that behaves
-// exactly like the colored ones (filled tag, filled dot, filled when on); PICKABLE_FIELDS lists it first for that reason.
-// A field's `onColor` is the text color on a surface filled with it; FieldChoices maps category ids to chosen fields.
+// Lemon is Frontpage's own colour, yet readers may give it to categories too. NO_FIELD ("No color") behaves exactly
+// like the coloured fields, so PICKABLE_FIELDS lists it first. `onColor` is the text colour on a filled surface.
 
 export type FieldId = 'lemon' | 'coral' | 'sky' | 'leaf' | 'lilac' | 'tangerine' | 'aqua' | 'rose' | 'none';
 
@@ -103,13 +100,11 @@ export const PICKABLE_FIELDS = [NO_FIELD, ...CATEGORY_FIELDS];
 
 const FIELD_BY_ID = new Map<FieldId, Field>(PICKABLE_FIELDS.map((field) => [field.id, field]));
 
-// Gives each category its field: the reader's choice, else the category's preset (sample data), else "No color".
-// Any number of categories may share a field.
+// The reader's choice, else the category's preset, else "No color".
 export function assignFields(categoryIds: string[], choices: FieldChoices, presets: FieldChoices = {}): Record<string, Field> {
     return Object.fromEntries(categoryIds.map((id) => [id, categoryFieldById(choices[id]) ?? categoryFieldById(presets[id]) ?? NO_FIELD]));
 }
 
-// Returns the field a category may be given, or undefined for unknown ids.
 export function categoryFieldById(id: string | undefined): Field | undefined {
     return id ? FIELD_BY_ID.get(id as FieldId) : undefined;
 }

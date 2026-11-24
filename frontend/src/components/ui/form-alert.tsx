@@ -1,6 +1,5 @@
-// The form-level error: an error FormNotice at the top of the form that takes keyboard focus when it appears or its
-// message changes (it is keyed by the message, so a new message is a fresh notice), so screen reader and keyboard
-// users hear it straight away instead of hunting for it.
+// A form-level error that takes focus when it appears. Keyed by its message, so a new message is a fresh notice that
+// screen reader and keyboard users hear at once.
 
 import type { ReactNode } from 'react';
 import { FormNotice } from './form-notice';
@@ -11,7 +10,6 @@ type FormAlertProps = {
     action?: ReactNode;
 };
 
-// Renders the error box (`lead` says what failed, `message` why and what to do).
 export function FormAlert({ lead, message, action }: FormAlertProps) {
     return (
         <FormNotice key={message} tone="error" icon="error" lead={lead} action={action} takesFocus>

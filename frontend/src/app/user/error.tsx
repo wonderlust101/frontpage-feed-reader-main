@@ -1,7 +1,6 @@
 'use client';
 
-// Shown when this signed-in page can't check the session because the API is down, slow or erroring (getSession
-// throws), instead of sending the reader to sign-in as if they were signed out. Plain, like the page it stands in for.
+// Shown when the API can't check the session, instead of sending the reader to sign-in as if signed out.
 
 import { TextLink } from '@/components/ui/text-link';
 import { AccountUnavailable } from '@/features/auth/components/account-unavailable';

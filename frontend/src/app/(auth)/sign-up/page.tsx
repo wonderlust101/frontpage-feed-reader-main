@@ -1,5 +1,3 @@
-// Create-account page.
-
 import type { Metadata } from 'next';
 import { SignUpForm } from '@/features/auth/components/sign-up-form';
 import { AuthHeading } from '@/features/auth/components/auth-heading';

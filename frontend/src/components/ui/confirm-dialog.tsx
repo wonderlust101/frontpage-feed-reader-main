@@ -1,8 +1,6 @@
 'use client';
 
-// Confirm dialog for actions that cannot be undone (unsubscribing drops a feed's history). A native modal <dialog>:
-// focus moves in and is trapped, Escape cancels, and focus returns to the button that opened it.
-// Anything that can be undone uses a toast with Undo instead, never this.
+// Only for actions that can't be undone; anything undoable uses a toast with Undo instead.
 
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Button } from './button';
@@ -16,7 +14,7 @@ type ConfirmDialogProps = {
     onCancel: () => void;
 };
 
-// Renders the dialog; `open` drives showModal()/close(), and every way of closing other than confirm calls `onCancel`.
+// Every way of closing other than confirm calls `onCancel`.
 export function ConfirmDialog({ open, title, children, confirmLabel, onConfirm, onCancel }: ConfirmDialogProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
 

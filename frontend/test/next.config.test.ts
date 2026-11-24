@@ -1,7 +1,4 @@
-// next.config headers: outside development every route gets the Content Security Policy, which never allows eval
-// and keeps everything on this site; the dev server sends the other headers but no policy. bun test runs with
-// NODE_ENV=test, so the config reads the production policy.
-// vercelDeployment: which committed deployment a Vercel build takes its URLs from.
+// bun test runs with NODE_ENV=test, so the config reads the production Content Security Policy.
 
 import { describe, expect, test } from 'bun:test';
 import nextConfig, { securityHeaders, vercelDeployment } from '../next.config';

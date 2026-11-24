@@ -1,6 +1,4 @@
-// The guest's curated categories, in order, with their preset fields and their sources: the same catalogue as
-// backend/data/sample-feeds.json (keep the two in step). Guest mode shows them in the app shell, each with its own
-// page at /guest/c/<id>, and search finds their sources. A guest may recolor them (useGuestCategoryFields).
+// The guest's curated categories: the same catalogue as backend/data/sample-feeds.json, so keep the two in step.
 
 import type { FieldId } from './fields';
 

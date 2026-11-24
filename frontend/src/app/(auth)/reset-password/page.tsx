@@ -1,8 +1,5 @@
-// Reset-password page, opened from the emailed link. The API's link checks the token first and arrives here with
-// ?token=… when it is valid, or ?error=INVALID_TOKEN when it expired or was used. The heading and the form each read
-// the URL behind their own <Suspense> while the frame stays in the static shell, so an expired link gets its own
-// heading (and a calmer panel: "Links go stale.") rather than "Choose a new password" over no field. The page sends no Referer header, so the token can't
-// leak to other sites, and stays out of search engines.
+// The heading and form read the URL behind their own <Suspense>, so the frame stays in the static shell. No Referer
+// header is sent, so the token can't leak to other sites.
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -43,29 +40,26 @@ export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-pa
     );
 }
 
-// Returns the reset token from the URL, or null when the link expired, was used, or carries no token.
+// null when the link expired, was used or carries no token.
 async function readToken(searchParams: ResetPageProps['searchParams']): Promise<string | null> {
     const { token, error } = await searchParams;
 
     return typeof token === 'string' && token && !error ? token : null;
 }
 
-// Shows "Choose a new password" for a usable link, else "This link no longer works".
 async function ResetHeading({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
 
     return <AuthHeading {...(token ? RESET_PASSWORD_HEADINGS.choose : RESET_PASSWORD_HEADINGS.expired)} />;
 }
 
-// Shows the reset panel's own text for a usable link, else the calmer expired one.
 async function ResetPanelText({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
 
     return <AuthPanelText {...(token ? AUTH_PANELS.resetPassword : RESET_PASSWORD_HEADINGS.expired.panel)} />;
 }
 
-// Shows the form for a usable link, else a way to get a new one (the heading and panel already say what went wrong, so
-// no error box repeats it a third time), and retitles the tab to match.
+// The heading and panel already say what went wrong, so no error box repeats it a third time.
 async function ResetFromUrl({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
 

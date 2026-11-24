@@ -1,9 +1,6 @@
 'use client';
 
-// The reader's settings behind the Aa button: text size, line height, reading width, density, typeface, theme and
-// contrast, in one light popover: Reading open, Display (theme, contrast, density) folded away, and a reset. Each
-// change applies at once to every reading surface and is saved (see
-// reader-preferences.ts), and a sample line at the top reflows as you go, so a setting is seen before it's read.
+// Every change applies at once and is saved, and a sample line at the top reflows, so a setting is seen before it's read.
 
 import { useId } from 'react';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
@@ -26,7 +23,7 @@ import {
 } from '../reader-preferences';
 import { ChoiceControl } from './choice-control';
 
-// Renders the Aa button and its panel. Radio names come from useId, so two copies on one page never share a group.
+// Radio names come from useId, so two copies on one page never share a group.
 export function ReaderSettings() {
     const id = useId();
     const [textSize, setTextSize] = useTextSize();

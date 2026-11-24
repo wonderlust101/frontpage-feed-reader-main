@@ -1,5 +1,4 @@
-// What an account adds, as guests see it in the shell: each feature as a locked view whose preview says what it does,
-// and whose Create account button leads to sign-up. The guest shell and the /design-system demo share this list.
+// What an account adds, as locked views guests see in the shell; shared by the guest shell and /design-system.
 
 import type { ShellView } from '@/components/app-shell/nav-entries';
 

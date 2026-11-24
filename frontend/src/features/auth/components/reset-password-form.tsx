@@ -1,9 +1,7 @@
 'use client';
 
-// Reset-password form, opened from the emailed link. The token arrives in the URL; once read, it is removed from the
-// address bar so it doesn't linger in history or get copied along with the address. Success signs every session out
-// (the API revokes them), so the reader goes to sign-in, whose heading says the password changed and whose email
-// field is filled in from the forgot-password step.
+// The token is removed from the address bar once read, so it doesn't linger in history. Success signs every session
+// out, so the reader goes to sign-in with their email filled in.
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -28,8 +26,6 @@ type ResetPasswordFormProps = {
 
 type ResetValues = z.infer<typeof resetPasswordSchema>;
 
-// Renders the new-password form for `token`; an expired or used link is reported with a way to ask for a new one, and
-// the page's heading and panel turn to the expired ones, as when the link was already known to be stale.
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     const router = useRouter();
     const [linkExpired, setLinkExpired] = useState(false);

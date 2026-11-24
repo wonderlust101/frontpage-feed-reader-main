@@ -1,8 +1,7 @@
 'use client';
 
-// Category colors a guest has chosen, kept in localStorage so they survive reloads on this device (signed-in readers
-// will keep theirs on the server). Changes reach every component using the hook, and other open tabs, and set the
-// colors' CSS properties on <html> (category-field-vars.ts), which the shell paints from.
+// Category colours a guest has chosen, kept in localStorage. Changes reach every user of the hook and other open tabs,
+// and set the CSS properties on <html> that the shell paints from.
 
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { applyCategoryFields, CATEGORY_FIELDS_KEY as STORAGE_KEY } from './category-field-vars';
@@ -16,8 +15,7 @@ let memoryRaw: string | null = null;
 
 let cached: { raw: string | null; choices: FieldChoices } = { raw: null, choices: NO_CHOICES };
 
-// The field of every category in `categoryIds` and a setter. `presets` are fields categories start with before the
-// reader chooses (sample data); without one a category has "No color".
+// `presets` are fields categories start with before the reader chooses; without one a category has "No color".
 export function useCategoryFields(categoryIds: string[], presets?: FieldChoices): [Record<string, Field>, (id: string, fieldId: FieldId) => void] {
     const choices = useSyncExternalStore(subscribe, readChoices, () => NO_CHOICES);
     const idsKey = categoryIds.join('\n');
@@ -27,7 +25,6 @@ export function useCategoryFields(categoryIds: string[], presets?: FieldChoices)
     return [fields, choose];
 }
 
-// Registers a listener for changes from this tab and, through the storage event, from other tabs.
 function subscribe(listener: () => void) {
     listeners.add(listener);
     const onStorage = (event: StorageEvent) => {
@@ -45,14 +42,13 @@ function subscribe(listener: () => void) {
     };
 }
 
-// Reads the saved JSON (or the in-memory copy when storage is blocked); returns the same object until it changes.
+// Returns the same object until it changes, as useSyncExternalStore requires.
 function readChoices(): FieldChoices {
     let raw = memoryRaw;
 
     try {
         raw = localStorage.getItem(STORAGE_KEY);
     } catch {
-        // Storage can be unavailable in private windows; fall back to this visit's choices.
     }
 
     if (raw !== cached.raw)
@@ -61,7 +57,6 @@ function readChoices(): FieldChoices {
     return cached.choices;
 }
 
-// Keeps only entries that name a field a category may take; anything else in storage is ignored.
 function parseChoices(raw: string | null): FieldChoices {
     try {
         const parsed: unknown = raw ? JSON.parse(raw) : {};
@@ -77,14 +72,13 @@ function parseChoices(raw: string | null): FieldChoices {
     }
 }
 
-// Saves one category's choice in memory and, when allowed, in localStorage, then re-renders every user of the hook.
 function storeChoice(id: string, fieldId: FieldId) {
     memoryRaw = JSON.stringify({ ...readChoices(), [id]: fieldId });
 
     try {
         localStorage.setItem(STORAGE_KEY, memoryRaw);
     } catch {
-        // The in-memory copy still holds for this visit.
+        // Storage can be unavailable in private windows; the in-memory copy still holds for this visit.
     }
 
     applyCategoryFields({ [id]: fieldId });
