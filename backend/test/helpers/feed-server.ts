@@ -5,8 +5,10 @@ export const ETAG = '"v1"';
 export const LAST_MODIFIED = 'Tue, 10 Jun 2025 09:00:00 GMT';
 
 // A fake feed server where each path acts out one HTTP behaviour (redirect, 304, timeout, 500…); `hits` and `lastHeaders` record requests.
+// `serve(path, body, init)` makes a path answer with that body instead (replacing any earlier serve), so a test can change a feed between fetches.
 export function startFeedServer() {
     const hits: Record<string, number> = {};
+    const served = new Map<string, { body: Uint8Array | string; init: ResponseInit }>();
     const lastHeaders: Record<string, Headers> = {};
     const rss = readFixture('odd/cdata-mixed.xml');
     const latin1 = readFixture('odd/iso-8859-1-header-only.xml');
@@ -18,6 +20,10 @@ export function startFeedServer() {
             const { pathname } = new URL(req.url);
             hits[pathname] = (hits[pathname] ?? 0) + 1;
             lastHeaders[pathname] = req.headers;
+            const override = served.get(pathname);
+            if (override) {
+                return new Response(override.body, override.init);
+            }
             const xml = { 'Content-Type': 'application/rss+xml; charset=utf-8' };
 
             switch (pathname) {
@@ -95,6 +101,9 @@ export function startFeedServer() {
         url: `http://127.0.0.1:${server.port}`,
         hits,
         lastHeaders,
+        serve: (path: string, body: Uint8Array | string, init: ResponseInit = { headers: { 'Content-Type': 'application/rss+xml' } }) => {
+            served.set(path, { body, init });
+        },
         stop: () => server.stop(true),
     };
 }

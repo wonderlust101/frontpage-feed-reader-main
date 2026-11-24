@@ -203,6 +203,16 @@ Without `RESEND_API_KEY`, nothing reaches a real inbox. Outside production the b
 
 Running with `bun dev` instead of Docker: start only Mailpit with `docker compose up -d mailpit`, and set `MAILPIT_URL=http://localhost:8025` in `backend/.env` (the local URLs come from `deployments.ts`). Reset links open on the API, which sends the reader on to `http://localhost:3000/reset-password`.
 
+## Feed ingestion
+
+`ingestFeed(db, url)` (`backend/src/modules/feeds/feeds.ingest.ts`) fetches one feed and stores it: one `feeds` row per URL, one `items` row per `(feed_id, guid)`. The scheduler, subscribing and manual retry all go through it; `GET /api/fetch` stays a preview that stores nothing.
+
+- **Only changes are written.** Before writing, it reads the stored `content_hash` of the fetched items (a SHA-256 of every stored field) and sends only new or edited items, in one `INSERT … ON CONFLICT`. An unchanged feed sends no item rows, so the database isn't asked to rewrite up to 500 articles and their search index on every fetch. An edited article keeps its `id` and `first_seen_at`, so it never looks new again; articles that drop out of the feed are kept.
+- **The fetch runs outside the transaction**, so a slow feed never holds one open. Every database write of one ingest runs in a single transaction.
+- **Fetch bookkeeping:** every fetch sets `last_fetched_at`. A success (a 304 counts) sets `last_success_at`, resets `consecutive_failures` and clears the last error. A failure records the error code, message and upstream status and adds one to `consecutive_failures`, as a single atomic update. A URL we don't store yet whose first fetch fails stores nothing: the caller gets the error.
+- **Permanent redirects** (301 or 308 on every hop) move `feeds.url`. If another feed already has the new URL, the two are merged: items, subscriptions, bookmarks, read states and the starter-feed entry move onto that feed (its own copy wins where both have one), and the old row is deleted.
+- **Trying it by hand:** `docker compose run --rm --no-deps backend bun run ingest:feed <url>` ingests one feed into the local Docker database and prints what changed. The script refuses any database host but `localhost` or `db`, so it can't write to Neon.
+
 ## Scripts (repo root)
 
 | Command                                                        | What it runs                                                                |
