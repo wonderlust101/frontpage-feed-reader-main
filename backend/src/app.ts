@@ -9,6 +9,7 @@ import { notFoundHandler } from './middleware/not-found-handler';
 import { authRouter } from './modules/auth/auth.routes';
 import { healthRouter } from './modules/health/health.routes';
 import { feedsRouter } from './modules/feeds/feeds.routes';
+import { subscriptionsRouter } from './modules/subscriptions/subscriptions.routes';
 
 const CORS_PREFLIGHT_CACHE_SECONDS = 2 * 60 * 60;
 
@@ -33,6 +34,7 @@ app.use(express.json());
 
 app.use('/api/health', healthRouter);
 app.use('/api/fetch', feedsRouter);
+app.use('/api/subscriptions', subscriptionsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

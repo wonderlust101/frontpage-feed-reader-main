@@ -18,6 +18,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
             message: error.message,
             retryable: error.retryable,
             ...(error.upstreamStatus !== undefined && { status: error.upstreamStatus }),
+            ...(error.subscriptionId !== undefined && { subscriptionId: error.subscriptionId }),
         },
     };
     res.status(error.status).json(body);

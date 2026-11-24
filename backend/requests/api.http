@@ -109,3 +109,51 @@ Origin: http://localhost:3000
 ### Auth — sign out
 POST {{baseUrl}}/api/auth/sign-out
 Origin: http://localhost:3000
+
+### Subscriptions — list mine, with each feed's health (sign in first; signed out → 401 unauthorized)
+GET {{baseUrl}}/api/subscriptions
+
+### Subscriptions — subscribe by URL → 201 { subscription } + Location (the feed is fetched and checked first)
+POST {{baseUrl}}/api/subscriptions
+Content-Type: application/json
+
+{ "url": "https://css-tricks.com/feed/" }
+
+### Subscriptions — subscribe into one of my categories (someone else's or a missing one → 404 category_not_found)
+POST {{baseUrl}}/api/subscriptions
+Content-Type: application/json
+
+{ "url": "https://vercel.com/atom", "categoryId": "paste-category-id-here" }
+
+### Subscriptions — the same feed again → 409 { error: { code: "already_subscribed", subscriptionId } }
+POST {{baseUrl}}/api/subscriptions
+Content-Type: application/json
+
+{ "url": "https://css-tricks.com/feed/" }
+
+### Subscriptions — not a feed → 422 { error: { code: "not_a_feed" } }
+POST {{baseUrl}}/api/subscriptions
+Content-Type: application/json
+
+{ "url": "https://example.com/" }
+
+### Subscriptions — rename (trimmed; over 200 characters → 400 bad_request)
+PATCH {{baseUrl}}/api/subscriptions/paste-subscription-id-here
+Content-Type: application/json
+
+{ "customTitle": "My CSS reading" }
+
+### Subscriptions — clear the custom title (the feed's own title shows again)
+PATCH {{baseUrl}}/api/subscriptions/paste-subscription-id-here
+Content-Type: application/json
+
+{ "customTitle": null }
+
+### Subscriptions — move to Uncategorized
+PATCH {{baseUrl}}/api/subscriptions/paste-subscription-id-here
+Content-Type: application/json
+
+{ "categoryId": null }
+
+### Subscriptions — unsubscribe → 204 (bookmarks stay; someone else's or a missing id → 404 not_found)
+DELETE {{baseUrl}}/api/subscriptions/paste-subscription-id-here
