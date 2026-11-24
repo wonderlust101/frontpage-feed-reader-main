@@ -10,12 +10,24 @@ type TextFieldProps = Omit<ComponentProps<'input'>, 'id'> & {
     hint?: string;
     error?: string;
     action?: ReactNode;
+    // Another element that describes the field, such as the step's text above the form.
+    describedBy?: string;
 };
 
-export function TextField({ id, label, hint, error, action, className = '', ...inputProps }: TextFieldProps) {
+export function TextField({ id, label, hint, error, action, describedBy, className = '', ...inputProps }: TextFieldProps) {
     const hintId = `${id}-hint`;
     const errorId = `${id}-error`;
-    const describedBy = error ? errorId : hint ? hintId : undefined;
+    const describedByIds: string[] = [];
+
+    if (error) {
+        describedByIds.push(errorId);
+    } else if (hint) {
+        describedByIds.push(hintId);
+    }
+
+    if (describedBy)
+        describedByIds.push(describedBy);
+
     const borderClasses = error ? 'border-2 border-error' : 'border-[1.5px] border-control-edge';
 
     return (
@@ -27,7 +39,7 @@ export function TextField({ id, label, hint, error, action, className = '', ...i
                 <input
                     id={id}
                     aria-invalid={error ? true : undefined}
-                    aria-describedby={describedBy}
+                    aria-describedby={describedByIds.join(' ') || undefined}
                     className={`text-field-input h-12 w-full rounded-control bg-control-fill px-5 text-ui text-ink placeholder:text-muted ${action ? 'pr-14' : ''} ${borderClasses}`}
                     {...inputProps}
                 />

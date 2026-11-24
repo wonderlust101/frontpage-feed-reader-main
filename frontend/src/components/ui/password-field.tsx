@@ -42,7 +42,7 @@ export function PasswordField({ hint, onKeyDown, onKeyUp, onBlur, ...props }: Pa
                     type="button"
                     aria-pressed={visible}
                     aria-controls={props.id}
-                    onClick={() => setVisible(!visible)}
+                    onClick={() => setVisible((shown) => !shown)}
                     className="grid size-11 place-items-center rounded-toggle text-ink-2 hover:bg-ground-2 hover:text-ink"
                 >
                     <Icon name={visible ? 'hide-password' : 'show-password'} label="Show password" />

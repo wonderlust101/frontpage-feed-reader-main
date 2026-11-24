@@ -1,8 +1,7 @@
-'use client';
-
 // The reader settings as shared hooks, one store each. "auto" is each setting's default; the CSS for the other
 // values lives in styles/tokens.css.
 
+import 'client-only';
 import { createHtmlPreference } from '@/lib/html-preference';
 import { SAVED_PREFERENCES } from '@/lib/saved-preferences';
 

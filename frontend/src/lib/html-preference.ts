@@ -1,8 +1,7 @@
-'use client';
-
 // A saved preference as a hook. Each call makes its own store, so create one hook per preference and share it: two
 // hooks for one setting would not update each other.
 
+import 'client-only';
 import { useEffect, useSyncExternalStore } from 'react';
 import type { SavedPreference } from './saved-preferences';
 
@@ -45,7 +44,7 @@ export function createHtmlPreference<const Preference extends SavedPreference>({
     }
 
     return function usePreference(): [Choice, (choice: Choice) => void] {
-        const choice = useSyncExternalStore(subscribe, read, () => 'auto' as Choice);
+        const choice = useSyncExternalStore<Choice>(subscribe, read, () => 'auto');
 
         useEffect(() => {
             if (choice === 'auto') {

@@ -1,4 +1,4 @@
-import { Icon, type IconName } from '@/components/ui/icon';
+import { ICON_SIZES, Icon, type IconName, type IconSize } from '@/components/ui/icon';
 import { DocSection, Specimen } from './doc-section';
 
 type IconGroup = {
@@ -130,10 +130,10 @@ const ICON_GROUPS: IconGroup[] = [
     },
 ];
 
-const SIZE_SCALE: { size: 'inline' | 'action' | 'nav'; px: number; use: string }[] = [
-    { size: 'inline', px: 16, use: 'Inline with metadata and tags' },
-    { size: 'action', px: 20, use: 'Buttons and item actions' },
-    { size: 'nav', px: 24, use: 'Navigation and empty states' },
+const SIZE_SCALE: { size: IconSize; use: string }[] = [
+    { size: 'inline', use: 'Inline with metadata and tags' },
+    { size: 'action', use: 'Buttons and item actions' },
+    { size: 'nav', use: 'Navigation and empty states' },
 ];
 
 export function IconsSection() {
@@ -152,7 +152,7 @@ export function IconsSection() {
                             </span>
                             <span>
                                 <span className="block text-ui font-semibold">
-                                    {step.px}px · {step.size}
+                                    {ICON_SIZES[step.size].px}px · {step.size}
                                 </span>
                                 <span className="block text-meta text-ink-2">{step.use}</span>
                             </span>

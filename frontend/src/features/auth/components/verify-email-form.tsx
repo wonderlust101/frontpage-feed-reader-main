@@ -244,7 +244,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
                             void handleSubmit(verify)();
                     },
                 })}
-                aria-describedby={[errors.code ? 'code-error' : null, descriptionId].filter(Boolean).join(' ') || undefined}
+                describedBy={descriptionId}
             />
 
             <SubmitButton pending={isSubmitting} pendingLabel="Checking…">

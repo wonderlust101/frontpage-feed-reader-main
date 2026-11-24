@@ -80,7 +80,7 @@ import {
     type LucideIcon,
 } from 'lucide-react';
 
-type IconSize = 'inline' | 'action' | 'nav';
+export type IconSize = 'inline' | 'action' | 'nav';
 
 type IconProps = {
     name: IconName;
@@ -181,7 +181,7 @@ export const ICONS = {
 
 export type IconName = keyof typeof ICONS;
 
-const ICON_SIZES: Record<IconSize, { px: number; className: string }> = {
+export const ICON_SIZES: Record<IconSize, { px: number; className: string }> = {
     inline: { px: 16, className: 'size-4' },
     action: { px: 20, className: 'size-5' },
     nav: { px: 24, className: 'size-6' },

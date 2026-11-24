@@ -1,8 +1,7 @@
-'use client';
-
 // Category colours a guest has chosen, kept in localStorage. Changes reach every user of the hook and other open tabs,
 // and set the CSS properties on <html> that the shell paints from.
 
+import 'client-only';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { applyCategoryFields, CATEGORY_FIELDS_KEY as STORAGE_KEY } from './category-field-vars';
 import { assignFields, categoryFieldById, type Field, type FieldChoices, type FieldId } from './fields';

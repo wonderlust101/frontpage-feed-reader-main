@@ -1,5 +1,3 @@
-'use client';
-
 // An on/off setting that applies at once. On shows a check, so the state never rests on colour or position alone.
 // Styles live in components.css.
 

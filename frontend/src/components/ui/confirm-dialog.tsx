@@ -2,7 +2,7 @@
 
 // Only for actions that can't be undone; anything undoable uses a toast with Undo instead.
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Button } from './button';
 
 type ConfirmDialogProps = {
@@ -17,6 +17,7 @@ type ConfirmDialogProps = {
 // Every way of closing other than confirm calls `onCancel`.
 export function ConfirmDialog({ open, title, children, confirmLabel, onConfirm, onCancel }: ConfirmDialogProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const titleId = useId();
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -31,14 +32,14 @@ export function ConfirmDialog({ open, title, children, confirmLabel, onConfirm, 
     return (
         <dialog
             ref={dialogRef}
-            aria-labelledby="confirm-dialog-title"
+            aria-labelledby={titleId}
             onCancel={(event) => {
                 event.preventDefault();
                 onCancel();
             }}
             className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-stage border-[1.5px] border-ink bg-ground p-6 text-ink backdrop:bg-ink/40 md:p-8"
         >
-            <h2 id="confirm-dialog-title" className="type-headline">
+            <h2 id={titleId} className="type-headline">
                 {title}
             </h2>
             <div className="mt-3 text-ui text-ink-2">{children}</div>
