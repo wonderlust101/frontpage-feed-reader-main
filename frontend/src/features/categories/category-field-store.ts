@@ -1,12 +1,12 @@
 'use client';
 
 // Category colors a guest has chosen, kept in localStorage so they survive reloads on this device (signed-in readers
-// will keep theirs on the server). Changes reach every component using the hook, and other open tabs.
+// will keep theirs on the server). Changes reach every component using the hook, and other open tabs, and set the
+// colors' CSS properties on <html> (category-field-vars.ts), which the shell paints from.
 
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { applyCategoryFields, CATEGORY_FIELDS_KEY as STORAGE_KEY } from './category-field-vars';
 import { assignFields, categoryFieldById, type Field, type FieldChoices, type FieldId } from './fields';
-
-const STORAGE_KEY = 'frontpage-category-fields';
 
 const NO_CHOICES: FieldChoices = {};
 
@@ -32,6 +32,7 @@ function subscribe(listener: () => void) {
     listeners.add(listener);
     const onStorage = (event: StorageEvent) => {
         if (event.key === STORAGE_KEY) {
+            applyCategoryFields(readChoices());
             listener();
         }
     };
@@ -79,5 +80,6 @@ function storeChoice(id: string, fieldId: FieldId) {
     } catch {
         // The in-memory copy still holds for this visit.
     }
+    applyCategoryFields({ [id]: fieldId });
     listeners.forEach((listener) => listener());
 }

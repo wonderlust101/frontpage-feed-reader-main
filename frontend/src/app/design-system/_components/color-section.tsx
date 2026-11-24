@@ -45,7 +45,7 @@ export function ColorSection() {
             <Specimen
                 title="Neutrals and status"
                 stage="none"
-                description="Ink and ground swap in dark mode. High contrast, from the system setting or the reading controls, raises supporting text and status to 7:1 and draws every rule and edge in ink. Status colors are for text and lines only, never fills, so they never compete with category fields."
+                description="Ink and ground swap in dark mode. High contrast, from the system setting or the reader settings, raises supporting text and status to 7:1 and draws every rule and edge in ink. Status colors are for text and lines only, never fills, so they never compete with category fields."
             >
                 <ul className="rule-t sm:hidden">
                     {NEUTRALS.map((neutral) => (

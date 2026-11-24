@@ -1,7 +1,8 @@
 // Next.js config. allowedDevOrigins affects the dev server only: it lets phones and other machines on the home network
 // (192.168.x.x) load the dev scripts, so pages are interactive when tested on other devices.
 // Every response gets baseline security headers: no framing (clickjacking), no MIME sniffing, a trimmed Referer, and
-// no camera, microphone or location, plus a Content Security Policy. Everything the app loads is on this site, and the
+// no camera, microphone or location, plus a Content Security Policy outside development (`next dev` sends none, so dev
+// tools and browser extensions can inject scripts while you work). Everything the app loads is on this site, and the
 // browser calls one other origin, the API (NEXT_PUBLIC_API_URL, for auth), so the policy allows 'self' plus that
 // origin for requests only: no scripts from other sites, no requests elsewhere, and forms submit here.
 // The policy is static rather than nonce-based: nonces need every page rendered per request, which would switch off
@@ -31,8 +32,7 @@ const IS_DEV = process.env.NODE_ENV === 'development';
 
 const CONTENT_SECURITY_POLICY = [
     "default-src 'self'",
-    // React's dev build uses eval to rebuild server error stacks in the browser; production never does.
-    `script-src 'self' 'unsafe-inline'${IS_DEV ? " 'unsafe-eval'" : ''}`,
+    "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data:",
     "font-src 'self'",
@@ -43,8 +43,7 @@ const CONTENT_SECURITY_POLICY = [
     "frame-ancestors 'none'",
 ].join('; ');
 
-const SECURITY_HEADERS = [
-    { key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY },
+const BASELINE_HEADERS = [
     { key: 'X-Frame-Options', value: 'DENY' },
     { key: 'X-Content-Type-Options', value: 'nosniff' },
     { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -65,11 +64,17 @@ const nextConfig: NextConfig = {
         },
     },
     async headers() {
-        return [{ source: '/:path*', headers: SECURITY_HEADERS }];
+        return [{ source: '/:path*', headers: securityHeaders(IS_DEV) }];
     },
 };
 
 export default nextConfig;
+
+// Returns the headers every response gets: the baseline ones always, and the Content Security Policy unless
+// `isDevelopment` (the dev server), where it would block the dev tools and scripts injected while working.
+export function securityHeaders(isDevelopment: boolean): { key: string; value: string }[] {
+    return isDevelopment ? BASELINE_HEADERS : [{ key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY }, ...BASELINE_HEADERS];
+}
 
 // Returns which deployment a build is for, from Vercel's VERCEL_ENV: unset (not on Vercel) or "development" (vercel
 // dev) is local. Throws on a value Vercel doesn't document, rather than guessing.

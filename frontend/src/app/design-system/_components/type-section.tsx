@@ -29,7 +29,7 @@ const TYPE_ROLES = [
     },
     {
         role: 'Body',
-        spec: 'Reading face · follows the reading controls · 66ch',
+        spec: 'Reading face · follows the reader settings · 66ch',
         sample: 'Frontpage keeps the reading column calm: one face, a real measure and line height you choose yourself.',
         className: 'max-w-measure type-body',
     },
@@ -53,7 +53,7 @@ export function TypeSection() {
         <DocSection
             id="type"
             title="Type"
-            intro="Bricolage Grotesque sets everything you scan: headlines, section openers, item titles. Onest sets everything you read and operate. The body face is yours to change, so the reading controls retune every body sample on this page."
+            intro="Bricolage Grotesque sets everything you scan: headlines, section openers, item titles. Onest sets everything you read and operate. The body face is yours to change, so the reader settings (Aa) retune every body sample on this page."
         >
             <dl className="mt-10 rule-t">
                 {TYPE_ROLES.map((type) => (

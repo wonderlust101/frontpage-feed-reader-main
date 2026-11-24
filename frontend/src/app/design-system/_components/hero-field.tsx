@@ -2,14 +2,14 @@
 
 // The design system page's hero: a full-width color field with a straight edge. Inside the page grid, the specimen
 // headline and intro take the left column and a sticker pile the right, both within the header row's gutters.
-// The capsules that recolor the field sit below the reading controls (HeroCategorySwitch); the choice is shared
+// The capsules that recolor the field sit just below it (HeroCategorySwitch); the choice is shared
 // through HeroChoiceProvider. Category colors come from the guest's saved choices, else each sample category's preset.
 
 import { Logo } from '@/components/logo';
 import { Stickers, type Sticker } from '@/components/stickers';
 import { useCategoryFields } from '@/features/categories/category-field-store';
 import { BRAND_FIELD } from '@/features/categories/fields';
-import { ThemeSwitch } from '@/features/preferences/components/theme-switch';
+import { ReaderSettings } from '@/features/preferences/components/reader-settings';
 import { CATEGORIES, CATEGORY_PRESETS } from '../_data/sample-data';
 import { SECTIONS } from '../_data/sections';
 import { CATEGORY_IDS, useHeroChoice } from './hero-choice';
@@ -118,7 +118,7 @@ export function HeroField() {
                             ))}
                         </nav>
                         <div className="ml-auto">
-                            <ThemeSwitch contrast={field} />
+                            <ReaderSettings />
                         </div>
                     </div>
 
@@ -131,8 +131,8 @@ export function HeroField() {
                                 Color maps.
                             </h1>
                             <p className="mt-8 max-w-[34rem] text-body leading-[1.55] font-medium">
-                                Every token and component on this page is live. Pick a category to recolor this field, tune the reading controls, switch the
-                                theme.
+                                Every token and component on this page is live. Pick a category to recolor this field, or open Aa to tune the reading settings
+                                and the theme.
                             </p>
                         </div>
                         <div className="relative hidden aspect-[4/3] lg:block">

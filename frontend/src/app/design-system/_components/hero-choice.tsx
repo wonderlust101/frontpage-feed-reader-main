@@ -1,7 +1,7 @@
 'use client';
 
 // The hero's chosen view ("All" or one category), shared between the field it colors and the capsules that choose it.
-// They sit apart on the page: the field above the reading controls, the capsules just below them.
+// They sit apart on the page: the field in the hero, the capsules just below it.
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { useCategoryFields } from '@/features/categories/category-field-store';

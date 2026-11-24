@@ -68,7 +68,7 @@ const ICON_GROUPS: IconGroup[] = [
     },
     {
         title: 'Reading settings',
-        description: 'The reading controls and accessibility preferences.',
+        description: 'The reader settings and accessibility preferences.',
         items: [
             ['text-size', 'Text size'],
             ['reading-face', 'Reading face'],

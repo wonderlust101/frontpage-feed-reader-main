@@ -5,11 +5,11 @@
 const TAG_CLASSES = 'inline-flex h-7 items-center rounded-tag border border-transparent px-3 text-small font-semibold';
 
 // Renders a category name as a flat label filled with its field ("No color" is the stone field); no outline, because
-// tags are not clickable.
-export function CategoryTag({ name, field }: { name: string; field: { color: string } }) {
+// tags are not clickable. A long name ends in an ellipsis when `className` caps the width (e.g. max-w-full).
+export function CategoryTag({ name, field, className = '' }: { name: string; field: { color: string }; className?: string }) {
     return (
-        <span className={`${TAG_CLASSES} fill-edge text-on-field`} style={{ background: field.color }}>
-            {name}
+        <span className={`${TAG_CLASSES} fill-edge text-on-field ${className}`} style={{ background: field.color }}>
+            <span className="truncate">{name}</span>
         </span>
     );
 }

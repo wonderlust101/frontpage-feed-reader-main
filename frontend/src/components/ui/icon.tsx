@@ -2,6 +2,8 @@
 // and the drawing can change in one place. One stroke weight everywhere (1.75px, absolute), in the current text color.
 
 import {
+    AArrowDown,
+    AArrowUp,
     Accessibility,
     ALargeSmall,
     ArrowDownUp,
@@ -42,6 +44,9 @@ import {
     Info,
     Keyboard,
     LayoutList,
+    Lock,
+    PanelLeftClose,
+    PanelLeftOpen,
     Lightbulb,
     Link,
     ListFilter,
@@ -94,6 +99,9 @@ export const ICONS = {
     search: Search,
     settings: Settings,
     menu: Menu,
+    locked: Lock,
+    'sidebar-close': PanelLeftClose,
+    'sidebar-open': PanelLeftOpen,
     close: X,
     back: ArrowLeft,
     expand: ChevronDown,
@@ -128,6 +136,8 @@ export const ICONS = {
     undo: Undo2,
 
     'text-size': ALargeSmall,
+    'text-smaller': AArrowDown,
+    'text-larger': AArrowUp,
     'reading-face': Type,
     density: Rows3,
     'theme-light': Sun,
