@@ -7,9 +7,9 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { SubscribeRequest, Subscription, UpdateSubscriptionRequest } from '@frontpage/shared';
 import type { Database } from '../../db';
-import { parseFeedUrl } from '../../lib/feed';
+import { feedIconUrl, parseFeedUrl } from '../../lib/feed';
 import { ConflictError, NotFoundError } from '../../middleware/errors';
-import { categories } from '../categories/categories.schema';
+import { assertOwnCategory } from '../categories/categories.service';
 import { ingestFeed } from '../feeds/feeds.ingest';
 import { feeds } from '../feeds/feeds.schema';
 import { itemReadStates, items } from '../items/items.schema';
@@ -129,9 +129,6 @@ function selectSubscriptions(db: Database) {
 
 // A subscription row as the API sends it: ISO dates, the title to show, an icon and the feed's health at `now`.
 function toSubscription(row: SubscriptionRow, now: Date): Subscription {
-    // URL.parse returns null rather than throwing when siteUrl isn't a valid URL.
-    const faviconUrl = row.siteUrl ? (URL.parse('/favicon.ico', row.siteUrl)?.href ?? null) : null;
-
     return {
         id: row.id,
         feedId: row.feedId,
@@ -141,7 +138,7 @@ function toSubscription(row: SubscriptionRow, now: Date): Subscription {
         feedTitle: row.feedTitle,
         description: row.description,
         siteUrl: row.siteUrl,
-        iconUrl: row.imageUrl ?? faviconUrl,
+        iconUrl: feedIconUrl(row.imageUrl, row.siteUrl),
         categoryId: row.categoryId,
         health: deriveHealth({ ...row, createdAt: row.feedCreatedAt }, now),
         lastSuccessAt: row.lastSuccessAt?.toISOString() ?? null,
@@ -149,17 +146,6 @@ function toSubscription(row: SubscriptionRow, now: Date): Subscription {
         lastError: row.lastErrorCode ? { code: row.lastErrorCode, message: row.lastErrorMessage ?? '' } : null,
         createdAt: row.createdAt.toISOString(),
     };
-}
-
-// Throws `category_not_found` (404) unless the category exists and belongs to the reader.
-async function assertOwnCategory(db: Database, userId: string, categoryId: string) {
-    const [category] = await db
-        .select({ id: categories.id })
-        .from(categories)
-        .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)));
-    if (!category) {
-        throw new NotFoundError('category_not_found', 'Category not found');
-    }
 }
 
 // The id of the reader's subscription to a feed, or undefined if they don't follow it.
