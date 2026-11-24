@@ -1,9 +1,10 @@
-// next.config headers: every route gets the Content Security Policy, and outside development it never allows eval
-// and keeps everything on this site. bun test runs with NODE_ENV=test, so this reads the production policy.
+// next.config headers: outside development every route gets the Content Security Policy, which never allows eval
+// and keeps everything on this site; the dev server sends the other headers but no policy. bun test runs with
+// NODE_ENV=test, so the config reads the production policy.
 // vercelDeployment: which committed deployment a Vercel build takes its URLs from.
 
 import { describe, expect, test } from 'bun:test';
-import nextConfig, { vercelDeployment } from '../next.config';
+import nextConfig, { securityHeaders, vercelDeployment } from '../next.config';
 
 // Returns the CSP directives sent for every path, keyed by name, e.g. { 'script-src': "'self' 'unsafe-inline'" }.
 async function readPolicy(): Promise<Record<string, string>> {
@@ -25,7 +26,13 @@ describe('Content Security Policy', () => {
         expect(await readPolicy()).toHaveProperty('default-src', "'self'");
     });
 
-    test('never allows eval outside development', async () => {
+    test('is left out on the dev server, keeping the other headers', () => {
+        const keys = securityHeaders(true).map((header) => header.key);
+        expect(keys).not.toContain('Content-Security-Policy');
+        expect(keys).toContain('X-Frame-Options');
+    });
+
+    test('never allows eval', async () => {
         expect((await readPolicy())['script-src']).toBe("'self' 'unsafe-inline'");
     });
 

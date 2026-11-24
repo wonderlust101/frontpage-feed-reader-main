@@ -1,4 +1,4 @@
-/* Component styles that utilities can't express cleanly: filter capsules, range inputs, health lines, and stickers */
+/* Component styles that utilities can't express cleanly: filter capsules, health lines, shell menus, and stickers */
 /* (their shapes, the phone-band rules, the hover spring and the arrival wobble). */
 
 @layer components {
@@ -217,54 +217,6 @@
         outline-offset: 1px;
     }
 
-    .range {
-        appearance: none;
-        width: 100%;
-        height: 1.5rem;
-        background: transparent;
-        cursor: pointer;
-    }
-
-    .range::-webkit-slider-runnable-track {
-        height: 2px;
-        background: var(--color-ink);
-    }
-
-    .range::-moz-range-track {
-        height: 2px;
-        background: var(--color-ink);
-    }
-
-    .range::-webkit-slider-thumb {
-        appearance: none;
-        width: 1.125rem;
-        height: 1.125rem;
-        margin-top: -0.5rem;
-        border-radius: 50%;
-        background: var(--color-field-lemon);
-        box-shadow: 0 0 0 2px var(--color-ink);
-    }
-
-    .range::-moz-range-thumb {
-        width: 1.125rem;
-        height: 1.125rem;
-        border: 0;
-        border-radius: 50%;
-        background: var(--color-field-lemon);
-        box-shadow: 0 0 0 2px var(--color-ink);
-    }
-
-    .range:focus-visible {
-        outline-offset: 6px;
-    }
-
-    /* Forced colors drop the drawn track and thumb, so the slider goes back to the system's own. */
-    @media (forced-colors: active) {
-        .range {
-            appearance: auto;
-        }
-    }
-
     .hero-field {
         transition: color var(--duration-field) var(--ease-out);
     }
@@ -441,10 +393,170 @@
     .health-line[data-health='failing']::after {
         transform: rotate(-45deg);
     }
+
+    /* A shell menu (Aa, account, guest, a category's actions): a native popover panel anchored to its button, scaling */
+    /* in from it. "Below" opens under a toolbar button, "beside" to the right of the rail's foot, and above the account */
+    /* row in the drawer, "row" to the right of a category row (under it where there is no room); */
+    /* without anchor positioning each falls back to a fixed spot near its button. Flat, like every layer: an edge, */
+    /* no shadow. */
+    .menu-panel {
+        inset: auto;
+        margin: 0;
+        width: min(22rem, calc(100vw - 1.5rem));
+        max-height: calc(100dvh - 1.5rem);
+        overflow-y: auto;
+        padding: 1rem;
+        border: 1.5px solid var(--color-control-edge);
+        border-radius: var(--radius-panel);
+        background: var(--color-workspace);
+        color: var(--color-ink);
+        opacity: 1;
+        scale: 1;
+        transition:
+            opacity 140ms var(--ease-out),
+            scale 140ms var(--ease-out),
+            display 140ms allow-discrete,
+            overlay 140ms allow-discrete;
+    }
+
+    @starting-style {
+        .menu-panel:popover-open {
+            opacity: 0;
+            scale: 0.97;
+        }
+    }
+
+    .menu-panel:not(:popover-open) {
+        opacity: 0;
+        scale: 0.97;
+    }
+
+    .menu-panel[data-placement='below'] {
+        top: 3.75rem;
+        right: 0.75rem;
+        transform-origin: top right;
+    }
+
+    .menu-panel[data-placement='beside'] {
+        bottom: 0.75rem;
+        left: 4.5rem;
+        transform-origin: bottom left;
+    }
+
+    [data-account='row'] .menu-panel[data-placement='beside'] {
+        bottom: 5rem;
+        left: 0.75rem;
+    }
+
+    /* A category's menu is narrower, so its nine swatches sit five and four. */
+    .menu-panel[data-placement='row'] {
+        width: min(18rem, calc(100vw - 1.5rem));
+        top: 6rem;
+        left: 0.75rem;
+        transform-origin: top left;
+    }
+
+    @supports (position-area: bottom) {
+        .menu-panel[data-placement='below'] {
+            top: auto;
+            right: auto;
+            position-area: bottom span-left;
+            position-try-fallbacks: flip-inline;
+            margin-top: 0.5rem;
+        }
+
+        .menu-panel[data-placement='beside'] {
+            bottom: auto;
+            left: auto;
+            position-area: right span-top;
+            position-try-fallbacks: flip-block;
+            margin-left: 0.5rem;
+        }
+
+        [data-account='row'] .menu-panel[data-placement='beside'] {
+            position-area: top span-right;
+            margin: 0 0 0.5rem;
+        }
+
+        .menu-panel[data-placement='row'] {
+            top: auto;
+            left: auto;
+            position-area: right span-bottom;
+            position-try-fallbacks:
+                right span-top,
+                bottom span-left,
+                top span-left;
+            margin: 0 0 0 0.5rem;
+        }
+    }
+
+    /* The current row's tint, mixed in OKLab: it blends toward the near-grey panel without OKLCH's hue interpolation, */
+    /* which swung Lilac through red on its way to the panel's warm hue. 30% over the panel in light mode, a gentler */
+    /* 14% over the workspace tone in dark, where a stronger mix turns Lemon olive and Coral maroon. */
+    /* A near-neutral field ("No color") would vanish as a light tint or bar, so in light mode a low-chroma field is */
+    /* darkened first (--row-field-strong); colored fields have chroma above 0.05 and pass through unchanged. */
+    .nav-current {
+        --row-field-strong: oklch(from var(--row-field) calc(l - max(0, 0.05 - c) * 6) c h);
+        background: light-dark(
+            color-mix(in oklab, var(--row-field-strong) 30%, var(--color-panel)),
+            color-mix(in oklab, var(--row-field) 14%, var(--color-workspace))
+        );
+    }
+
+    /* The current entry's field bar, which grows into place when it moves, so a choice feels picked up rather than */
+    /* repainted. */
+    .nav-marker {
+        background: light-dark(var(--row-field-strong), var(--row-field));
+        animation: nav-marker-in 180ms var(--ease-out);
+    }
+
+    /* A page title underlined in its category's field (--title-field), darkened like the row when it is "No color", */
+    /* so the underline stays visible on the light workspace. */
+    .field-underline {
+        text-decoration-color: light-dark(oklch(from var(--title-field) calc(l - max(0, 0.05 - c) * 6) c h), var(--title-field));
+    }
 }
 
 /* The fill-edge hairline for small color fills drawn with utilities: tags, fallback tiles, swatches, sidebar dots. */
 /* An inset ring, so it never changes size. */
 @utility fill-edge {
     box-shadow: inset 0 0 0 1px var(--color-fill-edge);
+}
+
+/* A tool button in the shell (Aa, the drawer's menu, the search trigger): an outlined control that fills on hover, */
+/* on the workspace tone it sits on. 44px for touch below lg, 40px beside the pointer-sized desktop rail. */
+@utility tool-button {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding-inline: 0.625rem;
+    border: 1.5px solid var(--color-control-edge);
+    border-radius: var(--radius-control);
+    background: var(--color-workspace);
+    color: var(--color-ink);
+    font-weight: 600;
+    transition:
+        background-color 160ms var(--ease-out),
+        border-color 160ms var(--ease-out);
+
+    &:hover {
+        border-color: var(--color-ink);
+        background: var(--color-ground-2);
+    }
+
+    @media (width >= 64rem) {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+    }
+}
+
+@keyframes nav-marker-in {
+    from {
+        scale: 1 0.3;
+        opacity: 0;
+    }
 }

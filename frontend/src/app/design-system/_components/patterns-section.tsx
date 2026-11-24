@@ -19,18 +19,18 @@ const CODE_SAMPLE = `.card-grid {
   }
 }`;
 
-// Renders the feed list and the article specimen; both follow the reading controls.
+// Renders the feed list and the article specimen; both follow the reader settings.
 export function PatternsSection() {
     return (
         <DocSection
             id="patterns"
             title="Patterns"
-            intro="The feed is a ruled list, newest first, with the time leading each row. Unread rows carry the New tag and a bold title; read rows fall back to regular weight. Change the density above and watch the rows breathe."
+            intro="The feed is a ruled list, newest first, with the time leading each row. Unread rows carry the New tag and a bold title; read rows fall back to regular weight. Change the density in the reader settings at the top of this page and watch the rows breathe."
         >
             <Specimen
                 title="App shell"
                 stage="frame"
-                description="Views and categories down the side, each with its unread count; search and the one primary action on top; the feed list below. Categories without a color are stone."
+                description="Sidebar first: a rail for the views and your account, a category panel that collapses away ([), and the workspace, three neutral steps lighter toward what you read. The selected category shows its color in its row, the toolbar tag and the title. Search with Ctrl or ⌘ + K. Each category row has quick actions: rename, recolor and delete (Undo, or Ctrl or ⌘ + Z) when signed in, recolor as a guest. Below lg it all moves into a drawer."
             >
                 <AppShellDemo />
             </Specimen>

@@ -1,4 +1,5 @@
-// The Frontpage design system page: every token and component, live, framed by the category color field.
+// The Frontpage design system page: every token and component, live, framed by the category color field. The Aa
+// button in the hero holds the reader settings, saved and applied site-wide like everywhere else.
 
 import type { Metadata } from 'next';
 import { ContentsNav } from './_components/contents-nav';
@@ -13,7 +14,6 @@ import { ImagerySection } from './_components/imagery-section';
 import { LogoSection } from './_components/logo-section';
 import { PatternsSection } from './_components/patterns-section';
 import { StatesSection } from './_components/states-section';
-import { ReadingControls } from '@/features/preferences/components/reading-controls';
 import { SECTIONS } from './_data/sections';
 
 export const metadata: Metadata = {
@@ -26,26 +26,24 @@ export default function DesignSystemPage() {
         <HeroChoiceProvider>
             <div className="flex flex-1 flex-col">
                 <HeroField />
-                <ReadingControls>
-                    <HeroCategorySwitch />
-                    <div className="mx-auto grid w-full max-w-page gap-x-16 px-gutter pt-16 lg:grid-cols-[11rem_minmax(0,1fr)]">
-                        <ContentsNav entries={SECTIONS} />
-                        <main id="main" className="min-w-0">
-                            <LogoSection />
-                            <ColorSection />
-                            <ImagerySection />
-                            <TypeSection />
-                            <SpaceSection />
-                            <IconsSection />
-                            <ComponentsSection />
-                            <StatesSection />
-                            <PatternsSection />
-                        </main>
-                    </div>
-                    <footer className="mx-auto w-full max-w-page border-t border-rule-soft px-gutter py-8 text-meta text-muted">
-                        Frontpage design system · Sources and categories from the guest sample feeds; item titles are illustrative.
-                    </footer>
-                </ReadingControls>
+                <HeroCategorySwitch />
+                <div className="mx-auto grid w-full max-w-page gap-x-16 px-gutter pt-16 lg:grid-cols-[11rem_minmax(0,1fr)]">
+                    <ContentsNav entries={SECTIONS} />
+                    <main id="main" className="min-w-0">
+                        <LogoSection />
+                        <ColorSection />
+                        <ImagerySection />
+                        <TypeSection />
+                        <SpaceSection />
+                        <IconsSection />
+                        <ComponentsSection />
+                        <StatesSection />
+                        <PatternsSection />
+                    </main>
+                </div>
+                <footer className="mx-auto w-full max-w-page border-t border-rule-soft px-gutter py-8 text-meta text-muted">
+                    Frontpage design system · Sources and categories from the guest sample feeds; item titles are illustrative.
+                </footer>
             </div>
         </HeroChoiceProvider>
     );

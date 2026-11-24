@@ -1,13 +1,15 @@
 'use client';
 
-// A reader preference stored on <html> as a data attribute (data-theme, data-contrast) and in localStorage when storage
-// is available. "Auto" removes the attribute, so the CSS falls back to the system setting.
+// A saved preference (lib/saved-preferences.ts) as a React hook: the choice lives on <html> as a data attribute and in
+// localStorage when storage is available. "auto" is the default and removes the attribute. Each call makes its own
+// store, so create one hook per preference and share it: two hooks for one setting would not update each other.
 
 import { useEffect, useSyncExternalStore } from 'react';
+import type { SavedPreference } from './saved-preferences';
 
-// Returns the hook for one preference: `attribute` is the data-* name, `values` the stored (non-auto) choices.
-export function createHtmlPreference<Value extends string>(storageKey: string, attribute: string, values: readonly Value[]) {
-    type Choice = Value | 'auto';
+// Returns the hook for `preference`; its choice is one of the preference's values or "auto".
+export function createHtmlPreference<const Preference extends SavedPreference>({ key: storageKey, attribute, values }: Preference) {
+    type Choice = Preference['values'][number] | 'auto';
 
     const listeners = new Set<() => void>();
     let memoryChoice: Choice = 'auto';
