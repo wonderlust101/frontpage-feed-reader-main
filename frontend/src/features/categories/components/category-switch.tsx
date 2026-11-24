@@ -32,12 +32,14 @@ export function CategorySwitch({ options, value, onChange, label, className = ''
     // Moves the choice one option along (wrapping at either end) and focuses it.
     function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
         const step = NEXT_KEYS.includes(event.key) ? 1 : PREVIOUS_KEYS.includes(event.key) ? -1 : 0;
+
         if (step === 0)
             return;
 
         event.preventDefault();
         const current = options.findIndex((option) => option.id === value);
         const next = options[(current + step + options.length) % options.length];
+
         onChange(next.id);
         groupRef.current?.querySelector<HTMLElement>(`[data-option="${next.id}"]`)?.focus();
     }

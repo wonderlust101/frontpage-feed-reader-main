@@ -32,5 +32,6 @@ export default function ChangePasswordPage() {
 // Renders the form only for a valid session; otherwise requireUser redirects to sign-in.
 async function SignedInChangePasswordForm() {
     await requireUser('/account/password');
+
     return <ChangePasswordForm />;
 }

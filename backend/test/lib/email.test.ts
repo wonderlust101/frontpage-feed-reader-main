@@ -15,6 +15,7 @@ beforeAll(() => {
         port: 0,
         async fetch(req) {
             mailpitRequests.push({ path: new URL(req.url).pathname, body: await req.json() });
+
             return Response.json({ ID: 'stub' }, { status: mailpitStatus });
         },
     });
@@ -27,6 +28,7 @@ afterAll(() => {
 describe('sendEmail to Mailpit (no API key, MAILPIT_URL set)', () => {
     test('posts the email to the send API outside production', async () => {
         const result = await sendEmail(EMAIL, { apiKey: undefined, from: 'Frontpage <hi@example.com>', production: false, mailpitUrl: mailpit.url.href });
+
         expect(result).toBe('captured');
         expect(mailpitRequests.at(-1)).toEqual({
             path: '/api/v1/send',
@@ -42,6 +44,7 @@ describe('sendEmail to Mailpit (no API key, MAILPIT_URL set)', () => {
     test('is never used in production', async () => {
         const before = mailpitRequests.length;
         const warn = spyOn(console, 'warn').mockImplementation(() => {});
+
         expect(await sendEmail(EMAIL, { apiKey: undefined, from: 'x@example.com', production: true, mailpitUrl: mailpit.url.href })).toBe('skipped');
         expect(mailpitRequests.length).toBe(before);
         warn.mockRestore();
@@ -59,6 +62,7 @@ describe('sendEmail to Mailpit (no API key, MAILPIT_URL set)', () => {
 describe('sendEmail without an API key', () => {
     test('logs the email outside production', async () => {
         const log = spyOn(console, 'log').mockImplementation(() => {});
+
         expect(await sendEmail(EMAIL, { apiKey: undefined, from: 'x@example.com', production: false })).toBe('logged');
         expect(log.mock.calls[0]?.[0]).toContain('Hi there');
         log.mockRestore();
@@ -66,6 +70,7 @@ describe('sendEmail without an API key', () => {
 
     test('skips with a warning in production', async () => {
         const warn = spyOn(console, 'warn').mockImplementation(() => {});
+
         expect(await sendEmail(EMAIL, { apiKey: undefined, from: 'x@example.com', production: true })).toBe('skipped');
         expect(warn).toHaveBeenCalled();
         warn.mockRestore();

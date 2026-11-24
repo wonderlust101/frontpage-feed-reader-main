@@ -199,14 +199,17 @@ function panel(headline: string, line: string, guestLink: boolean, wide: WideDec
     const decals = [...wide, ...band];
     const stickers = SLOTS.flatMap((slot, index) => {
         const decal = decals[index];
+
         return decal ? [{ ...slot, ...decal }] : [];
     });
+
     return { headline, line, guestLink, stickers };
 }
 
 // Returns the CSS colour for a field, e.g. field('coral') → 'var(--color-field-coral)', from the shared field list.
 function field(id: Exclude<FieldId, 'none'>): string {
     const match = FIELDS.find((candidate) => candidate.id === id);
+
     if (!match)
         throw new Error(`Unknown field: ${id}`);
 

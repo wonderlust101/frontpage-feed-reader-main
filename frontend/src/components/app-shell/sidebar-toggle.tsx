@@ -21,10 +21,12 @@ export function SidebarToggle({ panelId }: { panelId: string }) {
         function toggleOnBracket(event: KeyboardEvent) {
             const isTyping =
                 event.target instanceof HTMLElement && (event.target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName));
+
             if (event.key === '[' && !isTyping && !event.metaKey && !event.ctrlKey && !event.altKey)
                 setSidebar(isCollapsed ? 'auto' : 'collapsed');
         }
         window.addEventListener('keydown', toggleOnBracket);
+
         return () => window.removeEventListener('keydown', toggleOnBracket);
     }, [isCollapsed, setSidebar]);
 

@@ -46,18 +46,21 @@ export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-pa
 // Returns the reset token from the URL, or null when the link expired, was used, or carries no token.
 async function readToken(searchParams: ResetPageProps['searchParams']): Promise<string | null> {
     const { token, error } = await searchParams;
+
     return typeof token === 'string' && token && !error ? token : null;
 }
 
 // Shows "Choose a new password" for a usable link, else "This link no longer works".
 async function ResetHeading({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
+
     return <AuthHeading {...(token ? RESET_PASSWORD_HEADINGS.choose : RESET_PASSWORD_HEADINGS.expired)} />;
 }
 
 // Shows the reset panel's own text for a usable link, else the calmer expired one.
 async function ResetPanelText({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
+
     return <AuthPanelText {...(token ? AUTH_PANELS.resetPassword : RESET_PASSWORD_HEADINGS.expired.panel)} />;
 }
 

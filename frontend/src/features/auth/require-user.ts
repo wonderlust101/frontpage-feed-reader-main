@@ -16,6 +16,7 @@ const readSession = cache(async (): Promise<SessionResponse> => getSession((awai
 // Returns the signed-in user, or redirects to /sign-in?next=<returnTo> when there is no valid session (redirect throws).
 export async function requireUser(returnTo: string): Promise<SessionUser> {
     const user = await currentUser();
+
     if (!user)
         redirect(`/sign-in?next=${encodeURIComponent(returnTo)}`);
 
@@ -26,5 +27,6 @@ export async function requireUser(returnTo: string): Promise<SessionUser> {
 // the page's path (the page redirects). Throws when the API can't answer, like requireUser.
 export async function currentUser(): Promise<SessionUser | null> {
     const session = await readSession();
+
     return session?.user ?? null;
 }

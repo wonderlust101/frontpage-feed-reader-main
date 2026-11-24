@@ -6,7 +6,9 @@ function runScript(saved: string | null) {
     const set: Record<string, string> = {};
     const fakeDocument = { documentElement: { style: { setProperty: (name: string, value: string) => (set[name] = value) } } };
     const fakeStorage = { getItem: (key: string) => (key === CATEGORY_FIELDS_KEY ? saved : null) };
+
     new Function('document', 'localStorage', CATEGORY_FIELDS_SCRIPT)(fakeDocument, fakeStorage);
+
     return set;
 }
 

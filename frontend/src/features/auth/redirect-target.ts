@@ -12,6 +12,7 @@ export function safeNextPath(next: string | null | undefined): string {
         return DEFAULT_AFTER_SIGN_IN;
 
     const url = new URL(next, SAME_SITE_BASE);
+
     if (url.origin !== SAME_SITE_BASE)
         return DEFAULT_AFTER_SIGN_IN;
 

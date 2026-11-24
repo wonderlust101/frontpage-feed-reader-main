@@ -10,6 +10,7 @@ const API_URL = process.env.API_URL;
 export async function getHealth(): Promise<HealthResponse | null> {
     try {
         const res = await fetch(`${API_URL}/api/health`, { signal: AbortSignal.timeout(5000) });
+
         if (!res.ok)
             return null;
 
@@ -31,6 +32,7 @@ export async function getSession(cookieHeader: string): Promise<SessionResponse>
         headers: { cookie: cookieHeader },
         signal: AbortSignal.timeout(5000),
     });
+
     if (res.status === 401)
         return null;
 

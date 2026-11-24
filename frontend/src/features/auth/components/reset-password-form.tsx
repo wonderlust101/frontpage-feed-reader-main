@@ -33,6 +33,7 @@ type ResetValues = z.infer<typeof resetPasswordSchema>;
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     const router = useRouter();
     const [linkExpired, setLinkExpired] = useState(false);
+
     useAuthHeading(linkExpired ? RESET_PASSWORD_HEADINGS.expired : null);
     const {
         register,
@@ -48,12 +49,15 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
     async function resetPassword({ password }: ResetValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.resetPassword({ newPassword: password, token }, fetchOptions));
+
         if (failure) {
             resetField('password');
             setLinkExpired(failure.code === 'INVALID_TOKEN');
             setError('root', { message: authErrorMessage(failure) });
+
             return;
         }
+
         router.replace('/sign-in?reset=1');
     }
 

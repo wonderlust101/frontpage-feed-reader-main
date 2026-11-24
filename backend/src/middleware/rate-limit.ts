@@ -25,6 +25,7 @@ export function perUserRateLimit({ limit, windowMs, message }: PerUserRateLimitO
         handler: (req, res, next) => {
             const resetAt = req.rateLimit?.resetTime?.getTime() ?? Date.now() + windowMs;
             const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
+
             res.set('X-Retry-After', String(retryAfterSeconds));
             next(new TooManyRequestsError('rate_limited', message));
         },

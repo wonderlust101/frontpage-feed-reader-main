@@ -4,6 +4,8 @@
 import stylistic from '@stylistic/eslint-plugin';
 import tseslint from 'typescript-eslint';
 
+const CONTROL_FLOW = ['if', 'for', 'while', 'do', 'switch', 'try'];
+
 const BASE = stylistic.configs.customize({
     indent: 4,
     quotes: 'single',
@@ -36,6 +38,18 @@ export const style = [
             '@stylistic/max-len': [
                 'error',
                 { code: 160, tabWidth: 4, ignoreUrls: true, ignoreStrings: true, ignoreTemplateLiterals: true, ignoreRegExpLiterals: true },
+            ],
+            '@stylistic/padding-line-between-statements': [
+                'error',
+                { blankLine: 'always', prev: 'directive', next: '*' },
+                { blankLine: 'always', prev: 'import', next: '*' },
+                { blankLine: 'any', prev: 'import', next: 'import' },
+                { blankLine: 'always', prev: ['const', 'let'], next: '*' },
+                { blankLine: 'any', prev: ['const', 'let'], next: ['const', 'let'] },
+                { blankLine: 'always', prev: '*', next: CONTROL_FLOW },
+                { blankLine: 'always', prev: CONTROL_FLOW, next: '*' },
+                { blankLine: 'always', prev: '*', next: 'return' },
+                { blankLine: 'always', prev: '*', next: 'function' },
             ],
             '@stylistic/lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
             '@stylistic/no-multiple-empty-lines': ['error', { max: 1, maxBOF: 0, maxEOF: 0 }],

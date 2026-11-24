@@ -52,17 +52,21 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
         resetField,
         formState: { errors, isSubmitting },
     } = useForm<SignInValues>({ resolver: zodResolver(signInSchema), defaultValues: { email: '', password: '' }, reValidateMode: 'onChange' });
+
     useAuthHeading(arrival && attemptFailed ? SIGN_IN_HEADINGS.default : null);
 
     useEffect(() => {
         // Every visit clears a saved email (so an old one never lingers on a shared device) and fills it in when there
         // was one: after a reset, or from sign-up's "already has an account" alert.
         const email = takeSignInEmail();
+
         if (arrival) {
             const url = new URL(window.location.href);
+
             url.searchParams.delete('reset');
             window.history.replaceState(null, '', url);
         }
+
         if (email) {
             setValue('email', email);
             setFocus('password');
@@ -71,14 +75,17 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
 
     async function signIn(values: SignInValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.signIn.email(values, fetchOptions));
+
         if (failure) {
             resetField('password');
             setAttemptFailed(true);
             setUnverifiedEmail(failure.code === 'EMAIL_NOT_VERIFIED' ? values.email : null);
             setWrongCredentials(failure.code === 'INVALID_EMAIL_OR_PASSWORD');
             setError('root', { message: authErrorMessage(failure) });
+
             return;
         }
+
         router.replace(next);
         router.refresh();
     }
@@ -86,11 +93,15 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
     async function sendCode(email: string) {
         setSendingCode(true);
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+
         setSendingCode(false);
+
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
+
             return;
         }
+
         rememberPendingEmail(email);
         router.push('/verify-email');
     }

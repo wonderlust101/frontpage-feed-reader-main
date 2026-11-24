@@ -30,6 +30,7 @@ const HOME_MARK_CLASSES = `${IDLE_CLASSES} sidebar-collapsed:bg-field-lemon side
 // Renders the rail's top: the logo, the views and the panel toggle.
 export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailProps) {
     const [sidebar] = useSidebar();
+
     return (
         <div className="flex w-16 flex-none flex-col items-center gap-2 bg-rail pt-3">
             <Link href={homeHref} className="group relative mb-2 rounded-control">
@@ -44,6 +45,7 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                         const isHome = view.href === homeHref;
                         const marks = isCurrent ? (isHome ? HOME_MARK_CLASSES : MARK_CLASSES) : IDLE_CLASSES;
                         const shownCount = formatCount(view.count);
+
                         return (
                             <li key={view.label}>
                                 {view.preview ? (

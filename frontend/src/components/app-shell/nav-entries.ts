@@ -27,6 +27,7 @@ const MAX_SHOWN_COUNT = 99;
 // matches /user/saved but never /username. Returns null when no href matches.
 export function currentHref(pathname: string, hrefs: readonly string[]): string | null {
     const matches = hrefs.filter((href) => pathname === href || pathname.startsWith(`${href}/`));
+
     return matches.reduce<string | null>((longest, href) => (longest === null || href.length > longest.length ? href : longest), null);
 }
 
@@ -36,6 +37,7 @@ export function currentHref(pathname: string, hrefs: readonly string[]): string 
 export function shellPlace(pathname: string, homeHref: string, viewHrefs: readonly string[], categoryHrefs: readonly string[]): ShellPlace {
     const inCategory = currentHref(pathname, categoryHrefs);
     const category = inCategory ?? (pathname === homeHref ? homeHref : null);
+
     return { view: inCategory ? null : currentHref(pathname, viewHrefs), category };
 }
 

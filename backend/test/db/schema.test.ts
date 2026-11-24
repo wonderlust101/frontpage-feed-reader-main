@@ -18,7 +18,9 @@ afterAll(async () => {
 // Inserts a user and returns their id.
 async function newUser(): Promise<string> {
     const id = crypto.randomUUID();
+
     await testDb.db.insert(users).values({ id, name: 'Test User', email: `${id}@example.com` });
+
     return id;
 }
 
@@ -28,6 +30,7 @@ async function newFeed(): Promise<string> {
         .insert(feeds)
         .values({ url: `https://example.com/${crypto.randomUUID()}.xml`, title: 'Example' })
         .returning({ id: feeds.id });
+
     return row!.id;
 }
 
@@ -46,6 +49,7 @@ async function newItem(feedId: string, overrides: Partial<typeof items.$inferIns
             ...overrides,
         })
         .returning();
+
     return row!;
 }
 
@@ -55,14 +59,17 @@ async function errorCode(query: Promise<unknown>): Promise<string | undefined> {
         await query;
     } catch (err) {
         const cause = (err as { cause?: { code?: string } }).cause;
+
         return cause?.code ?? (err as { code?: string }).code;
     }
+
     return undefined;
 }
 
 describe('items', () => {
     test('the same guid twice in one feed is rejected', async () => {
         const feedId = await newFeed();
+
         await newItem(feedId, { guid: 'same' });
         expect(await errorCode(newItem(feedId, { guid: 'same' }))).toBe('23505');
     });
@@ -71,6 +78,7 @@ describe('items', () => {
         const feedId = await newFeed();
         const dated = await newItem(feedId, { publishedAt: new Date('2026-01-02T10:00:00.000Z') });
         const undated = await newItem(feedId);
+
         expect(dated.sortAt).toEqual(new Date('2026-01-02T10:00:00.000Z'));
         expect(undated.sortAt).toEqual(undated.firstSeenAt);
 
@@ -78,6 +86,7 @@ describe('items', () => {
             .select({ id: items.id })
             .from(items)
             .where(sql`${items.feedId} = ${feedId} and ${items.search} @@ websearch_to_tsquery('english', 'compilers')`);
+
         expect(found).toHaveLength(2);
     });
 });
@@ -87,6 +96,7 @@ describe('foreign keys', () => {
         const user = await newUser();
         const feedId = await newFeed();
         const item = await newItem(feedId);
+
         await testDb.db.insert(bookmarks).values({ userId: user, itemId: item.id });
         await testDb.db.insert(subscriptions).values({ userId: user, feedId });
 
@@ -99,6 +109,7 @@ describe('foreign keys', () => {
         const feedId = await newFeed();
         const item = await newItem(feedId);
         const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
+
         await testDb.db.insert(subscriptions).values({ userId: user, feedId, categoryId: category!.id });
         await testDb.db.insert(itemReadStates).values({ userId: user, itemId: item.id, isRead: true });
         await testDb.db.insert(bookmarks).values({ userId: user, itemId: item.id });
@@ -122,6 +133,7 @@ describe('foreign keys', () => {
 
         await testDb.db.delete(categories).where(eq(categories.id, category!.id));
         const [after] = await testDb.db.select().from(subscriptions).where(eq(subscriptions.id, sub!.id));
+
         expect(after!.categoryId).toBeNull();
     });
 });
@@ -132,8 +144,10 @@ describe('updated_at', () => {
             .insert(categories)
             .values({ userId: await newUser(), name: 'News', position: 0 })
             .returning();
+
         await Bun.sleep(5);
         const [renamed] = await testDb.db.update(categories).set({ name: 'World' }).where(eq(categories.id, category!.id)).returning();
+
         expect(renamed!.updatedAt.getTime()).toBeGreaterThan(category!.updatedAt.getTime());
     });
 });
@@ -141,6 +155,7 @@ describe('updated_at', () => {
 describe('checks and unique names', () => {
     test('category names are unique per user ignoring case', async () => {
         const user = await newUser();
+
         await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 });
         expect(await errorCode(testDb.db.insert(categories).values({ userId: user, name: 'news', position: 1 }))).toBe('23505');
         await testDb.db.insert(categories).values({ userId: await newUser(), name: 'news', position: 0 });
@@ -148,9 +163,11 @@ describe('checks and unique names', () => {
 
     test('preferences reject an unsupported refresh interval or order', async () => {
         const user = await newUser();
+
         expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, refreshIntervalMinutes: 45 }))).toBe('23514');
         expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, itemOrder: 'random' as 'newest' }))).toBe('23514');
         const [defaults] = await testDb.db.insert(userPreferences).values({ userId: user }).returning();
+
         expect(defaults).toMatchObject({ layout: 'list', refreshIntervalMinutes: 30, itemOrder: 'newest', showRead: true });
     });
 });

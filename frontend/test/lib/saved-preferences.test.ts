@@ -6,8 +6,10 @@ const realLocalStorage = globalThis.localStorage;
 // Runs `script` against a fake <html> and storage holding `stored`; returns the data attributes it set.
 function runScript(script: string, stored: Record<string, string>): Record<string, string> {
     const dataset: Record<string, string> = {};
+
     globalThis.localStorage = { getItem: (key: string) => stored[key] ?? null } as Storage;
     new Function('document', script)({ documentElement: { dataset } });
+
     return dataset;
 }
 

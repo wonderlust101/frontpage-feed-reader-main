@@ -151,6 +151,7 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
 
     // Decode twice to fix double-encoded entities like "&amp;amp;" that some feeds emit.
     let text = decode(decode(stripped));
+
     text = text
         .replace(/\s+/g, ' ')
         .replace(/\s+([.,;:!?)])/g, '$1')
@@ -208,6 +209,7 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
 function resolveSrcset(value: string, base?: string): string | null {
     const candidates = parseSrcset(value).flatMap((candidate) => {
         const url = resolveUrl(candidate.url, base, LINK_PROTOCOLS);
+
         return url ? [{ ...candidate, url }] : [];
     });
 

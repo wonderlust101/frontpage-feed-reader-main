@@ -17,6 +17,7 @@ let baseUrl: string;
 
 beforeAll(async () => {
     const app = express();
+
     app.use((req, res, next) => {
         res.locals.auth = { user: { id: req.get('x-user') } } as unknown as AuthSession;
         next();
@@ -47,6 +48,7 @@ describe('perUserRateLimit', () => {
         expect((await hit('ada')).status).toBe(204);
 
         const limited = await hit('ada');
+
         expect(limited.status).toBe(429);
         expect(await limited.json()).toEqual({ error: { code: 'rate_limited', message: 'Slow down', retryable: true } });
         expect(Number(limited.headers.get('X-Retry-After'))).toBeGreaterThanOrEqual(1);
@@ -54,6 +56,7 @@ describe('perUserRateLimit', () => {
 
     test('sends no RateLimit-* headers (CORS only exposes X-Retry-After)', async () => {
         const res = await hit('grace');
+
         expect(res.headers.get('RateLimit')).toBeNull();
         expect(res.headers.get('X-RateLimit-Limit')).toBeNull();
     });

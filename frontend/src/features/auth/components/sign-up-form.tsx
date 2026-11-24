@@ -39,12 +39,15 @@ export function SignUpForm() {
 
     async function signUp(values: SignUpValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.signUp.email(values, fetchOptions));
+
         if (failure) {
             resetField('password');
             setTakenEmail(failure.code && EMAIL_TAKEN_CODES.includes(failure.code) ? values.email : null);
             setError('root', { message: authErrorMessage(failure) });
+
             return;
         }
+
         rememberPendingEmail(values.email);
         router.push('/verify-email');
     }

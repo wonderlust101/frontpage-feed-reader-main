@@ -10,12 +10,14 @@ import nextConfig, { securityHeaders, vercelDeployment } from '../next.config';
 async function readPolicy(): Promise<Record<string, string>> {
     const rules = (await nextConfig.headers?.()) ?? [];
     const policy = rules.find((rule) => rule.source === '/:path*')?.headers.find((header) => header.key === 'Content-Security-Policy');
+
     if (!policy)
         throw new Error('No Content-Security-Policy header on /:path*');
 
     return Object.fromEntries(
         policy.value.split('; ').map((directive) => {
             const [name = '', ...sources] = directive.split(' ');
+
             return [name, sources.join(' ')];
         }),
     );
@@ -28,6 +30,7 @@ describe('Content Security Policy', () => {
 
     test('is left out on the dev server, keeping the other headers', () => {
         const keys = securityHeaders(true).map((header) => header.key);
+
         expect(keys).not.toContain('Content-Security-Policy');
         expect(keys).toContain('X-Frame-Options');
     });
@@ -38,6 +41,7 @@ describe('Content Security Policy', () => {
 
     test('lets the browser call only this site and the API origin, with no wildcard', async () => {
         const [self, api, ...others] = (await readPolicy())['connect-src']?.split(' ') ?? [];
+
         expect(self).toBe("'self'");
         expect(api).toMatch(/^https?:\/\/[^/*]+$/);
         expect(others).toEqual([]);

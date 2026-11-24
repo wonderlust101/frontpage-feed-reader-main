@@ -28,11 +28,13 @@ const fetchApi = (feedUrl: string | null, init?: RequestInit) =>
 describe('GET /api/fetch', () => {
     test('returns a normalized feed as JSON', async () => {
         const res = await fetchApi(`${upstream.url}/feed.xml`);
+
         expect(res.status).toBe(200);
         expect(res.headers.get('content-type')).toContain('application/json');
         expect(res.headers.get('cache-control')).toBe('public, max-age=300');
 
         const body = (await res.json()) as FetchFeedResponse;
+
         expect(body.notModified).toBe(false);
         expect(body.redirect).toBeNull();
         expect(Date.parse(body.fetchedAt)).not.toBeNaN();
@@ -47,11 +49,13 @@ describe('GET /api/fetch', () => {
 
     test('decodes the charset from the upstream Content-Type', async () => {
         const body = (await (await fetchApi(`${upstream.url}/latin1.xml`)).json()) as FetchFeedResponse;
+
         expect(body.feed.items[0]?.title).toBe('Grüße aus München');
     });
 
     test('reports redirects and the final URL', async () => {
         const body = (await (await fetchApi(`${upstream.url}/moved-permanently`)).json()) as FetchFeedResponse;
+
         expect(body.feed.url).toBe(`${upstream.url}/feed.xml`);
         expect(body.feed.requestedUrl).toBe(`${upstream.url}/moved-permanently`);
         expect(body.redirect).toMatchObject({ permanent: true, to: `${upstream.url}/feed.xml` });
@@ -59,14 +63,18 @@ describe('GET /api/fetch', () => {
 
     test('echoes upstream validators and reuses them on the next fetch', async () => {
         const first = await fetchApi(`${upstream.url}/cached.xml`);
+
         expect(first.headers.get('etag')).toBe(ETAG);
         expect(first.headers.get('last-modified')).toBe(LAST_MODIFIED);
         const firstBody = (await first.json()) as FetchFeedResponse;
+
         expect(firstBody.cache).toEqual({ etag: ETAG, lastModified: LAST_MODIFIED });
 
         const second = await fetchApi(`${upstream.url}/cached.xml`);
+
         expect(second.status).toBe(200);
         const secondBody = (await second.json()) as FetchFeedResponse;
+
         expect(secondBody.notModified).toBe(true);
         expect(secondBody.feed).toEqual(firstBody.feed);
         expect(upstream.lastHeaders['/cached.xml']?.get('if-none-match')).toBe(ETAG);
@@ -75,12 +83,14 @@ describe('GET /api/fetch', () => {
     test('answers 304 when the client already has the current version', async () => {
         await fetchApi(`${upstream.url}/cached.xml`);
         const res = await fetchApi(`${upstream.url}/cached.xml`, { headers: { 'If-None-Match': ETAG } });
+
         expect(res.status).toBe(304);
         expect(upstream.lastHeaders['/cached.xml']?.get('if-none-match')).toBe(ETAG);
     });
 
     test('a stale client validator gets the full feed', async () => {
         const res = await fetchApi(`${upstream.url}/cached.xml`, { headers: { 'If-None-Match': '"stale"' } });
+
         expect(res.status).toBe(200);
         expect(((await res.json()) as FetchFeedResponse).notModified).toBe(false);
     });
@@ -88,6 +98,7 @@ describe('GET /api/fetch', () => {
     test('refetches unconditionally when upstream says 304 but the server has no cached copy', async () => {
         const before = upstream.hits['/cached.xml'] ?? 0;
         const res = await fetchApi(`${upstream.url}/cached.xml`, { headers: { 'If-None-Match': ETAG } });
+
         // Two upstream requests: the conditional one (304) and the full refetch.
         expect((upstream.hits['/cached.xml'] ?? 0) - before).toBe(2);
         expect(res.status).toBe(304);
@@ -103,8 +114,10 @@ describe('GET /api/fetch', () => {
     ] as const)('maps %s to %i %s', async (_label, path, status, code, retryable) => {
         const target = path === null ? null : path.startsWith('/') ? `${upstream.url}${path}` : path;
         const res = await fetchApi(target);
+
         expect(res.status).toBe(status);
         const body = (await res.json()) as FeedErrorResponse;
+
         expect(body.error.code).toBe(code);
         expect(body.error.retryable).toBe(retryable);
         expect(body.error.message).toBeString();

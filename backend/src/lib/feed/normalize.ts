@@ -45,6 +45,7 @@ type FeedProblems = {
 };
 
 const BYTE_ORDER_MARK = /^﻿/;
+
 export const MAX_ITEMS = 500;
 
 const SUMMARY_MAX = 300;
@@ -69,6 +70,7 @@ const UPDATED_TAGS = ['updated', 'modified', 'date'];
 export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFeed {
     const now = opts.now ?? Date.now();
     const feedXml = xml.replace(BYTE_ORDER_MARK, '');
+
     rejectNonFeeds(feedXml);
 
     const limited = limitItems(feedXml, MAX_ITEMS);
@@ -120,11 +122,13 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
 
     const keptXml = xml.slice(0, closingTag.lastIndex);
     const hasMoreItems = /<(item|entry)[\s>]/i.test(xml.slice(closingTag.lastIndex));
+
     if (!lastKeptItem || !hasMoreItems)
         return { xml, limited: false };
 
     const isAtom = lastKeptItem[1]!.toLowerCase() === 'entry';
     const closingRootTag = isAtom ? '</feed>' : isRdf(xml) ? '</rdf:RDF>' : '</channel></rss>';
+
     return { xml: `${keptXml}\n${closingRootTag}\n`, limited: true };
 }
 
@@ -156,6 +160,7 @@ function collectItems(rawItems: ParsedItem[], ctx: ItemContext): CollectedItems 
 
     for (const [index, raw] of rawItems.entries()) {
         let item: NormalizedItem;
+
         try {
             item = normalizeItem(raw, ctx, index);
         } catch {
@@ -169,6 +174,7 @@ function collectItems(rawItems: ParsedItem[], ctx: ItemContext): CollectedItems 
         }
 
         seenIds.add(item.id);
+
         if (!item.publishedAt)
             collected.missingDates++;
 
@@ -220,6 +226,7 @@ function buildWarnings(found: FeedProblems): string[] {
 // True when the response is a normal web page (it starts like HTML and has no <rss> or <feed>),
 function looksLikeHtmlPage(xml: string): boolean {
     const head = xml.slice(0, 2048).toLowerCase();
+
     return /<!doctype html|<html[\s>]/.test(head) && !/<(rss|feed|rdf:rdf)[\s>]/.test(head);
 }
 
@@ -296,6 +303,7 @@ function joinAuthors(names: string[]): string | null {
 function firstDate(candidates: Array<string | Date | null | undefined>, now: number): string | null {
     for (const c of candidates) {
         const iso = c instanceof Date ? parseFeedDate(c.toISOString(), now) : parseFeedDate(c, now);
+
         if (iso)
             return iso;
     }
@@ -328,5 +336,6 @@ function looksTruncated(xml: string): boolean {
         .replace(/<!--[\s\S]*?-->|<\?[\s\S]*?\?>/g, '')
         .trimEnd()
         .toLowerCase();
+
     return !/<\/(rss|feed|rdf:rdf)>\s*$/.test(tail);
 }

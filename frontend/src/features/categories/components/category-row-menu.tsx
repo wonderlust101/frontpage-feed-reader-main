@@ -37,6 +37,7 @@ export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: Cat
     function handleRename(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const name = String(new FormData(event.currentTarget).get('name') ?? '');
+
         setError(onRename?.(name));
     }
 
@@ -44,6 +45,7 @@ export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: Cat
     function handleDelete(event: MouseEvent<HTMLButtonElement>) {
         const row = event.currentTarget.closest('li');
         const neighbour = (row?.nextElementSibling ?? row?.previousElementSibling)?.querySelector<HTMLElement>('a');
+
         event.currentTarget.closest<HTMLElement>('[popover]')?.hidePopover();
         onDelete?.();
         requestAnimationFrame(() => neighbour?.focus());

@@ -79,10 +79,12 @@ let loopbackAgents: Agents | undefined;
 // Turns a user-typed feed URL into a URL (adding "https://" if needed); throws `invalid_url` if it's empty, invalid, not http(s) or has a password.
 export function parseFeedUrl(input: string | undefined | null): URL {
     const raw = input?.trim();
+
     if (!raw)
         throw new BadRequestError('invalid_url', 'A feed URL is required');
 
     let url: URL;
+
     try {
         url = new URL(HAS_SCHEME.test(raw) ? raw : `https://${raw}`);
     } catch {
@@ -96,6 +98,7 @@ export function parseFeedUrl(input: string | undefined | null): URL {
         throw new BadRequestError('invalid_url', 'URLs with credentials are not allowed');
 
     url.hash = '';
+
     return url;
 }
 
@@ -128,6 +131,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
 
         if (status === 304) {
             res.destroy();
+
             return { ...fetchedFrom, notModified: true };
         }
 
@@ -141,6 +145,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
         }
 
         const bytes = await readBody(res, maxBytes);
+
         return { ...fetchedFrom, notModified: false, bytes, contentType: header(res, 'content-type') };
     } catch (err) {
         // Connection errors were already mapped per hop in request(); this catches body, decompression and timeout errors.
@@ -160,10 +165,12 @@ async function followRedirects(startUrl: URL, ctx: RequestContext, maxRedirects:
 
         if (!REDIRECT_STATUSES.has(status)) {
             const redirect = hops > 0 ? { permanent: allPermanent, from: startUrl.href, to: url.href } : null;
+
             return { res, url, redirect };
         }
 
         res.destroy();
+
         if (hops === maxRedirects)
             throw new BadGatewayError('network', 'Too many redirects', { retryable: false });
 
@@ -215,16 +222,19 @@ function request(url: URL, ctx: RequestContext) {
 // Reads one response header as a string, or null if it's missing (Node gives repeated headers as an array).
 function header(res: IncomingMessage, name: string): string | null {
     const value = res.headers[name];
+
     return (Array.isArray(value) ? value[0] : value) ?? null;
 }
 
 // Where a redirect response points, checked like the first URL: throws if the Location is missing, not http(s) or has a password.
 function nextRedirectUrl(res: IncomingMessage, currentUrl: URL): URL {
     const location = header(res, 'location');
+
     if (!location)
         throw new BadGatewayError('network', `Redirect (${res.statusCode}) without a Location header`);
 
     const next = new URL(location, currentUrl);
+
     if (!WEB_PROTOCOLS.has(next.protocol))
         throw new BadRequestError('blocked_url', 'Redirected to an unsupported protocol');
 
@@ -232,12 +242,14 @@ function nextRedirectUrl(res: IncomingMessage, currentUrl: URL): URL {
         throw new BadRequestError('blocked_url', 'Redirected to a URL with credentials');
 
     next.hash = '';
+
     return next;
 }
 
 // Reads the whole decompressed body; throws `too_large` as soon as it passes `maxBytes`, so huge responses and zip bombs can't fill memory.
 async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Array> {
     const declared = Number(header(res, 'content-length'));
+
     if (Number.isFinite(declared) && declared > maxBytes) {
         res.destroy();
         throw new PayloadTooLargeError('too_large', `Feed is larger than ${maxBytes} bytes`);
@@ -246,6 +258,7 @@ async function readBody(res: IncomingMessage, maxBytes: number): Promise<Uint8Ar
     const body = decompress(res);
     const chunks: Buffer[] = [];
     let total = 0;
+
     for await (const chunk of body as AsyncIterable<Buffer>) {
         total += chunk.byteLength;
 

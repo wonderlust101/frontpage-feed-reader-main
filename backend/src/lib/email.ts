@@ -26,15 +26,18 @@ export async function sendEmail(email: Email, config: EmailConfig): Promise<'sen
     if (!config.apiKey || !config.from) {
         if (!config.production && config.mailpitUrl) {
             await sendToMailpit(email, config.mailpitUrl, config.from);
+
             return 'captured';
         }
 
         if (config.production) {
             console.warn(`Email not sent (RESEND_API_KEY or EMAIL_FROM missing): "${email.subject}"`);
+
             return 'skipped';
         }
 
         console.log(`[email] to ${email.to}: ${email.subject}\n${email.text}`);
+
         return 'logged';
     }
 

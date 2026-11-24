@@ -16,6 +16,7 @@ const SPECIAL_DIRS = new Set(['helpers', 'fixtures', 'live']);
 function walk(dir: string): string[] {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
         const full = join(dir, entry.name);
+
         return entry.isDirectory() ? walk(full) : [full];
     });
 }
@@ -29,6 +30,7 @@ const testFiles = codeFiles.filter((f) => f.endsWith('.test.ts'));
 describe('test folder structure', () => {
     test('only known files sit at the root of test/', () => {
         const strays = codeFiles.filter((f) => !f.includes('/') && !ROOT_EXCEPTIONS.has(f) && !f.endsWith('.test.ts'));
+
         expect(strays).toEqual([]);
     });
 
@@ -37,8 +39,10 @@ describe('test folder structure', () => {
             .filter((f) => !SPECIAL_DIRS.has(f.split('/')[0]!) && !ROOT_EXCEPTIONS.has(f))
             .filter((f) => {
                 const base = f.replace(/\.test\.ts$/, '');
+
                 return !existsSync(join(SRC_DIR, `${base}.ts`)) && !existsSync(join(SRC_DIR, base, 'index.ts'));
             });
+
         expect(orphans).toEqual([]);
     });
 
@@ -48,6 +52,7 @@ describe('test folder structure', () => {
 
     test('network tests live in live/ and are named *.live.test.ts', () => {
         const misnamed = testFiles.filter((f) => f.startsWith('live/') !== f.endsWith('.live.test.ts'));
+
         expect(misnamed).toEqual([]);
     });
 
@@ -55,6 +60,7 @@ describe('test folder structure', () => {
         const ungated = testFiles
             .filter((f) => f.startsWith('live/'))
             .filter((f) => !readFileSync(join(TEST_DIR, f), 'utf8').includes('skipIf(!process.env.LIVE_FEEDS)'));
+
         expect(ungated).toEqual([]);
     });
 
@@ -74,6 +80,7 @@ describe('feed fixtures', () => {
         const onDisk = readdirSync(join(FIXTURES_DIR, 'curated'))
             .filter((f) => f !== 'manifest.json')
             .sort();
+
         expect(onDisk).toEqual(listed);
     });
 
@@ -84,6 +91,7 @@ describe('feed fixtures', () => {
             .map((f) => readFileSync(join(TEST_DIR, f), 'utf8'))
             .join('\n');
         const unused = readdirSync(join(FIXTURES_DIR, 'odd')).filter((f) => !sources.includes(`odd/${f}`) && !helperSources.includes(`odd/${f}`));
+
         expect(unused).toEqual([]);
     });
 });

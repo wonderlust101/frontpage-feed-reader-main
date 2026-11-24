@@ -69,6 +69,7 @@ function parseCustomTitle(value: unknown): string | null {
         throw new BadRequestError('bad_request', 'customTitle must be a string or null');
 
     const title = value.trim();
+
     if (title.length > MAX_CUSTOM_TITLE_LENGTH)
         throw new BadRequestError('bad_request', `customTitle must be at most ${MAX_CUSTOM_TITLE_LENGTH} characters`);
 

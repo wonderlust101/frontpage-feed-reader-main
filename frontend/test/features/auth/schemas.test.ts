@@ -61,6 +61,7 @@ describe('verification code', () => {
 describe('change password', () => {
     test('needs a new password that differs from the current one', () => {
         const result = changePasswordSchema.safeParse({ currentPassword: 'same-password', newPassword: 'same-password', revokeOtherSessions: true });
+
         expect(result.success).toBe(false);
         expect(result.error?.issues[0]?.path).toEqual(['newPassword']);
     });

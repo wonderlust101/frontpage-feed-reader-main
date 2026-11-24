@@ -31,6 +31,7 @@ export function ForgotPasswordForm() {
     const [sentTo, setSentTo] = useState<string | null>(null);
     const [returning, setReturning] = useState(false);
     const { data: session } = authClient.useSession();
+
     useAuthHeading(sentTo ? FORGOT_PASSWORD_HEADINGS.sent : null);
     const {
         register,
@@ -45,6 +46,7 @@ export function ForgotPasswordForm() {
 
     useEffect(() => {
         const email = readSignInEmail() ?? knownEmail;
+
         if (email && !getValues('email'))
             setValue('email', email);
     }, [knownEmail, getValues, setValue]);
@@ -57,10 +59,13 @@ export function ForgotPasswordForm() {
     async function requestLink({ email }: EmailValues) {
         const redirectTo = `${window.location.origin}/reset-password`;
         const { failure } = await authRequest((fetchOptions) => authClient.requestPasswordReset({ email, redirectTo }, fetchOptions));
+
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
+
             return;
         }
+
         rememberSignInEmail(email);
         setSentTo(email);
     }

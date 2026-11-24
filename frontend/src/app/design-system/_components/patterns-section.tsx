@@ -40,6 +40,7 @@ export function PatternsSection() {
                     <ul className="rule-t">
                         {SAMPLE_ITEMS.map((item) => {
                             const category = getCategory(item.category);
+
                             return (
                                 <FeedItemRow
                                     key={item.id}

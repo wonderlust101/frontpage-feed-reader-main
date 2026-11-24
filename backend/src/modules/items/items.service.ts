@@ -65,12 +65,14 @@ const SUMMARY_COLUMNS = {
 // Throws `feed_not_found` or `category_not_found` (404) when the page is empty because the feed or category isn't the reader's.
 export async function listItems(db: Database, userId: string, query: ItemListQuery, now = new Date()): Promise<ItemListResponse> {
     const rows = await selectPage(db, userId, query);
+
     if (rows.length === 0)
         await assertScopeBelongsToReader(db, userId, query.scope);
 
     // selectPage reads one row more than a page: if it came back, there is a next page, starting after the page's last item.
     const lastShown = rows.length > query.limit ? rows[query.limit - 1] : undefined;
     const nextCursor = lastShown ? encodeCursor({ order: query.order, sortAt: lastShown.cursorSortAt, id: lastShown.id }) : null;
+
     return { items: rows.slice(0, query.limit).map((row) => toItemSummary(row, now)), nextCursor };
 }
 
@@ -98,8 +100,10 @@ export async function countItems(db: Database, userId: string): Promise<ItemCoun
     const total: ItemCount = { items: 0, unread: 0 };
     // A Map keeps insertion order: the categories first, then Uncategorized (null), added only when a feed has no category.
     const byCategory = new Map<string | null, ItemCount>(readerCategories.map((category) => [category.id, { items: 0, unread: 0 }]));
+
     for (const feed of feedCounts) {
         const sum = byCategory.get(feed.categoryId) ?? { items: 0, unread: 0 };
+
         byCategory.set(feed.categoryId, { items: sum.items + feed.items, unread: sum.unread + feed.unread });
         total.items += feed.items;
         total.unread += feed.unread;
@@ -122,6 +126,7 @@ export async function getItem(db: Database, userId: string, id: string, now = ne
         .innerJoin(feeds, eq(feeds.id, items.feedId))
         .leftJoin(itemReadStates, and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId)))
         .where(eq(items.id, id));
+
     if (!row)
         throw new NotFoundError('not_found', 'Item not found');
 
@@ -191,8 +196,10 @@ function scopeCondition(scope: ItemScope): SQL | undefined {
 async function assertScopeBelongsToReader(db: Database, userId: string, scope: ItemScope): Promise<void> {
     if (scope.kind === 'category' && scope.categoryId !== null) {
         await assertOwnCategory(db, userId, scope.categoryId);
+
         return;
     }
+
     if (scope.kind !== 'feed')
         return;
 
@@ -200,6 +207,7 @@ async function assertScopeBelongsToReader(db: Database, userId: string, scope: I
         .select({ id: subscriptions.id })
         .from(subscriptions)
         .where(and(eq(subscriptions.userId, userId), eq(subscriptions.feedId, scope.feedId)));
+
     if (!subscription)
         throw new NotFoundError('feed_not_found', 'Feed not found');
 }

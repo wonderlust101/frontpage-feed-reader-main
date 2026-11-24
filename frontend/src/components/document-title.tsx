@@ -11,7 +11,9 @@ const SITE_NAME = 'Frontpage';
 export function DocumentTitle({ title }: { title: string }) {
     useEffect(() => {
         const previous = document.title;
+
         document.title = `${title} · ${SITE_NAME}`;
+
         return () => {
             document.title = previous;
         };

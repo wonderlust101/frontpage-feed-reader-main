@@ -38,12 +38,15 @@ export function authErrorMessage(failure: AuthFailure): string {
 
     if (failure.status === 429) {
         const seconds = failure.retryAfterSeconds;
+
         if (!seconds)
             return TOO_MANY_REQUESTS;
 
         const wait = seconds === 1 ? '1 second' : `${seconds} seconds`;
+
         return `Too many tries in a row. Try again in ${wait}.`;
     }
+
     if (failure.status >= 500)
         return UNAVAILABLE;
 

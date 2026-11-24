@@ -20,6 +20,7 @@ export type Library = {
 // Whether another category already has `name`, ignoring case and outer spaces; `exceptId` skips the one being renamed.
 export function isNameTaken(library: Library, name: string, exceptId?: string): boolean {
     const wanted = name.trim().toLowerCase();
+
     return library.categories.some((category) => category.id !== exceptId && category.name.toLowerCase() === wanted);
 }
 
@@ -31,6 +32,7 @@ export function updateCategory(library: Library, id: string, changes: Partial<Pi
 // Removes a category; its feeds move to Uncategorized, as deleting a category does in the database.
 export function deleteCategory(library: Library, id: string): Library {
     const removed = library.categories.find((category) => category.id === id);
+
     return {
         categories: library.categories.filter((category) => category.id !== id),
         uncategorized: [...library.uncategorized, ...(removed?.feeds ?? [])],

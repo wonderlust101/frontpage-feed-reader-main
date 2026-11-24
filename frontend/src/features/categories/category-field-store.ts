@@ -36,7 +36,9 @@ function subscribe(listener: () => void) {
             listener();
         }
     };
+
     window.addEventListener('storage', onStorage);
+
     return () => {
         listeners.delete(listener);
         window.removeEventListener('storage', onStorage);
@@ -46,11 +48,13 @@ function subscribe(listener: () => void) {
 // Reads the saved JSON (or the in-memory copy when storage is blocked); returns the same object until it changes.
 function readChoices(): FieldChoices {
     let raw = memoryRaw;
+
     try {
         raw = localStorage.getItem(STORAGE_KEY);
     } catch {
         // Storage can be unavailable in private windows; fall back to this visit's choices.
     }
+
     if (raw !== cached.raw)
         cached = { raw, choices: parseChoices(raw) };
 
@@ -61,6 +65,7 @@ function readChoices(): FieldChoices {
 function parseChoices(raw: string | null): FieldChoices {
     try {
         const parsed: unknown = raw ? JSON.parse(raw) : {};
+
         if (!parsed || typeof parsed !== 'object')
             return NO_CHOICES;
 
@@ -75,11 +80,13 @@ function parseChoices(raw: string | null): FieldChoices {
 // Saves one category's choice in memory and, when allowed, in localStorage, then re-renders every user of the hook.
 function storeChoice(id: string, fieldId: FieldId) {
     memoryRaw = JSON.stringify({ ...readChoices(), [id]: fieldId });
+
     try {
         localStorage.setItem(STORAGE_KEY, memoryRaw);
     } catch {
         // The in-memory copy still holds for this visit.
     }
+
     applyCategoryFields({ [id]: fieldId });
     listeners.forEach((listener) => listener());
 }

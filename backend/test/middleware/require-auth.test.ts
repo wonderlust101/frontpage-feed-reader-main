@@ -23,6 +23,7 @@ describe('currentUser', () => {
     test('returns the user requireAuth stored', () => {
         const user = { id: 'u1', email: 'a@example.com' };
         const res = { locals: { auth: { user } } } as unknown as Response;
+
         expect(currentUser(res)).toBe(user as never);
     });
 

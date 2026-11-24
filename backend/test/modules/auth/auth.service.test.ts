@@ -33,6 +33,7 @@ afterAll(async () => {
 // Signs up a new user and returns the Cookie header for their session.
 async function signUp(email: string) {
     const { headers } = await auth.api.signUpEmail({ body: { email, password: PASSWORD, name: 'Ada' }, returnHeaders: true });
+
     return cookieFrom(headers);
 }
 
@@ -52,6 +53,7 @@ function lastEmailTo(to: string) {
 // The reset token in the last reset email to `to` (its link ends ".../reset-password/<token>?callbackURL=...").
 function resetTokenFor(to: string) {
     const link = lastEmailTo(to)?.text.match(/https?:\/\/\S+/)?.[0];
+
     return new URL(link!).pathname.split('/').at(-1)!;
 }
 
@@ -70,12 +72,14 @@ function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 
         AUTH_COOKIE_PREFIX: env.AUTH_COOKIE_PREFIX,
         WEB_ORIGINS: env.WEB_ORIGINS,
     };
+
     Object.assign(env, {
         NODE_ENV: 'production',
         AUTH_SECRET: 'a-long-enough-secret-for-the-guard-0123',
         AUTH_COOKIE_DOMAIN: 'readfrontpage.com',
         ...overrides,
     });
+
     try {
         return createAuth(testDb.db, async () => {});
     } finally {
@@ -123,8 +127,10 @@ describe('production cookies and rate limits', () => {
     test('the session cookie is set for the whole shared domain, so the site sees it too', async () => {
         const prodAuth = createInProduction();
         const res = await prodAuth.handler(signInRequest('nobody-yet@example.com', '203.0.113.1', 'sign-up/email', { name: 'Ada' }));
+
         expect(res.status).toBe(200);
         const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
+
         expect(sessionCookie).toContain('Domain=readfrontpage.com');
     });
 
@@ -132,6 +138,7 @@ describe('production cookies and rate limits', () => {
         const stagingAuth = createInProduction({ AUTH_COOKIE_DOMAIN: 'staging.readfrontpage.com', AUTH_COOKIE_PREFIX: 'frontpage-staging' });
         const res = await stagingAuth.handler(signInRequest('staging@example.com', '203.0.113.2', 'sign-up/email', { name: 'Ada' }));
         const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
+
         expect(sessionCookie).toStartWith('frontpage-staging.session_token=');
         expect(sessionCookie).toContain('Domain=staging.readfrontpage.com');
     });
@@ -139,6 +146,7 @@ describe('production cookies and rate limits', () => {
     test('each reader (X-Real-IP) gets their own sign-in limit', async () => {
         const prodAuth = createInProduction();
         const statuses = [];
+
         for (let i = 0; i < 4; i += 1)
             statuses.push((await prodAuth.handler(signInRequest('ada@example.com', '203.0.113.10'))).status);
 
@@ -150,10 +158,13 @@ describe('production cookies and rate limits', () => {
         const prodAuth = createInProduction();
         const SESSION_CHECKS = 150;
         const statuses = new Set<number>();
+
         for (let i = 0; i < SESSION_CHECKS; i += 1) {
             const res = await prodAuth.handler(new Request(`${API}/api/auth/get-session`, { headers: { 'x-real-ip': '198.51.100.1' } }));
+
             statuses.add(res.status);
         }
+
         expect(statuses.has(429)).toBe(false);
     });
 });
@@ -162,14 +173,17 @@ describe('sign up and sign in', () => {
     test('sign-up creates a user and a session cookie that getSession accepts', async () => {
         const cookie = await signUp('ada@example.com');
         const session = await auth.api.getSession({ headers: new Headers({ cookie }) });
+
         expect(session?.user.email).toBe('ada@example.com');
         expect(session?.user.name).toBe('Ada');
     });
 
     test('checking a session is one query (the session joined to its user)', async () => {
         const cookie = await signUp('joan@example.com');
+
         testDb.queries.length = 0;
         const session = await auth.api.getSession({ headers: new Headers({ cookie }) });
+
         expect(session?.user.email).toBe('joan@example.com');
         expect(testDb.queries).toHaveLength(1);
     });
@@ -186,12 +200,14 @@ describe('sign up and sign in', () => {
     test('sign-in works with the right password and fails with a wrong one', async () => {
         await signUp('grace@example.com');
         const ok = await auth.api.signInEmail({ body: { email: 'grace@example.com', password: PASSWORD } });
+
         expect(ok.user.email).toBe('grace@example.com');
         await expect(auth.api.signInEmail({ body: { email: 'grace@example.com', password: 'wrong password' } })).rejects.toThrow();
     });
 
     test('sign-out ends the session', async () => {
         const cookie = await signUp('leaving@example.com');
+
         await auth.api.signOut({ headers: new Headers({ cookie }) });
         expect(await auth.api.getSession({ headers: new Headers({ cookie }) })).toBeNull();
     });
@@ -200,6 +216,7 @@ describe('sign up and sign in', () => {
 describe('password reset', () => {
     test('a reset link sets a new password and signs out existing sessions', async () => {
         const cookie = await signUp('forgetful@example.com');
+
         await auth.api.requestPasswordReset({ body: { email: 'forgetful@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
 
         expect(lastEmailTo('forgetful@example.com')?.text).toContain('/api/auth/reset-password/');
@@ -210,6 +227,7 @@ describe('password reset', () => {
         expect(await auth.api.getSession({ headers: new Headers({ cookie }) })).toBeNull();
         await expect(auth.api.signInEmail({ body: { email: 'forgetful@example.com', password: PASSWORD } })).rejects.toThrow();
         const signedIn = await auth.api.signInEmail({ body: { email: 'forgetful@example.com', password: NEW_PASSWORD } });
+
         expect(signedIn.user.email).toBe('forgetful@example.com');
     });
 
@@ -222,6 +240,7 @@ describe('password reset', () => {
         await signUp('once@example.com');
         await auth.api.requestPasswordReset({ body: { email: 'once@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
         const token = resetTokenFor('once@example.com');
+
         await auth.api.resetPassword({ body: { token, newPassword: NEW_PASSWORD } });
         await expect(auth.api.resetPassword({ body: { token, newPassword: 'another new password' } })).rejects.toThrow();
     });
@@ -244,6 +263,7 @@ describe('email verification by code', () => {
         expect(response.status).toBe(true);
         expect(response.token).toBeTruthy();
         const session = await auth.api.getSession({ headers: new Headers({ cookie: cookieFrom(headers) }) });
+
         expect(session?.user.email).toBe('verify@example.com');
         expect(session?.user.emailVerified).toBe(true);
     });
@@ -251,6 +271,7 @@ describe('email verification by code', () => {
     test('a wrong code fails with INVALID_OTP', async () => {
         await signUp('typo@example.com');
         const otp = wrongCode(codeFor('typo@example.com')!);
+
         await expect(auth.api.verifyEmailOTP({ body: { email: 'typo@example.com', otp } })).rejects.toMatchObject({ body: { code: 'INVALID_OTP' } });
     });
 
@@ -265,6 +286,7 @@ describe('email verification by code', () => {
     test('after 3 wrong codes even the right one fails with TOO_MANY_ATTEMPTS', async () => {
         await signUp('guesser@example.com');
         const otp = codeFor('guesser@example.com')!;
+
         for (let attempt = 0; attempt < 3; attempt++)
             await expect(auth.api.verifyEmailOTP({ body: { email: 'guesser@example.com', otp: wrongCode(otp) } })).rejects.toThrow();
 
@@ -273,6 +295,7 @@ describe('email verification by code', () => {
 
     test('asking for a code for an unknown email sends nothing and reveals nothing', async () => {
         const result = await auth.api.sendVerificationOTP({ body: { email: 'ghost@example.com', type: 'email-verification' } });
+
         expect(result.success).toBe(true);
         expect(lastEmailTo('ghost@example.com')).toBeUndefined();
     });
@@ -281,6 +304,7 @@ describe('email verification by code', () => {
         await signUp('hashed@example.com');
         const code = codeFor('hashed@example.com')!;
         const rows = await testDb.db.query.verifications.findMany();
+
         expect(rows.some((row) => row.value.includes(code))).toBe(false);
     });
 
@@ -292,6 +316,7 @@ describe('email verification by code', () => {
                 body: JSON.stringify({ email: 'ada@example.com', otp: '123456' }),
             }),
         );
+
         expect(res.status).toBe(404);
     });
 });
@@ -299,6 +324,7 @@ describe('email verification by code', () => {
 describe('change password', () => {
     test('a wrong current password fails with INVALID_PASSWORD', async () => {
         const cookie = await signUp('changer@example.com');
+
         await expect(
             auth.api.changePassword({ body: { currentPassword: 'not my password', newPassword: NEW_PASSWORD }, headers: new Headers({ cookie }) }),
         ).rejects.toMatchObject({ body: { code: 'INVALID_PASSWORD' } });
@@ -320,6 +346,7 @@ describe('change password', () => {
 
         // Better Auth swaps this device's session for a new one when it revokes the others.
         const thisDeviceNow = cookieFrom(headers) || thisDevice;
+
         expect(await auth.api.getSession({ headers: new Headers({ cookie: otherDevice }) })).toBeNull();
         expect((await auth.api.getSession({ headers: new Headers({ cookie: thisDeviceNow }) }))?.user.email).toBe('two-devices@example.com');
     });
@@ -335,6 +362,7 @@ describe('untrusted return addresses', () => {
                 body: JSON.stringify({ email: 'phished@example.com', redirectTo: 'https://evil.example/reset-password' }),
             }),
         );
+
         expect(res.status).toBe(403);
         expect(await res.json()).toMatchObject({ code: 'INVALID_REDIRECT_URL' });
         expect(lastEmailTo('phished@example.com')?.text ?? '').not.toContain('evil.example');
@@ -344,6 +372,7 @@ describe('untrusted return addresses', () => {
 describe('verificationCodeEmail', () => {
     test('puts the code in the text and HTML but not in the subject', () => {
         const email = verificationCodeEmail('ada@example.com', '123456');
+
         expect(email.to).toBe('ada@example.com');
         expect(email.text).toContain('123456');
         expect(email.html).toContain('123456');
@@ -356,6 +385,7 @@ describe('passwordResetEmail', () => {
 
     test('escapes the name and link in the HTML and keeps the raw link in the text', () => {
         const email = passwordResetEmail({ email: 'ada@example.com', name: '<b>Ada</b>' }, URL_WITH_QUERY);
+
         expect(email.to).toBe('ada@example.com');
         expect(email.html).toContain('Hi &lt;b&gt;Ada&lt;/b&gt;,');
         expect(email.html).toContain('href="http://localhost:4000/api/auth/reset-password/abc?callbackURL=http%3A%2F%2Fx&amp;a=1"');
@@ -365,6 +395,7 @@ describe('passwordResetEmail', () => {
 
     test('greets with just "Hi," when the user has no name', () => {
         const email = passwordResetEmail({ email: 'anon@example.com', name: '' }, URL_WITH_QUERY);
+
         expect(email.text.startsWith('Hi,\n')).toBe(true);
     });
 });

@@ -38,6 +38,7 @@ const RESULT_LINKS: FrameLinks = { switchLink: null, guestLink: false };
 export function ChangePasswordForm() {
     const [changed, setChanged] = useState<{ signedOutOthers: boolean } | null>(null);
     const [needsSignIn, setNeedsSignIn] = useState(false);
+
     useAuthHeading(changed ? CHANGE_PASSWORD_HEADINGS.changed : null);
     useAuthFrameLinks(changed ? RESULT_LINKS : null);
     const {
@@ -54,14 +55,18 @@ export function ChangePasswordForm() {
 
     async function changePassword(values: ChangePasswordValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.changePassword(values, fetchOptions));
+
         if (failure) {
             resetField('currentPassword');
             resetField('newPassword');
             setNeedsSignIn(Boolean(failure.code && SIGN_IN_AGAIN_CODES.includes(failure.code)));
             const field = failure.code === 'INVALID_PASSWORD' ? 'currentPassword' : 'root';
+
             setError(field, { message: authErrorMessage(failure) }, { shouldFocus: true });
+
             return;
         }
+
         setChanged({ signedOutOthers: values.revokeOtherSessions });
     }
 

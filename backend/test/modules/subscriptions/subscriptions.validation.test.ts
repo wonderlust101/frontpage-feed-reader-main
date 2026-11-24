@@ -17,6 +17,7 @@ function rejection(call: () => unknown): HttpError {
 
         throw err;
     }
+
     throw new Error('expected the call to throw');
 }
 
@@ -68,11 +69,13 @@ describe('parseUpdateSubscriptionRequest', () => {
 
     test('accepts a title of exactly the maximum length, measured after trimming', () => {
         const title = 'x'.repeat(MAX_CUSTOM_TITLE_LENGTH);
+
         expect(parseUpdateSubscriptionRequest({ customTitle: ` ${title} ` })).toEqual({ customTitle: title });
     });
 
     test('a title one character too long → 400 bad_request', () => {
         const err = rejection(() => parseUpdateSubscriptionRequest({ customTitle: 'x'.repeat(MAX_CUSTOM_TITLE_LENGTH + 1) }));
+
         expect(err).toMatchObject({ status: 400, code: 'bad_request', message: 'customTitle must be at most 200 characters' });
     });
 

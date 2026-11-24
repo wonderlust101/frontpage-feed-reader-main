@@ -56,12 +56,14 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
             'AUTH_URL is required in production: password-reset links are built from it (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
         );
     }
+
     // Without an allowed origin, the browser's CORS check and Better Auth's origin check would refuse every sign-in.
     if (env.NODE_ENV === 'production' && env.WEB_ORIGINS.length === 0) {
         throw new Error(
             'WEB_ORIGIN is required in production: the site that may call the API (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
         );
     }
+
     // The secret signs session cookies: a missing or short one would let someone forge a sign-in.
     if (env.NODE_ENV === 'production' && (env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH)
         throw new Error(`AUTH_SECRET is required in production and must be at least ${MIN_SECRET_LENGTH} characters`);

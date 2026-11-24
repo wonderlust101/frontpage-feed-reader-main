@@ -10,5 +10,6 @@ export async function healthController(_req: Request, res: Response) {
         database: database.status,
         ...(database.error && { error: database.error }),
     };
+
     res.json(body);
 }

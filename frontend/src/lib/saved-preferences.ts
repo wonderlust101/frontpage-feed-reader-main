@@ -30,5 +30,6 @@ export function savedPreferencesScript(preferences: readonly SavedPreference[]):
                 `v=localStorage.getItem(${JSON.stringify(key)});if(${JSON.stringify(values)}.indexOf(v)>-1)d.dataset.${attribute}=v;`,
         )
         .join('');
+
     return `try{var d=document.documentElement,v;${copies}}catch(e){}`;
 }

@@ -18,9 +18,11 @@ export function startFeedServer() {
         hostname: '127.0.0.1',
         async fetch(req) {
             const { pathname } = new URL(req.url);
+
             hits[pathname] = (hits[pathname] ?? 0) + 1;
             lastHeaders[pathname] = req.headers;
             const override = served.get(pathname);
+
             if (override)
                 return new Response(override.body, override.init);
 
@@ -48,6 +50,7 @@ export function startFeedServer() {
                     return new Response(null, { status: 302, headers: { Location: 'file:///etc/passwd' } });
                 case '/slow':
                     await Bun.sleep(1_000);
+
                     return new Response(rss, { headers: xml });
                 case '/slow-body':
                     return new Response(

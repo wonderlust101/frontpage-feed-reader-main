@@ -103,12 +103,14 @@ export function AppShellDemo() {
         // Takes the last edit back on Ctrl/⌘ + Z while its toast shows, outside text fields.
         function undoOnShortcut(event: KeyboardEvent) {
             const inField = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
+
             if (toast && !inField && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
                 event.preventDefault();
                 undo(toast.undo);
             }
         }
         window.addEventListener('keydown', undoOnShortcut);
+
         return () => window.removeEventListener('keydown', undoOnShortcut);
     }, [toast]);
 
@@ -128,6 +130,7 @@ export function AppShellDemo() {
     function rowMenu(shellCategory: ShellCategory) {
         if (!isReader) {
             const guestCategory = CATEGORIES.find((entry) => `#category-${entry.id}` === shellCategory.href);
+
             return (
                 guestCategory && (
                     <CategoryRowMenu
@@ -137,7 +140,9 @@ export function AppShellDemo() {
                 )
             );
         }
+
         const category = library.categories.find((candidate) => categoryHref(candidate.id) === shellCategory.href);
+
         return (
             category && (
                 <CategoryRowMenu
@@ -153,6 +158,7 @@ export function AppShellDemo() {
                             return `You already have a category called ${name.trim()}.`;
 
                         change(updateCategory(library, category.id, { name: name.trim() }), `Renamed ${category.name} to ${name.trim()}.`);
+
                         return undefined;
                     }}
                     onDelete={() => change(deleteCategory(library, category.id), `Deleted ${category.name}.`)}
@@ -238,6 +244,7 @@ function searchSamples(query: string, categoryHref: string | null): SearchResult
     const needle = query.toLowerCase();
     const categoryId = categoryHref ? CATEGORY_BY_HREF.get(categoryHref) : undefined;
     const inScope = (id: CategoryId) => !categoryHref || id === categoryId;
+
     return {
         articles: SAMPLE_ITEMS.filter((item) => inScope(item.category) && item.title.toLowerCase().includes(needle)).map((item) => ({
             href: '#patterns',

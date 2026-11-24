@@ -26,13 +26,16 @@ beforeEach(async () => {
 // Inserts a reader and returns their id.
 async function newUser(): Promise<string> {
     const id = crypto.randomUUID();
+
     await testDb.db.insert(users).values({ id, name: 'Reader', email: `${id}@example.com` });
+
     return id;
 }
 
 // Inserts a category for `userId` and returns its id.
 async function newCategory(userId: string): Promise<string> {
     const [row] = await testDb.db.insert(categories).values({ userId, name: 'Design', position: 0 }).returning({ id: categories.id });
+
     return row!.id;
 }
 

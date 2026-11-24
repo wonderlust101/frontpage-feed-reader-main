@@ -72,6 +72,7 @@ export function VerifyEmailForm() {
     const [sentTo, setSentTo] = useState<string | null>(null);
     const [changingEmail, setChangingEmail] = useState(false);
     const signedIn = Boolean(session);
+
     useAuthFrameLinks(signedIn ? SIGNED_IN_LINKS : null);
 
     // Next keeps a visited page alive (hidden) after the reader leaves; forget this visit's code so the next visit
@@ -123,10 +124,13 @@ function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
 
     async function sendCode({ email }: EmailValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
+
             return;
         }
+
         onSent(email);
     }
 
@@ -159,6 +163,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
     const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
     const [resending, setResending] = useState(false);
     const [resentCount, setResentCount] = useState(0);
+
     useAuthHeading(codeStepHeading(email));
     const {
         register,
@@ -182,16 +187,21 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
             return;
 
         const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+
         return () => clearTimeout(timer);
     }, [cooldown]);
 
     async function verify({ code }: z.output<typeof codeSchema>) {
         const result = await authRequest((fetchOptions) => authClient.emailOtp.verifyEmail({ email, otp: code }, fetchOptions));
+
         if (result.failure) {
             const field = result.failure.code && CODE_FIELD_CODES.includes(result.failure.code) ? 'code' : 'root';
+
             setError(field, { message: authErrorMessage(result.failure) }, { shouldFocus: true });
+
             return;
         }
+
         forgetPendingEmail();
         router.replace('/user');
         router.refresh();
@@ -201,11 +211,15 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
         clearErrors('root');
         setResending(true);
         const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+
         setResending(false);
+
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
+
             return;
         }
+
         rememberPendingEmail(email);
         setResentCount((count) => count + 1);
         setCooldown(RESEND_COOLDOWN_SECONDS);
@@ -242,6 +256,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
                     onChange: (event: { target: { value: string }; nativeEvent?: { inputType?: string } }) => {
                         const digits = event.target.value.replace(/\s/g, '');
                         const typed = event.nativeEvent?.inputType?.startsWith('insertText') || event.nativeEvent?.inputType?.startsWith('delete');
+
                         if (!typed && digits.length === CODE_LENGTH && /^\d+$/.test(digits) && !isSubmitting)
                             void handleSubmit(verify)();
                     },

@@ -18,6 +18,7 @@ export function generateStaticParams() {
 // Titles the page with the category's name.
 export async function generateMetadata({ params }: PageProps<'/guest/c/[category]'>): Promise<Metadata> {
     const { category: id } = await params;
+
     return { title: GUEST_CATEGORIES.find((category) => category.id === id)?.name ?? 'Guest' };
 }
 
@@ -35,6 +36,7 @@ export default function GuestCategoryPage({ params }: PageProps<'/guest/c/[categ
 async function GuestCategory({ params }: Pick<PageProps<'/guest/c/[category]'>, 'params'>) {
     const { category: id } = await params;
     const category = GUEST_CATEGORIES.find((entry) => entry.id === id);
+
     if (!category)
         notFound();
 

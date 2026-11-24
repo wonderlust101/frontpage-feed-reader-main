@@ -32,17 +32,20 @@ describe('detectCharset', () => {
 describe('decodeFeed', () => {
     test('decodes Windows-1252 smart quotes and the euro sign', () => {
         const xml = decodeFeed(readFixture('odd/windows-1252.xml'));
+
         expect(xml).toContain('“Smart” Quotes — Café');
         expect(xml).toContain('It’s naïve – €5');
     });
 
     test('decodes Latin-1 declared only in the HTTP header', () => {
         const xml = decodeFeed(readFixture('odd/iso-8859-1-header-only.xml'), 'application/rss+xml; charset=ISO-8859-1');
+
         expect(xml).toContain('Grüße aus München');
     });
 
     test('strips the UTF-8 BOM', () => {
         const xml = decodeFeed(readFixture('odd/bom-utf8.xml'));
+
         expect(xml.startsWith('<?xml')).toBe(true);
         expect(xml).toContain('😀');
     });
@@ -51,6 +54,7 @@ describe('decodeFeed', () => {
         // UTF-16LE "<?xml" is 3C 00 3F 00 …: recognizable from the byte pattern alone.
         const xml = '<?xml version="1.0" encoding="UTF-16"?><rss><channel><title>Ünïcödé</title></channel></rss>';
         const bytes = new Uint8Array([...xml].flatMap((ch) => [ch.charCodeAt(0) & 0xff, ch.charCodeAt(0) >> 8]));
+
         expect(decodeFeed(bytes)).toBe(xml);
     });
 });

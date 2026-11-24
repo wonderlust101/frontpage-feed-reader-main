@@ -89,20 +89,24 @@ const TWO_DIGIT_YEAR_PIVOT = 70;
 export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
     const input = value?.replace(/\s+/g, ' ').trim() ?? '';
     const groups = input.match(ISO)?.groups ?? input.match(RFC822)?.groups;
+
     if (!groups)
         return null;
 
     const parts = toDateParts(groups);
     const offset = toOffsetMinutes(groups.zone);
+
     if (!parts || offset === undefined)
         return null;
 
     const time = toEpochMs(parts, offset);
+
     if (time === null)
         return null;
 
     // Not before 1995 (older than RSS itself) and at most a day ahead (publishers' clocks and time zones drift).
     const isRealisticPublishTime = time >= EARLIEST_FEED_TIME && time <= now + FUTURE_SLACK_MS;
+
     if (!isRealisticPublishTime)
         return null;
 
@@ -112,6 +116,7 @@ export function parseFeedDate(value: string | null | undefined, now: number = Da
 // The matched pieces of a date as numbers; undefined if the month isn't a real one (e.g. "Octopus").
 function toDateParts(groups: Record<string, string | undefined>): DateParts | undefined {
     const month = groups.month && toMonth(groups.month);
+
     if (!groups.year || !groups.day || !month)
         return undefined;
 
@@ -133,10 +138,12 @@ function toMonth(value: string): number | undefined {
         return Number(value);
 
     const name = value.toLowerCase().replace(/\.$/, '');
+
     if (name.length < 3)
         return undefined;
 
     const index = MONTHS.findIndex((month) => month.startsWith(name));
+
     return index >= 0 ? index + 1 : undefined;
 }
 
@@ -147,19 +154,23 @@ function toOffsetMinutes(zone: string | undefined): number | undefined {
         return 0;
 
     const namedHours = ZONE_OFFSET_HOURS[zone.toUpperCase()];
+
     if (namedHours !== undefined)
         return namedHours * 60;
 
     const numeric = zone.match(NUMERIC_OFFSET)?.groups;
+
     if (!numeric)
         return undefined;
 
     const hours = Number(numeric.hours);
     const extraMinutes = Number(numeric.minutes ?? 0);
+
     if (hours > MAX_OFFSET_HOURS || extraMinutes > 59)
         return undefined;
 
     const minutes = hours * 60 + extraMinutes;
+
     return numeric.sign === '-' ? -minutes : minutes;
 }
 
@@ -183,6 +194,7 @@ function toEpochMs(parts: DateParts, offsetMinutes: number): number | null {
 // Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
 function toFullYear(value: string): number {
     const year = Number(value);
+
     if (year >= 100)
         return year;
 

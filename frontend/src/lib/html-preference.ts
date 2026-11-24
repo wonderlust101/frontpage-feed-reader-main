@@ -17,6 +17,7 @@ export function createHtmlPreference<const Preference extends SavedPreference>({
     // Registers a listener for changes made through any switch for this preference; returns the unsubscribe function.
     function subscribe(listener: () => void) {
         listeners.add(listener);
+
         return () => listeners.delete(listener);
     }
 
@@ -24,6 +25,7 @@ export function createHtmlPreference<const Preference extends SavedPreference>({
     function read(): Choice {
         try {
             const stored = localStorage.getItem(storageKey);
+
             return values.find((value) => value === stored) ?? 'auto';
         } catch {
             return memoryChoice;
@@ -33,6 +35,7 @@ export function createHtmlPreference<const Preference extends SavedPreference>({
     // Saves the choice in memory and, when allowed, in localStorage, then notifies every switch to re-render.
     function store(choice: Choice) {
         memoryChoice = choice;
+
         try {
             if (choice === 'auto') {
                 localStorage.removeItem(storageKey);
@@ -42,6 +45,7 @@ export function createHtmlPreference<const Preference extends SavedPreference>({
         } catch {
             // Storage can be unavailable in private windows; the in-memory choice still holds for this visit.
         }
+
         listeners.forEach((listener) => listener());
     }
 

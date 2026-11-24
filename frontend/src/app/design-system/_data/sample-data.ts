@@ -105,6 +105,7 @@ export const SAMPLE_ITEMS: SampleItem[] = [
 // Looks up a category by id; throws when the id is unknown, which only happens if the sample data is edited wrongly.
 export function getCategory(id: CategoryId): Category {
     const category = CATEGORIES.find((candidate) => candidate.id === id);
+
     if (!category)
         throw new Error(`Unknown category: ${id}`);
 

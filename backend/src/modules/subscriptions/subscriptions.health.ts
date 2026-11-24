@@ -18,9 +18,11 @@ export function deriveHealth(feed: FeedHealthInput, now: Date): FeedHealth {
     if (feed.lastErrorCode) {
         const msSinceSuccess = feed.lastSuccessAt ? now.getTime() - feed.lastSuccessAt.getTime() : Infinity;
         const isDead = feed.consecutiveFailures >= DEAD_MIN_FAILURES && msSinceSuccess >= DEAD_MIN_DAYS * DAY_MS;
+
         return isDead ? 'dead' : 'error';
     }
 
     const lastNewItemAt = feed.latestItemAt ?? feed.createdAt;
+
     return now.getTime() - lastNewItemAt.getTime() >= STALE_DAYS * DAY_MS ? 'stale' : 'active';
 }

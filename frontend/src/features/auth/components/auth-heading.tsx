@@ -91,6 +91,7 @@ export function AuthPanelText({ headline, line }: PanelText) {
 // Renders the page-switch link: the one a form set (useAuthFrameLinks; nothing when it hid it), else the page's `target`.
 export function AuthSwitchLink({ target }: { target: SwitchLinkTarget }) {
     const links = use(FrameLinksContext);
+
     if (links?.switchLink === null)
         return null;
 
@@ -109,6 +110,7 @@ export function AuthSwitchLink({ target }: { target: SwitchLinkTarget }) {
 // Renders the "Just looking? Read as a guest" footer when the page offers it (`show`) and no form has hidden it.
 export function AuthGuestLink({ show }: { show: boolean }) {
     const links = use(FrameLinksContext);
+
     if (!(links?.guestLink ?? show))
         return null;
 
@@ -138,7 +140,9 @@ export function useAuthHeading(heading: Heading | null) {
             return;
 
         const panel = panelHeadline !== undefined && panelLine !== undefined ? { headline: panelHeadline, line: panelLine } : undefined;
+
         setStep({ title, description, panel });
+
         return () => setStep(null);
     }, [setStep, title, description, panelHeadline, panelLine]);
 }
@@ -165,7 +169,9 @@ export function useAuthFrameLinks(links: FrameLinks | null) {
             return;
 
         const switchLink = hidesSwitch || label === undefined || href === undefined ? null : { prompt, label, href, onClick };
+
         setLinks({ switchLink, guestLink });
+
         return () => setLinks(null);
     }, [setLinks, active, hidesSwitch, prompt, label, href, onClick, guestLink]);
 }

@@ -26,6 +26,7 @@ describe('isNameTaken', () => {
 describe('updateCategory', () => {
     test('changes only the named category', () => {
         const updated = updateCategory(LIBRARY, 'design', { name: 'UX', fieldId: 'rose' });
+
         expect(updated.categories[1]).toEqual({ id: 'design', name: 'UX', fieldId: 'rose', feeds: ['Sidebar.io'] });
         expect(updated.categories[0]).toBe(LIBRARY.categories[0]);
     });

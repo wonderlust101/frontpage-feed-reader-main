@@ -19,6 +19,7 @@ function rejection(call: () => unknown): HttpError {
 
         throw err;
     }
+
     throw new Error('expected the call to throw');
 }
 

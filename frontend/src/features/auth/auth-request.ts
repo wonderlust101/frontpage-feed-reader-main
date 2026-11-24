@@ -26,12 +26,14 @@ export async function authRequest<T>(call: (fetchOptions: ErrorHook) => Promise<
     const fetchOptions: ErrorHook = {
         onError({ response }) {
             const header = response.headers.get('X-Retry-After');
+
             retryAfterSeconds = header ? Number(header) : undefined;
         },
     };
 
     try {
         const result = await call(fetchOptions);
+
         if (result.error)
             return { data: null, failure: { code: result.error.code, status: result.error.status, retryAfterSeconds } };
 

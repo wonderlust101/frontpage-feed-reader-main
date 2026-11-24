@@ -23,6 +23,7 @@ describe('status classes', () => {
     for (const { ErrorClass, status, retryable } of STATUS_CLASSES) {
         test(`${ErrorClass.name} → ${status} (retryable by default: ${retryable})`, () => {
             const err = new ErrorClass('bad_request', 'message');
+
             expect(err).toBeInstanceOf(HttpError);
             expect(err).toMatchObject({ status, retryable, code: 'bad_request', message: 'message', name: ErrorClass.name });
         });

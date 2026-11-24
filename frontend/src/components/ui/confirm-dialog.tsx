@@ -22,6 +22,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, onConfirm, 
 
     useEffect(() => {
         const dialog = dialogRef.current;
+
         if (open && !dialog?.open) {
             dialog?.showModal();
         } else if (!open && dialog?.open) {

@@ -11,6 +11,7 @@ import { parseSubscribeRequest, parseSubscriptionId, parseUpdateSubscriptionRequ
 // GET /api/subscriptions: the reader's subscriptions with each feed's health.
 export async function listSubscriptionsController(_req: Request, res: Response) {
     const subscriptions = await listSubscriptions(requireDatabase(), currentUser(res).id);
+
     res.json({ subscriptions } satisfies SubscriptionListResponse);
 }
 
@@ -18,6 +19,7 @@ export async function listSubscriptionsController(_req: Request, res: Response) 
 export async function subscribeController(req: Request, res: Response) {
     const input = parseSubscribeRequest(req.body);
     const subscription = await subscribe(requireDatabase(), currentUser(res).id, input);
+
     res.status(201)
         .location(`${req.baseUrl}/${subscription.id}`)
         .json({ subscription } satisfies SubscriptionResponse);
@@ -28,6 +30,7 @@ export async function updateSubscriptionController(req: Request<{ id: string }>,
     const id = parseSubscriptionId(req.params.id);
     const changes = parseUpdateSubscriptionRequest(req.body);
     const subscription = await updateSubscription(requireDatabase(), currentUser(res).id, id, changes);
+
     res.json({ subscription } satisfies SubscriptionResponse);
 }
 

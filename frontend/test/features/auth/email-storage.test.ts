@@ -21,6 +21,7 @@ const CODE_LIFETIME_MS = CODE_LIFETIME_MINUTES * 60 * 1000;
 // A minimal in-memory Storage, enough for the module under test.
 function memoryStorage(): Storage {
     const items = new Map<string, string>();
+
     return {
         get length() {
             return items.size;
@@ -38,6 +39,7 @@ function blockedStorage(): Storage {
     const blocked = () => {
         throw new Error('blocked');
     };
+
     return { length: 0, clear: blocked, getItem: blocked, key: blocked, removeItem: blocked, setItem: blocked };
 }
 

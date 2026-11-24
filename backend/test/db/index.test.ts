@@ -11,6 +11,7 @@ describe('requireDatabase without DATABASE_URL', () => {
 
     test('throws a retryable 503 database_unavailable', () => {
         let thrown: unknown;
+
         try {
             requireDatabase();
         } catch (err) {

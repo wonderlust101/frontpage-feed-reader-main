@@ -119,6 +119,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
             }
         }
         window.addEventListener('keydown', openOnShortcut);
+
         return () => window.removeEventListener('keydown', openOnShortcut);
     }, []);
 
@@ -142,6 +143,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
             const step = event.key === 'ArrowDown' ? 1 : -1;
+
             setActiveIndex((index) => (Math.min(index, options.length - 1) + step + options.length) % options.length);
         } else if (event.key === 'Enter' && activeOption) {
             event.preventDefault();
@@ -268,6 +270,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                 <ul role="group" aria-label={label}>
                     {groupOptions.map((option, index) => {
                         const isActive = option === activeOption;
+
                         return (
                             <li
                                 key={`${label}-${option.href}-${option.title}`}
@@ -312,6 +315,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                     search ? 'Type a view, a category, an article or a source.' : 'Type a view, a category or a source. Article search arrives with the feeds.',
                 ]
             : [`Nothing matches “${trimmedQuery}”`, scopeHref ? 'Try every category, or fewer letters.' : 'Try fewer letters, or another word.'];
+
         return (
             <div role="status" className="flex flex-col items-center gap-2 px-6 py-10 text-center">
                 <Icon name={trimmedQuery ? 'no-results' : 'search'} size="nav" className="text-ink-2" />
@@ -330,6 +334,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
 // Renders a result's lead: a view's icon, a category's field dot, or a source's initial on the panel tone.
 function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
     const box = 'grid size-7 flex-none place-items-center rounded-tag';
+
     if ('icon' in lead) {
         return (
             <span aria-hidden="true" className={`${box} text-ink-2`}>
@@ -337,6 +342,7 @@ function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
             </span>
         );
     }
+
     if ('color' in lead) {
         return (
             <span aria-hidden="true" className={box}>
@@ -344,6 +350,7 @@ function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
             </span>
         );
     }
+
     return (
         <span aria-hidden="true" className={`${box} bg-panel text-meta font-bold text-ink-2`}>
             {lead.initial}

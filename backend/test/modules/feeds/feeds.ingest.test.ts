@@ -44,25 +44,30 @@ function rss(posts: TestItem[]): string {
             `<item><guid>${p.guid}</guid><title>${p.title}</title><link>https://ingest.example/${p.guid}</link>` +
             `<description>About ${p.title}</description>${p.date ? `<pubDate>${p.date}</pubDate>` : ''}</item>`,
     );
+
     return `<?xml version="1.0"?><rss version="2.0"><channel><title>Ingest Test</title><link>https://ingest.example/</link>${entries.join('')}</channel></rss>`;
 }
 
 // The stored feed row at a URL (undefined if there is none).
 async function feedAt(url: string) {
     const [row] = await testDb.db.select().from(feeds).where(eq(feeds.url, url));
+
     return row;
 }
 
 // Every stored item of a feed, by guid.
 async function itemsOf(feedId: string) {
     const rows = await testDb.db.select().from(items).where(eq(items.feedId, feedId));
+
     return new Map(rows.map((row) => [row.guid, row]));
 }
 
 // Inserts a user and returns their id.
 async function newUser(): Promise<string> {
     const id = crypto.randomUUID();
+
     await testDb.db.insert(users).values({ id, name: 'Reader', email: `${id}@example.com` });
+
     return id;
 }
 
@@ -72,7 +77,9 @@ async function feedError(call: Promise<unknown>): Promise<HttpError> {
         () => null,
         (e: unknown) => e,
     );
+
     expect(err).toBeInstanceOf(HttpError);
+
     return err as HttpError;
 }
 
@@ -86,6 +93,7 @@ describe('first ingest', () => {
         const result = await ingestFeed(testDb.db, url, { now: T1 });
 
         const feed = await feedAt(url);
+
         expect(feed).toMatchObject({
             id: result.feedId,
             title: 'CSS-Tricks',
@@ -102,10 +110,12 @@ describe('first ingest', () => {
         expect(feed!.description).toBeTruthy();
 
         const stored = await itemsOf(result.feedId);
+
         expect(stored.size).toBeGreaterThan(0);
         expect(result).toMatchObject({ notModified: false, inserted: stored.size, updated: 0, unchanged: 0, movedFrom: null, mergedFeedId: null });
 
         const newest = Math.max(...[...stored.values()].map((item) => item.sortAt.getTime()));
+
         expect(feed!.latestItemAt?.getTime()).toBe(newest);
         expect([...stored.values()].every((item) => item.firstSeenAt.getTime() === T1.getTime())).toBe(true);
     });
@@ -142,6 +152,7 @@ describe('re-fetching', () => {
         const result = await ingestFeed(testDb.db, url, { now: T2 });
 
         const after = (await itemsOf(feedId)).get('a')!;
+
         expect(result).toMatchObject({ inserted: 0, updated: 1, unchanged: 1 });
         expect(after.title).toBe('Post A (corrected)');
         expect(after.contentHash).not.toBe(before.contentHash);
@@ -170,6 +181,7 @@ describe('re-fetching', () => {
         const result = await ingestFeed(testDb.db, url, { now: T2 });
 
         const stored = await itemsOf(feedId);
+
         expect(result).toMatchObject({ inserted: 1, updated: 0, unchanged: 2 });
         expect(stored.get('c')!.firstSeenAt).toEqual(T2);
         expect(stored.get('a')!.firstSeenAt).toEqual(T1);
@@ -190,6 +202,7 @@ describe('re-fetching', () => {
     test('an unchanged re-fetch sends no item rows, and one edit sends exactly one', async () => {
         server.serve('/budget.xml', rss([POST_A, POST_B, POST_C]));
         const url = `${server.url}/budget.xml`;
+
         await ingestFeed(testDb.db, url, { now: T1 });
 
         testDb.queries.length = 0;
@@ -201,6 +214,7 @@ describe('re-fetching', () => {
         testDb.queries.length = 0;
         await ingestFeed(testDb.db, url, { now: T3 });
         const itemInserts = testDb.queries.filter((q) => q.startsWith('insert into "items"'));
+
         expect(itemInserts).toHaveLength(1);
         expect(itemInserts[0]!.match(/\), \(/g)).toBeNull();
     });
@@ -211,6 +225,7 @@ describe('304 Not Modified', () => {
         const url = `${server.url}/cached.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
         const itemsBefore = await itemsOf(feedId);
+
         await testDb.db
             .update(feeds)
             .set({ consecutiveFailures: 2, lastErrorCode: 'timeout', lastErrorMessage: 'slow', title: 'Renamed locally' })
@@ -246,6 +261,7 @@ describe('failures', () => {
 
         expect(err.code).toBe('http_5xx');
         const after = await feedAt(url);
+
         expect(after).toMatchObject({
             lastFetchedAt: T2,
             lastSuccessAt: T1,
@@ -266,6 +282,7 @@ describe('failures', () => {
         server.serve('/recovers.xml', rss([POST_A]));
         const url = `${server.url}/recovers.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
+
         await testDb.db
             .update(feeds)
             .set({ consecutiveFailures: 3, lastErrorCode: 'timeout', lastErrorMessage: 'slow', lastErrorStatus: null })
@@ -288,11 +305,14 @@ describe('failures', () => {
         { name: 'a web page', code: 'not_a_feed', status: null, fail: (path) => server.serve(path, '<!doctype html><html><body>Hi</body></html>') },
         { name: 'a body over 5 MB', code: 'too_large', status: null, fail: (path) => server.serve(path, new Uint8Array(6 * 1024 * 1024).fill(32)) },
     ];
+
     for (const { name, code, status, fail } of failures) {
         test(`${name} is recorded as ${code}`, async () => {
             const path = `/fails-${code}.xml`;
+
             server.serve(path, rss([POST_A]));
             const url = `${server.url}${path}`;
+
             await ingestFeed(testDb.db, url, { now: T1 });
 
             fail(path);
@@ -304,6 +324,7 @@ describe('failures', () => {
 
     test('a timeout is recorded as timeout', async () => {
         const url = `${server.url}/slow`;
+
         await testDb.db.insert(feeds).values({ url, title: 'Slow feed' });
 
         const err = await feedError(ingestFeed(testDb.db, url, { now: T1 }));
@@ -315,12 +336,14 @@ describe('failures', () => {
     test('a database error rolls everything back and records nothing', async () => {
         server.serve('/db-error.xml', rss([POST_A]));
         const url = `${server.url}/db-error.xml`;
+
         await testDb.db.insert(feeds).values({ url, title: 'Before' });
         await testDb.db.execute(sql`create function reject_items() returns trigger language plpgsql as $$ begin raise exception 'items are read-only'; end $$`);
         await testDb.db.execute(sql`create trigger reject_items before insert on items for each row execute function reject_items()`);
 
         try {
             const err = await ingestFeed(testDb.db, url, { now: T1 }).catch((e: unknown) => e);
+
             expect(err).not.toBeInstanceOf(HttpError);
         } finally {
             await testDb.db.execute(sql`drop trigger reject_items on items`);
@@ -345,6 +368,7 @@ describe('redirects', () => {
 
     test('a temporary redirect keeps the stored URL', async () => {
         const url = `${server.url}/moved-temporarily`;
+
         await testDb.db.insert(feeds).values({ url, title: 'Old' });
 
         const result = await ingestFeed(testDb.db, url, { now: T1 });
@@ -382,6 +406,7 @@ describe('redirects', () => {
 
         const both = await newUser();
         const oldOnly = await newUser();
+
         await testDb.db.insert(subscriptions).values([
             { userId: both, feedId: keep.feedId, customTitle: 'Kept' },
             { userId: both, feedId: old!.id, customTitle: 'Dropped' },
@@ -396,6 +421,7 @@ describe('redirects', () => {
         expect(await testDb.db.select().from(feeds).where(eq(feeds.id, old!.id))).toEqual([]);
 
         const merged = await itemsOf(keep.feedId);
+
         expect(merged.get(sharedGuid)!.id).toBe(keptItem.id);
         expect(merged.get('only-in-old-feed')!.id).toBe(onlyOld!.id);
 
@@ -405,6 +431,7 @@ describe('redirects', () => {
         const subs = await testDb.db
             .select({ userId: subscriptions.userId, feedId: subscriptions.feedId, customTitle: subscriptions.customTitle })
             .from(subscriptions);
+
         expect(subs).toHaveLength(2);
         expect(subs).toContainEqual({ userId: both, feedId: keep.feedId, customTitle: 'Kept' });
         expect(subs).toContainEqual({ userId: oldOnly, feedId: keep.feedId, customTitle: null });
@@ -416,6 +443,7 @@ describe('odd feeds', () => {
     async function ingestFixture(path: string) {
         server.serve(`/${path}`, readFixture(path));
         const result = await ingestFeed(testDb.db, `${server.url}/${path}`, { now: T1 });
+
         return { result, stored: await itemsOf(result.feedId) };
     }
 
@@ -445,6 +473,7 @@ describe('odd feeds', () => {
         const { stored } = await ingestFixture('odd/atom-no-dates.xml');
 
         const undated = [...stored.values()].filter((item) => item.publishedAt === null);
+
         expect(undated.length).toBeGreaterThan(0);
         expect(undated.every((item) => item.sortAt.getTime() === T1.getTime())).toBe(true);
     });

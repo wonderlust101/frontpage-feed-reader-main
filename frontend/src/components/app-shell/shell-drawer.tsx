@@ -15,6 +15,7 @@ export function ShellDrawer({ children }: { children: ReactNode }) {
     function closeOnBackdropOrLink(event: MouseEvent<HTMLDialogElement>) {
         const isBackdrop = event.target === event.currentTarget;
         const isLink = event.target instanceof Element && event.target.closest('a') !== null;
+
         if (isBackdrop || isLink)
             event.currentTarget.close();
     }

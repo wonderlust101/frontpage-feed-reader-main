@@ -20,8 +20,10 @@ async function expectError(promise: Promise<unknown>, code: HttpError['code'], r
         () => null,
         (e: unknown) => e,
     );
+
     expect(err).toBeInstanceOf(HttpError);
     expect((err as HttpError).code).toBe(code);
+
     if (retryable !== undefined)
         expect((err as HttpError).retryable).toBe(retryable);
 
@@ -31,7 +33,9 @@ async function expectError(promise: Promise<unknown>, code: HttpError['code'], r
 describe('fetchFeed', () => {
     test('returns the body, content type and final URL', async () => {
         const res = await fetchFeed(`${upstream.url}/feed.xml`, opts);
+
         expect(res.notModified).toBe(false);
+
         if (res.notModified)
             return;
 
@@ -44,12 +48,14 @@ describe('fetchFeed', () => {
     test('sends a User-Agent and a feed-friendly Accept header', async () => {
         await fetchFeed(`${upstream.url}/feed.xml`, { ...opts, userAgent: 'TestAgent/1.0' });
         const headers = upstream.lastHeaders['/feed.xml']!;
+
         expect(headers.get('user-agent')).toBe('TestAgent/1.0');
         expect(headers.get('accept')).toContain('application/rss+xml');
     });
 
     test('follows a chain of permanent redirects and reports it as permanent', async () => {
         const res = await fetchFeed(`${upstream.url}/moved-permanently`, opts);
+
         expect(res.finalUrl).toBe(`${upstream.url}/feed.xml`);
         expect(res.redirect).toEqual({
             permanent: true,
@@ -60,6 +66,7 @@ describe('fetchFeed', () => {
 
     test('a temporary hop makes the whole redirect temporary', async () => {
         const res = await fetchFeed(`${upstream.url}/moved-temporarily`, opts);
+
         expect(res.finalUrl).toBe(`${upstream.url}/feed.xml`);
         expect(res.redirect?.permanent).toBe(false);
     });
@@ -78,17 +85,21 @@ describe('fetchFeed', () => {
 
     test('sends If-None-Match / If-Modified-Since and reports 304s', async () => {
         const first = await fetchFeed(`${upstream.url}/cached.xml`, opts);
+
         expect(first.validators).toEqual({ etag: ETAG, lastModified: LAST_MODIFIED });
 
         const second = await fetchFeed(`${upstream.url}/cached.xml`, { ...opts, ...first.validators });
+
         expect(second.notModified).toBe(true);
         const headers = upstream.lastHeaders['/cached.xml']!;
+
         expect(headers.get('if-none-match')).toBe(ETAG);
         expect(headers.get('if-modified-since')).toBe(LAST_MODIFIED);
     });
 
     test('times out slow responses', async () => {
         const started = Date.now();
+
         await expectError(fetchFeed(`${upstream.url}/slow`, { ...opts, timeoutMs: 200 }), 'timeout', true);
         expect(Date.now() - started).toBeLessThan(900);
     });
@@ -104,11 +115,13 @@ describe('fetchFeed', () => {
         ['/error', 'http_5xx', 500, true],
     ] as const)('maps %s to %s', async (path, code, status, retryable) => {
         const err = await expectError(fetchFeed(`${upstream.url}${path}`, opts), code, retryable);
+
         expect(err.upstreamStatus).toBe(status);
     });
 
     test.each(['/gzip', '/deflate', '/brotli'])('decompresses %s responses', async (path) => {
         const res = await fetchFeed(`${upstream.url}${path}`, opts);
+
         if (res.notModified)
             throw new Error('unexpected 304');
 

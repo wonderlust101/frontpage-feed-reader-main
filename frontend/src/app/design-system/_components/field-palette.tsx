@@ -17,6 +17,7 @@ export function FieldPalette() {
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-9">
             {[...FIELDS, NO_FIELD].map((field) => {
                 const holders = CATEGORIES.filter((category) => fields[category.id].id === field.id).map((category) => category.name);
+
                 return (
                     <li key={field.id} className="flex min-h-52 flex-col justify-between p-4 text-on-field" style={{ background: field.color }}>
                         <span className="type-title font-semibold">{field.name}</span>

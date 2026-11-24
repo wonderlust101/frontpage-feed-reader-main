@@ -50,7 +50,9 @@ export function rememberSignInEmail(email: string): void {
 // Clears the saved address and returns it, or null when there is none, it is over an hour old, or storage is unavailable.
 export function takeSignInEmail(): string | null {
     const email = readSignInEmail();
+
     tryStorage(() => localStorage.removeItem(SIGN_IN_KEY), undefined);
+
     return email;
 }
 
@@ -66,10 +68,12 @@ function readFreshEmail(saved: string | null, maxAgeMs: number): string | null {
         return null;
 
     const parsed: unknown = JSON.parse(saved);
+
     if (typeof parsed !== 'object' || parsed === null || !('email' in parsed) || !('savedAt' in parsed))
         return null;
 
     const { email, savedAt } = parsed;
     const fresh = typeof savedAt === 'number' && Date.now() - savedAt < maxAgeMs;
+
     return fresh && typeof email === 'string' ? email : null;
 }

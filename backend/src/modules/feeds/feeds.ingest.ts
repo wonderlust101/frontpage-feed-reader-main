@@ -47,8 +47,10 @@ export async function ingestFeed(db: Database, url: string, opts: IngestOptions 
 
     let result: FetchFeedResult;
     let feed: NormalizedFeed | null = null;
+
     try {
         result = await fetchUpstream(new URL(key), { etag: stored?.etag ?? null, lastModified: stored?.lastModified ?? null });
+
         if (!result.notModified) {
             feed = normalizeFeed(decodeFeed(result.bytes, result.contentType), { url: result.finalUrl, requestedUrl: key });
         } else if (!stored) {
@@ -66,11 +68,13 @@ export async function ingestFeed(db: Database, url: string, opts: IngestOptions 
 
         if (!feed) {
             const feedId = await recordNotModified(tx, target.url, result.validators, stored!, now);
+
             return { feedId, ...target, notModified: true, inserted: 0, updated: 0, unchanged: 0, warnings: [] };
         }
 
         const feedId = await upsertFeed(tx, target.url, feed, result.validators, now);
         const counts = await writeItems(tx, feedId, feed.items, now);
+
         return { feedId, ...target, notModified: false, ...counts, warnings: feed.warnings };
     });
 }
@@ -101,12 +105,15 @@ async function resolveTarget(tx: Transaction, stored: StoredFeed | null, key: st
         return { url: redirect.to, movedFrom: null, mergedFeedId: null };
 
     const [existing] = await tx.select({ id: feeds.id }).from(feeds).where(eq(feeds.url, redirect.to));
+
     if (existing) {
         await mergeFeeds(tx, stored.id, existing.id);
+
         return { url: redirect.to, movedFrom: key, mergedFeedId: stored.id };
     }
 
     await tx.update(feeds).set({ url: redirect.to }).where(eq(feeds.id, stored.id));
+
     return { url: redirect.to, movedFrom: key, mergedFeedId: null };
 }
 
@@ -120,6 +127,7 @@ async function mergeFeeds(tx: Transaction, fromId: string, intoId: string) {
         select dup.id as from_item, keep.id as into_item
         from ${items} dup join ${items} keep on keep.feed_id = ${intoId} and keep.guid = dup.guid
         where dup.feed_id = ${fromId}`;
+
     await tx.execute(sql`
         insert into ${bookmarks} (user_id, item_id, created_at)
         select b.user_id, d.into_item, b.created_at from ${bookmarks} b join (${duplicateItems}) d on d.from_item = b.item_id
@@ -154,6 +162,7 @@ async function recordNotModified(tx: Transaction, url: string, validators: FeedC
         })
         .where(eq(feeds.url, url))
         .returning({ id: feeds.id });
+
     return row!.id;
 }
 
@@ -188,6 +197,7 @@ async function upsertFeed(tx: Transaction, url: string, feed: NormalizedFeed, va
         .values({ url, ...columns })
         .onConflictDoUpdate({ target: feeds.url, set: { ...columns, updatedAt: now } })
         .returning({ id: feeds.id });
+
     return row!.id;
 }
 
@@ -213,9 +223,11 @@ async function writeItems(tx: Transaction, feedId: string, fetched: NormalizedIt
 
     const rows: (typeof items.$inferInsert)[] = [];
     let inserted = 0;
+
     for (const item of fetched) {
         const contentHash = itemHash(item);
         const storedHash = storedHashes.get(item.id);
+
         if (storedHash === contentHash)
             continue;
 
@@ -272,5 +284,6 @@ async function writeItems(tx: Transaction, feedId: string, fetched: NormalizedIt
 // A SHA-256 of every stored field of an item: equal hashes mean the stored row is already up to date.
 function itemHash(item: NormalizedItem): string {
     const fields = [item.title, item.url, item.author, item.summary, item.contentHtml, item.hasFullContent, item.imageUrl, item.publishedAt, item.updatedAt];
+
     return createHash('sha256').update(JSON.stringify(fields)).digest('hex');
 }

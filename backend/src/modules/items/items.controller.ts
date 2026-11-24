@@ -12,17 +12,20 @@ import { parseItemId, parseItemListQuery } from './items.validation';
 export async function listItemsController(req: Request, res: Response) {
     const query = parseItemListQuery(req.query);
     const page = await listItems(requireDatabase(), currentUser(res).id, query);
+
     res.json(page satisfies ItemListResponse);
 }
 
 // GET /api/items/counts: item and unread counts per feed, per category and in total.
 export async function countItemsController(_req: Request, res: Response) {
     const counts = await countItems(requireDatabase(), currentUser(res).id);
+
     res.json(counts satisfies ItemCountsResponse);
 }
 
 // GET /api/items/:id: one item with its full content, for the reader view.
 export async function getItemController(req: Request<{ id: string }>, res: Response) {
     const item = await getItem(requireDatabase(), currentUser(res).id, parseItemId(req.params.id));
+
     res.json({ item } satisfies ItemResponse);
 }

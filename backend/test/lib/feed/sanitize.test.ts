@@ -32,6 +32,7 @@ describe('sanitizeFeedHtml', () => {
             '<figure><img src="https://cdn.example/a.png" alt="A"><figcaption>Cap</figcaption></figure>' +
             '<table><tr><td>cell</td></tr></table>';
         const out = sanitizeFeedHtml(html, BASE);
+
         for (const tag of ['<h2>', '<em>', '<strong>', '<ul>', '<li>', '<blockquote>', '<figcaption>', '<td>'])
             expect(out).toContain(tag);
 
@@ -41,6 +42,7 @@ describe('sanitizeFeedHtml', () => {
 
     test('keeps YouTube embeds, sandboxed so they cannot navigate our page', () => {
         const out = sanitizeFeedHtml('<iframe src="https://www.youtube.com/embed/abc"></iframe>', BASE);
+
         expect(out).toContain('src="https://www.youtube.com/embed/abc"');
         expect(out).toContain('sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"');
         expect(out).not.toContain('allow-top-navigation');
@@ -48,6 +50,7 @@ describe('sanitizeFeedHtml', () => {
 
     test('a feed cannot loosen the iframe sandbox', () => {
         const out = sanitizeFeedHtml('<iframe src="https://www.youtube.com/embed/abc" sandbox="allow-top-navigation allow-forms"></iframe>', BASE);
+
         expect(out).not.toContain('allow-top-navigation');
         expect(out).not.toContain('allow-forms');
     });
@@ -58,6 +61,7 @@ describe('sanitizeFeedHtml', () => {
 
     test('resolves relative links, images and srcsets against the base URL', () => {
         const out = sanitizeFeedHtml('<a href="../about">a</a><img src="img/a.png" srcset="img/a.png 1x, /img/a@2x.png 2x">', BASE);
+
         expect(out).toContain('href="https://blog.example/about"');
         expect(out).toContain('src="https://blog.example/posts/img/a.png"');
         expect(out).toContain('srcset="https://blog.example/posts/img/a.png 1x, https://blog.example/img/a@2x.png 2x"');
@@ -66,6 +70,7 @@ describe('sanitizeFeedHtml', () => {
     test('keeps commas inside srcset URLs (Cloudinary / Substack style)', () => {
         const cdn = 'https://res.cloudinary.com/demo/image/upload';
         const out = sanitizeFeedHtml(`<img src="a.png" srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w">`, BASE);
+
         expect(out).toContain(`srcset="${cdn}/w_400,c_fill/cat.jpg 400w, ${cdn}/w_800,c_fill/cat.jpg 800w"`);
     });
 
@@ -104,6 +109,7 @@ describe('htmlToText', () => {
 
     test('truncates at a word boundary', () => {
         const text = htmlToText('<p>one two three four five six seven</p>', 20);
+
         expect(text.length).toBeLessThanOrEqual(20);
         expect(text).toBe('one two three four…');
     });
@@ -116,6 +122,7 @@ describe('truncate', () => {
 
     test('never splits an emoji in half', () => {
         const out = truncate('ab😀😀😀😀😀😀', 4);
+
         expect(out).toBe('ab…');
         expect(out).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
     });

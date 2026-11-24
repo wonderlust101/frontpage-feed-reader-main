@@ -21,11 +21,14 @@ export function SignOutButton() {
         setSigningOut(true);
         setError(null);
         const { failure } = await authRequest((fetchOptions) => authClient.signOut({ fetchOptions }));
+
         if (failure) {
             setSigningOut(false);
             setError(authErrorMessage(failure));
+
             return;
         }
+
         router.replace('/');
         router.refresh();
     }

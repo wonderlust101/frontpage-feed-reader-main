@@ -15,16 +15,20 @@ export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
         const observer = new IntersectionObserver(
             (observed) => {
                 const visible = observed.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
                 if (visible[0])
                     setCurrentId(visible[0].target.id);
             },
             { rootMargin: '-20% 0px -70% 0px' },
         );
+
         entries.forEach((entry) => {
             const section = document.getElementById(entry.id);
+
             if (section)
                 observer.observe(section);
         });
+
         return () => observer.disconnect();
     }, [entries]);
 
@@ -33,6 +37,7 @@ export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
             <ul className="sticky top-24 space-y-1 rule-t pt-3">
                 {entries.map((entry) => {
                     const isCurrent = entry.id === currentId;
+
                     return (
                         <li key={entry.id}>
                             <a

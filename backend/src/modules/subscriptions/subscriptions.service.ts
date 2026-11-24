@@ -45,6 +45,7 @@ const DISPLAY_TITLE_ORDER = sql`lower(coalesce(${subscriptions.customTitle}, ${f
 // Every subscription of the reader with its feed's health at `now`, sorted by the title they see (ignoring case). One query.
 export async function listSubscriptions(db: Database, userId: string, now = new Date()): Promise<Subscription[]> {
     const rows = await selectSubscriptions(db).where(eq(subscriptions.userId, userId)).orderBy(DISPLAY_TITLE_ORDER, subscriptions.id);
+
     return rows.map((row) => toSubscription(row, now));
 }
 
@@ -53,6 +54,7 @@ export async function listSubscriptions(db: Database, userId: string, now = new 
 export async function subscribe(db: Database, userId: string, input: SubscribeRequest, now = new Date()): Promise<Subscription> {
     const url = parseFeedUrl(input.url).href;
     const categoryId = input.categoryId ?? null;
+
     if (categoryId)
         await assertOwnCategory(db, userId, categoryId);
 
@@ -62,6 +64,7 @@ export async function subscribe(db: Database, userId: string, input: SubscribeRe
         .from(feeds)
         .where(eq(feeds.url, url));
     const existingId = stored ? await findSubscriptionId(db, userId, stored.id) : undefined;
+
     if (existingId)
         throw alreadySubscribedError(existingId);
 
@@ -73,6 +76,7 @@ export async function subscribe(db: Database, userId: string, input: SubscribeRe
         .values({ userId, feedId, categoryId })
         .onConflictDoNothing({ target: [subscriptions.userId, subscriptions.feedId] })
         .returning({ id: subscriptions.id });
+
     if (!created)
         throw alreadySubscribedError(await findSubscriptionId(db, userId, feedId));
 
@@ -96,6 +100,7 @@ export async function updateSubscription(
         .set(changes)
         .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)))
         .returning({ id: subscriptions.id });
+
     if (!updated)
         throw new NotFoundError('not_found', 'Subscription not found');
 
@@ -110,10 +115,12 @@ export async function unsubscribe(db: Database, userId: string, id: string): Pro
             .delete(subscriptions)
             .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)))
             .returning({ feedId: subscriptions.feedId });
+
         if (!deleted)
             throw new NotFoundError('not_found', 'Subscription not found');
 
         const feedItemIds = tx.select({ id: items.id }).from(items).where(eq(items.feedId, deleted.feedId));
+
         await tx.delete(itemReadStates).where(and(eq(itemReadStates.userId, userId), inArray(itemReadStates.itemId, feedItemIds)));
     });
 }
@@ -150,6 +157,7 @@ async function findSubscriptionId(db: Database, userId: string, feedId: string):
         .select({ id: subscriptions.id })
         .from(subscriptions)
         .where(and(eq(subscriptions.userId, userId), eq(subscriptions.feedId, feedId)));
+
     return row?.id;
 }
 
@@ -161,6 +169,7 @@ function alreadySubscribedError(subscriptionId: string | undefined) {
 // One of the reader's subscriptions, read like the list; throws `not_found` (404) if it isn't theirs (or was just deleted).
 async function findSubscription(db: Database, userId: string, id: string, now: Date): Promise<Subscription> {
     const [row] = await selectSubscriptions(db).where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)));
+
     if (!row)
         throw new NotFoundError('not_found', 'Subscription not found');
 

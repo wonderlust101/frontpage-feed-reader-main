@@ -13,7 +13,9 @@ export async function createTestDb() {
     const queries: string[] = [];
     let recording = false;
     const db = drizzle({ client, schema, logger: { logQuery: (query) => recording && queries.push(query) } });
+
     await migrate(db, { migrationsFolder: MIGRATIONS_DIR });
     recording = true;
+
     return { db, queries, close: () => client.close() };
 }

@@ -18,6 +18,7 @@ const WHOLE_NUMBER = /^\d+$/;
 // Throws `bad_request` (400) for a malformed or repeated parameter or both filters, then `feed_not_found` / `category_not_found` (404).
 export function parseItemListQuery(query: Record<string, unknown>): ItemListQuery {
     const params = singleValues(query);
+
     if (params.feed !== undefined && params.category !== undefined)
         throw new BadRequestError('bad_request', 'Filter by feed or by category, not both');
 
@@ -27,6 +28,7 @@ export function parseItemListQuery(query: Record<string, unknown>): ItemListQuer
     const cursor = parseCursor(params.cursor, order);
     // Last, so that every 400 above wins over its 404s.
     const scope = parseScope(params.feed, params.category);
+
     return { scope, unreadOnly, order, limit, cursor };
 }
 
@@ -41,8 +43,10 @@ export function parseItemId(value: string): string {
 // The list parameters as single strings (undefined when absent). A parameter sent twice arrives as an array: `bad_request`.
 function singleValues(query: Record<string, unknown>): Partial<Record<ListParameter, string>> {
     const values: Partial<Record<ListParameter, string>> = {};
+
     for (const name of LIST_PARAMETERS) {
         const value = query[name];
+
         if (value === undefined)
             continue;
 
@@ -51,6 +55,7 @@ function singleValues(query: Record<string, unknown>): Partial<Record<ListParame
 
         values[name] = value;
     }
+
     return values;
 }
 
@@ -82,6 +87,7 @@ function parseLimit(value: string | undefined): number {
         return ITEM_PAGE_SIZE;
 
     const limit = Number(value);
+
     if (!WHOLE_NUMBER.test(value) || limit < 1 || limit > MAX_ITEM_PAGE_SIZE)
         throw new BadRequestError('bad_request', `limit must be a whole number from 1 to ${MAX_ITEM_PAGE_SIZE}`);
 
@@ -94,6 +100,7 @@ function parseCursor(value: string | undefined, order: ItemOrder): ItemCursor | 
         return null;
 
     const cursor = decodeCursor(value);
+
     if (!cursor || cursor.order !== order)
         throw new BadRequestError('bad_request', 'cursor is not valid for this list; load the first page again');
 

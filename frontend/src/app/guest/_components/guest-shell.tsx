@@ -34,6 +34,7 @@ export function GuestShell({ views, sources, account, children }: GuestShellProp
     // Renders a category's color menu.
     function colorMenu(shellCategory: ShellCategory) {
         const category = GUEST_CATEGORIES.find((entry) => `/guest/c/${entry.id}` === shellCategory.href);
+
         return (
             category && (
                 <CategoryRowMenu category={{ name: category.name, fieldId: fields[category.id].id }} onRecolor={(fieldId) => choose(category.id, fieldId)} />

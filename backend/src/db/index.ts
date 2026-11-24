@@ -44,10 +44,12 @@ export async function checkDatabase(): Promise<{ status: DbStatus; error?: strin
 
     try {
         await db.execute(sql`select 1`);
+
         return { status: 'connected' };
     } catch (err) {
         // Drizzle wraps driver errors; the useful message is on `cause`.
         const cause = err instanceof Error && err.cause instanceof Error ? err.cause : err;
+
         return { status: 'error', error: cause instanceof Error ? cause.message : String(cause) };
     }
 }

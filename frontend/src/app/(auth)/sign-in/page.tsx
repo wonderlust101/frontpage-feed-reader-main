@@ -39,6 +39,7 @@ export default function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
 // Shows the heading for how the reader arrived (a reset, a confirmed email, or neither).
 async function SignInHeading({ searchParams }: SignInPageProps) {
     const arrival = signInArrival(await searchParams);
+
     return <AuthHeading {...SIGN_IN_HEADINGS[arrival ?? 'default']} />;
 }
 
@@ -46,5 +47,6 @@ async function SignInHeading({ searchParams }: SignInPageProps) {
 async function SignInFormFromUrl({ searchParams }: SignInPageProps) {
     const params = await searchParams;
     const next = safeNextPath(typeof params.next === 'string' ? params.next : null);
+
     return <SignInForm next={next} arrival={signInArrival(params)} />;
 }

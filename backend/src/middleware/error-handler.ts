@@ -8,6 +8,7 @@ import { HttpError } from './errors';
 // Unexpected errors (bugs) are logged and answered with a generic 500 that hides the details.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     const error = toHttpError(err);
+
     if (error.code === 'internal_error')
         console.error(err);
 
@@ -20,6 +21,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
             ...(error.subscriptionId !== undefined && { subscriptionId: error.subscriptionId }),
         },
     };
+
     res.status(error.status).json(body);
 };
 
@@ -30,6 +32,7 @@ function toHttpError(err: unknown): HttpError {
 
     const expressError = err as { status?: number; type?: string; message?: string } | undefined;
     const status = expressError?.status ?? 500;
+
     if (status >= 400 && status < 500) {
         return expressError?.type === 'entity.parse.failed'
             ? new HttpError(status, 'invalid_json', 'The request body is not valid JSON')
