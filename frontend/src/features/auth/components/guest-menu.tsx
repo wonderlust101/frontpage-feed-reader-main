@@ -32,8 +32,8 @@ export function GuestMenu() {
                 </>
             }
         >
-            <p className="font-semibold">Reading as a guest</p>
-            <p className="mt-1 text-meta text-ink-2">Create an account to keep your feeds, colors and saved items.</p>
+            <p className="font-semibold">You’re reading as a guest</p>
+            <p className="mt-1 text-meta text-ink-2">Pull up a chair. An account keeps your feeds, colors and saved items right where you left them.</p>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                 <Link href="/sign-up" className={buttonClassName('primary')}>
                     Create account

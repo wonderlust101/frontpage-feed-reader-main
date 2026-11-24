@@ -1,9 +1,9 @@
-// One entry in the shell's category panel or drawer. The current entry is tinted with its field, carries a field bar
+// One entry in the shell's category panel or drawer. The current entry is tinted with its field (.nav-current), carries a field bar
 // that grows into place, is bold and has aria-current, so the place never rests on colour alone. Labels truncate; the
 // full name stays the link's accessible name.
 
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { formatCount } from './nav-entries';
 
 type NavRowProps = {
@@ -23,14 +23,14 @@ export function NavRow({ href, label, lead, color, isCurrent, count }: NavRowPro
         <Link
             href={href}
             aria-current={isCurrent ? 'page' : undefined}
-            className={`relative flex min-h-11 items-center lg:min-h-10 gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 ${isCurrent ? 'font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
-            style={isCurrent ? { background: `color-mix(in srgb, ${color} 24%, var(--color-panel))` } : undefined}
+            className={`relative flex min-h-11 items-center lg:min-h-10 gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 ${isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
+            style={isCurrent ? ({ '--row-field': color } as CSSProperties) : undefined}
         >
             {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" style={{ background: color }} />}
             {lead}
             <span className="min-w-0 truncate">{label}</span>
             {shownCount && (
-                <span className="ml-auto pl-2 text-meta font-semibold tabular-nums">
+                <span className="ml-auto pl-2 text-meta font-semibold">
                     {shownCount}
                     <span className="sr-only"> unread</span>
                 </span>

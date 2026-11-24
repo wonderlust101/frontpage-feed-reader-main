@@ -1,26 +1,29 @@
 'use client';
 
-// The shell's rail (lg up): the Lemon logo tile linking home, the views as icon links with tooltips, the toggle for the
-// category panel. ShellSidebar puts the account at its foot. The current view sits on a workspace square with a Lemon dot.
+// The shell's rail (lg up): the Lemon logo tile linking home, the views as icon links with tooltips, and the toggle for
+// the category panel; ShellSidebar puts the account at its foot. The current view sits on a workspace square with a
+// Lemon dot, unless a category is current: the shell marks one place at a time.
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogoMark } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
-import { currentHref, formatCount, type ShellView } from './nav-entries';
+import { currentEntry, formatCount, type ShellCategory, type ShellView } from './nav-entries';
 import { RailTooltip, SidebarToggle } from './sidebar-toggle';
 
 type ShellRailProps = {
     homeHref: string;
     views: ShellView[];
+    categories: ShellCategory[];
     panelId: string;
 };
 
 // Renders the rail's top: the logo, the views and the panel toggle.
-export function ShellRail({ homeHref, views, panelId }: ShellRailProps) {
-    const current = currentHref(
+export function ShellRail({ homeHref, views, categories, panelId }: ShellRailProps) {
+    const current = currentEntry(
         usePathname(),
         views.map((view) => view.href),
+        categories.map((category) => category.href),
     );
 
     return (
@@ -33,7 +36,7 @@ export function ShellRail({ homeHref, views, panelId }: ShellRailProps) {
             <nav aria-label="Views">
                 <ul className="flex flex-col gap-1">
                     {views.map((view) => {
-                        const isCurrent = view.href === current;
+                        const isCurrent = current?.kind === 'view' && current.href === view.href;
                         const shownCount = formatCount(view.count);
                         return (
                             <li key={view.href}>
@@ -52,7 +55,7 @@ export function ShellRail({ homeHref, views, panelId }: ShellRailProps) {
                                     </span>
                                     <RailTooltip>
                                         {view.label}
-                                        {shownCount && <span className="ml-1.5 font-normal tabular-nums">{shownCount}</span>}
+                                        {shownCount && <span className="ml-1.5 font-normal">{shownCount}</span>}
                                     </RailTooltip>
                                 </Link>
                             </li>

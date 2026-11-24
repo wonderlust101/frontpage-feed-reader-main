@@ -143,7 +143,7 @@ function searchSamples(query: string, categoryHref: string | null): SearchResult
         sources: CATEGORIES.filter((category) => inScope(category.id)).flatMap((category) =>
             category.sources
                 .filter((source) => source.toLowerCase().includes(needle))
-                .map((source) => ({ href: '#patterns', name: source, detail: category.name })),
+                .map((source) => ({ href: '#patterns', name: source, detail: category.name, categoryHref: `#category-${category.id}` })),
         ),
     };
 }

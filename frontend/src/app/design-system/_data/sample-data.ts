@@ -1,13 +1,14 @@
 // Sample categories and items for the design system page.
-// Category and source names come from backend/data/sample-feeds.json; item titles are illustrative.
+// The guest categories and their sources come from features/categories/guest-categories.ts; item titles are illustrative.
 // The guest categories come with preset colors (part of the curated sample); a reader can change them in the Color
 // section. New categories start with "No color". READER_CATEGORIES adds example categories a reader might add (not
 // guest feeds): two still on No color, and Football sharing Leaf with Backend & DevOps, since categories may share.
 
 import type { FeedHealth } from '@/components/ui/health-mark';
 import { NO_FIELD, categoryFieldById, type Field, type FieldChoices } from '@/features/categories/fields';
+import { GUEST_CATEGORIES, type GuestCategoryId } from '@/features/categories/guest-categories';
 
-export type CategoryId = 'frontend' | 'design' | 'backend' | 'tech' | 'ai';
+export type CategoryId = GuestCategoryId;
 
 export type Category = {
     id: CategoryId;
@@ -26,42 +27,13 @@ export type SampleItem = {
     health: FeedHealth;
 };
 
-const GUEST_CATEGORIES: (Omit<Category, 'field'> & { preset: Field['id'] })[] = [
-    {
-        id: 'frontend',
-        preset: 'coral',
-        name: 'Frontend',
-        sources: ['CSS-Tricks', 'Smashing Magazine', 'Josh W. Comeau', 'Kent C. Dodds', 'web.dev', 'MDN Blog'],
-    },
-    {
-        id: 'design',
-        preset: 'sky',
-        name: 'Design',
-        sources: ['Sidebar.io', 'Nielsen Norman Group', 'Figma Blog', 'A List Apart', 'UX Collective'],
-    },
-    {
-        id: 'backend',
-        preset: 'leaf',
-        name: 'Backend & DevOps',
-        sources: ['Cloudflare Blog', 'Vercel Blog', 'The GitHub Blog', 'Netlify Blog'],
-    },
-    {
-        id: 'tech',
-        preset: 'lilac',
-        name: 'General Tech',
-        sources: ['The Pragmatic Engineer', 'Hacker News Best'],
-    },
-    {
-        id: 'ai',
-        preset: 'tangerine',
-        name: 'AI & ML',
-        sources: ["Simon Willison's Weblog", 'Hugging Face Blog'],
-    },
-];
-
 export const CATEGORY_PRESETS: FieldChoices = Object.fromEntries(GUEST_CATEGORIES.map((category) => [category.id, category.preset]));
 
-export const CATEGORIES: Category[] = GUEST_CATEGORIES.map(({ preset, ...category }) => ({ ...category, field: categoryFieldById(preset) ?? NO_FIELD }));
+export const CATEGORIES: Category[] = GUEST_CATEGORIES.map(({ preset, sources, ...category }) => ({
+    ...category,
+    sources: [...sources],
+    field: categoryFieldById(preset) ?? NO_FIELD,
+}));
 
 export const READER_CATEGORIES: { name: string; field: Field }[] = [
     ...CATEGORIES.map((category) => ({ name: category.name, field: category.field })),

@@ -14,7 +14,7 @@ What the shell must do:
 
 Non-functional:
 
-- **Accessible:** one `<main>`, a skip link, labelled navigation, keyboard-only use (including Ctrl/Cmd + K and `[`), the two-tone focus ring, no state by colour alone.
+- **Accessible:** one `<main>`, a `<header>` toolbar, skip links to the content and to search, labelled navigation, keyboard-only use (including Ctrl/Cmd + K and `[`), the two-tone focus ring, no state by colour alone.
 - **Fast for guests:** `/guest` reads nothing at request time, so it is prerendered and served as static HTML.
 - **No flash:** saved preferences (theme, contrast, reading settings, the collapsed sidebar) are on `<html>` before the first paint.
 - **Survives the API being down:** the shell still renders; only the account slot and the page show the failure.
@@ -43,14 +43,15 @@ src/lib/
   saved-preferences.ts             every saved preference (key, data attribute, values) + the early script built from them
   html-preference.ts               client: createHtmlPreference(preference) → a shared hook for one preference
 src/components/app-shell/          feature-agnostic: plain data and ReactNode slots, never imports features/
-  nav-entries.ts                   ShellView, ShellCategory, currentHref(), formatCount(): pure, unit tested
-  nav-row.tsx                      a panel/drawer row: field tint, field bar, count; FieldDot
+  nav-entries.ts                   ShellView, ShellCategory, currentHref(), currentEntry(), formatCount(): pure, tested
+  nav-row.tsx                      a panel/drawer row: field tint (.nav-current), field bar, count; FieldDot
+  category-list.tsx                the categories as navigation (panel and drawer), with the empty and caught-up notes
   shell-sidebar.tsx                server: the desktop grid of rail, panel and account (account last in tab order)
   shell-rail.tsx                   client: logo, view icons with tooltips, the panel toggle
   sidebar-toggle.tsx               client: collapses the panel (saved preference, the [ key); RailTooltip
-  shell-panel.tsx                  client: "All categories" and the categories; collapses by width
-  shell-toolbar.tsx                client: drawer button (below lg), location tag, search, utilities
-  search-palette.tsx               client: the Ctrl/Cmd + K command palette (native <dialog>, combobox)
+  shell-panel.tsx                  client: the categories (no "all" row: the rail's All items is it); collapses by width
+  shell-toolbar.tsx                client: the shell's <header>: drawer button (below lg), location tag, search, utilities
+  search-palette.tsx               client: Ctrl/Cmd + K search and jump (native <dialog>, combobox, "Search in" scope)
   search-match.ts                  matchParts(): marks query matches, pure, unit tested
   shell-menu.tsx                   client: a button and a native popover panel (Aa, account, guest)
   shell-drawer.tsx                 client: menu button + native <dialog> holding ShellNav, below lg
@@ -65,7 +66,10 @@ src/features/auth/
   components/account-menu.tsx      avatar button and menu: name, email, Verify email, Change password, Sign out
   components/guest-menu.tsx        "Guest" button and menu: what an account keeps, Create account, Sign in
   components/account-boundary.tsx  client: catchError around the account slot, a "Try again" control
-src/app/guest/layout.tsx           AppShell for guests (static)
+src/features/categories/
+  guest-categories.ts              the guest's curated categories and sources (mirrors backend/data/sample-feeds.json)
+src/app/guest/layout.tsx           AppShell for guests (static), with the sample categories and their sources
+src/app/guest/c/[category]/page.tsx a guest category's page, prerendered per category (generateStaticParams)
 src/app/user/layout.tsx            AppShell for readers; metadata robots noindex
 ```
 
@@ -113,22 +117,22 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 - **Alternatives:** keys repeated in the script and the hooks (they drift); continuous sliders saved as numbers (a second kind of preference, and heavier in a small popover).
 - **Consequences:** text size and line height are fixed steps. Radio groups that control a setting from two places need different `name`s (the Aa popover takes them from `useId`).
 
-### ADR-006: Categories, counts and search data come later
+### ADR-006: One current place; guests get their categories now
 
-- **Status:** Accepted
-- **Context:** each category link needs a category page, unread counts need items and read state, and search needs articles and sources; none exist yet.
-- **Decision:** the live sidebar shows the views and "All categories"; `ShellPanel`, `ShellNav` and the toolbar already take categories and counts, and `/design-system` shows them. The live palette has no `search` function and says "Nothing to search yet".
-- **Consequences:** see "Later" for what that work must add.
+- **Status:** Accepted (revised after the second critique)
+- **Context:** the rail's "All items" and a panel "All categories" row named one URL twice and were both `aria-current`; the live guest shell showed no categories, and search said "nothing to search yet" to a guest with sample feeds.
+- **Decision:** the rail's All items is the only "all". `currentEntry()` marks exactly one entry: a category when the path is inside one, else the view. Guests get the five curated categories from `features/categories/guest-categories.ts` (a frontend mirror of `backend/data/sample-feeds.json`), each with a static page at `/guest/c/<id>` (`generateStaticParams`; an unknown id is a 404; Cache Components rejects `dynamicParams`, and `notFound()` covers it). The palette finds views and categories ("Go to") and, from plain `sources` data, the guests' sources; articles wait for the items. Readers' categories, counts and article search still wait for their endpoints.
+- **Consequences:** guest category colours are the presets (a guest's recolouring in localStorage isn't read by the shell yet). Because the category route has `generateStaticParams`, `usePathname` resolves at prerender and needs no Suspense.
 
 ## Risks
 
-| Risk                                                                                                                                                      | What we do                                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `usePathname` suspends once a page with a dynamic segment (e.g. `/user/c/[id]`) without `generateStaticParams` sits under the layout, and the build fails | When the category pages land, wrap the rail, panel, toolbar and drawer nav in `<Suspense>` with the same markup (no current entry) as the fallback |
-| Browsers without CSS anchor positioning                                                                                                                   | `.menu-panel` falls back to a fixed spot near its button                                                                                           |
-| The toolbar at 320px                                                                                                                                      | Below md the search button is an icon and the tag stays short; checked at 320px                                                                    |
-| The API down or slow (5-second timeout in `lib/api.ts`)                                                                                                   | The account slot shows "Try again"; the page shows `user/error.tsx`; navigation still works                                                        |
-| The Tailwind Turbopack loader caches a failed CSS compile and doesn't watch `@import`ed files after a failure                                             | If a CSS error persists after the fix, touch `src/app/globals.css` to force a rebuild                                                              |
+| Risk                                                                                                                                                               | What we do                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `usePathname` suspends once a page with a dynamic segment without `generateStaticParams` (e.g. readers' `/user/c/[id]`) sits under the layout, and the build fails | Guest categories use `generateStaticParams`. When readers' category pages land, wrap the sidebar, toolbar and drawer nav in `<Suspense>` with the same markup (no current entry) as the fallback |
+| Browsers without CSS anchor positioning                                                                                                                            | `.menu-panel` falls back to a fixed spot near its button                                                                                                                                         |
+| The toolbar at 320px                                                                                                                                               | Below md the search button is an icon and the tag stays short; checked at 320px                                                                                                                  |
+| The API down or slow (5-second timeout in `lib/api.ts`)                                                                                                            | The account slot shows "Try again"; the page shows `user/error.tsx`; navigation still works                                                                                                      |
+| The Tailwind Turbopack loader caches a failed CSS compile and doesn't watch `@import`ed files after a failure                                                      | If a CSS error persists after the fix, touch `src/app/globals.css` to force a rebuild                                                                                                            |
 
 ## Later (not built now)
 

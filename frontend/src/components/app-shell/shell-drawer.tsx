@@ -32,7 +32,7 @@ export function ShellDrawer({ children }: { children: ReactNode }) {
                 onClick={closeOnBackdropOrLink}
                 className="m-0 h-dvh max-h-none w-[min(20rem,calc(100vw-3rem))] max-w-none bg-panel p-0 text-ink transition-[translate] duration-200 ease-out backdrop:bg-on-field/45 starting:open:-translate-x-full lg:hidden"
             >
-                <div className="flex min-h-full flex-col gap-3 px-3 pt-3 pb-4">
+                <div className="flex h-full flex-col gap-3 overflow-y-auto px-3 pt-3 pb-4">
                     <button type="button" onClick={() => dialogRef.current?.close()} className="tool-button self-end">
                         <Icon name="close" />
                         <span className="sr-only">Close menu</span>

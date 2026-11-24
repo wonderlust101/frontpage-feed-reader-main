@@ -15,15 +15,15 @@ Chosen on 2026-11-23 through the Impeccable decision page. A first version (an i
 **Three neutral steps toward the content, colour marks the place.**
 
 - **Rail (64px, `--color-rail`):** the Lemon logo tile linking home, the views as icon links with tooltips (the current one on a workspace square with a Lemon dot), the toggle for the category panel, and the account at the foot.
-- **Category panel (232px, `--color-panel`):** "Categories", then "All categories" in Lemon and the reader's categories with their field dots and unread counts. It collapses away, leaving the rail (the toggle in the rail, or the `[` key), remembered per device with no flash on load.
+- **Category panel (232px, `--color-panel`):** "Categories", then each category with its field dot and unread count. The rail's All items is the only "all", and only one entry is ever current. Guests see the five sample categories, each with its own page. It collapses away, leaving the rail (the toggle in the rail, or the `[` key), remembered per device with no flash on load.
 - **Workspace (`--color-workspace`):** a hairline toolbar (the location tag, the search button, Aa on the right) above the page.
 - **Tones:** light rail `#d9d7ce`, panel `#e9e7e0`, workspace `#fafaf7`; dark rail `#0d0d0c`, panel `#171716`, workspace `#232220`. Each step is lighter toward what you read, in both themes.
-- **Colour thread:** the selected category's field shows three times: its row in the panel is tinted with the field and carries a 3px field bar (with bold text and `aria-current`); the toolbar's location tag is filled with it; and the page title takes a field underline (pages pick this up as they are designed). Views and "All categories" use Lemon.
+- **Colour thread:** the selected category's field shows three times: its row in the panel is tinted with the field and carries a 3px field bar (with bold text and `aria-current`); the toolbar's location tag is filled with it; and the page title takes a field underline (pages pick this up as they are designed). Views use Lemon.
 
 ## 3. Search: the command palette
 
-- Ctrl/Cmd + K from anywhere, or the toolbar's search button, opens a centred palette (a native modal `<dialog>`): the query field, category capsules to search within one category, and results grouped as Articles and Sources, matches marked in Lemon, with keycap hints (↑ ↓ move, ↵ open, Esc close).
-- **Data:** no article or source search exists yet, so the live palette says so plainly ("Nothing to search yet"). `/design-system` shows it working with the sample items and sources. When the data lands, a `search` function plugs in.
+- Ctrl/Cmd + K from anywhere, or the toolbar's "Search and jump" button, opens a centred palette (a native modal `<dialog>`): the query field, one "Search in" select (starting on the current category), and results grouped as Go to (views and categories), Articles and Sources, matches marked in solid Lemon, with keycap hints (↑ ↓ move, ↵ open, Esc close). On touch, a Cancel button replaces the keycaps.
+- **Data:** "Go to" always works; guests' sources come from the curated catalogue. Article search waits for the items, and the palette says so ("Article search arrives with the feeds"). `/design-system` shows articles too, with sample data.
 - Below md the button is a search icon; the palette sits near the top of the screen.
 
 ## 4. Reader settings: Aa
@@ -46,14 +46,14 @@ Small and quick, all off under reduced motion: the palette and menus scale in (1
 
 ## 8. States and ranges
 
-| What           | Range / state                            | Behaviour                                                                                                                                    |
-| -------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Categories     | 0 (live today), 5 (guest sample), 20+    | 0: the panel shows "All categories" only. 20+: the panel scrolls on its own.                                                                 |
-| Category names | short to long                            | One line, ellipsis; the full name stays the accessible name.                                                                                 |
-| Unread counts  | none, 1–99, 100+                         | None (or 0): nothing. 100+: "99+". Tabular figures.                                                                                          |
-| Search         | no data, empty query, results, no match  | "Nothing to search yet"; "Find articles and sources"; grouped results; "Nothing matches …" with "Search every category" when a filter is on. |
-| Account        | loading, signed in, API down, signed out | A skeleton circle; the avatar menu; a "Try again" control (the page shows its own error); nothing (the page redirects).                      |
-| Sidebar        | expanded, collapsed                      | Remembered per device; `[` toggles it outside text fields.                                                                                   |
+| What           | Range / state                            | Behaviour                                                                                                                     |
+| -------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Categories     | 0 (readers today), 5 (guest sample), 20+ | 0: "Your categories line up here, colors and all, once you add feeds." All counts 0: "All caught up." 20+: the panel scrolls. |
+| Category names | short to long                            | One line, ellipsis; the full name stays the accessible name.                                                                  |
+| Unread counts  | none, 1–99, 100+                         | None (or 0): nothing. 100+: "99+". Tabular figures.                                                                           |
+| Search         | empty query, results, no match           | "Jump anywhere"; Go to, Articles and Sources; "Nothing matches …" with "Search every category" when a category is chosen.     |
+| Account        | loading, signed in, API down, signed out | A skeleton circle; the avatar menu; a "Try again" control (the page shows its own error); nothing (the page redirects).       |
+| Sidebar        | expanded, collapsed                      | Remembered per device; `[` toggles it outside text fields.                                                                    |
 
 ## 9. Constraints
 

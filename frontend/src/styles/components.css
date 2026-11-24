@@ -470,6 +470,15 @@
         }
     }
 
+    /* The current row's tint, mixed in OKLCH so pale fields stay clean: 30% over the panel in light mode, a gentler */
+    /* 14% over the workspace tone in dark, where a stronger mix turns Lemon olive and Coral maroon. */
+    .nav-current {
+        background: light-dark(
+            color-mix(in oklch, var(--row-field) 30%, var(--color-panel)),
+            color-mix(in oklch, var(--row-field) 14%, var(--color-workspace))
+        );
+    }
+
     /* The current entry's marker grows into place when it moves, so a choice feels picked up rather than repainted. */
     .nav-marker {
         animation: nav-marker-in 180ms var(--ease-out);

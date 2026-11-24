@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { currentHref, formatCount } from '../../../src/components/app-shell/nav-entries';
+import { currentEntry, currentHref, formatCount } from '../../../src/components/app-shell/nav-entries';
 
 describe('currentHref', () => {
     test('matches the href that is the pathname', () => {
@@ -20,6 +20,20 @@ describe('currentHref', () => {
 
     test('returns null when nothing matches', () => {
         expect(currentHref('/guest', ['/user', '#saved'])).toBeNull();
+    });
+});
+
+describe('currentEntry', () => {
+    test('picks the category over the view whose path contains it', () => {
+        expect(currentEntry('/guest/c/design', ['/guest'], ['/guest/c/design'])).toEqual({ kind: 'category', href: '/guest/c/design' });
+    });
+
+    test('falls back to the view when no category matches', () => {
+        expect(currentEntry('/guest', ['/guest'], ['/guest/c/design'])).toEqual({ kind: 'view', href: '/guest' });
+    });
+
+    test('returns null when nothing matches', () => {
+        expect(currentEntry('/user', ['/guest'], [])).toBeNull();
     });
 });
 

@@ -67,7 +67,7 @@ export function ReaderSettings() {
                             <Icon name="text-smaller" />
                             <span className="sr-only">Smaller text</span>
                         </button>
-                        <output aria-live="polite" className="w-12 text-center text-ui font-semibold tabular-nums">
+                        <output aria-live="polite" className="w-12 text-center text-ui font-semibold">
                             {TEXT_SIZE_STEPS[sizeIndex].label}
                         </output>
                         <button

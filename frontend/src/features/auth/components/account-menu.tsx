@@ -3,6 +3,7 @@
 
 import type { SessionUser } from '@frontpage/shared';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
+import { Icon } from '@/components/ui/icon';
 import { TextLink } from '@/components/ui/text-link';
 import { SignOutButton } from './sign-out-button';
 
@@ -46,6 +47,12 @@ export function AccountMenu({ user }: AccountMenuProps) {
         >
             <p className="truncate font-semibold">{user.name}</p>
             <p className="truncate text-meta text-muted">{user.email}</p>
+            {!user.emailVerified && (
+                <p className="mt-2 flex items-center gap-1.5 text-meta font-semibold text-warning">
+                    <Icon name="info" size="inline" />
+                    Email not verified yet
+                </p>
+            )}
             <ul className="mt-3 border-t border-edge pt-1">
                 {!user.emailVerified && (
                     <li>

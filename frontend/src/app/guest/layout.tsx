@@ -1,16 +1,29 @@
-// The app shell for guests, around every /guest page. It reads nothing per request, so guest pages stay static. The
-// rail's foot (the drawer's, on phones) holds the guest menu: a gentle way to an account that never blocks reading.
+// The app shell for guests, around every /guest page. Guests get the curated sample categories (each with its own
+// static page) and can search their sources, so a first visit shows a full shell. It reads nothing per request, so
+// guest pages stay static. The rail's foot (the drawer's, on phones) holds the guest menu: a gentle way to an account.
 
 import { AppShell } from '@/components/app-shell/app-shell';
-import type { ShellView } from '@/components/app-shell/nav-entries';
+import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
+import type { SearchSource } from '@/components/app-shell/search-palette';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
+import { GUEST_CATEGORIES, guestCategoryColor } from '@/features/categories/guest-categories';
 import { ReaderSettings } from '@/features/preferences/components/reader-settings';
 
 const GUEST_VIEWS = [{ href: '/guest', label: 'All items', icon: 'all-items' }] satisfies ShellView[];
 
+const GUEST_NAV = GUEST_CATEGORIES.map((category) => ({
+    href: `/guest/c/${category.id}`,
+    name: category.name,
+    color: guestCategoryColor(category),
+})) satisfies ShellCategory[];
+
+const GUEST_SOURCES = GUEST_CATEGORIES.flatMap((category) =>
+    category.sources.map((source) => ({ href: `/guest/c/${category.id}`, name: source, detail: category.name, categoryHref: `/guest/c/${category.id}` })),
+) satisfies SearchSource[];
+
 export default function GuestLayout({ children }: LayoutProps<'/guest'>) {
     return (
-        <AppShell homeHref="/guest" views={GUEST_VIEWS} account={<GuestMenu />} utilities={<ReaderSettings />}>
+        <AppShell homeHref="/guest" views={GUEST_VIEWS} categories={GUEST_NAV} sources={GUEST_SOURCES} account={<GuestMenu />} utilities={<ReaderSettings />}>
             {children}
         </AppShell>
     );
