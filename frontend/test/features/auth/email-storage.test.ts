@@ -45,6 +45,10 @@ function blockedStorage(): Storage {
 
 const realNow = Date.now;
 
+const realLocalStorage = globalThis.localStorage;
+
+const realSessionStorage = globalThis.sessionStorage;
+
 beforeEach(() => {
     globalThis.localStorage = memoryStorage();
     globalThis.sessionStorage = memoryStorage();
@@ -52,6 +56,8 @@ beforeEach(() => {
 
 afterEach(() => {
     Date.now = realNow;
+    globalThis.localStorage = realLocalStorage;
+    globalThis.sessionStorage = realSessionStorage;
 });
 
 describe('pending email', () => {
