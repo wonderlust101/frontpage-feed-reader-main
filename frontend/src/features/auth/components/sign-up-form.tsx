@@ -18,6 +18,7 @@ import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { rememberPendingEmail, rememberSignInEmail } from '../email-storage';
 import { signUpSchema, NEW_PASSWORD_HINT } from '../schemas';
+import { EmailField } from './email-field';
 
 type SignUpValues = z.infer<typeof signUpSchema>;
 
@@ -72,17 +73,7 @@ export function SignUpForm() {
             )}
 
             <TextField aria-required id="name" label="Name" autoComplete="name" error={errors.name?.message} {...register('name')} />
-            <TextField
-                aria-required
-                id="email"
-                label="Email"
-                type="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                error={errors.email?.message}
-                {...register('email')}
-            />
+            <EmailField error={errors.email?.message} {...register('email')} />
             <PasswordField
                 aria-required
                 id="password"

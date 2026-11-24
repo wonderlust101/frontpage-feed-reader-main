@@ -24,7 +24,10 @@ import { useAuthFrameLinks, useAuthHeading, type FrameLinks } from './auth-headi
 
 type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
-const SIGN_IN_AGAIN_CODES = ['UNAUTHORIZED'];
+const OTHER_DEVICES_NOTICE = {
+    signedOut: { lead: 'Other devices are signed out.', detail: 'This one stays signed in.' },
+    stillSignedIn: { lead: 'Other devices stay signed in.', detail: 'They keep working until they sign out.' },
+};
 
 const RESULT_LINKS: FrameLinks = { switchLink: null, guestLink: false };
 
@@ -52,7 +55,7 @@ export function ChangePasswordForm() {
         if (failure) {
             resetField('currentPassword');
             resetField('newPassword');
-            setNeedsSignIn(Boolean(failure.code && SIGN_IN_AGAIN_CODES.includes(failure.code)));
+            setNeedsSignIn(failure.code === 'UNAUTHORIZED');
             const field = failure.code === 'INVALID_PASSWORD' ? 'currentPassword' : 'root';
 
             setError(field, { message: authErrorMessage(failure) }, { shouldFocus: true });
@@ -64,10 +67,12 @@ export function ChangePasswordForm() {
     }
 
     if (changed) {
+        const notice = changed.signedOutOthers ? OTHER_DEVICES_NOTICE.signedOut : OTHER_DEVICES_NOTICE.stillSignedIn;
+
         return (
             <div className="flex flex-col gap-6">
-                <FormNotice icon="healthy" lead={changed.signedOutOthers ? 'Other devices are signed out.' : 'Other devices stay signed in.'} takesFocus>
-                    {changed.signedOutOthers ? 'This one stays signed in.' : 'They keep working until they sign out.'}
+                <FormNotice icon="healthy" lead={notice.lead} takesFocus>
+                    {notice.detail}
                 </FormNotice>
                 <Link href="/user" className={buttonClassName('primary', 'w-full justify-center')}>
                     Back to your account

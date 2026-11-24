@@ -5,23 +5,22 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { TextLink } from '@/components/ui/text-link';
 import { PasswordField } from '@/components/ui/password-field';
-import { TextField } from '@/components/ui/text-field';
 import { FormAlert } from '@/components/ui/form-alert';
 import { SubmitButton } from '@/components/ui/submit-button';
-import { authClient } from '../auth-client';
+import { authClient, sendVerificationCode } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
-import { rememberPendingEmail } from '../email-storage';
 import { signInSchema } from '../schemas';
-import { takeSignInEmail } from '../email-storage';
+import { rememberPendingEmail, takeSignInEmail } from '../email-storage';
 import { SIGN_IN_HEADINGS, type SignInArrival } from '../headings';
 import { useAuthHeading } from './auth-heading';
+import { EmailField } from './email-field';
 
 type SignInFormProps = {
     next: string;
@@ -84,7 +83,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
 
     async function sendCode(email: string) {
         setSendingCode(true);
-        const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+        const { failure } = await sendVerificationCode(email);
 
         setSendingCode(false);
 
@@ -98,39 +97,31 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
         router.push('/verify-email');
     }
 
+    const forgotPasswordLink = (
+        <TextLink href="/forgot-password" standalone className="-my-3 text-ui">
+            Forgot your password?
+        </TextLink>
+    );
+
+    let failureAction: ReactNode = null;
+
+    if (unverifiedEmail) {
+        failureAction = (
+            <Button variant="secondary" disabled={sendingCode} aria-busy={sendingCode || undefined} onClick={() => sendCode(unverifiedEmail)}>
+                {sendingCode ? 'Sending…' : 'Send a code'}
+            </Button>
+        );
+    } else if (wrongCredentials) {
+        failureAction = forgotPasswordLink;
+    }
+
     return (
         <form noValidate method="post" onSubmit={handleSubmit(signIn)} className="flex flex-col gap-6">
             {errors.root?.message && (
-                <FormAlert
-                    lead="Couldn't sign you in."
-                    message={errors.root.message}
-                    action={
-                        unverifiedEmail ? (
-                            <Button variant="secondary" disabled={sendingCode} aria-busy={sendingCode || undefined} onClick={() => sendCode(unverifiedEmail)}>
-                                {sendingCode ? 'Sending…' : 'Send a code'}
-                            </Button>
-                        ) : (
-                            wrongCredentials && (
-                                <TextLink href="/forgot-password" standalone className="-my-3 text-ui">
-                                    Forgot your password?
-                                </TextLink>
-                            )
-                        )
-                    }
-                />
+                <FormAlert lead="Couldn't sign you in." message={errors.root.message} action={failureAction} />
             )}
 
-            <TextField
-                aria-required
-                id="email"
-                label="Email"
-                type="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                error={errors.email?.message}
-                {...register('email')}
-            />
+            <EmailField error={errors.email?.message} {...register('email')} />
             <PasswordField
                 aria-required
                 id="password"
@@ -144,13 +135,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
                 Sign in
             </SubmitButton>
 
-            {!(errors.root && wrongCredentials) && (
-                <p>
-                    <TextLink href="/forgot-password" standalone className="-my-3 text-ui">
-                        Forgot your password?
-                    </TextLink>
-                </p>
-            )}
+            {!(errors.root && wrongCredentials) && <p>{forgotPasswordLink}</p>}
         </form>
     );
 }

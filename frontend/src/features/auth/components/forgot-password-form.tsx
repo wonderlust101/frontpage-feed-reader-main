@@ -9,7 +9,6 @@ import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { FormNotice } from '@/components/ui/form-notice';
-import { TextField } from '@/components/ui/text-field';
 import { FormAlert } from '@/components/ui/form-alert';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
@@ -19,6 +18,7 @@ import { FORGOT_PASSWORD_HEADINGS } from '../headings';
 import { emailSchema } from '../schemas';
 import { readSignInEmail, rememberSignInEmail } from '../email-storage';
 import { useAuthHeading } from './auth-heading';
+import { EmailField } from './email-field';
 
 type EmailValues = z.infer<typeof emailSchema>;
 
@@ -91,17 +91,7 @@ export function ForgotPasswordForm() {
         <form noValidate method="post" onSubmit={handleSubmit(requestLink)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't send the link." message={errors.root.message} />}
 
-            <TextField
-                aria-required
-                id="email"
-                label="Email"
-                type="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                error={errors.email?.message}
-                {...register('email')}
-            />
+            <EmailField error={errors.email?.message} {...register('email')} />
 
             <SubmitButton pending={isSubmitting} pendingLabel="Sending…">
                 Send reset link

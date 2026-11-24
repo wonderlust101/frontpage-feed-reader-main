@@ -14,17 +14,22 @@ import { FormNotice } from '@/components/ui/form-notice';
 import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { TextField } from '@/components/ui/text-field';
-import { authClient } from '../auth-client';
+import { authClient, sendVerificationCode } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { forgetPendingEmail, readPendingEmail, rememberPendingEmail } from '../email-storage';
 import { authErrorMessage } from '../error-messages';
 import { codeStepHeading, VERIFY_EMAIL_HEADINGS } from '../headings';
 import { CODE_LENGTH, codeSchema, emailSchema } from '../schemas';
 import { useAuthDescriptionId, useAuthFrameLinks, useAuthHeading, type FrameLinks } from './auth-heading';
+import { EmailField } from './email-field';
 
 type EmailValues = z.infer<typeof emailSchema>;
 
 type CodeValues = z.input<typeof codeSchema>;
+
+type CheckedCode = z.output<typeof codeSchema>;
+
+type CodeInputEvent = { target: { value: string }; nativeEvent?: { inputType?: string } };
 
 type EmailStepProps = {
     defaultEmail: string;
@@ -108,7 +113,7 @@ function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
     }, [focusEmail, setFocus]);
 
     async function sendCode({ email }: EmailValues) {
-        const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+        const { failure } = await sendVerificationCode(email);
 
         if (failure) {
             setError('root', { message: authErrorMessage(failure) });
@@ -122,17 +127,7 @@ function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
     return (
         <form noValidate method="post" onSubmit={handleSubmit(sendCode)} className="flex flex-col gap-6">
             {errors.root?.message && <FormAlert lead="Couldn't send a code." message={errors.root.message} />}
-            <TextField
-                aria-required
-                id="email"
-                label="Email"
-                type="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                error={errors.email?.message}
-                {...register('email')}
-            />
+            <EmailField error={errors.email?.message} {...register('email')} />
             <SubmitButton pending={isSubmitting} pendingLabel="Sending…">
                 Send code
             </SubmitButton>
@@ -155,7 +150,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
         clearErrors,
         setFocus,
         formState: { errors, isSubmitting },
-    } = useForm<CodeValues, unknown, z.output<typeof codeSchema>>({
+    } = useForm<CodeValues, unknown, CheckedCode>({
         resolver: zodResolver(codeSchema),
         defaultValues: { code: '' },
         reValidateMode: 'onChange',
@@ -174,7 +169,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
         return () => clearTimeout(timer);
     }, [cooldown]);
 
-    async function verify({ code }: z.output<typeof codeSchema>) {
+    async function verify({ code }: CheckedCode) {
         const result = await authRequest((fetchOptions) => authClient.emailOtp.verifyEmail({ email, otp: code }, fetchOptions));
 
         if (result.failure) {
@@ -193,7 +188,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
     async function resend() {
         clearErrors('root');
         setResending(true);
-        const { failure } = await authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+        const { failure } = await sendVerificationCode(email);
 
         setResending(false);
 
@@ -210,19 +205,7 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
 
     return (
         <form noValidate method="post" onSubmit={handleSubmit(verify)} className="flex flex-col gap-6">
-            {errors.root?.message ? (
-                <FormAlert lead="Couldn't confirm your email." message={errors.root.message} />
-            ) : resentCount > 0 ? (
-                <FormNotice key={resentCount} icon="newsletter" lead="New code sent." takesFocus>
-                    Use the code in the newest email; older ones stop working. You can send another in a minute.
-                </FormNotice>
-            ) : (
-                accountReady && (
-                    <FormNotice icon="healthy" lead="Account created.">
-                        One last step: enter the code we emailed you.
-                    </FormNotice>
-                )
-            )}
+            <CodeStepNotice error={errors.root?.message} resentCount={resentCount} accountReady={accountReady} />
 
             <TextField
                 aria-required
@@ -235,12 +218,8 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
                 className="[&_input]:font-semibold [&_input]:tracking-[0.35em] [&_input]:tabular-nums [&_input]:text-title"
                 error={errors.code?.message}
                 {...register('code', {
-                    // A paste or autofill drops the whole code in at once (it isn't typed text): confirm it straight away.
-                    onChange: (event: { target: { value: string }; nativeEvent?: { inputType?: string } }) => {
-                        const digits = event.target.value.replace(/\s/g, '');
-                        const typed = event.nativeEvent?.inputType?.startsWith('insertText') || event.nativeEvent?.inputType?.startsWith('delete');
-
-                        if (!typed && digits.length === CODE_LENGTH && /^\d+$/.test(digits) && !isSubmitting)
+                    onChange: (event: CodeInputEvent) => {
+                        if (isWholeCodeInserted(event) && !isSubmitting)
                             void handleSubmit(verify)();
                     },
                 })}
@@ -273,6 +252,45 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
             </div>
         </form>
     );
+}
+
+type CodeStepNoticeProps = {
+    error: string | undefined;
+    resentCount: number;
+    accountReady: boolean;
+};
+
+// One message at a time: an error first, then a resent code, then the welcome straight after sign-up.
+function CodeStepNotice({ error, resentCount, accountReady }: CodeStepNoticeProps) {
+    if (error)
+        return <FormAlert lead="Couldn't confirm your email." message={error} />;
+
+    if (resentCount > 0) {
+        return (
+            <FormNotice key={resentCount} icon="newsletter" lead="New code sent." takesFocus>
+                Use the code in the newest email; older ones stop working. You can send another in a minute.
+            </FormNotice>
+        );
+    }
+
+    if (accountReady) {
+        return (
+            <FormNotice icon="healthy" lead="Account created.">
+                One last step: enter the code we emailed you.
+            </FormNotice>
+        );
+    }
+
+    return null;
+}
+
+// A paste or autofill drops the whole code in at once (it isn't typed text), so it can be confirmed straight away.
+function isWholeCodeInserted(event: CodeInputEvent): boolean {
+    const inputType = event.nativeEvent?.inputType;
+    const isTyped = inputType?.startsWith('insertText') || inputType?.startsWith('delete');
+    const digits = event.target.value.replace(/\s/g, '');
+
+    return !isTyped && digits.length === CODE_LENGTH && /^\d+$/.test(digits);
 }
 
 // sessionStorage has no change events within a tab; useSyncExternalStore still reads it safely (null on the server),

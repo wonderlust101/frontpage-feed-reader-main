@@ -11,11 +11,17 @@ export { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_L
 
 export const NEW_PASSWORD_HINT = `At least ${MIN_PASSWORD_LENGTH} characters. Longer is stronger: try a few unrelated words.`;
 
+export const INVALID_EMAIL_MESSAGE = 'Enter an email address like name@example.com.';
+
+export const PASSWORD_TOO_SHORT_MESSAGE = `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
+
+export const PASSWORD_TOO_LONG_MESSAGE = `Use at most ${MAX_PASSWORD_LENGTH} characters.`;
+
 const MAX_NAME_LENGTH = 100;
 
 const email = z.pipe(
     z.string().check(z.minLength(1, { error: 'Enter your email address.' })),
-    z.email({ error: 'Enter an email address like name@example.com.' }),
+    z.email({ error: INVALID_EMAIL_MESSAGE }),
 );
 
 const currentPassword = z.string().check(z.minLength(1, { error: 'Enter your password.' }));
@@ -23,19 +29,21 @@ const currentPassword = z.string().check(z.minLength(1, { error: 'Enter your pas
 const newPassword = z
     .string()
     .check(
-        z.minLength(MIN_PASSWORD_LENGTH, { error: `Use at least ${MIN_PASSWORD_LENGTH} characters.` }),
-        z.maxLength(MAX_PASSWORD_LENGTH, { error: `Use at most ${MAX_PASSWORD_LENGTH} characters.` }),
+        z.minLength(MIN_PASSWORD_LENGTH, { error: PASSWORD_TOO_SHORT_MESSAGE }),
+        z.maxLength(MAX_PASSWORD_LENGTH, { error: PASSWORD_TOO_LONG_MESSAGE }),
     );
 
 const name = z
     .string()
     .check(z.trim(), z.minLength(1, { error: 'Enter your name.' }), z.maxLength(MAX_NAME_LENGTH, { error: `Use at most ${MAX_NAME_LENGTH} characters.` }));
 
+const codeWithoutSpaces = z.pipe(
+    z.string(),
+    z.transform((value: string) => value.replace(/\s/g, '')),
+);
+
 const code = z.pipe(
-    z.pipe(
-        z.string(),
-        z.transform((value: string) => value.replace(/\s/g, '')),
-    ),
+    codeWithoutSpaces,
     z.string().check(z.regex(new RegExp(`^\\d{${CODE_LENGTH}}$`), { error: `Enter the ${CODE_LENGTH}-digit code from the email.` })),
 );
 

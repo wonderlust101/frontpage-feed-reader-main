@@ -11,7 +11,7 @@ export type SwitchLinkTarget = { prompt?: string; label: string; href: string; o
 
 export type FrameLinks = { switchLink: SwitchLinkTarget | null; guestLink: boolean };
 
-const HeadingContext = createContext<Dispatch<SetStateAction<Heading | null>> | null>(null);
+const StepHeadingSetterContext = createContext<Dispatch<SetStateAction<Heading | null>> | null>(null);
 
 const StepHeadingContext = createContext<Heading | null>(null);
 
@@ -27,7 +27,7 @@ export function AuthHeadingProvider({ children }: { children: ReactNode }) {
     const descriptionId = useId();
 
     return (
-        <HeadingContext value={setStep}>
+        <StepHeadingSetterContext value={setStep}>
             <StepHeadingContext value={step}>
                 <FrameLinksSetterContext value={setLinks}>
                     <FrameLinksContext value={links}>
@@ -35,7 +35,7 @@ export function AuthHeadingProvider({ children }: { children: ReactNode }) {
                     </FrameLinksContext>
                 </FrameLinksSetterContext>
             </StepHeadingContext>
-        </HeadingContext>
+        </StepHeadingSetterContext>
     );
 }
 
@@ -114,7 +114,7 @@ export function AuthGuestLink({ show }: { show: boolean }) {
 
 // null keeps the page's default heading.
 export function useAuthHeading(heading: Heading | null) {
-    const setStep = use(HeadingContext);
+    const setStep = use(StepHeadingSetterContext);
     const title = heading?.title;
     const description = heading?.description;
     const panelHeadline = heading?.panel?.headline;
@@ -137,25 +137,16 @@ export function useAuthDescriptionId(): string | undefined {
     return use(DescriptionIdContext);
 }
 
-// Pass a stable `onClick` (e.g. a module constant): a new one on every render resets the links.
+// Pass a module constant (or null): a new object on every render would reset the links each time.
 export function useAuthFrameLinks(links: FrameLinks | null) {
     const setLinks = use(FrameLinksSetterContext);
-    const active = links !== null;
-    const hidesSwitch = links?.switchLink === null;
-    const prompt = links?.switchLink?.prompt;
-    const label = links?.switchLink?.label;
-    const href = links?.switchLink?.href;
-    const onClick = links?.switchLink?.onClick;
-    const guestLink = links?.guestLink;
 
     useEffect(() => {
-        if (!setLinks || !active || guestLink === undefined)
+        if (!setLinks || !links)
             return;
 
-        const switchLink = hidesSwitch || label === undefined || href === undefined ? null : { prompt, label, href, onClick };
-
-        setLinks({ switchLink, guestLink });
+        setLinks(links);
 
         return () => setLinks(null);
-    }, [setLinks, active, hidesSwitch, prompt, label, href, onClick, guestLink]);
+    }, [setLinks, links]);
 }

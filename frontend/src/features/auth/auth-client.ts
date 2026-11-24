@@ -4,8 +4,13 @@
 import 'client-only';
 import { emailOTPClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
+import { authRequest } from './auth-request';
 
 export const authClient = createAuthClient({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     plugins: [emailOTPClient()],
 });
+
+export function sendVerificationCode(email: string) {
+    return authRequest((fetchOptions) => authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' }, fetchOptions));
+}

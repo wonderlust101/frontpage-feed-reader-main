@@ -1,7 +1,7 @@
 // Sign-in failures stay vague on purpose ("email or password"), so the form never reveals which emails have accounts.
 
 import type { AuthFailure } from './auth-request';
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './schemas';
+import { INVALID_EMAIL_MESSAGE, PASSWORD_TOO_LONG_MESSAGE, PASSWORD_TOO_SHORT_MESSAGE } from './schemas';
 
 const ACCOUNT_EXISTS = 'An account with this email already exists. Sign in instead, or reset your password if you have forgotten it.';
 
@@ -9,9 +9,9 @@ const MESSAGES: Record<string, string> = {
     INVALID_EMAIL_OR_PASSWORD: "That email and password don't match. Check both and try again.",
     USER_ALREADY_EXISTS: ACCOUNT_EXISTS,
     USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: ACCOUNT_EXISTS,
-    INVALID_EMAIL: 'Enter an email address like name@example.com.',
-    PASSWORD_TOO_SHORT: `Use at least ${MIN_PASSWORD_LENGTH} characters.`,
-    PASSWORD_TOO_LONG: `Use at most ${MAX_PASSWORD_LENGTH} characters.`,
+    INVALID_EMAIL: INVALID_EMAIL_MESSAGE,
+    PASSWORD_TOO_SHORT: PASSWORD_TOO_SHORT_MESSAGE,
+    PASSWORD_TOO_LONG: PASSWORD_TOO_LONG_MESSAGE,
     INVALID_PASSWORD: 'Your current password is incorrect.',
     INVALID_TOKEN: 'This reset link has expired or was already used. Ask for a new one.',
     EMAIL_NOT_VERIFIED: 'Confirm your email address before signing in.',
