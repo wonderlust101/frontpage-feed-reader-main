@@ -31,7 +31,7 @@ export function NavRow({ href, label, lead, color, isCurrent, count, locked = fa
             className={`relative flex min-h-11 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 lg:min-h-10 ${menu ? 'pointer-coarse:pr-12' : ''} ${isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
             style={isCurrent ? ({ '--row-field': color } as CSSProperties) : undefined}
         >
-            {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" style={{ background: color }} />}
+            {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" />}
             {lead}
             <span className="min-w-0 truncate">{label}</span>
             {locked && (

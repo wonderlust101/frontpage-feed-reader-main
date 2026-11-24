@@ -26,8 +26,8 @@
     --color-on-ink: #f3f3ee;
 
     /* The app shell steps lighter toward the content: rail, then category panel, then the workspace you read in. */
-    --color-rail: light-dark(#d9d7ce, #0d0d0c);
-    --color-panel: light-dark(#e9e7e0, #171716);
+    --color-rail: light-dark(#d9d7ce, #0a0a09);
+    --color-panel: light-dark(#e9e7e0, #1a1a18);
     --color-workspace: light-dark(#fafaf7, #232220);
 
     --color-error: light-dark(#951c12, #ffa29a);

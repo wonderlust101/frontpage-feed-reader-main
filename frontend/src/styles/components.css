@@ -448,7 +448,9 @@
         left: 0.75rem;
     }
 
+    /* A category's menu is narrower, so its nine swatches sit five and four. */
     .menu-panel[data-placement='row'] {
+        width: min(18rem, calc(100vw - 1.5rem));
         top: 6rem;
         left: 0.75rem;
         transform-origin: top left;
@@ -490,16 +492,27 @@
 
     /* The current row's tint, mixed in OKLCH so pale fields stay clean: 30% over the panel in light mode, a gentler */
     /* 14% over the workspace tone in dark, where a stronger mix turns Lemon olive and Coral maroon. */
+    /* A near-neutral field ("No color") would vanish as a light tint or bar, so in light mode a low-chroma field is */
+    /* darkened first (--row-field-strong); colored fields have chroma above 0.05 and pass through unchanged. */
     .nav-current {
+        --row-field-strong: oklch(from var(--row-field) calc(l - max(0, 0.05 - c) * 6) c h);
         background: light-dark(
-            color-mix(in oklch, var(--row-field) 30%, var(--color-panel)),
+            color-mix(in oklch, var(--row-field-strong) 30%, var(--color-panel)),
             color-mix(in oklch, var(--row-field) 14%, var(--color-workspace))
         );
     }
 
-    /* The current entry's marker grows into place when it moves, so a choice feels picked up rather than repainted. */
+    /* The current entry's field bar, which grows into place when it moves, so a choice feels picked up rather than */
+    /* repainted. */
     .nav-marker {
+        background: light-dark(var(--row-field-strong), var(--row-field));
         animation: nav-marker-in 180ms var(--ease-out);
+    }
+
+    /* A page title underlined in its category's field (--title-field), darkened like the row when it is "No color", */
+    /* so the underline stays visible on the light workspace. */
+    .field-underline {
+        text-decoration-color: light-dark(oklch(from var(--title-field) calc(l - max(0, 0.05 - c) * 6) c h), var(--title-field));
     }
 }
 

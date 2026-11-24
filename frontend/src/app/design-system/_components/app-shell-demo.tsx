@@ -7,7 +7,7 @@
 // shell. Readers get these in the app when the categories endpoints exist. One view and one category link to this
 // page, so the matcher marks them current.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
 import type { SearchResults } from '@/components/app-shell/search-palette';
 import { ShellDrawer } from '@/components/app-shell/shell-drawer';
@@ -18,6 +18,7 @@ import { Toast } from '@/components/ui/toast';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
+import { categoryColor } from '@/features/categories/category-field-vars';
 import { NO_FIELD, categoryFieldById } from '@/features/categories/fields';
 import { deleteCategory, isNameTaken, updateCategory, type Library } from '@/features/categories/library';
 import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
@@ -91,7 +92,7 @@ export function AppShellDemo() {
         : CATEGORIES.map((category, index) => ({
               href: `#category-${category.id}`,
               name: category.name,
-              color: guestFields[category.id].color,
+              color: categoryColor(category.id, category.field.color),
               count: UNREAD_COUNTS[index],
           }));
     const account = isReader ? <AccountMenu user={SAMPLE_READER} /> : <GuestMenu />;
@@ -192,8 +193,8 @@ export function AppShellDemo() {
                     <div className="px-5 pt-8 pb-10 sm:px-8">
                         <p className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
                             <span
-                                className="type-display underline decoration-[0.12em] underline-offset-[0.14em] [text-decoration-skip-ink:none]"
-                                style={{ textDecorationColor: titleField }}
+                                className="field-underline type-display underline decoration-[0.12em] underline-offset-[0.14em] [text-decoration-skip-ink:none]"
+                                style={{ '--title-field': titleField } as CSSProperties}
                             >
                                 {title}
                             </span>

@@ -8,7 +8,7 @@ import { Icon } from '@/components/ui/icon';
 import { createHtmlPreference } from '@/lib/html-preference';
 import { SAVED_PREFERENCES } from '@/lib/saved-preferences';
 
-const useSidebar = createHtmlPreference(SAVED_PREFERENCES.sidebar);
+export const useSidebar = createHtmlPreference(SAVED_PREFERENCES.sidebar);
 
 // Renders the toggle for the panel `panelId`; its tooltip names the action and the [ shortcut.
 export function SidebarToggle({ panelId }: { panelId: string }) {

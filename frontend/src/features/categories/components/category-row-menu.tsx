@@ -3,9 +3,10 @@
 // A category's quick actions, on its row in the panel or drawer: pick its color from the brand fields and, when the
 // caller allows them, rename it or delete it (guests only recolor, saved on this device). Changes apply at once.
 // Deleting is undoable (its feeds move to Uncategorized), so the caller offers Undo rather than asking first; it sits
-// apart from the rest. After a delete, focus moves to the neighbouring row, so a keyboard user keeps their place.
+// apart from the rest. After a delete, focus moves to the neighbouring row, and after a rename it stays in the field,
+// so a keyboard user keeps their place.
 
-import { useId, useState, type FormEvent, type MouseEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent, type MouseEvent } from 'react';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -24,6 +25,14 @@ type CategoryRowMenuProps = {
 export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: CategoryRowMenuProps) {
     const id = useId();
     const [error, setError] = useState<string | undefined>();
+    const nameRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        // Shows the current name when it changes elsewhere (an Undo), leaving the field alone while it is being edited.
+        if (nameRef.current && document.activeElement !== nameRef.current) {
+            nameRef.current.value = category.name;
+        }
+    }, [category.name]);
 
     // Applies the new name, or shows why not.
     function handleRename(event: FormEvent<HTMLFormElement>) {
@@ -53,13 +62,13 @@ export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: Cat
                     </span>
                 </>
             }
-            triggerClassName="grid size-9 place-items-center rounded-control text-ink-2 hover:bg-ink/8 hover:text-ink lg:size-8"
+            triggerClassName="grid size-11 place-items-center rounded-control text-ink-2 hover:bg-ink/8 hover:text-ink lg:size-8 pointer-coarse:size-11"
         >
             <p className="truncate font-display text-title leading-tight font-bold tracking-[-0.02em]">{category.name}</p>
             {onRename && (
                 <form onSubmit={handleRename} noValidate className="mt-4 flex flex-col items-start gap-3">
                     <TextField
-                        key={category.name}
+                        ref={nameRef}
                         id={`${id}-name`}
                         name="name"
                         label="Name"
@@ -76,6 +85,7 @@ export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: Cat
             <div className="mt-5">
                 <p className="mb-2 text-ui font-semibold">Color</p>
                 <FieldPicker name={`${id}-field`} legend={category.name} value={category.fieldId} onChange={onRecolor} />
+                {!onRename && <p className="mt-2 text-meta text-ink-2">Saved on this device.</p>}
             </div>
             {onDelete && (
                 <div className="mt-6 border-t border-edge pt-3">

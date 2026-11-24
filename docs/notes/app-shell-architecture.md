@@ -68,6 +68,7 @@ src/features/auth/
   components/account-boundary.tsx  client: catchError around the account slot, a "Try again" control
 src/features/categories/
   guest-categories.ts              the guest's curated categories and sources (mirrors backend/data/sample-feeds.json)
+  category-field-vars.ts           guest colors as CSS properties on <html>: the early script, categoryColor(id, preset)
   use-guest-category-fields.ts     client: the guest categories' fields (preset or the guest's choice on this device)
   library.ts                       a reader's categories and feeds and the pure edits the quick actions make: tested
   components/category-row-menu.tsx client: a category's quick actions (color swatches; rename and delete when allowed)
@@ -126,7 +127,7 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 - **Status:** Accepted (revised after the fourth critique)
 - **Context:** the rail, the panel and the drawer named the home page differently ("All items", "All categories") and disagreed on what was current inside a category; the live guest shell once showed no categories.
 - **Decision:** one name, "All items", for the home page in the rail and the panel, always Lemon. `shellPlace()` returns the category (a category, or `homeHref` on the home page) and the view, which is null inside a category, so only one place is ever marked; the drawer leaves the home view out of its views, since "All items" leads its categories. Guests get the five curated categories from `features/categories/guest-categories.ts` (a frontend mirror of `backend/data/sample-feeds.json`), each with a static page at `/guest/c/<id>` (`generateStaticParams`; an unknown id is a 404), recolourable on this device. What only an account adds is one locked view leading to sign-up. Readers' categories, counts and article search still wait for their endpoints.
-- **Consequences:** guest colours come from localStorage after hydration, so a recoloured category shows its preset for a frame on first load. Because the category route has `generateStaticParams`, `usePathname` resolves at prerender and needs no Suspense; the page reads `params` inside a `<Suspense>` child.
+- **Consequences:** guest colours are CSS properties (`--category-<id>`) the root layout's early script copies from localStorage before the first paint, and every place that draws a guest category uses `categoryColor(id, preset)`, so nothing flashes and server and client render the same markup. The rail's Lemon square for the home view shows only while the panel is collapsed (and `aria-current` with it), so the place is never marked twice. Because the category route has `generateStaticParams`, `usePathname` resolves at prerender and needs no Suspense; the page reads `params` inside a `<Suspense>` child.
 
 ### ADR-007: Quick actions on category rows; Add feed and Manage deferred
 

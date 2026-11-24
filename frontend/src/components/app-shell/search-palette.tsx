@@ -3,8 +3,9 @@
 // Search, the shell's one global utility: a button in the workspace toolbar and Ctrl/Cmd + K from anywhere open a
 // palette (a native modal <dialog>) that both searches and navigates. Typing finds views and categories to jump to
 // ("Go to"), articles (when a `search` function is given) and sources (from `search`, or the plain `sources` list).
-// It searches everything, with the current category's sources first; once there is a query, a "Search in" select
-// narrows articles and sources to one category when the reader wants that. Locked views (a guest's account-only ones)
+// Before anything is typed it lists every view and category, so arrow keys and Enter work at once. It searches
+// everything, with the current category's sources first; once there is a query, a "Search in" select (its row's space
+// kept, so results never jump) narrows articles and sources to one category when the reader wants that. Locked views (a guest's account-only ones)
 // say so, with a lock. Reopening selects the last query, so typing replaces it. The query field is a combobox: arrow
 // keys move through the results, Enter opens one, Escape (or Cancel on touch) closes.
 
@@ -69,22 +70,20 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
     const groups: ResultGroup[] = [
         {
             label: 'Go to',
-            options: needle
-                ? [
-                      ...views
-                          .filter((view) => view.label.toLowerCase().includes(needle))
-                          .map((view) => ({
-                              href: view.href,
-                              title: view.label,
-                              detail: view.locked ? 'View · with an account' : 'View',
-                              locked: view.locked,
-                              lead: { icon: view.icon },
-                          })),
-                      ...categories
-                          .filter((category) => category.name.toLowerCase().includes(needle))
-                          .map((category) => ({ href: category.href, title: category.name, detail: 'Category', lead: { color: category.color } })),
-                  ]
-                : [],
+            options: [
+                ...views
+                    .filter((view) => view.label.toLowerCase().includes(needle))
+                    .map((view) => ({
+                        href: view.href,
+                        title: view.label,
+                        detail: view.locked ? 'View · with an account' : 'View',
+                        locked: view.locked,
+                        lead: { icon: view.icon },
+                    })),
+                ...categories
+                    .filter((category) => category.name.toLowerCase().includes(needle))
+                    .map((category) => ({ href: category.href, title: category.name, detail: 'Category', lead: { color: category.color } })),
+            ],
         },
         {
             label: 'Articles',
@@ -157,11 +156,11 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                 aria-haspopup="dialog"
                 aria-keyshortcuts="Meta+K Control+K"
                 onClick={openPalette}
-                className="tool-button max-w-full min-w-0 shrink justify-start text-ink-2 max-md:min-w-11 md:w-88 md:px-3"
+                className="tool-button flex-none justify-start text-ink-2 @max-lg:min-w-11 @lg:w-88 @lg:px-3"
             >
                 <Icon name="search" />
                 <span className="truncate font-medium @max-lg:sr-only">Search and jump</span>
-                <kbd className="ml-auto rounded-tag border border-edge bg-workspace px-1.5 font-sans text-meta font-semibold whitespace-nowrap text-ink-2 max-md:hidden">
+                <kbd className="ml-auto rounded-tag border border-edge bg-workspace px-1.5 font-sans text-meta font-semibold whitespace-nowrap text-ink-2 @max-lg:hidden">
                     {shortcut}
                 </kbd>
             </button>
@@ -203,8 +202,8 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             Cancel
                         </button>
                     </div>
-                    {categories.length > 0 && trimmedQuery && (
-                        <div className="flex items-center gap-2 border-b border-edge px-4 py-2">
+                    {categories.length > 0 && (
+                        <div inert={!trimmedQuery} className={`flex items-center gap-2 border-b border-edge px-4 py-2 ${trimmedQuery ? '' : 'invisible'}`}>
                             <label htmlFor={scopeId} className="text-meta font-semibold text-ink-2">
                                 Search in
                             </label>

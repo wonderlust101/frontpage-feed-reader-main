@@ -1,10 +1,11 @@
 'use client';
 
-// The workspace toolbar, the shell's <header>, sticky at the top of the page. Search leads at the left, at a fixed width,
-// so it sits in the same place on every page; where you are (the current category, else the current view, as a tag in
-// its field) follows it after a hairline, so a long category name only ever moves the tag, never search. Below lg the
-// drawer's menu button comes first. It is a size container, so the search button drops its label whenever the toolbar
-// itself is narrow.
+// The workspace toolbar, the shell's <header>, sticky at the top of the page. Search leads at the left, at a fixed
+// width that never shrinks, so it sits in the same place on every page; where you are (the current category, else the
+// current view, as a tag in its field) follows it after a hairline, so a long category name only ever moves the tag,
+// never search, and a name too long for the toolbar ends in an ellipsis ("Viewing:" and the panel keep it whole).
+// Below lg the drawer's menu button comes first. It is a size container, so the search button drops its label whenever
+// the toolbar itself is narrow.
 
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -39,13 +40,13 @@ export function ShellToolbar({ homeHref, views, categories, sources, drawer, sea
             {drawer}
             <SearchPalette homeHref={homeHref} views={views} categories={categories} sources={sources} search={search} />
             {(category || view) && (
-                <span className="flex min-w-0 items-center gap-2 sm:gap-3">
+                <span className="flex min-w-0 items-center gap-2 overflow-hidden sm:gap-3">
                     <span aria-hidden="true" className="h-6 w-px flex-none bg-edge" />
                     <span className="sr-only">Viewing: </span>
                     {category ? (
-                        <CategoryTag name={category.name} field={{ color: category.color }} />
+                        <CategoryTag name={category.name} field={{ color: category.color }} className="min-w-0 max-w-full" />
                     ) : (
-                        view && <CategoryTag name={view.label} field={VIEW_FIELD} />
+                        view && <CategoryTag name={view.label} field={VIEW_FIELD} className="min-w-0 max-w-full" />
                     )}
                 </span>
             )}

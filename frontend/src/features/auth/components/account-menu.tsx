@@ -3,6 +3,7 @@
 
 import type { SessionUser } from '@frontpage/shared';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
+import { RailTooltip } from '@/components/app-shell/sidebar-toggle';
 import { Icon } from '@/components/ui/icon';
 import { TextLink } from '@/components/ui/text-link';
 import { SignOutButton } from './sign-out-button';
@@ -12,7 +13,7 @@ type AccountMenuProps = {
 };
 
 export const ACCOUNT_TRIGGER_CLASSES =
-    'flex items-center gap-3 rounded-control p-1 text-left transition-colors duration-150 hover:bg-ink/6 in-data-[account=row]:w-full in-data-[account=row]:p-2';
+    'group relative flex items-center gap-3 rounded-control p-1 text-left transition-colors duration-150 hover:bg-ink/6 in-data-[account=row]:w-full in-data-[account=row]:p-2';
 
 // Renders the avatar button and its panel for `user`.
 export function AccountMenu({ user }: AccountMenuProps) {
@@ -41,6 +42,9 @@ export function AccountMenu({ user }: AccountMenuProps) {
                         <span className="block truncate text-meta text-muted">{user.email}</span>
                     </span>
                     <span className="sr-only in-data-[account=row]:hidden">Account menu for {user.name}</span>
+                    <span className="in-data-[account=row]:hidden">
+                        <RailTooltip>{user.name} · Account</RailTooltip>
+                    </span>
                     <span className="sr-only hidden in-data-[account=row]:block">, account menu</span>
                 </>
             }

@@ -1,11 +1,13 @@
-// The root layout: fonts, metadata, and the reader's saved preferences (theme, contrast, the reading settings and the
-// collapsed sidebar), stored in localStorage (lib/saved-preferences.ts). A tiny inline script copies them onto <html>
+// The root layout: fonts, metadata, and the reader's saved preferences (theme, contrast, the reading settings, the
+// collapsed sidebar and a guest's category colors), stored in localStorage (lib/saved-preferences.ts,
+// features/categories/category-field-vars.ts). A tiny inline script copies them onto <html>
 // before the first paint, so every page, including one opened from an email link, starts in the reader's choice
 // instead of flashing the default. The Content Security Policy allows inline scripts (next.config.ts). React leaves the
 // attributes alone (suppressHydrationWarning).
 
 import type { Metadata } from 'next';
 import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque, JetBrains_Mono, Lexend, Onest } from 'next/font/google';
+import { CATEGORY_FIELDS_SCRIPT } from '@/features/categories/category-field-vars';
 import { SAVED_PREFERENCES_SCRIPT } from '@/lib/saved-preferences';
 import './globals.css';
 
@@ -54,7 +56,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
             className={`${bricolage.variable} ${onest.variable} ${jetbrainsMono.variable} ${atkinson.variable} ${lexend.variable} h-full antialiased`}
         >
             <head>
-                <script dangerouslySetInnerHTML={{ __html: SAVED_PREFERENCES_SCRIPT }} />
+                <script dangerouslySetInnerHTML={{ __html: SAVED_PREFERENCES_SCRIPT + CATEGORY_FIELDS_SCRIPT }} />
             </head>
             <body className="flex min-h-full flex-col">{children}</body>
         </html>
