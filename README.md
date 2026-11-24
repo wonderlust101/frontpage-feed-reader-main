@@ -14,15 +14,16 @@ Bun is the package manager and script runner everywhere.
 
 ## Project structure
 
-The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and `packages/shared/`. Each has its own `package.json`, but there is one `bun.lock` and one (hoisted) `node_modules` at the root. Run `bun install` from the root; add a dependency inside the package that needs it (`cd backend && bun add x`).
+The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `packages/shared/` and `packages/eslint-config/`. Each has its own `package.json`, but there is one `bun.lock` and one (hoisted) `node_modules` at the root. Run `bun install` from the root; add a dependency inside the package that needs it (`cd backend && bun add x`).
 
 `packages/shared` (`@frontpage/shared`) holds code both sides use, starting with the API response types. Backend and frontend import it the same way (`import type { HealthResponse } from "@frontpage/shared"`), so the API contract is defined once.
 
 ```
 .
 ├── packages/
-│   └── shared/               # @frontpage/shared: code used by both sides
-│       └── src/api.ts        #   API response types (the backend ↔ frontend contract)
+│   ├── shared/               # @frontpage/shared: code used by both sides
+│   │   └── src/api.ts        #   API response types (the backend ↔ frontend contract)
+│   └── eslint-config/        # @frontpage/eslint-config: the ESLint Stylistic code style every package lints with
 ├── frontend/                 # Next.js → Vercel (Root Directory: frontend)
 │   ├── vercel.json
 │   ├── .env.example
@@ -33,7 +34,7 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       │   ├── (auth)/       #   sign-in, sign-up, verify-email, forgot/reset-password, account/password
 │       │   └── design-system/  # /design-system: the living design system page
 │       ├── features/         # app features, mirroring backend/src/modules (auth, categories, items, preferences…)
-│       │   └── <domain>/     #   components/, logic (fields.ts, category-field-store.ts…), later hooks/, actions.ts, types.ts
+│       │   └── <domain>/     #   components/, hooks/ (use-*.ts), logic at the root (fields.ts, schemas.ts…)
 │       ├── components/       # shared, feature-agnostic: ui/ primitives (incl. form pieces), logo.tsx, app-shell/ (rail, category panel, toolbar with search, drawer), stickers.tsx
 │       ├── lib/api.ts        # server-side client for the backend
 │       └── styles/           # tokens.css (design tokens), components.css (component layer)
@@ -104,11 +105,26 @@ The sample feeds live in `backend/data/` because only the backend reads them.
 
 ### Code style
 
-Prettier handles formatting and ESLint adds `curly` (braces on every `if`/`else`/loop body). Beyond that, every source file follows the same layout and comment rules, so any file reads the same way.
+ESLint formats TypeScript (`.ts`, `.tsx`, `.mjs`) with ESLint Stylistic (`packages/eslint-config`); Prettier formats everything else (CSS, JSON, Markdown, YAML). `bun run format` runs both, and `bun run lint` fails on any layout the formatter would change. Prettier skips TS files because it would pull a brace-free `if` body up onto the `if` line.
+
+**Layout:**
+
+- Braces are optional for a single statement. Without braces, the body goes on the next line, indented. Use braces for several statements, every branch of an `if`/`else` chain, and wherever leaving them out reads worse.
+- A blank line separates steps: after imports and groups of declarations, around `if`/`for`/`while`/`switch`/`try`, and before `return` (the linter enforces these). Inside a component, group the hooks, the derived values, the handlers and the JSX, and leave a blank line between large JSX sections.
+- Prefer early returns to nesting, and `if`/`else` to nested ternaries.
+
+<!-- prettier-ignore -->
+```ts
+if (!user)
+    return null;
+
+for (const item of items)
+    processItem(item);
+```
 
 **File order, top to bottom:**
 
-1. Purpose comment (a few `//` lines), then a blank line
+1. Purpose comment (0–2 `//` lines, 3 at most), then a blank line
 2. Imports
 3. Types
 4. Constants, then module state (`let` variables, caches)
@@ -117,12 +133,16 @@ Prettier handles formatting and ESLint adds `curly` (braces on every `if`/`else`
 
 You meet a file's main function first and read down into the details. Write helpers as `function` declarations, not `const helper = () => …`: functions are hoisted, so a constant near the top (like `const ISO = pattern(…)` in `dates.ts`) can use a helper defined further down. Test files are the exception: their setup and helpers go above the tests.
 
-**Comments** (`//` only, never `/* */` or `/** */`):
+**Comments** (`//` only, never `/* */` or `/** */`). Fewer is better: a comment says _why_, not _what_.
 
-- **Top of file:** optional lines stating the file's purpose and any key design decision, then a blank line.
-- **Every function:** one line saying what it does, what it returns and its edge cases (when it returns null, what it throws); two lines only for unusually complex functions. Comment lines may run past Prettier's `printWidth`, since Prettier never wraps comments.
-- **Nowhere else**, except a one-line _why_ on a genuinely complex line (a regex, a workaround, non-obvious library behaviour). No section dividers and no comments on constants, types or fields.
+- **Top of file:** optional, 0–2 lines (3 at most) on the file's purpose or a key design decision. Don't add one just to restate the file name.
+- **Functions:** none when the name and body explain it. Otherwise exactly one line on what a caller can't see (why it exists, when it returns null, what it throws).
+- **Inside code:** a one-line _why_ next to the line it explains (a regex, a workaround, non-obvious library or browser behaviour, an accessibility decision). No section dividers and no narration.
+- **Tables:** one line above each `pgTable(...)` saying what the table is for (two for complex tables).
 - **Names first:** if code needs a comment to be understood, rename the variable or extract a named constant instead (`MAX_OFFSET_HOURS = 14`, not `14 // max offset`).
+- Roadmap notes and to-dos go in Jira, not in comments.
+
+**Editor setup:** run ESLint's fix on save for TS and restrict Prettier to the other files. WebStorm: Settings → Prettier → "Run for files" `**/*.{css,json,md,yml,yaml,html}`, and Settings → ESLint → "Run eslint --fix on save". VS Code: `"editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" }`, with Prettier as the formatter only for those file types.
 
 ## Planning and tracking
 
@@ -255,7 +275,8 @@ Running with `bun dev` instead of Docker: start only Mailpit with `docker compos
 | `bun run typecheck`                                            | Type-check both projects                                                    |
 | `bun run test`                                                 | Backend and frontend tests (`bun test` in each)                             |
 | `bun run test:watch`                                           | Backend tests, re-run on save                                               |
-| `bun run lint`                                                 | Lint frontend and backend (ESLint; Prettier handles formatting)             |
+| `bun run lint`                                                 | Lint frontend, backend and shared (ESLint, including code layout)           |
+| `bun run format`                                               | Format everything: Prettier (CSS, JSON, Markdown…) then `eslint --fix` (TS) |
 | `bun run db:generate` / `db:migrate` / `db:push` / `db:studio` | Drizzle Kit (backend)                                                       |
 | `bun run docker:up` / `docker:down` / `docker:logs`            | Local Docker stack (see above)                                              |
 
