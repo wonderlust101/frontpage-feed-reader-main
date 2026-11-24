@@ -3,104 +3,50 @@
 // Search, the shell's one global utility: Ctrl/Cmd + K or the toolbar button opens a native modal <dialog> that both
 // searches and navigates. The "Search in" select sits in the query's own row, so the results never move.
 
-import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
-import { Icon, type IconName } from '@/components/ui/icon';
-import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
+import { useRouter } from 'next/navigation';
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent, type MouseEvent } from 'react';
+import { Icon } from '@/components/ui/icon';
+import type { ShellCategory, ShellView } from './nav-entries';
 import { matchParts } from './search-match';
-
-export type SearchResults = {
-    articles: { href: string; title: string; source: string; time: string }[];
-    sources: SearchSource[];
-};
-
-export type SearchSource = { href: string; name: string; detail: string; categoryHref: string };
+import { buildResultGroups, type ResultGroup, type ResultOption, type SearchFn, type SearchSource } from './search-results';
+import { useShellPlace } from './use-shell-place';
 
 type SearchPaletteProps = {
     homeHref: string;
     views: ShellView[];
     categories: ShellCategory[];
     sources?: SearchSource[];
-    search?: (query: string, categoryHref: string | null) => SearchResults;
+    search?: SearchFn;
 };
-
-type ResultOption = {
-    href: string;
-    title: string;
-    detail: string;
-    aside?: string;
-    locked?: boolean;
-    lead: { icon: IconName } | { color: string } | { initial: string };
-};
-
-type ResultGroup = { label: string; options: ResultOption[] };
 
 export function SearchPalette({ homeHref, views, categories, sources = [], search }: SearchPaletteProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
-    const pathname = usePathname();
     const listId = useId();
     const scopeId = useId();
     const isMac = useSyncExternalStore(subscribeToNothing, isApplePlatform, () => false);
     const [query, setQuery] = useState('');
     const [scopeHref, setScopeHref] = useState<string | null>(null);
     const [activeIndex, setActiveIndex] = useState(0);
-    const place = shellPlace(
-        pathname,
-        homeHref,
-        views.map((view) => view.href),
-        categories.map((category) => category.href),
-    );
+
+    const place = useShellPlace(homeHref, views, categories);
     const currentCategoryHref = place.category !== homeHref ? place.category : null;
     const trimmedQuery = query.trim();
-    const needle = trimmedQuery.toLowerCase();
     const searched = search && trimmedQuery ? search(trimmedQuery, scopeHref) : null;
-    const matchedSources = searched
-        ? searched.sources
-        : sources.filter((source) => needle && source.name.toLowerCase().includes(needle) && (!scopeHref || source.categoryHref === scopeHref));
-    const scopedSources = [...matchedSources].sort((a, b) => Number(b.categoryHref === currentCategoryHref) - Number(a.categoryHref === currentCategoryHref));
-    const groups: ResultGroup[] = [
-        {
-            label: 'Go to',
-            options: [
-                ...views
-                    .filter((view) => view.label.toLowerCase().includes(needle))
-                    .map((view) => ({
-                        href: view.href,
-                        title: view.label,
-                        detail: view.preview ? 'View · with an account' : 'View',
-                        locked: Boolean(view.preview),
-                        lead: { icon: view.icon },
-                    })),
-                ...categories
-                    .filter((category) => category.name.toLowerCase().includes(needle))
-                    .map((category) => ({ href: category.href, title: category.name, detail: 'Category', lead: { color: category.color } })),
-            ],
-        },
-        {
-            label: 'Articles',
-            options: (searched?.articles ?? []).map((article) => ({
-                href: article.href,
-                title: article.title,
-                detail: article.source,
-                aside: article.time,
-                lead: { initial: article.source.charAt(0) },
-            })),
-        },
-        {
-            label: 'Sources',
-            options: scopedSources.map((source) => ({
-                href: source.href,
-                title: source.name,
-                detail: source.detail,
-                lead: { initial: source.name.charAt(0) },
-            })),
-        },
-    ];
+    const groups = buildResultGroups({ query, views, categories, sources, searched, scopeHref, currentCategoryHref });
     const options = groups.flatMap((group) => group.options);
-    const activeOption = options[Math.min(activeIndex, options.length - 1)];
+
+    // The list can shrink under a kept index (a new scope), so the active row is clamped to it.
+    const activePosition = Math.min(activeIndex, options.length - 1);
+    const activeOption = options[activePosition];
     const shortcut = isMac ? '⌘K' : 'Ctrl K';
+
+    // Selects the last query, so typing starts a new search.
+    function openPalette() {
+        dialogRef.current?.showModal();
+        inputRef.current?.select();
+    }
 
     useEffect(() => {
         function openOnShortcut(event: globalThis.KeyboardEvent) {
@@ -109,16 +55,11 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                 openPalette();
             }
         }
+
         window.addEventListener('keydown', openOnShortcut);
 
         return () => window.removeEventListener('keydown', openOnShortcut);
     }, []);
-
-    // Selects the last query, so typing starts a new search.
-    function openPalette() {
-        dialogRef.current?.showModal();
-        inputRef.current?.select();
-    }
 
     function openResult(option: ResultOption) {
         dialogRef.current?.close();
@@ -134,11 +75,16 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
             event.preventDefault();
             const step = event.key === 'ArrowDown' ? 1 : -1;
 
-            setActiveIndex((index) => (Math.min(index, options.length - 1) + step + options.length) % options.length);
+            setActiveIndex((activePosition + step + options.length) % options.length);
         } else if (event.key === 'Enter' && activeOption) {
             event.preventDefault();
             openResult(activeOption);
         }
+    }
+
+    function closeOnBackdropClick(event: MouseEvent<HTMLDialogElement>) {
+        if (event.target === event.currentTarget)
+            event.currentTarget.close();
     }
 
     return (
@@ -160,7 +106,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
             <dialog
                 ref={dialogRef}
                 aria-label="Search"
-                onClick={(event) => event.target === event.currentTarget && event.currentTarget.close()}
+                onClick={closeOnBackdropClick}
                 className="mx-auto mt-[10vh] max-h-[80dvh] w-[min(52rem,calc(100vw-1.5rem))] overflow-hidden rounded-stage border-[1.5px] border-control-edge bg-workspace p-0 text-ink transition-[opacity,scale,display,overlay] transition-discrete duration-150 ease-out backdrop:bg-on-field/45 starting:open:scale-97 starting:open:opacity-0 max-md:mt-3"
             >
                 <div className="flex max-h-[80dvh] flex-col">
@@ -174,7 +120,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             aria-label="Search and jump"
                             aria-expanded={options.length > 0}
                             aria-controls={listId}
-                            aria-activedescendant={activeOption ? `${listId}-${options.indexOf(activeOption)}` : undefined}
+                            aria-activedescendant={activeOption ? `${listId}-${activeOption.index}` : undefined}
                             autoComplete="off"
                             autoFocus
                             value={query}
@@ -219,15 +165,25 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                     <div className="min-h-0 flex-1 overflow-y-auto py-2 md:min-h-80">
                         {options.length > 0 ? (
                             <ul id={listId} role="listbox" aria-label="Results">
-                                {groups.map((group, index) =>
-                                    renderGroup(
-                                        group,
-                                        groups.slice(0, index).reduce((offset, earlier) => offset + earlier.options.length, 0),
-                                    ),
-                                )}
+                                {groups.map((group) => (
+                                    <ResultList
+                                        key={group.label}
+                                        group={group}
+                                        listId={listId}
+                                        query={trimmedQuery}
+                                        activeIndex={activePosition}
+                                        onOpen={openResult}
+                                        onActivate={setActiveIndex}
+                                    />
+                                ))}
                             </ul>
                         ) : (
-                            renderEmpty()
+                            <NoResults
+                                query={trimmedQuery}
+                                scopeHref={scopeHref}
+                                canSearchArticles={Boolean(search)}
+                                onSearchEverywhere={() => setScopeHref(null)}
+                            />
                         )}
                     </div>
                     <p className="flex gap-4 border-t border-edge px-4 py-2.5 text-meta text-muted pointer-coarse:hidden">
@@ -245,77 +201,98 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
             </dialog>
         </>
     );
+}
 
-    // The group's aria-label names it for screen readers; the visible label is for sighted readers.
-    function renderGroup({ label, options: groupOptions }: ResultGroup, offset: number) {
-        if (groupOptions.length === 0)
-            return null;
+type ResultListProps = {
+    group: ResultGroup;
+    listId: string;
+    query: string;
+    activeIndex: number;
+    onOpen: (option: ResultOption) => void;
+    onActivate: (index: number) => void;
+};
 
-        return (
-            <li key={label} role="presentation">
-                <p aria-hidden="true" className="px-4 pt-2 pb-1 text-meta font-semibold text-muted">
-                    {label}
-                </p>
-                <ul role="group" aria-label={label}>
-                    {groupOptions.map((option, index) => {
-                        const isActive = option === activeOption;
+// The group's aria-label names it for screen readers; the visible label is for sighted readers.
+function ResultList({ group, listId, query, activeIndex, onOpen, onActivate }: ResultListProps) {
+    return (
+        <li role="presentation">
+            <p aria-hidden="true" className="px-4 pt-2 pb-1 text-meta font-semibold text-muted">
+                {group.label}
+            </p>
+            <ul role="group" aria-label={group.label}>
+                {group.options.map((option) => (
+                    <li
+                        key={`${group.label}-${option.href}-${option.title}`}
+                        id={`${listId}-${option.index}`}
+                        role="option"
+                        aria-selected={option.index === activeIndex}
+                        onClick={() => onOpen(option)}
+                        onMouseMove={() => onActivate(option.index)}
+                        className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 ${option.index === activeIndex ? 'bg-ground-2' : ''}`}
+                    >
+                        <ResultLead lead={option.lead} />
+                        <span className="min-w-0 flex-1">
+                            <span className="block truncate text-ui font-medium">
+                                <HighlightedText text={option.title} query={query} />
+                            </span>
+                            <span className="block truncate text-meta text-muted">{option.detail}</span>
+                        </span>
+                        {option.aside && <span className="flex-none text-meta text-muted">{option.aside}</span>}
+                        {option.locked && <Icon name="locked" size="inline" className="flex-none text-ink-2" />}
+                    </li>
+                ))}
+            </ul>
+        </li>
+    );
+}
 
-                        return (
-                            <li
-                                key={`${label}-${option.href}-${option.title}`}
-                                id={`${listId}-${offset + index}`}
-                                role="option"
-                                aria-selected={isActive}
-                                onClick={() => openResult(option)}
-                                onMouseMove={() => setActiveIndex(offset + index)}
-                                className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 ${isActive ? 'bg-ground-2' : ''}`}
-                            >
-                                <ResultLead lead={option.lead} />
-                                <span className="min-w-0 flex-1">
-                                    <span className="block truncate text-ui font-medium">
-                                        {matchParts(option.title, trimmedQuery).map((part, partIndex) =>
-                                            part.isMatch ? (
-                                                <mark key={partIndex} className="bg-field-lemon text-on-field">
-                                                    {part.text}
-                                                </mark>
-                                            ) : (
-                                                part.text
-                                            ),
-                                        )}
-                                    </span>
-                                    <span className="block truncate text-meta text-muted">{option.detail}</span>
-                                </span>
-                                {option.aside && <span className="flex-none text-meta text-muted">{option.aside}</span>}
-                                {option.locked && <Icon name="locked" size="inline" className="flex-none text-ink-2" />}
-                            </li>
-                        );
-                    })}
-                </ul>
-            </li>
-        );
-    }
-
-    function renderEmpty() {
-        const [title, hint] = !trimmedQuery
-            ? [
-                    'Jump anywhere',
-                    search ? 'Type a view, a category, an article or a source.' : 'Type a view, a category or a source. Article search arrives with the feeds.',
-                ]
-            : [`Nothing matches “${trimmedQuery}”`, scopeHref ? 'Try every category, or fewer letters.' : 'Try fewer letters, or another word.'];
+function HighlightedText({ text, query }: { text: string; query: string }) {
+    return matchParts(text, query).map((part, index) => {
+        if (!part.isMatch)
+            return part.text;
 
         return (
-            <div role="status" className="flex flex-col items-center gap-2 px-6 py-10 text-center">
-                <Icon name={trimmedQuery ? 'no-results' : 'search'} size="nav" className="text-ink-2" />
-                <p className="font-display text-title font-semibold tracking-[-0.015em]">{title}</p>
-                <p className="max-w-80 text-ui text-ink-2">{hint}</p>
-                {trimmedQuery && scopeHref && (
-                    <button type="button" onClick={() => setScopeHref(null)} className="tool-button mt-2">
-                        Search every category
-                    </button>
-                )}
-            </div>
+            <mark key={index} className="bg-field-lemon text-on-field">
+                {part.text}
+            </mark>
         );
+    });
+}
+
+type NoResultsProps = {
+    query: string;
+    scopeHref: string | null;
+    canSearchArticles: boolean;
+    onSearchEverywhere: () => void;
+};
+
+// Says what to type before a query, or why nothing matched, with a way to widen a scoped search.
+function NoResults({ query, scopeHref, canSearchArticles, onSearchEverywhere }: NoResultsProps) {
+    let title: string;
+    let hint: string;
+
+    if (!query) {
+        title = 'Jump anywhere';
+        hint = canSearchArticles
+            ? 'Type a view, a category, an article or a source.'
+            : 'Type a view, a category or a source. Article search arrives with the feeds.';
+    } else {
+        title = `Nothing matches “${query}”`;
+        hint = scopeHref ? 'Try every category, or fewer letters.' : 'Try fewer letters, or another word.';
     }
+
+    return (
+        <div role="status" className="flex flex-col items-center gap-2 px-6 py-10 text-center">
+            <Icon name={query ? 'no-results' : 'search'} size="nav" className="text-ink-2" />
+            <p className="font-display text-title font-semibold tracking-[-0.015em]">{title}</p>
+            <p className="max-w-80 text-ui text-ink-2">{hint}</p>
+            {query && scopeHref && (
+                <button type="button" onClick={onSearchEverywhere} className="tool-button mt-2">
+                    Search every category
+                </button>
+            )}
+        </div>
+    );
 }
 
 function ResultLead({ lead }: { lead: ResultOption['lead'] }) {

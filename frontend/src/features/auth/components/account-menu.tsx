@@ -2,7 +2,7 @@
 
 import type { SessionUser } from '@frontpage/shared';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
-import { RailTooltip } from '@/components/app-shell/sidebar-toggle';
+import { RailTooltip } from '@/components/app-shell/rail-tooltip';
 import { Icon } from '@/components/ui/icon';
 import { TextLink } from '@/components/ui/text-link';
 import { SignOutButton } from './sign-out-button';

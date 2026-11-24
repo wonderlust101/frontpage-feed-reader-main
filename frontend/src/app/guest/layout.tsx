@@ -1,7 +1,7 @@
 // The app shell for guests. It reads nothing per request, so guest pages stay static.
 
 import type { ShellView } from '@/components/app-shell/nav-entries';
-import type { SearchSource } from '@/components/app-shell/search-palette';
+import type { SearchSource } from '@/components/app-shell/search-results';
 import { ACCOUNT_FEATURE_VIEWS } from '@/features/auth/account-features';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
 import { GUEST_CATEGORIES } from '@/features/categories/guest-categories';

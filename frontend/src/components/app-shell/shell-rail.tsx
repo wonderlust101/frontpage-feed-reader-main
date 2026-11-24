@@ -8,7 +8,8 @@ import { LogoMark } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
 import { LockedView } from './locked-view';
 import { formatCount, type ShellView } from './nav-entries';
-import { RailTooltip, SidebarToggle, useSidebar } from './sidebar-toggle';
+import { RailTooltip } from './rail-tooltip';
+import { SidebarToggle, useSidebar } from './sidebar-toggle';
 
 type ShellRailProps = {
     homeHref: string;
@@ -38,8 +39,15 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                     {views.map((view) => {
                         const isCurrent = view.href === currentView;
                         const isHome = view.href === homeHref;
-                        const marks = isCurrent ? (isHome ? HOME_MARK_CLASSES : MARK_CLASSES) : IDLE_CLASSES;
                         const shownCount = formatCount(view.count);
+
+                        // While the panel is open, its "All items" row marks home, so the rail doesn't say it twice.
+                        const isMarkedCurrent = isCurrent && (!isHome || sidebar === 'collapsed');
+
+                        let marks = IDLE_CLASSES;
+
+                        if (isCurrent)
+                            marks = isHome ? HOME_MARK_CLASSES : MARK_CLASSES;
 
                         return (
                             <li key={view.label}>
@@ -48,7 +56,7 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                                 ) : (
                                     <Link
                                         href={view.href}
-                                        aria-current={isCurrent && (!isHome || sidebar === 'collapsed') ? 'true' : undefined}
+                                        aria-current={isMarkedCurrent ? 'true' : undefined}
                                         className={`group relative grid size-11 place-items-center rounded-control transition-colors duration-150 ${marks}`}
                                     >
                                         <Icon name={view.icon} />

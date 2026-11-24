@@ -2,12 +2,12 @@
 
 // A grid, so the account sits at the rail's foot yet comes after the categories in the tab order.
 
-import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import type { RowMenu } from './category-list';
-import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
+import type { ShellCategory, ShellView } from './nav-entries';
 import { ShellPanel } from './shell-panel';
 import { ShellRail } from './shell-rail';
+import { useShellPlace } from './use-shell-place';
 
 type ShellSidebarProps = {
     homeHref: string;
@@ -20,12 +20,7 @@ type ShellSidebarProps = {
 };
 
 export function ShellSidebar({ homeHref, views, categories, panelId, account, rowMenu, className = '' }: ShellSidebarProps) {
-    const place = shellPlace(
-        usePathname(),
-        homeHref,
-        views.map((view) => view.href),
-        categories.map((category) => category.href),
-    );
+    const place = useShellPlace(homeHref, views, categories);
 
     return (
         <div className={`grid-cols-[4rem_auto] grid-rows-[1fr_auto] ${className}`}>

@@ -5,7 +5,7 @@
 
 import { useEffect, useState, type CSSProperties } from 'react';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
-import type { SearchResults } from '@/components/app-shell/search-palette';
+import type { SearchResults } from '@/components/app-shell/search-results';
 import { ShellDrawer } from '@/components/app-shell/shell-drawer';
 import { ShellNav } from '@/components/app-shell/shell-nav';
 import { ShellSidebar } from '@/components/app-shell/shell-sidebar';

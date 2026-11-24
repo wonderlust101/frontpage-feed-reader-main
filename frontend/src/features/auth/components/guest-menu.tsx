@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
-import { RailTooltip } from '@/components/app-shell/sidebar-toggle';
+import { RailTooltip } from '@/components/app-shell/rail-tooltip';
 import { buttonClassName } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { TextLink } from '@/components/ui/text-link';

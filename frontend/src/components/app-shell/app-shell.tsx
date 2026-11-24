@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import type { RowMenu } from './category-list';
 import type { ShellCategory, ShellView } from './nav-entries';
-import type { SearchSource } from './search-palette';
+import type { SearchSource } from './search-results';
 import { ShellDrawer } from './shell-drawer';
 import { ShellNav } from './shell-nav';
 import { ShellSidebar } from './shell-sidebar';

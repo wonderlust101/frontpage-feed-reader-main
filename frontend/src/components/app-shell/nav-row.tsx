@@ -17,20 +17,28 @@ type NavRowProps = {
 
 export function NavRow({ href, label, lead, color, isCurrent, count, menu }: NavRowProps) {
     const shownCount = formatCount(count);
+
+    const stateClasses = isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink';
+    const menuRoomClasses = menu ? 'pointer-coarse:pr-12' : '';
+    const linkClasses = `relative flex min-h-11 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 lg:min-h-10 ${menuRoomClasses} ${stateClasses}`;
+
+    // With a mouse, the menu takes the count's place while the row is hovered or focused.
+    const countToneClasses = isCurrent ? 'bg-ink text-ground' : 'bg-ink/8 text-ink-2';
+    const countHidingClasses = menu ? 'pointer-fine:group-focus-within/row:invisible pointer-fine:group-hover/row:invisible' : '';
+    const countClasses = `ml-auto rounded-full px-2 font-display text-meta leading-6 font-semibold ${countToneClasses} ${countHidingClasses}`;
+
     const link = (
         <Link
             href={href}
             aria-current={isCurrent ? 'page' : undefined}
-            className={`relative flex min-h-11 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 lg:min-h-10 ${menu ? 'pointer-coarse:pr-12' : ''} ${isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
+            className={linkClasses}
             style={isCurrent ? ({ '--row-field': color } as CSSProperties) : undefined}
         >
             {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" />}
             {lead}
             <span className="min-w-0 truncate">{label}</span>
             {shownCount && (
-                <span
-                    className={`ml-auto rounded-full px-2 font-display text-meta leading-6 font-semibold ${isCurrent ? 'bg-ink text-ground' : 'bg-ink/8 text-ink-2'} ${menu ? 'pointer-fine:group-focus-within/row:invisible pointer-fine:group-hover/row:invisible' : ''}`}
-                >
+                <span className={countClasses}>
                     {shownCount}
                     <span className="sr-only"> unread</span>
                 </span>

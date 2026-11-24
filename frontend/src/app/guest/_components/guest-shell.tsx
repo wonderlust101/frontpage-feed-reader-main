@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/app-shell/app-shell';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
-import type { SearchSource } from '@/components/app-shell/search-palette';
+import type { SearchSource } from '@/components/app-shell/search-results';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { categoryColor } from '@/features/categories/category-field-vars';
 import { NO_FIELD, categoryFieldById } from '@/features/categories/fields';

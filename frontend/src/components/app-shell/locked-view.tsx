@@ -1,5 +1,3 @@
-'use client';
-
 // An account-only view as a guest sees it: a locked icon or row that opens a preview of the feature, so a guest can
 // see what an account adds without leaving the page.
 
@@ -8,7 +6,7 @@ import { buttonClassName } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import type { ShellView } from './nav-entries';
 import { ShellMenu } from './shell-menu';
-import { RailTooltip } from './sidebar-toggle';
+import { RailTooltip } from './rail-tooltip';
 
 type LockedViewProps = {
     view: ShellView;
@@ -22,35 +20,37 @@ const TRIGGER_CLASSES = {
 };
 
 export function LockedView({ view, preview, variant }: LockedViewProps) {
+    const railTrigger = (
+        <>
+            <Icon name={view.icon} />
+            <span aria-hidden="true" className="absolute right-1 bottom-1 grid size-4 place-items-center rounded-full bg-rail text-ink-2">
+                <Icon name="locked" size="inline" className="size-3" />
+            </span>
+            <span className="sr-only">{view.label}, with an account</span>
+            <RailTooltip>
+                {view.label}
+                <span className="ml-1.5 font-normal">· with an account</span>
+            </RailTooltip>
+        </>
+    );
+
+    const rowTrigger = (
+        <>
+            <Icon name={view.icon} />
+            <span className="min-w-0 truncate">{view.label}</span>
+            <span className="ml-auto flex">
+                <Icon name="locked" size="inline" />
+            </span>
+            <span className="sr-only">, with an account</span>
+        </>
+    );
+
     return (
         <ShellMenu
             label={view.label}
             placement="row"
             triggerClassName={TRIGGER_CLASSES[variant]}
-            trigger={
-                variant === 'rail' ? (
-                    <>
-                        <Icon name={view.icon} />
-                        <span aria-hidden="true" className="absolute right-1 bottom-1 grid size-4 place-items-center rounded-full bg-rail text-ink-2">
-                            <Icon name="locked" size="inline" className="size-3" />
-                        </span>
-                        <span className="sr-only">{view.label}, with an account</span>
-                        <RailTooltip>
-                            {view.label}
-                            <span className="ml-1.5 font-normal">· with an account</span>
-                        </RailTooltip>
-                    </>
-                ) : (
-                    <>
-                        <Icon name={view.icon} />
-                        <span className="min-w-0 truncate">{view.label}</span>
-                        <span className="ml-auto flex">
-                            <Icon name="locked" size="inline" />
-                        </span>
-                        <span className="sr-only">, with an account</span>
-                    </>
-                )
-            }
+            trigger={variant === 'rail' ? railTrigger : rowTrigger}
         >
             <div className="flex items-center gap-3">
                 <span aria-hidden="true" className="grid size-10 flex-none place-items-center rounded-control bg-field-lemon text-on-field">

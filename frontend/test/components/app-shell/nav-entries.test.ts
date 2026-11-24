@@ -1,25 +1,25 @@
 import { describe, expect, test } from 'bun:test';
-import { currentHref, formatCount, shellPlace } from '../../../src/components/app-shell/nav-entries';
+import { findCurrentHref, formatCount, shellPlace } from '../../../src/components/app-shell/nav-entries';
 
-describe('currentHref', () => {
+describe('findCurrentHref', () => {
     test('matches the href that is the pathname', () => {
-        expect(currentHref('/user', ['/user'])).toBe('/user');
+        expect(findCurrentHref('/user', ['/user'])).toBe('/user');
     });
 
     test('falls back to the parent entry on a nested page', () => {
-        expect(currentHref('/user/saved', ['/user'])).toBe('/user');
+        expect(findCurrentHref('/user/saved', ['/user'])).toBe('/user');
     });
 
     test('picks the longest matching href', () => {
-        expect(currentHref('/user/c/abc/item/1', ['/user', '/user/c/abc', '/user/c'])).toBe('/user/c/abc');
+        expect(findCurrentHref('/user/c/abc/item/1', ['/user', '/user/c/abc', '/user/c'])).toBe('/user/c/abc');
     });
 
     test('never matches part of a segment', () => {
-        expect(currentHref('/username', ['/user'])).toBeNull();
+        expect(findCurrentHref('/username', ['/user'])).toBeNull();
     });
 
     test('returns null when nothing matches', () => {
-        expect(currentHref('/guest', ['/user', '#saved'])).toBeNull();
+        expect(findCurrentHref('/guest', ['/user', '#saved'])).toBeNull();
     });
 });
 

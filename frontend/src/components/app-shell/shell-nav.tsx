@@ -3,14 +3,14 @@
 // The drawer's navigation (below lg): the same rows and markers as the desktop rail and panel, account at the foot.
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
 import { CategoryList, type RowMenu } from './category-list';
 import { LockedView } from './locked-view';
-import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
+import type { ShellCategory, ShellView } from './nav-entries';
 import { NavRow } from './nav-row';
+import { useShellPlace } from './use-shell-place';
 
 type ShellNavProps = {
     homeHref: string;
@@ -23,12 +23,7 @@ type ShellNavProps = {
 const VIEW_COLOR = 'var(--color-field-lemon)';
 
 export function ShellNav({ homeHref, views, categories, account, rowMenu }: ShellNavProps) {
-    const place = shellPlace(
-        usePathname(),
-        homeHref,
-        views.map((view) => view.href),
-        categories.map((category) => category.href),
-    );
+    const place = useShellPlace(homeHref, views, categories);
 
     return (
         <div className="flex flex-1 flex-col gap-5">
