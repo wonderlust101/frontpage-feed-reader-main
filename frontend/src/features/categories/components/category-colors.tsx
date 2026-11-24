@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CategoryTag } from '@/components/ui/tags';
-import { useCategoryFields } from '../category-field-store';
+import { useCategoryFields } from '../hooks/use-category-fields';
 import { categoryFieldById, type FieldChoices, type FieldId } from '../fields';
 import { FieldPicker } from './field-picker';
 

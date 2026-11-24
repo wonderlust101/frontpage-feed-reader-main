@@ -3,8 +3,8 @@
 
 import 'client-only';
 import { useMemo, useSyncExternalStore } from 'react';
-import { applyCategoryFields, CATEGORY_FIELDS_KEY } from './category-field-vars';
-import { assignFields, categoryFieldById, type Field, type FieldChoices, type FieldId } from './fields';
+import { applyCategoryFields, CATEGORY_FIELDS_KEY } from '../category-field-vars';
+import { assignFields, categoryFieldById, type Field, type FieldChoices, type FieldId } from '../fields';
 
 const NO_CHOICES: FieldChoices = {};
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCategoryFields } from '@/features/categories/category-field-store';
+import { useCategoryFields } from '@/features/categories/hooks/use-category-fields';
 import { BRAND_FIELD, FIELDS, NO_FIELD } from '@/features/categories/fields';
 import { CATEGORIES, CATEGORY_IDS, CATEGORY_PRESETS } from '../_data/sample-data';
 

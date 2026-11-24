@@ -18,7 +18,7 @@ import { CategoryRowMenu } from '@/features/categories/components/category-row-m
 import { categoryColor } from '@/features/categories/category-field-vars';
 import { BRAND_FIELD, categoryFieldById, fieldOrNone } from '@/features/categories/fields';
 import { deleteCategory, isNameTaken, updateCategory, type Library } from '@/features/categories/library';
-import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
+import { useGuestCategoryFields } from '@/features/categories/hooks/use-guest-category-fields';
 import { ChoiceControl } from '@/features/preferences/components/choice-control';
 import { CATEGORIES, READER_CATEGORIES, SAMPLE_ITEMS, SAMPLE_READER, type CategoryId } from '../_data/sample-data';
 import { SampleItemRow } from './sample-item-row';

@@ -2,7 +2,7 @@
 
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
-import { useCategoryFields } from '@/features/categories/category-field-store';
+import { useCategoryFields } from '@/features/categories/hooks/use-category-fields';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import { ReaderSettings } from '@/features/preferences/components/reader-settings';
 import { CATEGORIES, CATEGORY_IDS, CATEGORY_PRESETS } from '../_data/sample-data';

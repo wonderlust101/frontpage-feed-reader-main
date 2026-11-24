@@ -10,7 +10,7 @@ import { CategoryRowMenu } from '@/features/categories/components/category-row-m
 import { categoryColor } from '@/features/categories/category-field-vars';
 import { fieldOrNone } from '@/features/categories/fields';
 import { GUEST_CATEGORIES, guestCategoryHref } from '@/features/categories/guest-categories';
-import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
+import { useGuestCategoryFields } from '@/features/categories/hooks/use-guest-category-fields';
 
 type GuestShellProps = {
     views: ShellView[];
