@@ -5,5 +5,13 @@
     "type": "module",
     "exports": {
         ".": "./src/index.ts"
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
+    },
+    "devDependencies": {
+        "@frontpage/eslint-config": "workspace:*",
+        "eslint": "^9"
     }
 }
