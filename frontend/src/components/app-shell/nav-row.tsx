@@ -23,7 +23,7 @@ export function NavRow({ href, label, lead, color, isCurrent, count }: NavRowPro
         <Link
             href={href}
             aria-current={isCurrent ? 'page' : undefined}
-            className={`relative flex min-h-10 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 ${isCurrent ? 'font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
+            className={`relative flex min-h-11 items-center lg:min-h-10 gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 ${isCurrent ? 'font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
             style={isCurrent ? { background: `color-mix(in srgb, ${color} 24%, var(--color-panel))` } : undefined}
         >
             {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" style={{ background: color }} />}

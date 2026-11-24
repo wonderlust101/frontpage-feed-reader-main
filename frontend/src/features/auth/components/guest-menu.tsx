@@ -23,11 +23,12 @@ export function GuestMenu() {
                     >
                         <Icon name="guest" size="inline" />
                     </span>
-                    <span className="sr-only in-data-[account=row]:not-sr-only in-data-[account=row]:min-w-0">
+                    <span className="hidden min-w-0 in-data-[account=row]:block">
                         <span className="block text-ui font-semibold">Guest</span>
                         <span className="block text-meta text-muted">Create account · Sign in</span>
                     </span>
-                    <span className="sr-only">, reading as a guest</span>
+                    <span className="sr-only in-data-[account=row]:hidden">Guest menu</span>
+                    <span className="sr-only hidden in-data-[account=row]:block">, guest menu</span>
                 </>
             }
         >

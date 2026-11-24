@@ -482,20 +482,20 @@
     box-shadow: inset 0 0 0 1px var(--color-fill-edge);
 }
 
-/* A tool button in the shell (Aa, the drawer's menu, the search trigger): an outlined 40px control that fills on */
-/* hover, with the same edge and fill as every other control. */
+/* A tool button in the shell (Aa, the drawer's menu, the search trigger): an outlined control that fills on hover, */
+/* on the workspace tone it sits on. 44px for touch below lg, 40px beside the pointer-sized desktop rail. */
 @utility tool-button {
     display: inline-flex;
     flex: none;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-width: 2.5rem;
-    min-height: 2.5rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     padding-inline: 0.625rem;
     border: 1.5px solid var(--color-control-edge);
     border-radius: var(--radius-control);
-    background: var(--color-control-fill);
+    background: var(--color-workspace);
     color: var(--color-ink);
     font-weight: 600;
     transition:
@@ -505,6 +505,11 @@
     &:hover {
         border-color: var(--color-ink);
         background: var(--color-ground-2);
+    }
+
+    @media (width >= 64rem) {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
     }
 }
 

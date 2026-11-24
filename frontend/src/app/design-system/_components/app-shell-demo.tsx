@@ -10,8 +10,7 @@ import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entrie
 import type { SearchResults } from '@/components/app-shell/search-palette';
 import { ShellDrawer } from '@/components/app-shell/shell-drawer';
 import { ShellNav } from '@/components/app-shell/shell-nav';
-import { ShellPanel } from '@/components/app-shell/shell-panel';
-import { ShellRail } from '@/components/app-shell/shell-rail';
+import { ShellSidebar } from '@/components/app-shell/shell-sidebar';
 import { ShellToolbar } from '@/components/app-shell/shell-toolbar';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
@@ -77,10 +76,14 @@ export function AppShellDemo() {
                 <ChoiceControl name="shell-demo-mode" legend="Show the shell" options={MODE_OPTIONS} value={mode} onChange={setMode} />
             </div>
             <div className="flex h-[40rem] overflow-hidden rounded-panel border border-edge bg-workspace">
-                <div className="hidden flex-none lg:flex">
-                    <ShellRail homeHref={homeHref} views={VIEWS} panelId={PANEL_ID} account={account} />
-                    <ShellPanel id={PANEL_ID} homeHref={homeHref} categories={categories} />
-                </div>
+                <ShellSidebar
+                    homeHref={homeHref}
+                    views={VIEWS}
+                    categories={categories}
+                    panelId={PANEL_ID}
+                    account={account}
+                    className="hidden flex-none lg:grid"
+                />
                 <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
                     <ShellToolbar
                         views={VIEWS}

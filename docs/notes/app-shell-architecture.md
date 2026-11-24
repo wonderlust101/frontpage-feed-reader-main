@@ -45,7 +45,8 @@ src/lib/
 src/components/app-shell/          feature-agnostic: plain data and ReactNode slots, never imports features/
   nav-entries.ts                   ShellView, ShellCategory, currentHref(), formatCount(): pure, unit tested
   nav-row.tsx                      a panel/drawer row: field tint, field bar, count; FieldDot
-  shell-rail.tsx                   client: logo, view icons with tooltips, the panel toggle, the account slot
+  shell-sidebar.tsx                server: the desktop grid of rail, panel and account (account last in tab order)
+  shell-rail.tsx                   client: logo, view icons with tooltips, the panel toggle
   sidebar-toggle.tsx               client: collapses the panel (saved preference, the [ key); RailTooltip
   shell-panel.tsx                  client: "All categories" and the categories; collapses by width
   shell-toolbar.tsx                client: drawer button (below lg), location tag, search, utilities
@@ -68,7 +69,7 @@ src/app/guest/layout.tsx           AppShell for guests (static)
 src/app/user/layout.tsx            AppShell for readers; metadata robots noindex
 ```
 
-The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<div>`, not a `<main>`: the shell owns `<main id="main">`. The `/design-system` demo builds the same frame from `ShellRail`, `ShellPanel`, `ShellToolbar` and `ShellDrawer` (not `AppShell`, which would nest a second `<main>` and skip link in that page), with sample categories and a sample `search` function.
+The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<div>`, not a `<main>`: the shell owns `<main id="main">`. The `/design-system` demo builds the same frame from `ShellSidebar`, `ShellToolbar` and `ShellDrawer` (not `AppShell`, which would nest a second `<main>` and skip link in that page), with sample categories and a sample `search` function.
 
 ## Decisions
 

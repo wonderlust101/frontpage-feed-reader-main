@@ -28,7 +28,7 @@ export function ShellPanel({ id, homeHref, categories }: ShellPanelProps) {
             className="w-58 flex-none overflow-hidden bg-panel transition-[width,visibility] duration-200 ease-out sidebar-collapsed:invisible sidebar-collapsed:w-0"
         >
             <div className="flex h-full w-58 flex-col overflow-y-auto px-2.5 pt-4 pb-5">
-                <p id={labelId} className="px-3 pb-3 font-display text-[1.25rem] leading-none font-bold tracking-[-0.02em]">
+                <p id={labelId} className="px-3 pb-3 font-display text-title leading-none font-bold tracking-[-0.02em]">
                     Categories
                 </p>
                 <nav aria-labelledby={labelId}>

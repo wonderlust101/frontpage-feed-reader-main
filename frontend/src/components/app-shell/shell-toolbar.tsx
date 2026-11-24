@@ -44,7 +44,16 @@ export function ShellToolbar({ views, categories, drawer, utilities, search }: S
     return (
         <div className="@container sticky top-0 z-20 flex h-15 items-center gap-2 border-b border-edge bg-workspace px-3 sm:gap-3 sm:px-5">
             {drawer}
-            {category ? <CategoryTag name={category.name} field={{ color: category.color }} /> : view && <CategoryTag name={view.label} field={VIEW_FIELD} />}
+            {(category || view) && (
+                <span className="flex min-w-0">
+                    <span className="sr-only">Viewing: </span>
+                    {category ? (
+                        <CategoryTag name={category.name} field={{ color: category.color }} />
+                    ) : (
+                        view && <CategoryTag name={view.label} field={VIEW_FIELD} />
+                    )}
+                </span>
+            )}
             <div className="ml-auto flex min-w-0 md:mr-auto md:ml-3">
                 <SearchPalette categories={categories} search={search} />
             </div>

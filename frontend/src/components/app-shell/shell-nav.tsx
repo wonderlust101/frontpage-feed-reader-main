@@ -35,7 +35,7 @@ export function ShellNav({ homeHref, views, categories, account }: ShellNavProps
 
     return (
         <div className="flex min-h-full flex-col gap-5">
-            <Link href={homeHref} className="self-start rounded-control px-3">
+            <Link href={homeHref} className="flex min-h-11 items-center self-start rounded-control px-3">
                 <Logo size="md" />
             </Link>
             <nav aria-label="Feeds" className="flex flex-col gap-5">

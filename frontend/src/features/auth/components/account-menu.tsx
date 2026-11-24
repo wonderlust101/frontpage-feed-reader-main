@@ -35,11 +35,12 @@ export function AccountMenu({ user }: AccountMenuProps) {
                     >
                         {initials}
                     </span>
-                    <span className="sr-only in-data-[account=row]:not-sr-only in-data-[account=row]:min-w-0">
+                    <span className="hidden min-w-0 in-data-[account=row]:block">
                         <span className="block truncate text-ui font-semibold">{user.name}</span>
                         <span className="block truncate text-meta text-muted">{user.email}</span>
                     </span>
-                    <span className="sr-only">, account menu</span>
+                    <span className="sr-only in-data-[account=row]:hidden">Account menu for {user.name}</span>
+                    <span className="sr-only hidden in-data-[account=row]:block">, account menu</span>
                 </>
             }
         >

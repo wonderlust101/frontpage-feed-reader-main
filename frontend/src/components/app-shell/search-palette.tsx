@@ -96,7 +96,7 @@ export function SearchPalette({ categories, search }: SearchPaletteProps) {
                 aria-haspopup="dialog"
                 aria-keyshortcuts="Meta+K Control+K"
                 onClick={() => dialogRef.current?.showModal()}
-                className="tool-button max-w-full min-w-0 shrink justify-start text-ink-2 md:w-88 md:px-3"
+                className="tool-button max-w-full min-w-0 shrink justify-start max-md:min-w-11 text-ink-2 md:w-88 md:px-3"
             >
                 <Icon name="search" />
                 <span className="truncate font-medium @max-lg:sr-only">Search articles and sources</span>
@@ -130,7 +130,7 @@ export function SearchPalette({ categories, search }: SearchPaletteProps) {
                             }}
                             onKeyDown={moveOrOpen}
                             placeholder="Search articles and sources"
-                            className="palette-input h-14 min-w-0 flex-1 bg-transparent text-[1.0625rem] placeholder:text-muted"
+                            className="palette-input h-14 min-w-0 flex-1 bg-transparent text-ui placeholder:text-muted"
                         />
                         <kbd className="rounded-tag border border-edge px-1.5 text-meta font-semibold text-ink-2">Esc</kbd>
                     </div>
@@ -184,7 +184,9 @@ export function SearchPalette({ categories, search }: SearchPaletteProps) {
         }
         return (
             <li role="presentation">
-                <p className="px-4 pt-2 pb-1 text-meta font-semibold text-muted">{label}</p>
+                <p aria-hidden="true" className="px-4 pt-2 pb-1 text-meta font-semibold text-muted">
+                    {label}
+                </p>
                 <ul role="group" aria-label={label}>
                     {groupOptions.map((option, index) => {
                         const isActive = option === activeOption;
@@ -200,7 +202,7 @@ export function SearchPalette({ categories, search }: SearchPaletteProps) {
                             >
                                 <span
                                     aria-hidden="true"
-                                    className="grid size-6 flex-none place-items-center rounded-tag bg-panel text-[0.75rem] font-bold text-ink-2"
+                                    className="grid size-7 flex-none place-items-center rounded-tag bg-panel text-meta font-bold text-ink-2"
                                 >
                                     {option.initial}
                                 </span>

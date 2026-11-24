@@ -1,11 +1,10 @@
 'use client';
 
 // The shell's rail (lg up): the Lemon logo tile linking home, the views as icon links with tooltips, the toggle for the
-// category panel, and the account at the foot. The current view sits on a workspace square with a Lemon dot.
+// category panel. ShellSidebar puts the account at its foot. The current view sits on a workspace square with a Lemon dot.
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
 import { LogoMark } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
 import { currentHref, formatCount, type ShellView } from './nav-entries';
@@ -15,18 +14,17 @@ type ShellRailProps = {
     homeHref: string;
     views: ShellView[];
     panelId: string;
-    account: ReactNode;
 };
 
-// Renders the rail; `account` is the account or guest menu for its foot.
-export function ShellRail({ homeHref, views, panelId, account }: ShellRailProps) {
+// Renders the rail's top: the logo, the views and the panel toggle.
+export function ShellRail({ homeHref, views, panelId }: ShellRailProps) {
     const current = currentHref(
         usePathname(),
         views.map((view) => view.href),
     );
 
     return (
-        <div className="flex w-16 flex-none flex-col items-center gap-2 bg-rail py-3">
+        <div className="flex w-16 flex-none flex-col items-center gap-2 bg-rail pt-3">
             <Link href={homeHref} className="group relative mb-2 rounded-control">
                 <LogoMark size={36} />
                 <span className="sr-only">Frontpage home</span>
@@ -65,7 +63,6 @@ export function ShellRail({ homeHref, views, panelId, account }: ShellRailProps)
             <div className="mt-1 border-t border-edge pt-2">
                 <SidebarToggle panelId={panelId} />
             </div>
-            <div className="mt-auto">{account}</div>
         </div>
     );
 }

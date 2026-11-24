@@ -41,7 +41,7 @@ export function ReaderSettings() {
         <ShellMenu
             label="Reader settings"
             placement="below"
-            triggerClassName="tool-button font-display text-[1.0625rem] font-bold tracking-[-0.01em]"
+            triggerClassName="tool-button font-display text-ui font-bold tracking-[-0.01em]"
             trigger={
                 <>
                     <span aria-hidden="true">Aa</span>

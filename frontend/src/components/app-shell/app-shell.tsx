@@ -8,8 +8,7 @@ import type { ReactNode } from 'react';
 import type { ShellCategory, ShellView } from './nav-entries';
 import { ShellDrawer } from './shell-drawer';
 import { ShellNav } from './shell-nav';
-import { ShellPanel } from './shell-panel';
-import { ShellRail } from './shell-rail';
+import { ShellSidebar } from './shell-sidebar';
 import { ShellToolbar } from './shell-toolbar';
 
 type AppShellProps = {
@@ -33,10 +32,14 @@ export function AppShell({ homeHref, views, categories = [], account, utilities,
             >
                 Skip to content
             </a>
-            <div className="sticky top-0 hidden h-dvh flex-none lg:flex">
-                <ShellRail homeHref={homeHref} views={views} panelId={PANEL_ID} account={account} />
-                <ShellPanel id={PANEL_ID} homeHref={homeHref} categories={categories} />
-            </div>
+            <ShellSidebar
+                homeHref={homeHref}
+                views={views}
+                categories={categories}
+                panelId={PANEL_ID}
+                account={account}
+                className="sticky top-0 hidden h-dvh flex-none lg:grid"
+            />
             <div className="flex min-w-0 flex-1 flex-col">
                 <ShellToolbar
                     views={views}
