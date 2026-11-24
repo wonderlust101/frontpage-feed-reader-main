@@ -1,5 +1,7 @@
-// API response shapes: the contract between backend and frontend, imported from "@frontpage/shared".
+// API request and response shapes: the contract between backend and frontend, imported from "@frontpage/shared".
 // Dates are ISO 8601 UTC strings (or null); only `contentHtml` is HTML (sanitized), all other text is plain.
+// In a Subscription, `title` is the reader's custom title or else the feed's own, `iconUrl` is the feed's image or else
+// the site's /favicon.ico (unchecked, so hide it if it fails to load), and a null `categoryId` means Uncategorized.
 
 export type DbStatus = 'connected' | 'skipped' | 'error';
 
@@ -60,7 +62,17 @@ export type FetchFeedResponse = {
 
 export type FeedErrorCode = 'invalid_url' | 'blocked_url' | 'timeout' | 'network' | 'http_4xx' | 'http_5xx' | 'not_a_feed' | 'parse_error' | 'too_large';
 
-export type ApiErrorCode = FeedErrorCode | 'not_found' | 'bad_request' | 'invalid_json' | 'unauthorized' | 'database_unavailable' | 'internal_error';
+export type ApiErrorCode =
+    | FeedErrorCode
+    | 'not_found'
+    | 'bad_request'
+    | 'invalid_json'
+    | 'unauthorized'
+    | 'already_subscribed'
+    | 'category_not_found'
+    | 'rate_limited'
+    | 'database_unavailable'
+    | 'internal_error';
 
 export type ApiErrorResponse<C extends string = ApiErrorCode> = {
     error: {
@@ -68,6 +80,7 @@ export type ApiErrorResponse<C extends string = ApiErrorCode> = {
         message: string;
         retryable: boolean;
         status?: number;
+        subscriptionId?: string;
     };
 };
 
@@ -85,3 +98,43 @@ export type SessionResponse = {
     user: SessionUser;
     session: { id: string; expiresAt: string };
 } | null;
+
+export const MAX_CUSTOM_TITLE_LENGTH = 200;
+
+export type FeedHealth = 'active' | 'stale' | 'error' | 'dead';
+
+export type Subscription = {
+    id: string;
+    feedId: string;
+    url: string;
+    title: string;
+    customTitle: string | null;
+    feedTitle: string;
+    description: string | null;
+    siteUrl: string | null;
+    iconUrl: string | null;
+    categoryId: string | null;
+    health: FeedHealth;
+    lastSuccessAt: string | null;
+    lastFetchedAt: string | null;
+    lastError: { code: FeedErrorCode; message: string } | null;
+    createdAt: string;
+};
+
+export type SubscriptionResponse = {
+    subscription: Subscription;
+};
+
+export type SubscriptionListResponse = {
+    subscriptions: Subscription[];
+};
+
+export type SubscribeRequest = {
+    url: string;
+    categoryId?: string | null;
+};
+
+export type UpdateSubscriptionRequest = {
+    customTitle?: string | null;
+    categoryId?: string | null;
+};

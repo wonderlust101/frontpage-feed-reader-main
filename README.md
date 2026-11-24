@@ -48,10 +48,11 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │   └── src/
 │       ├── index.ts          # starts the server (PORT, graceful shutdown)
 │       ├── app.ts            # Express app: global middleware + mounts module routers
-│       ├── middleware/       # shared by all modules: error handling and the auth guard
+│       ├── middleware/       # shared by all modules: error handling, the auth guard and rate limits
 │       │   ├── error-handler.ts      # errorHandler: every thrown error → the standard JSON error body
 │       │   ├── not-found-handler.ts  # notFoundHandler: unknown routes → 404
 │       │   ├── require-auth.ts       # requireAuth: 401 without a session; currentUser(res) in controllers
+│       │   ├── rate-limit.ts         # perUserRateLimit: 429 + X-Retry-After past N requests per signed-in user
 │       │   └── errors/               # one file per error class: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
@@ -60,7 +61,7 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       │   ├── feeds/        #   GET /api/fetch (routes → controller → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
 │       │   ├── items/        #   "items", "item_read_states" tables
 │       │   ├── categories/   #   "categories" table
-│       │   ├── subscriptions/#   "subscriptions" table
+│       │   ├── subscriptions/#   /api/subscriptions (routes → controller → validation → service; health rule) + "subscriptions" table
 │       │   ├── preferences/  #   "user_preferences" table
 │       │   └── bookmarks/    #   "bookmarks" table
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
@@ -78,15 +79,16 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 
 Each feature lives in `backend/src/modules/<feature>/`, with files named after the feature:
 
-| File                      | Holds                                                                                                                     |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `<feature>.routes.ts`     | Express `Router`, mounted in `app.ts` (`app.use("/api/<feature>", router)`). Only maps URL + method → controller          |
-| `<feature>.controller.ts` | HTTP in/out: reads `req` (query, params, headers, body), calls the service, sets status/headers, maps errors to responses |
-| `<feature>.service.ts`    | Business logic and database queries; controllers call this. Never touches `req`/`res`                                     |
-| `<feature>.schema.ts`     | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it             |
-| `<feature>.types.ts`      | Types used only inside this module                                                                                        |
+| File                      | Holds                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `<feature>.routes.ts`     | Express `Router`, mounted in `app.ts` (`app.use("/api/<feature>", router)`). Only maps URL + method → controller      |
+| `<feature>.controller.ts` | HTTP in/out: reads `req` (query, params, headers, body), calls the service, sets status/headers. Never catches errors |
+| `<feature>.validation.ts` | Checks ids and bodies and returns the shared request types (`unknown` in, typed out); throws 400 or 404               |
+| `<feature>.service.ts`    | Business logic and database queries; controllers call this. Never touches `req`/`res`                                 |
+| `<feature>.schema.ts`     | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it         |
+| `<feature>.types.ts`      | Types used only inside this module                                                                                    |
 
-Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, service, types and its tables, plus `feeds.ingest.ts`, a second service that stores fetched feeds. A module may split its service like this when one file would hold two unrelated jobs.
+Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, service, types and its tables, plus `feeds.ingest.ts`, a second service that stores fetched feeds; `subscriptions/` has routes, controller, validation, service and its table, plus `subscriptions.health.ts`, the pure feed-health rule. A module may split out a file like this when one file would hold two unrelated jobs.
 
 **Errors.** Every API error has the same shape, whatever the status:
 
@@ -94,7 +96,7 @@ Requests flow **routes → controller → service**: keep handler bodies out of 
 { "error": { "code": "not_found", "message": "Feed not found", "retryable": false } }
 ```
 
-- Services **throw** the class for the status they mean, from `src/middleware/errors/`: `BadRequestError` (400), `UnauthorizedError` (401), `NotFoundError` (404), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `BadGatewayError` (502), `ServiceUnavailableError` (503), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
+- Services **throw** the class for the status they mean, from `src/middleware/errors/`: `BadRequestError` (400), `UnauthorizedError` (401), `NotFoundError` (404), `ConflictError` (409), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `TooManyRequestsError` (429), `BadGatewayError` (502), `ServiceUnavailableError` (503), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
 - Controllers **don't catch**. Express 5 forwards thrown errors to `src/middleware/error-handler.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
 - A new kind of error needs no registration: throw the right class with a new code, and add the code to `ApiErrorCode` in `packages/shared/src/api.ts` so the frontend knows it. A new status is a small file in `src/middleware/errors/` (copy one of the others) plus a line in its `index.ts`.
 
@@ -401,8 +403,12 @@ The AI ignore lists deliberately **don't** hide `docs/`, `AGENTS.md` or `CLAUDE.
 
 Example requests for every route are in [`backend/requests/api.http`](backend/requests/api.http).
 
-| Method | Path          | Description                                                                                                                                          |
-| ------ | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/health` | `{ api: "ok", database: "connected" \| "skipped" \| "error" }`                                                                                       |
-| GET    | `/api/fetch`  | `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304 |
-| \*     | `/api/auth/*` | Better Auth: sign-up, sign-in, sign-out, session, email verification by code, password reset and change (see [Auth](#auth))                          |
+| Method | Path                     | Description                                                                                                                                           |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/health`            | `{ api: "ok", database: "connected" \| "skipped" \| "error" }`                                                                                        |
+| GET    | `/api/fetch`             | `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304  |
+| \*     | `/api/auth/*`            | Better Auth: sign-up, sign-in, sign-out, session, email verification by code, password reset and change (see [Auth](#auth))                           |
+| GET    | `/api/subscriptions`     | Signed in: the reader's subscriptions (`SubscriptionListResponse`) with each feed's health (active / stale / error / dead), sorted by title           |
+| POST   | `/api/subscriptions`     | Signed in: `{ url, categoryId? }` fetches and checks the feed, then subscribes → 201 + `Location`; 409 `already_subscribed`; 30 per reader per 10 min |
+| PATCH  | `/api/subscriptions/:id` | Signed in: `{ customTitle?, categoryId? }` renames and/or moves it (`null` = clear / Uncategorized); another reader's id → 404                        |
+| DELETE | `/api/subscriptions/:id` | Signed in: unsubscribes → 204; bookmarks stay; another reader's id → 404                                                                              |
