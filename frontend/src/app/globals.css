@@ -2,6 +2,9 @@
 @import '../styles/tokens.css';
 @import '../styles/components.css';
 
+/* Styles for the app shell's collapsed sidebar, set on <html> by the saved preference (no flash on load). */
+@custom-variant sidebar-collapsed (&:where([data-sidebar='collapsed'] *));
+
 @theme inline {
     --color-ground: var(--color-ground);
     --color-ground-2: var(--color-ground-2);
@@ -16,9 +19,9 @@
     --color-control-fill: var(--color-control-fill);
     --color-on-field: var(--color-on-field);
     --color-on-ink: var(--color-on-ink);
-    --color-shell: var(--color-shell);
-    --color-on-shell: var(--color-on-shell);
-    --color-on-shell-2: var(--color-on-shell-2);
+    --color-rail: var(--color-rail);
+    --color-panel: var(--color-panel);
+    --color-workspace: var(--color-workspace);
     --color-error: var(--color-error);
     --color-warning: var(--color-warning);
     --color-field-lemon: var(--color-field-lemon);
@@ -149,6 +152,13 @@ body {
 .text-field-input[aria-invalid='true']:focus-visible {
     border-color: var(--color-error);
     box-shadow: inset 0 0 0 2px var(--color-error);
+}
+
+/* The search palette's query field is the panel's whole purpose, so its focus shows as its row's bottom edge turning */
+/* ink (search-palette.tsx), not a ring drawn inside the panel. */
+.palette-input:focus-visible {
+    outline: none;
+    box-shadow: none;
 }
 
 /* Forced colours (Windows high contrast) drop box shadows, so the focus edge would vanish: draw it as an outline */

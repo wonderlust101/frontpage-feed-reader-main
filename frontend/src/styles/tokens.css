@@ -25,12 +25,10 @@
     --color-on-field: #0a0a0a;
     --color-on-ink: #f3f3ee;
 
-    /* The app header stays near-black in both themes, like printed ink, so these never use light-dark(). */
-    --color-shell: #0a0a0a;
-    --color-on-shell: #f3f3ee;
-    --color-on-shell-2: #b9b9b1;
-    --color-shell-control: #2a2a27;
-    --color-shell-control-edge: #8a8a83;
+    /* The app shell steps lighter toward the content: rail, then category panel, then the workspace you read in. */
+    --color-rail: light-dark(#d9d7ce, #0d0d0c);
+    --color-panel: light-dark(#e9e7e0, #171716);
+    --color-workspace: light-dark(#fafaf7, #232220);
 
     --color-error: light-dark(#951c12, #ffa29a);
     --color-warning: light-dark(#8a5300, #f2b13b);
@@ -87,6 +85,52 @@
     color-scheme: dark;
 }
 
+/* Reader settings, saved by the Aa menu and copied onto <html> before the first paint (data-text-size and friends). */
+/* No attribute means the default: 19px text, 1.6 line height, a 32em measure, comfortable density, Onest. */
+:root[data-text-size='s'] {
+    --text-body: 1.0625rem;
+}
+
+:root[data-text-size='l'] {
+    --text-body: 1.3125rem;
+}
+
+:root[data-text-size='xl'] {
+    --text-body: 1.4375rem;
+}
+
+:root[data-leading='tight'] {
+    --leading-body: 1.45;
+}
+
+:root[data-leading='loose'] {
+    --leading-body: 1.75;
+}
+
+:root[data-measure='narrow'] {
+    --measure: 27em;
+}
+
+:root[data-measure='wide'] {
+    --measure: 38em;
+}
+
+:root[data-density='compact'] {
+    --density: 0.7;
+}
+
+:root[data-density='spacious'] {
+    --density: 1.35;
+}
+
+:root[data-reading-face='atkinson'] {
+    --reading-face: var(--font-atkinson);
+}
+
+:root[data-reading-face='lexend'] {
+    --reading-face: var(--font-lexend);
+}
+
 :root[data-contrast='more'] {
     --color-ink-2: var(--color-ink);
     --color-meta: light-dark(#3d3d3a, #c9c9c1);
@@ -94,8 +138,6 @@
     --rule-width: 2px;
     --color-edge: var(--color-ink);
     --color-control-edge: var(--color-ink);
-    --color-on-shell-2: var(--color-on-shell);
-    --color-shell-control-edge: var(--color-on-shell);
     --color-error: light-dark(#7a160e, #ffb3ac);
     --color-warning: light-dark(#6b4000, #f2b13b);
 }
@@ -108,8 +150,6 @@
         --rule-width: 2px;
         --color-edge: var(--color-ink);
         --color-control-edge: var(--color-ink);
-        --color-on-shell-2: var(--color-on-shell);
-        --color-shell-control-edge: var(--color-on-shell);
         --color-error: light-dark(#7a160e, #ffb3ac);
         --color-warning: light-dark(#6b4000, #f2b13b);
     }

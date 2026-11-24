@@ -19,18 +19,18 @@ const CODE_SAMPLE = `.card-grid {
   }
 }`;
 
-// Renders the feed list and the article specimen; both follow the reading controls.
+// Renders the feed list and the article specimen; both follow the reader settings.
 export function PatternsSection() {
     return (
         <DocSection
             id="patterns"
             title="Patterns"
-            intro="The feed is a ruled list, newest first, with the time leading each row. Unread rows carry the New tag and a bold title; read rows fall back to regular weight. Change the density above and watch the rows breathe."
+            intro="The feed is a ruled list, newest first, with the time leading each row. Unread rows carry the New tag and a bold title; read rows fall back to regular weight. Change the density in Aa and watch the rows breathe."
         >
             <Specimen
                 title="App shell"
                 stage="frame"
-                description="The ink header with its Lemon stripe, the ground-2 sidebar and the paper sheet. The current entry is a bold paper row with an ink-outlined marker in its field. Below lg the sidebar opens as a drawer. This specimen shows every planned control; the live app shows each one once it works."
+                description="Sidebar first: a rail for the views and your account, a category panel that collapses away ([), and the workspace, three neutral steps lighter toward what you read. The selected category shows its color in its row, the toolbar tag and the title. Search with Ctrl or ⌘ + K; Aa holds the reader settings. Below lg it all moves into a drawer."
             >
                 <AppShellDemo />
             </Specimen>

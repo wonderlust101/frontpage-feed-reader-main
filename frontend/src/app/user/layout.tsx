@@ -1,6 +1,7 @@
 // The app shell for signed-in readers, around every /user page, none of which search engines should index. The account
-// menu reads the session, so it streams in behind <Suspense> (Cache Components), inside its own error boundary: this
-// route's error.tsx doesn't wrap this layout, and the page shows that error when the API is down.
+// menu (the rail's foot, the drawer's on phones) reads the session, so it streams in behind <Suspense> (Cache
+// Components), inside its own error boundary: this route's error.tsx doesn't wrap this layout, and the page shows that
+// error when the API is down.
 
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
@@ -9,7 +10,7 @@ import type { ShellView } from '@/components/app-shell/nav-entries';
 import { AccountBoundary } from '@/features/auth/components/account-boundary';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { currentUser } from '@/features/auth/require-user';
-import { AppearanceMenu } from '@/features/preferences/components/appearance-menu';
+import { ReaderSettings } from '@/features/preferences/components/reader-settings';
 
 export const metadata: Metadata = { robots: { index: false } };
 
@@ -20,16 +21,14 @@ export default function UserLayout({ children }: LayoutProps<'/user'>) {
         <AppShell
             homeHref="/user"
             views={READER_VIEWS}
-            actions={
-                <>
-                    <AppearanceMenu />
-                    <AccountBoundary>
-                        <Suspense fallback={<span aria-hidden="true" className="shell-control" />}>
-                            <Account />
-                        </Suspense>
-                    </AccountBoundary>
-                </>
+            account={
+                <AccountBoundary>
+                    <Suspense fallback={<span aria-hidden="true" className="block size-11 rounded-full bg-skeleton" />}>
+                        <Account />
+                    </Suspense>
+                </AccountBoundary>
             }
+            utilities={<ReaderSettings />}
         >
             {children}
         </AppShell>

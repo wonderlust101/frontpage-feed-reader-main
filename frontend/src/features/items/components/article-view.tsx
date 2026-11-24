@@ -1,5 +1,5 @@
 // The article reading column: category and source line, title, optional AI summary, then the body.
-// The body follows the reading controls (face, size, line height) and is capped at the 66-character measure.
+// The body follows the reader settings (face, size, line height) and is capped at the 66-character measure.
 
 import type { ReactNode } from 'react';
 import { AiSummary } from '@/components/ui/ai-summary';

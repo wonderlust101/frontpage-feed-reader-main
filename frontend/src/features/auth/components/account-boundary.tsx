@@ -12,9 +12,9 @@ export const AccountBoundary = catchError(AccountRetry);
 // Renders the retry control; the visible "Try again" is part of its accessible name, as WCAG 2.5.3 asks.
 function AccountRetry(_props: Record<string, unknown>, { retry }: ErrorInfo) {
     return (
-        <button type="button" onClick={() => retry()} aria-label="Couldn't load your account. Try again" className="shell-control">
+        <button type="button" onClick={() => retry()} aria-label="Couldn't load your account. Try again" className="tool-button">
             <Icon name="refresh" />
-            <span className="max-sm:sr-only">Try again</span>
+            <span className="sr-only in-data-[account=row]:not-sr-only">Try again</span>
         </button>
     );
 }

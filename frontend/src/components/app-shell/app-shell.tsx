@@ -1,37 +1,54 @@
-// The app shell around guest mode and the signed-in home: a skip link, the sticky header, the ground-2 sidebar (lg up;
-// a drawer below) and the sheet, the page's <main>, inset like a page on a tray. Feature-agnostic: the views are plain
-// data, and each route's layout fills the header's `actions` and the sidebar's `foot` with feature pieces.
+// The app shell around guest mode and the signed-in home, sidebar first: a rail (logo, views, the panel toggle, the
+// account), the category panel beside it, and the workspace with its toolbar (location, search, Aa) above the page's
+// <main>. Three neutral steps get lighter toward the content. Below lg the rail and panel move into a drawer opened from
+// the toolbar. Feature-agnostic: views and categories are plain data; each route's layout passes in `account` (shown
+// in the rail's foot and the drawer's) and `utilities` (the toolbar's right end).
 
 import type { ReactNode } from 'react';
-import type { ShellView } from './nav-entries';
+import type { ShellCategory, ShellView } from './nav-entries';
 import { ShellDrawer } from './shell-drawer';
-import { ShellHeader } from './shell-header';
 import { ShellNav } from './shell-nav';
+import { ShellPanel } from './shell-panel';
+import { ShellRail } from './shell-rail';
+import { ShellToolbar } from './shell-toolbar';
 
 type AppShellProps = {
     homeHref: string;
     views: ShellView[];
-    actions: ReactNode;
-    foot?: ReactNode;
+    categories?: ShellCategory[];
+    account: ReactNode;
+    utilities: ReactNode;
     children: ReactNode;
 };
 
-// Renders the shell with the page (`children`) in the sheet.
-export function AppShell({ homeHref, views, actions, foot, children }: AppShellProps) {
-    const nav = <ShellNav views={views} foot={foot} />;
+const PANEL_ID = 'shell-categories';
 
+// Renders the shell with the page (`children`) in the workspace.
+export function AppShell({ homeHref, views, categories = [], account, utilities, children }: AppShellProps) {
     return (
-        <div className="flex flex-1 flex-col bg-ground-2">
+        <div className="flex flex-1 bg-workspace">
             <a
                 href="#main"
-                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-control focus:bg-field-lemon focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-on-field"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-control focus:bg-ink focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-ground"
             >
                 Skip to content
             </a>
-            <ShellHeader homeHref={homeHref} drawer={<ShellDrawer>{nav}</ShellDrawer>} actions={actions} className="sticky top-0 z-30" />
-            <div className="grid flex-1 lg:grid-cols-[16rem_minmax(0,1fr)]">
-                <div className="sticky top-19 hidden h-[calc(100dvh-4.75rem)] self-start overflow-y-auto pt-6 pb-5 pl-4 lg:block">{nav}</div>
-                <main id="main" tabIndex={-1} className="min-w-0 bg-ground lg:mt-3 lg:mr-3 lg:rounded-t-stage lg:border lg:border-b-0 lg:border-edge">
+            <div className="sticky top-0 hidden h-dvh flex-none lg:flex">
+                <ShellRail homeHref={homeHref} views={views} panelId={PANEL_ID} account={account} />
+                <ShellPanel id={PANEL_ID} homeHref={homeHref} categories={categories} />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col">
+                <ShellToolbar
+                    views={views}
+                    categories={categories}
+                    drawer={
+                        <ShellDrawer>
+                            <ShellNav homeHref={homeHref} views={views} categories={categories} account={account} />
+                        </ShellDrawer>
+                    }
+                    utilities={utilities}
+                />
+                <main id="main" tabIndex={-1} className="min-w-0 flex-1">
                     {children}
                 </main>
             </div>
