@@ -1,13 +1,15 @@
 // The app shell for guests, around every /guest page. Guests get the curated sample categories (each with its own
 // static page) and can search their sources, so a first visit shows a full shell. Saved, Weekly digest and Reading
-// show as locked views that lead to sign-up, so a guest sees what an account adds. It reads nothing per request, so
+// show as locked views that lead to sign-up, so a guest sees what an account adds; so do Add feed and Manage. It reads nothing per request, so
 // guest pages stay static. The rail's foot (the drawer's, on phones) holds the guest menu: a gentle way to an account.
 
 import { AppShell } from '@/components/app-shell/app-shell';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
 import type { SearchSource } from '@/components/app-shell/search-palette';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
+import { ManageLink } from '@/features/categories/components/manage-link';
 import { GUEST_CATEGORIES, guestCategoryColor } from '@/features/categories/guest-categories';
+import { AddFeedLocked } from '@/features/feeds/components/add-feed';
 import { ReaderSettings } from '@/features/preferences/components/reader-settings';
 
 const GUEST_VIEWS = [
@@ -29,7 +31,15 @@ const GUEST_SOURCES = GUEST_CATEGORIES.flatMap((category) =>
 
 export default function GuestLayout({ children }: LayoutProps<'/guest'>) {
     return (
-        <AppShell homeHref="/guest" views={GUEST_VIEWS} categories={GUEST_NAV} sources={GUEST_SOURCES} account={<GuestMenu />} utilities={<ReaderSettings />}>
+        <AppShell
+            homeHref="/guest"
+            views={GUEST_VIEWS}
+            categories={GUEST_NAV}
+            sources={GUEST_SOURCES}
+            account={<GuestMenu />}
+            tools={{ add: <AddFeedLocked />, manage: <ManageLink href="/sign-up" locked /> }}
+            utilities={<ReaderSettings />}
+        >
             {children}
         </AppShell>
     );

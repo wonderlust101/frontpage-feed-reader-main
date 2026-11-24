@@ -36,26 +36,35 @@ Chosen on 2026-11-23 through the Impeccable decision page. A first version (an i
 - **Readers:** an avatar button (initials on Lemon) at the rail's foot opens the account menu: name and email, Verify email (until verified), Change password, Sign out.
 - **Guests:** a "Guest" button in the same place opens what an account keeps, Create account and Sign in. A gentle nudge; nothing is gated.
 
-## 6. Below lg
+## 6. Adding feeds and managing categories
+
+- **Add feed** heads the category panel (and the drawer's categories): an ink-edged button that fills Lemon on hover. It opens a modal form: the site or feed address and a category (or none).
+- **Manage** sits beside the "Categories" heading and opens the Manage page: each category in order with its dot and name, up and down buttons, its quick actions, and its feeds, each with "Move to" and Unsubscribe; Uncategorized last; a "New category" field at the foot.
+- **Quick actions** on each category row: a "⋯" button that, with a mouse, takes the count's place while the row is hovered or focused (on touch it is always there). It opens a panel beside the row: rename, colour from the brand field swatches, "Move or remove feeds" (Manage), Delete category ("feeds stay": they move to Uncategorized).
+- **Feedback:** every change applies at once and shows a toast with Undo; unsubscribing asks first, since it drops a feed's history.
+- **Guests** see Add feed and Manage with a lock, leading to sign-up, like the account-only views.
+- **Readers** get the tools when the categories and subscriptions endpoints exist; until then they work on `/design-system` with sample data.
+
+## 7. Below lg
 
 The rail and panel move into a drawer (native modal `<dialog>`, from the left, panel tone): the logo, the views with names, the categories, and the account row at the foot (avatar, name and email, or Guest). The compact toolbar keeps the menu button, the location tag, a search button and Aa. The drawer closes on Escape, the backdrop or any link.
 
-## 7. Feedback and motion
+## 8. Feedback and motion
 
 Small and quick, all off under reduced motion: the palette and menus scale in (120–140ms); a newly current row's field bar grows into place; the panel's width animates as it collapses; the Aa sample line reflows smoothly; tool buttons fill on hover.
 
-## 8. States and ranges
+## 9. States and ranges
 
 | What           | Range / state                            | Behaviour                                                                                                                     |
 | -------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Categories     | 0 (readers today), 5 (guest sample), 20+ | 0: "Your categories line up here, colors and all, once you add feeds." All counts 0: "All caught up." 20+: the panel scrolls. |
-| Category names | short to long                            | One line, ellipsis; the full name stays the accessible name.                                                                  |
+| Category names | short to long, empty, taken              | One line, ellipsis; the full name stays the accessible name. Renaming to nothing or to a taken name (any case) says why.      |
 | Unread counts  | none, 1–99, 100+                         | None (or 0): nothing. 100+: "99+". Tabular figures.                                                                           |
 | Search         | empty query, results, no match           | "Jump anywhere"; Go to, Articles and Sources; "Nothing matches …" with "Search every category" when a category is chosen.     |
 | Account        | loading, signed in, API down, signed out | A skeleton circle; the avatar menu; a "Try again" control (the page shows its own error); nothing (the page redirects).       |
 | Sidebar        | expanded, collapsed                      | Remembered per device; `[` toggles it outside text fields.                                                                    |
 
-## 9. Constraints
+## 10. Constraints
 
 - **Tokens:** `--color-rail`, `--color-panel`, `--color-workspace` (light and dark), and the reader settings as data attributes on `<html>` (`data-text-size`, `data-leading`, `data-measure`, `data-density`, `data-reading-face`). The old shell tokens and the Lemon stripe are gone.
 - **Flat:** menus are panels with a 1.5px control edge, no shadow, like every other layer.

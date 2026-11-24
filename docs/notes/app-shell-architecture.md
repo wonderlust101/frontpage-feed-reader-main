@@ -44,16 +44,16 @@ src/lib/
   html-preference.ts               client: createHtmlPreference(preference) → a shared hook for one preference
 src/components/app-shell/          feature-agnostic: plain data and ReactNode slots, never imports features/
   nav-entries.ts                   ShellView, ShellCategory, currentHref(), shellPlace(), formatCount(): pure, tested
-  nav-row.tsx                      a panel/drawer row: field tint (.nav-current), field bar, count; FieldDot
-  category-list.tsx                the categories as navigation (panel and drawer), with the empty and caught-up notes
+  nav-row.tsx                      a panel/drawer row: field tint (.nav-current), field bar, count, optional menu; FieldDot, AllDots
+  category-list.tsx                CategoryTools (add, manage, rowMenu) + the categories as navigation (panel and drawer)
   shell-sidebar.tsx                server: the desktop grid of rail, panel and account (account last in tab order)
   shell-rail.tsx                   client: logo, view icons with tooltips, the panel toggle
   sidebar-toggle.tsx               client: collapses the panel (saved preference, the [ key); RailTooltip
-  shell-panel.tsx                  client: the categories (no "all" row: the rail's All items is it); collapses by width
+  shell-panel.tsx                  client: the category tools and the categories ("All categories" first); collapses by width
   shell-toolbar.tsx                client: the shell's <header>: drawer button (below lg), location tag, search, utilities
   search-palette.tsx               client: Ctrl/Cmd + K search and jump (native <dialog>, combobox, "Search in" scope)
   search-match.ts                  matchParts(): marks query matches, pure, unit tested
-  shell-menu.tsx                   client: a button and a native popover panel (Aa, account, guest)
+  shell-menu.tsx                   client: a button and a native popover panel (Aa, account, guest, a category's actions)
   shell-drawer.tsx                 client: menu button + native <dialog> holding ShellNav, below lg
   shell-nav.tsx                    client: the drawer's contents (logo, views, categories, account row)
   app-shell.tsx                    server: skip link, rail + panel (lg up), toolbar, <main id="main">
@@ -68,6 +68,13 @@ src/features/auth/
   components/account-boundary.tsx  client: catchError around the account slot, a "Try again" control
 src/features/categories/
   guest-categories.ts              the guest's curated categories and sources (mirrors backend/data/sample-feeds.json)
+  library.ts                       a reader's categories and feeds and the pure edits Manage makes: tested
+  components/category-row-menu.tsx client: a category's quick actions (rename, color swatches, Manage, delete)
+  components/manage-categories.tsx client: the Manage page body (order, colors, move and unsubscribe feeds, new category)
+  components/manage-link.tsx       "Manage" beside the Categories heading; locked for guests
+src/features/feeds/
+  web-address.ts                   webAddress(): reads a typed site or feed address as a URL, tested
+  components/add-feed.tsx          client: Add feed (button + modal form) and AddFeedLocked for guests
 src/app/guest/layout.tsx           AppShell for guests (static), with the sample categories and their sources
 src/app/guest/c/[category]/page.tsx a guest category's page, prerendered per category (generateStaticParams)
 src/app/user/layout.tsx            AppShell for readers; metadata robots noindex
@@ -124,6 +131,14 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 - **Decision:** `shellPlace()` returns the current view and the current category separately: the rail marks the view (`aria-current="true"`), the panel marks the category, or its "All categories" row on the home page (`aria-current="page"`); the drawer tints one row. Guests' account-only views are listed as `locked` and lead to sign-up. Guests get the five curated categories from `features/categories/guest-categories.ts` (a frontend mirror of `backend/data/sample-feeds.json`), each with a static page at `/guest/c/<id>` (`generateStaticParams`; an unknown id is a 404; Cache Components rejects `dynamicParams`, and `notFound()` covers it). The palette finds views and categories ("Go to") and, from plain `sources` data, the guests' sources; articles wait for the items. Readers' categories, counts and article search still wait for their endpoints.
 - **Consequences:** guest category colours are the presets (a guest's recolouring in localStorage isn't read by the shell yet). Because the category route has `generateStaticParams`, `usePathname` resolves at prerender and needs no Suspense; the page itself reads `params` inside a `<Suspense>` child so the static shell never waits on them.
 
+### ADR-007: Category tools are slots, shown working only where their data exists
+
+- **Status:** Accepted
+- **Context:** the shell had no place to add feeds or manage categories. The backend has the `categories` and `subscriptions` tables but no endpoints for them yet, and categories have no colour column.
+- **Decision:** `AppShell`, `ShellSidebar` and `ShellNav` take `tools: CategoryTools`: `add` (above the categories), `manage` (beside their heading) and `rowMenu(category)` (a quick-actions menu on each row; a function, so only a client parent such as the demo can pass it, and `AppShell` omits it). Guests get Add feed and Manage locked, leading to sign-up. Readers get nothing yet; `/design-system` runs the full set (Add feed, row menus, the Manage page, Undo toasts) on a sample library through `features/categories/library.ts`.
+- **Alternatives:** an Add feed button in the toolbar (it would crowd search and Aa); finding feeds through the search palette (hard to discover); showing readers the tools before the API (dead controls).
+- **Consequences:** when the endpoints land, `user/layout.tsx` wraps the tools in a client component that calls them, and the Manage page becomes `/user/manage`. Colours come from the brand fields only (`FieldPicker`), so contrast holds in both themes. Unsubscribing asks first (it drops history); renames, colours, moves and deletes apply at once with Undo.
+
 ## Risks
 
 | Risk                                                                                                                                                               | What we do                                                                                                                                                                                       |
@@ -137,5 +152,6 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 ## Later (not built now)
 
 - **Navigation data:** a shared `NavigationResponse = { categories: { id: string; name: string; unread: number | null }[]; unreadTotal: number | null }` (`null` = not known yet) and a `navigation` backend module with `GET /api/navigation` (reader, `requireAuth`) and a public guest endpoint. The guest catalogue can import `backend/data/sample-feeds.json` directly; the `starter_feeds` table is never seeded.
+- **Categories and subscriptions:** endpoints to list, add, rename, recolour (a `color` column on `categories`), reorder and delete categories, and to subscribe, move and unsubscribe feeds; then the reader's tools, `/user/manage`, and OPML import and export on that page.
 - **Search:** an endpoint over articles and sources, per reader, with a category filter; the palette's `search` becomes async when it lands.
 - **Caching:** the default `'use cache'` handler is in-memory per server instance, fine for guest navigation (`cacheLife('days')`); a reader's data is per person and stays uncached, inside `<Suspense>`.

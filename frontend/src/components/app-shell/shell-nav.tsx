@@ -1,7 +1,7 @@
 'use client';
 
-// The shell's navigation in the drawer (below lg): the logo, the views with their names, the categories ("All
-// categories" first), and the account pinned to the foot, where the rail would put it. The same rows, labels and
+// The shell's navigation in the drawer (below lg): the logo, the views with their names, the category tools and the
+// categories ("All categories" first), and the account pinned to the foot, where the rail would put it. The same rows, labels and
 // markers as the desktop rail and panel: the current view, and the current category or "all".
 
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
-import { CategoryList } from './category-list';
+import { CategoryList, type CategoryTools } from './category-list';
 import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
 import { NavRow } from './nav-row';
 
@@ -18,12 +18,13 @@ type ShellNavProps = {
     views: ShellView[];
     categories: ShellCategory[];
     account: ReactNode;
+    tools?: CategoryTools;
 };
 
 const VIEW_COLOR = 'var(--color-field-lemon)';
 
 // Renders the drawer's contents; where the reader is comes from the URL.
-export function ShellNav({ homeHref, views, categories, account }: ShellNavProps) {
+export function ShellNav({ homeHref, views, categories, account, tools }: ShellNavProps) {
     const place = shellPlace(
         usePathname(),
         homeHref,
@@ -53,7 +54,7 @@ export function ShellNav({ homeHref, views, categories, account }: ShellNavProps
                     ))}
                 </ul>
             </nav>
-            <CategoryList homeHref={homeHref} categories={categories} currentHref={place.category} />
+            <CategoryList homeHref={homeHref} categories={categories} currentHref={place.category} tools={tools} />
             <div data-account="row" className="mt-auto border-t border-edge pt-3">
                 {account}
             </div>

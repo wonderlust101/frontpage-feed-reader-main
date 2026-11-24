@@ -394,8 +394,9 @@
         transform: rotate(-45deg);
     }
 
-    /* A shell menu (Aa, account, guest): a native popover panel anchored to its button, scaling in from it. "Below" */
-    /* opens under a toolbar button, "beside" to the right of the rail's foot, and above the account row in the drawer; */
+    /* A shell menu (Aa, account, guest, a category's actions): a native popover panel anchored to its button, scaling */
+    /* in from it. "Below" opens under a toolbar button, "beside" to the right of the rail's foot, and above the account */
+    /* row in the drawer, "row" to the right of a category row (under it where there is no room); */
     /* without anchor positioning each falls back to a fixed spot near its button. Flat, like every layer: an edge, */
     /* no shadow. */
     .menu-panel {
@@ -447,6 +448,12 @@
         left: 0.75rem;
     }
 
+    .menu-panel[data-placement='row'] {
+        top: 6rem;
+        left: 0.75rem;
+        transform-origin: top left;
+    }
+
     @supports (position-area: bottom) {
         .menu-panel[data-placement='below'] {
             top: auto;
@@ -467,6 +474,16 @@
         [data-account='row'] .menu-panel[data-placement='beside'] {
             position-area: top span-right;
             margin: 0 0 0.5rem;
+        }
+
+        .menu-panel[data-placement='row'] {
+            top: auto;
+            left: auto;
+            position-area: right span-bottom;
+            position-try-fallbacks:
+                bottom span-left,
+                top span-left;
+            margin: 0 0 0 0.5rem;
         }
     }
 
