@@ -481,6 +481,7 @@
             left: auto;
             position-area: right span-bottom;
             position-try-fallbacks:
+                right span-top,
                 bottom span-left,
                 top span-left;
             margin: 0 0 0 0.5rem;

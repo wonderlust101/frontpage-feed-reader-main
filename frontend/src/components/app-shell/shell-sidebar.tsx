@@ -6,7 +6,7 @@
 
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import type { CategoryTools } from './category-list';
+import type { RowMenu } from './category-list';
 import { shellPlace, type ShellCategory, type ShellView } from './nav-entries';
 import { ShellPanel } from './shell-panel';
 import { ShellRail } from './shell-rail';
@@ -17,12 +17,12 @@ type ShellSidebarProps = {
     categories: ShellCategory[];
     panelId: string;
     account: ReactNode;
-    tools?: CategoryTools;
+    rowMenu?: RowMenu;
     className?: string;
 };
 
 // Renders the rail, the panel and the account; `panelId` is what the rail's toggle controls.
-export function ShellSidebar({ homeHref, views, categories, panelId, account, tools, className = '' }: ShellSidebarProps) {
+export function ShellSidebar({ homeHref, views, categories, panelId, account, rowMenu, className = '' }: ShellSidebarProps) {
     const place = shellPlace(
         usePathname(),
         homeHref,
@@ -34,7 +34,7 @@ export function ShellSidebar({ homeHref, views, categories, panelId, account, to
         <div className={`grid-cols-[4rem_auto] grid-rows-[1fr_auto] ${className}`}>
             <ShellRail homeHref={homeHref} views={views} currentView={place.view} panelId={panelId} />
             <div className="col-start-2 row-span-2 row-start-1 flex">
-                <ShellPanel id={panelId} homeHref={homeHref} categories={categories} currentHref={place.category} tools={tools} />
+                <ShellPanel id={panelId} homeHref={homeHref} categories={categories} currentHref={place.category} rowMenu={rowMenu} />
             </div>
             <div className="col-start-1 row-start-2 flex justify-center bg-rail pt-2 pb-3">{account}</div>
         </div>

@@ -10,7 +10,6 @@ import type { ShellView } from '@/components/app-shell/nav-entries';
 import { AccountBoundary } from '@/features/auth/components/account-boundary';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { currentUser } from '@/features/auth/require-user';
-import { ReaderSettings } from '@/features/preferences/components/reader-settings';
 
 export const metadata: Metadata = { robots: { index: false } };
 
@@ -28,7 +27,6 @@ export default function UserLayout({ children }: LayoutProps<'/user'>) {
                     </Suspense>
                 </AccountBoundary>
             }
-            utilities={<ReaderSettings />}
         >
             {children}
         </AppShell>

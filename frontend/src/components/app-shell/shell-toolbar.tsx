@@ -1,10 +1,10 @@
 'use client';
 
-// The workspace toolbar, the shell's <header>, sticky at the top of the page: where you are (the current category, else
-// the current view, as a tag in its field) on the left, the search button centred in the workspace, and the reader's
-// utilities (Aa) on the right. Search sits in the middle column of a three-column grid, so it never moves when the
-// tag's width changes. Below lg it also holds the drawer's menu button. It is a size container, so the search button
-// drops its label whenever the toolbar itself is narrow.
+// The workspace toolbar, the shell's <header>, sticky at the top of the page. Search leads at the left, at a fixed width,
+// so it sits in the same place on every page; where you are (the current category, else the current view, as a tag in
+// its field) follows it after a hairline, so a long category name only ever moves the tag, never search. Below lg the
+// drawer's menu button comes first. It is a size container, so the search button drops its label whenever the toolbar
+// itself is narrow.
 
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -18,14 +18,13 @@ type ShellToolbarProps = {
     categories: ShellCategory[];
     sources?: SearchSource[];
     drawer: ReactNode;
-    utilities: ReactNode;
     search?: (query: string, categoryHref: string | null) => SearchResults;
 };
 
 const VIEW_FIELD = { color: 'var(--color-field-lemon)' };
 
 // Renders the toolbar; `sources` and `search` feed the palette (see search-palette.tsx).
-export function ShellToolbar({ homeHref, views, categories, sources, drawer, utilities, search }: ShellToolbarProps) {
+export function ShellToolbar({ homeHref, views, categories, sources, drawer, search }: ShellToolbarProps) {
     const place = shellPlace(
         usePathname(),
         homeHref,
@@ -36,24 +35,20 @@ export function ShellToolbar({ homeHref, views, categories, sources, drawer, uti
     const view = views.find((entry) => entry.href === place.view);
 
     return (
-        <header className="@container sticky top-0 z-20 grid h-15 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-edge bg-workspace px-3 sm:gap-3 sm:px-5">
-            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                {drawer}
-                {(category || view) && (
-                    <span className="flex min-w-0">
-                        <span className="sr-only">Viewing: </span>
-                        {category ? (
-                            <CategoryTag name={category.name} field={{ color: category.color }} />
-                        ) : (
-                            view && <CategoryTag name={view.label} field={VIEW_FIELD} />
-                        )}
-                    </span>
-                )}
-            </div>
-            <div className="flex min-w-0 justify-center">
-                <SearchPalette homeHref={homeHref} views={views} categories={categories} sources={sources} search={search} />
-            </div>
-            <div className="flex justify-end">{utilities}</div>
+        <header className="@container sticky top-0 z-20 flex h-15 items-center gap-2 border-b border-edge bg-workspace px-3 sm:gap-3 sm:px-5">
+            {drawer}
+            <SearchPalette homeHref={homeHref} views={views} categories={categories} sources={sources} search={search} />
+            {(category || view) && (
+                <span className="flex min-w-0 items-center gap-2 sm:gap-3">
+                    <span aria-hidden="true" className="h-6 w-px flex-none bg-edge" />
+                    <span className="sr-only">Viewing: </span>
+                    {category ? (
+                        <CategoryTag name={category.name} field={{ color: category.color }} />
+                    ) : (
+                        view && <CategoryTag name={view.label} field={VIEW_FIELD} />
+                    )}
+                </span>
+            )}
         </header>
     );
 }

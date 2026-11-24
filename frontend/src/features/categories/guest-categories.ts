@@ -1,8 +1,8 @@
 // The guest's curated categories, in order, with their preset fields and their sources: the same catalogue as
 // backend/data/sample-feeds.json (keep the two in step). Guest mode shows them in the app shell, each with its own
-// page at /guest/c/<id>, and search finds their sources. A guest may recolor them (useCategoryFields).
+// page at /guest/c/<id>, and search finds their sources. A guest may recolor them (useGuestCategoryFields).
 
-import { NO_FIELD, categoryFieldById, type FieldId } from './fields';
+import type { FieldId } from './fields';
 
 type GuestCategory = {
     id: string;
@@ -45,8 +45,3 @@ export const GUEST_CATEGORIES = [
 ] as const satisfies readonly GuestCategory[];
 
 export type GuestCategoryId = (typeof GUEST_CATEGORIES)[number]['id'];
-
-// Returns the CSS color of a guest category's preset field (the stone "No color" field if the preset is unknown).
-export function guestCategoryColor(category: GuestCategory): string {
-    return (categoryFieldById(category.preset) ?? NO_FIELD).color;
-}

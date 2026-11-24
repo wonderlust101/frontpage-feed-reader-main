@@ -1,12 +1,13 @@
 // A guest category's page, one per curated category, prerendered at build time (an unknown id is a 404). Placeholder
-// content like /guest itself: the feed list arrives with the items. Its title carries the category's field as an
-// underline, the page end of the shell's colour thread. The part that reads the URL's params sits in <Suspense>, so a
-// navigation between categories is instant (the static shell paints first) rather than waiting on the params.
+// content like /guest itself: the feed list arrives with the items. Its title carries the category's field (as the
+// guest colored it) as an underline, the page end of the shell's colour thread. The part that reads the URL's params
+// sits in <Suspense>, so a navigation between categories is instant (the static shell paints first).
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { GUEST_CATEGORIES, guestCategoryColor } from '@/features/categories/guest-categories';
+import { GUEST_CATEGORIES } from '@/features/categories/guest-categories';
+import { CategoryTitle } from './_components/category-title';
 
 // Returns one path per guest category, so every category page is static.
 export function generateStaticParams() {
@@ -39,12 +40,7 @@ async function GuestCategory({ params }: Pick<PageProps<'/guest/c/[category]'>, 
 
     return (
         <>
-            <h1
-                className="self-start type-headline underline decoration-[0.12em] underline-offset-[0.16em] [text-decoration-skip-ink:none]"
-                style={{ textDecorationColor: guestCategoryColor(category) }}
-            >
-                {category.name}
-            </h1>
+            <CategoryTitle id={category.id} name={category.name} />
             <p>Articles from {category.sources.join(', ')} will load here.</p>
         </>
     );

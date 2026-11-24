@@ -8,50 +8,47 @@ Chosen on 2026-11-23 through the Impeccable decision page. A first version (an i
 
 - **Who arrives:** daily readers (signed in, at `/user`) and reviewers trying the product as guests (at `/guest`), who judge it on the first screen without signing up.
 - **Mode:** Operate. Readers come back once or twice a day, scan what's new, switch categories and read. A safe, familiar SaaS structure, with the brand in precise details; light and dark, desktop and mobile get equal weight.
-- **Three areas, nothing duplicated:** the sidebar navigates, the workspace toolbar holds the global utilities (search, reader settings), and the account menu at the sidebar's foot holds personal account management.
+- **Three areas, nothing duplicated:** the sidebar navigates, the workspace toolbar holds search and says where you are, and the account menu at the sidebar's foot holds personal account management.
 
 ## 2. Selected direction
 
 **Three neutral steps toward the content, colour marks the place.**
 
 - **Rail (64px, `--color-rail`):** the Lemon logo tile linking home, the views as icon links with tooltips (the current one a Lemon square with an ink edge; a guest's account-only views, Saved, Weekly digest and Reading, show muted with a lock and lead to sign-up), the toggle for the category panel, and the account at the foot.
-- **Category panel (232px, `--color-panel`):** "Categories" (a Bricolage title, clearly bigger than the rows), an "All categories" row (a stack of the category dots) that returns home, then each category with its field dot and unread count. The panel marks the current category, or "All categories" on the home page; the rail marks the current view. Guests see the five sample categories, each with its own page. It collapses away, leaving the rail (the toggle in the rail, or the `[` key), remembered per device with no flash on load.
-- **Workspace (`--color-workspace`):** a hairline toolbar above the page, in three columns so the search button stays centred and never moves: the location tag ("Viewing:" and the category or view) on the left, search in the middle, Aa on the right.
+- **Category panel (256px, `--color-panel`):** "Categories" (a Bricolage `h2`, clearly bigger than the rows), an "All items" row that returns home, always Lemon (Frontpage's own field: it can't be recoloured, though a category may still choose Lemon), then each category with its field dot, unread count and quick actions. One place is current: the category (inside one), or "All items" in both the rail and the panel on the home page. Guests see the five sample categories, each with its own page, and may recolour them on this device. It collapses away, leaving the rail (the toggle in the rail, or the `[` key), remembered per device with no flash on load.
+- **Workspace (`--color-workspace`):** a hairline toolbar above the page. Search leads at the left at a fixed width, so it sits in the same place on every page; the location tag ("Viewing:" for screen readers, then the category or view) follows after a hairline, so a long name only moves the tag.
 - **Tones:** light rail `#d9d7ce`, panel `#e9e7e0`, workspace `#fafaf7`; dark rail `#0d0d0c`, panel `#171716`, workspace `#232220`. Each step is lighter toward what you read, in both themes.
 - **Colour thread:** the selected category's field shows three times: its row in the panel is tinted with the field and carries a 3px field bar (with bold text and `aria-current`); the toolbar's location tag is filled with it; and the page title takes a field underline (pages pick this up as they are designed). Views use Lemon.
 
 ## 3. Search: the command palette
 
-- Ctrl/Cmd + K from anywhere, or the toolbar's "Search and jump" button, opens a centred palette (a native modal `<dialog>`): the query field, one "Search in" select (starting on All, so nothing is hidden; the current category's sources rank first), and results grouped as Go to (views and categories), Articles and Sources, matches marked in solid Lemon, with keycap hints (↑ ↓ move, ↵ open, Esc close). On touch, a Cancel button replaces the keycaps.
+- Ctrl/Cmd + K from anywhere, or the toolbar's "Search and jump" button, opens a large centred palette (a native modal `<dialog>`, 52rem wide): the query field (the last query selected on reopening, so typing replaces it), a "Search in" select once there is a query (starting on All, so nothing is hidden; the current category's sources rank first), and results grouped as Go to (views and categories), Articles and Sources, matches marked in solid Lemon, a guest's account-only views marked with a lock and "with an account", with keycap hints (↑ ↓ move, ↵ open, Esc close). On touch, a Cancel button replaces the keycaps.
 - **Data:** "Go to" always works; guests' sources come from the curated catalogue. Article search waits for the items, and the palette says so ("Article search arrives with the feeds"). `/design-system` shows articles too, with sample data.
 - Below md the button is a search icon; the palette sits near the top of the screen.
 
-## 4. Reader settings: Aa
+## 4. Reader settings: deferred
 
-- The Aa button at the toolbar's right opens a light popover: a sample line that reflows as you change things, text size (17 / 19 / 21 / 23px, with smaller and larger buttons), line height (Tight, Normal, Loose), reading width (Narrow, Standard, Wide), density (Compact, Comfortable, Spacious), typeface (Onest, Atkinson, Lexend) under "Reading"; theme, contrast and density sit in a collapsed "Display" section; "Reset to defaults" at the foot.
-- Every change applies at once and is saved; an early script copies the choices onto `<html>` before the first paint. The same popover replaces the old reading-controls bar on `/design-system`, so there is one settings UI across the site.
+The Aa popover (text size, line height, reading width, typeface, theme, contrast, density) has left the shell; its new home in the app is designed later, somewhere more accessible than a toolbar popover. The preferences still apply from the early script, and `/design-system` keeps the control in its header.
 
 ## 5. Account
 
 - **Readers:** an avatar button (initials on Lemon) at the rail's foot opens the account menu: name and email, Verify email (until verified), Change password, Sign out.
 - **Guests:** a "Guest" button in the same place opens what an account keeps, Create account and Sign in. A gentle nudge; nothing is gated.
 
-## 6. Adding feeds and managing categories
+## 6. Category quick actions; adding feeds and managing deferred
 
-- **Add feed** heads the category panel (and the drawer's categories): an ink-edged button that fills Lemon on hover. It opens a modal form: the site or feed address and a category (or none).
-- **Manage** sits beside the "Categories" heading and opens the Manage page: each category in order with its dot and name, up and down buttons, its quick actions, and its feeds, each with "Move to" and Unsubscribe; Uncategorized last; a "New category" field at the foot.
-- **Quick actions** on each category row: a "⋯" button that, with a mouse, takes the count's place while the row is hovered or focused (on touch it is always there). It opens a panel beside the row: rename, colour from the brand field swatches, "Move or remove feeds" (Manage), Delete category ("feeds stay": they move to Uncategorized).
-- **Feedback:** every change applies at once and shows a toast with Undo; unsubscribing asks first, since it drops a feed's history.
-- **Guests** see Add feed and Manage with a lock, leading to sign-up, like the account-only views.
-- **Readers** get the tools when the categories and subscriptions endpoints exist; until then they work on `/design-system` with sample data.
+- **Quick actions** on each category row: a "⋯" button that, with a mouse, takes the count's place while the row is hovered or focused (on touch it is always there). It opens a panel beside the row (above it near the bottom of the screen, never over the panel): rename (with a Rename button), colour from the brand field swatches, and, set apart, Delete category ("feeds stay": they move to Uncategorized). After a delete, focus moves to the neighbouring row; a toast offers Undo, also on Ctrl/Cmd + Z.
+- **Guests** get the colour swatches only, saved on this device; the new colour shows in the row, the toolbar tag and the page title. What only an account adds (saved items, the weekly digest, reading stats) is one locked rail entry leading to sign-up, at full contrast.
+- **Add feed and Manage are deferred.** Add feed will live in the search palette (paste a site or feed address and it offers to add it) and in empty states; managing categories and feeds (order, moving and removing feeds, OPML) will live on a Settings page with the reader settings.
+- **Readers** get the quick actions when the categories endpoints exist; until then they work on `/design-system` with sample data.
 
 ## 7. Below lg
 
-The rail and panel move into a drawer (native modal `<dialog>`, from the left, panel tone): the logo, the views with names, the categories, and the account row at the foot (avatar, name and email, or Guest). The compact toolbar keeps the menu button, the location tag, a search button and Aa. The drawer closes on Escape, the backdrop or any link.
+The rail and panel move into a drawer (native modal `<dialog>`, from the left, panel tone): the logo, the views with names, the categories, and the account row at the foot (avatar, name and email, or Guest). The compact toolbar keeps the menu button, a search button and the location tag, in that order. The drawer's views leave out All items, which leads the categories. The drawer closes on Escape, the backdrop or any link.
 
 ## 8. Feedback and motion
 
-Small and quick, all off under reduced motion: the palette and menus scale in (120–140ms); a newly current row's field bar grows into place; the panel's width animates as it collapses; the Aa sample line reflows smoothly; tool buttons fill on hover.
+Small and quick, all off under reduced motion: the palette and menus scale in (120–140ms); a newly current row's field bar grows into place; the panel's width animates as it collapses; tool buttons fill on hover.
 
 ## 9. States and ranges
 
@@ -69,4 +66,4 @@ Small and quick, all off under reduced motion: the palette and menus scale in (1
 - **Tokens:** `--color-rail`, `--color-panel`, `--color-workspace` (light and dark), and the reader settings as data attributes on `<html>` (`data-text-size`, `data-leading`, `data-measure`, `data-density`, `data-reading-face`). The old shell tokens and the Lemon stripe are gone.
 - **Flat:** menus are panels with a 1.5px control edge, no shadow, like every other layer.
 - **High contrast:** edges and rules turn to ink; the tonal steps still separate the areas.
-- **Open decisions:** where reader settings live beyond Aa (a settings page?); how signed-in readers' category colours are stored (the `categories` table has no colour column yet).
+- **Open decisions:** the Settings page that will hold the reader settings and category management; how signed-in readers' category colours are stored (the `categories` table has no colour column yet).

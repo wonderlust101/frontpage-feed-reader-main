@@ -29,12 +29,13 @@ export function currentHref(pathname: string, hrefs: readonly string[]): string 
     return matches.reduce<string | null>((longest, href) => (longest === null || href.length > longest.length ? href : longest), null);
 }
 
-// Returns where the reader is, one marker per column: the view (the rail) and the category (the panel). The category
-// is the matching category, else "all categories" (`homeHref`) on the home page itself, else null (another view).
-// Example: on /guest/c/design with home /guest, { view: '/guest', category: '/guest/c/design' }.
+// Returns where the reader is: the category (the panel's row: a category, or "All items", `homeHref`, on the home page)
+// and the view (the rail's icon), which is null inside a category, so the rail and the panel never mark two places.
+// Example: on /guest/c/design with home /guest, { view: null, category: '/guest/c/design' }.
 export function shellPlace(pathname: string, homeHref: string, viewHrefs: readonly string[], categoryHrefs: readonly string[]): ShellPlace {
-    const category = currentHref(pathname, categoryHrefs) ?? (pathname === homeHref ? homeHref : null);
-    return { view: currentHref(pathname, viewHrefs), category };
+    const inCategory = currentHref(pathname, categoryHrefs);
+    const category = inCategory ?? (pathname === homeHref ? homeHref : null);
+    return { view: inCategory ? null : currentHref(pathname, viewHrefs), category };
 }
 
 // Returns the text for an unread count: null when there is none (null, undefined or 0), "99+" above 99, else the number.

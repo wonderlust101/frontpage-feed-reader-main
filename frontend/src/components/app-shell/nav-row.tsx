@@ -1,7 +1,7 @@
 // One entry in the shell's category panel or drawer. The current entry is tinted with its field (.nav-current), carries
 // a field bar that grows into place, is bold and has aria-current, so the place never rests on colour alone. Unread
-// counts are small Bricolage chips (ink on the current row). A locked entry (a guest's account-only view) is muted with
-// a lock. A row may carry a quick-actions `menu`, beside the link rather than in it: with a mouse it replaces the count
+// counts are small Bricolage chips (ink on the current row). A locked entry (a guest's account-only views) carries a
+// lock, at full contrast. A row may carry a quick-actions `menu`, beside the link rather than in it: with a mouse it replaces the count
 // while the row is hovered or focused; on touch it stays in view. Labels truncate; the full name stays the link's
 // accessible name.
 
@@ -28,14 +28,14 @@ export function NavRow({ href, label, lead, color, isCurrent, count, locked = fa
         <Link
             href={href}
             aria-current={isCurrent ? 'page' : undefined}
-            className={`relative flex min-h-11 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 lg:min-h-10 ${menu ? 'pointer-coarse:pr-12' : ''} ${isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'} ${locked ? 'opacity-70' : ''}`}
+            className={`relative flex min-h-11 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 lg:min-h-10 ${menu ? 'pointer-coarse:pr-12' : ''} ${isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
             style={isCurrent ? ({ '--row-field': color } as CSSProperties) : undefined}
         >
             {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" style={{ background: color }} />}
             {lead}
             <span className="min-w-0 truncate">{label}</span>
             {locked && (
-                <span className="ml-auto flex items-center gap-1 text-meta text-muted">
+                <span className="ml-auto flex items-center gap-1 text-meta text-ink-2">
                     <Icon name="locked" size="inline" />
                     <span className="sr-only">, with an account</span>
                 </span>
@@ -67,17 +67,4 @@ export function NavRow({ href, label, lead, color, isCurrent, count, locked = fa
 // Renders a category's field dot, with the hairline that keeps pale fields visible.
 export function FieldDot({ color }: { color: string }) {
     return <span aria-hidden="true" className="fill-edge mx-[3px] size-3 flex-none rounded-full" style={{ background: color }} />;
-}
-
-// Renders "all categories" as a small overlapping stack of the first three category fields (Lemon when there are none),
-// so the "all" row looks like every colour at once.
-export function AllDots({ colors }: { colors: string[] }) {
-    const shown = colors.length > 0 ? colors.slice(0, 3) : ['var(--color-field-lemon)'];
-    return (
-        <span aria-hidden="true" className="flex w-[18px] flex-none items-center">
-            {shown.map((color, index) => (
-                <span key={color + index} className="fill-edge -ml-1.5 size-2.5 rounded-full ring-1 ring-panel first:ml-0" style={{ background: color }} />
-            ))}
-        </span>
-    );
 }

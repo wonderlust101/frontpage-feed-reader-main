@@ -24,11 +24,11 @@ describe('currentHref', () => {
 });
 
 describe('shellPlace', () => {
-    test('marks the view and the category the path is in', () => {
-        expect(shellPlace('/guest/c/design', '/guest', ['/guest'], ['/guest/c/design'])).toEqual({ view: '/guest', category: '/guest/c/design' });
+    test('marks only the category inside a category', () => {
+        expect(shellPlace('/guest/c/design', '/guest', ['/guest'], ['/guest/c/design'])).toEqual({ view: null, category: '/guest/c/design' });
     });
 
-    test('marks "all categories" on the home page itself', () => {
+    test('marks "All items" in both columns on the home page itself', () => {
         expect(shellPlace('/guest', '/guest', ['/guest'], ['/guest/c/design'])).toEqual({ view: '/guest', category: '/guest' });
     });
 

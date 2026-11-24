@@ -2,8 +2,8 @@
 
 // The shell's rail (lg up): the Lemon logo tile linking home, the views as icon links with tooltips, and the toggle for
 // the category panel; ShellSidebar puts the account at its foot. The current view is a Lemon square with an ink edge,
-// the brand's own colour marking where you are (aria-current="true": the panel marks the page). A locked view (a
-// guest's account-only one) is muted, with a lock badge and a tooltip saying why.
+// the brand's own colour marking where you are (aria-current="true": the panel marks the page), and none is current
+// inside a category. A locked view (a guest's account-only ones) carries a lock badge and a tooltip saying why.
 
 import Link from 'next/link';
 import { LogoMark } from '@/components/logo';
@@ -39,7 +39,7 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                                     aria-current={isCurrent ? 'true' : undefined}
                                     className={`group relative grid size-11 place-items-center rounded-control transition-colors duration-150 ${isCurrent ? 'bg-field-lemon text-on-field shadow-[inset_0_0_0_1.5px_var(--color-on-field)]' : 'text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
                                 >
-                                    <Icon name={view.icon} className={view.locked ? 'opacity-55' : ''} />
+                                    <Icon name={view.icon} />
                                     {view.locked && (
                                         <span
                                             aria-hidden="true"

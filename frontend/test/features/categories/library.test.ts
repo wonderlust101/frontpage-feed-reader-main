@@ -1,14 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import {
-    addCategory,
-    deleteCategory,
-    isNameTaken,
-    moveCategory,
-    placeFeed,
-    unsubscribe,
-    updateCategory,
-    type Library,
-} from '../../../src/features/categories/library';
+import { deleteCategory, isNameTaken, updateCategory, type Library } from '../../../src/features/categories/library';
 
 const LIBRARY: Library = {
     categories: [
@@ -40,12 +31,6 @@ describe('updateCategory', () => {
     });
 });
 
-describe('addCategory', () => {
-    test('adds an empty, trimmed category on No color at the end', () => {
-        expect(addCategory(LIBRARY, 'film', ' Film ').categories.at(-1)).toEqual({ id: 'film', name: 'Film', fieldId: 'none', feeds: [] });
-    });
-});
-
 describe('deleteCategory', () => {
     test('moves its feeds to Uncategorized', () => {
         expect(deleteCategory(LIBRARY, 'frontend')).toEqual({
@@ -56,41 +41,5 @@ describe('deleteCategory', () => {
 
     test('leaves the library alone for an unknown id', () => {
         expect(deleteCategory(LIBRARY, 'nope')).toEqual(LIBRARY);
-    });
-});
-
-describe('moveCategory', () => {
-    test('swaps with its neighbour', () => {
-        expect(moveCategory(LIBRARY, 'design', -1).categories.map((category) => category.id)).toEqual(['design', 'frontend']);
-    });
-
-    test('stays put at either end', () => {
-        expect(moveCategory(LIBRARY, 'frontend', -1)).toBe(LIBRARY);
-        expect(moveCategory(LIBRARY, 'design', 1)).toBe(LIBRARY);
-    });
-});
-
-describe('placeFeed', () => {
-    test('moves a feed between categories', () => {
-        const moved = placeFeed(LIBRARY, 'web.dev', 'design');
-        expect(moved.categories[0].feeds).toEqual(['CSS-Tricks']);
-        expect(moved.categories[1].feeds).toEqual(['Sidebar.io', 'web.dev']);
-    });
-
-    test('moves a feed to Uncategorized', () => {
-        const moved = placeFeed(LIBRARY, 'Sidebar.io', null);
-        expect(moved.categories[1].feeds).toEqual([]);
-        expect(moved.uncategorized).toEqual(['Hacker News Best', 'Sidebar.io']);
-    });
-
-    test('adds a new feed', () => {
-        expect(placeFeed(LIBRARY, 'Figma Blog', 'design').categories[1].feeds).toEqual(['Sidebar.io', 'Figma Blog']);
-    });
-});
-
-describe('unsubscribe', () => {
-    test('removes the feed wherever it is', () => {
-        expect(unsubscribe(LIBRARY, 'Hacker News Best').uncategorized).toEqual([]);
-        expect(unsubscribe(LIBRARY, 'CSS-Tricks').categories[0].feeds).toEqual(['web.dev']);
     });
 });

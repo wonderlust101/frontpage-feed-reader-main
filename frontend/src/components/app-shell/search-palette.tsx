@@ -3,9 +3,10 @@
 // Search, the shell's one global utility: a button in the workspace toolbar and Ctrl/Cmd + K from anywhere open a
 // palette (a native modal <dialog>) that both searches and navigates. Typing finds views and categories to jump to
 // ("Go to"), articles (when a `search` function is given) and sources (from `search`, or the plain `sources` list).
-// It searches everything, with the current category's sources first; a "Search in" select narrows articles and sources
-// to one category when the reader wants that. The query
-// field is a combobox: arrow keys move through the results, Enter opens one, Escape (or Cancel on touch) closes.
+// It searches everything, with the current category's sources first; once there is a query, a "Search in" select
+// narrows articles and sources to one category when the reader wants that. Locked views (a guest's account-only ones)
+// say so, with a lock. Reopening selects the last query, so typing replaces it. The query field is a combobox: arrow
+// keys move through the results, Enter opens one, Escape (or Cancel on touch) closes.
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
@@ -28,13 +29,21 @@ type SearchPaletteProps = {
     search?: (query: string, categoryHref: string | null) => SearchResults;
 };
 
-type ResultOption = { href: string; title: string; detail: string; aside?: string; lead: { icon: IconName } | { color: string } | { initial: string } };
+type ResultOption = {
+    href: string;
+    title: string;
+    detail: string;
+    aside?: string;
+    locked?: boolean;
+    lead: { icon: IconName } | { color: string } | { initial: string };
+};
 
 type ResultGroup = { label: string; options: ResultOption[] };
 
 // Renders the toolbar's search button and the palette.
 export function SearchPalette({ homeHref, views, categories, sources = [], search }: SearchPaletteProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
     const pathname = usePathname();
     const listId = useId();
@@ -64,7 +73,13 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                 ? [
                       ...views
                           .filter((view) => view.label.toLowerCase().includes(needle))
-                          .map((view) => ({ href: view.href, title: view.label, detail: 'View', lead: { icon: view.icon } })),
+                          .map((view) => ({
+                              href: view.href,
+                              title: view.label,
+                              detail: view.locked ? 'View · with an account' : 'View',
+                              locked: view.locked,
+                              lead: { icon: view.icon },
+                          })),
                       ...categories
                           .filter((category) => category.name.toLowerCase().includes(needle))
                           .map((category) => ({ href: category.href, title: category.name, detail: 'Category', lead: { color: category.color } })),
@@ -100,12 +115,18 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
         function openOnShortcut(event: globalThis.KeyboardEvent) {
             if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
                 event.preventDefault();
-                dialogRef.current?.showModal();
+                openPalette();
             }
         }
         window.addEventListener('keydown', openOnShortcut);
         return () => window.removeEventListener('keydown', openOnShortcut);
     }, []);
+
+    // Opens the palette with the last query selected, so typing starts a new search.
+    function openPalette() {
+        dialogRef.current?.showModal();
+        inputRef.current?.select();
+    }
 
     // Opens the chosen result and closes the palette.
     function openResult(option: ResultOption) {
@@ -135,7 +156,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                 type="button"
                 aria-haspopup="dialog"
                 aria-keyshortcuts="Meta+K Control+K"
-                onClick={() => dialogRef.current?.showModal()}
+                onClick={openPalette}
                 className="tool-button max-w-full min-w-0 shrink justify-start text-ink-2 max-md:min-w-11 md:w-88 md:px-3"
             >
                 <Icon name="search" />
@@ -148,12 +169,13 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                 ref={dialogRef}
                 aria-label="Search"
                 onClick={(event) => event.target === event.currentTarget && event.currentTarget.close()}
-                className="mx-auto mt-[12vh] max-h-[76dvh] w-[min(40rem,calc(100vw-1.5rem))] overflow-hidden rounded-stage border-[1.5px] border-control-edge bg-workspace p-0 text-ink transition-[opacity,scale,display,overlay] transition-discrete duration-150 ease-out backdrop:bg-on-field/45 starting:open:scale-97 starting:open:opacity-0 max-md:mt-3"
+                className="mx-auto mt-[10vh] max-h-[80dvh] w-[min(52rem,calc(100vw-1.5rem))] overflow-hidden rounded-stage border-[1.5px] border-control-edge bg-workspace p-0 text-ink transition-[opacity,scale,display,overlay] transition-discrete duration-150 ease-out backdrop:bg-on-field/45 starting:open:scale-97 starting:open:opacity-0 max-md:mt-3"
             >
-                <div className="flex max-h-[76dvh] flex-col">
+                <div className="flex max-h-[80dvh] flex-col">
                     <div className="flex items-center gap-3 border-b border-edge px-4 has-[.palette-input:focus-visible]:shadow-[inset_0_-2px_0_var(--color-ink)]">
                         <Icon name="search" className="text-ink-2" />
                         <input
+                            ref={inputRef}
                             type="text"
                             role="combobox"
                             enterKeyHint="search"
@@ -169,8 +191,8 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                                 setActiveIndex(0);
                             }}
                             onKeyDown={moveOrOpen}
-                            placeholder="A view, a category or a source"
-                            className="palette-input h-14 min-w-0 flex-1 bg-transparent text-ui placeholder:text-muted"
+                            placeholder="Views, categories, sources"
+                            className="palette-input h-16 min-w-0 flex-1 bg-transparent text-body placeholder:text-muted"
                         />
                         <kbd className="rounded-tag border border-edge px-1.5 font-sans text-meta font-semibold text-ink-2 pointer-coarse:hidden">Esc</kbd>
                         <button
@@ -181,7 +203,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             Cancel
                         </button>
                     </div>
-                    {categories.length > 0 && (
+                    {categories.length > 0 && trimmedQuery && (
                         <div className="flex items-center gap-2 border-b border-edge px-4 py-2">
                             <label htmlFor={scopeId} className="text-meta font-semibold text-ink-2">
                                 Search in
@@ -201,7 +223,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             </select>
                         </div>
                     )}
-                    <div className="min-h-0 flex-1 overflow-y-auto py-2">
+                    <div className="min-h-0 flex-1 overflow-y-auto py-2 md:min-h-80">
                         {options.length > 0 ? (
                             <ul id={listId} role="listbox" aria-label="Results">
                                 {groups.map((group, index) =>
@@ -253,7 +275,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                                 aria-selected={isActive}
                                 onClick={() => openResult(option)}
                                 onMouseMove={() => setActiveIndex(offset + index)}
-                                className={`flex cursor-pointer items-center gap-3 px-4 py-2 ${isActive ? 'bg-ground-2' : ''}`}
+                                className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 ${isActive ? 'bg-ground-2' : ''}`}
                             >
                                 <ResultLead lead={option.lead} />
                                 <span className="min-w-0 flex-1">
@@ -271,6 +293,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                                     <span className="block truncate text-meta text-muted">{option.detail}</span>
                                 </span>
                                 {option.aside && <span className="flex-none text-meta text-muted">{option.aside}</span>}
+                                {option.locked && <Icon name="locked" size="inline" className="flex-none text-ink-2" />}
                             </li>
                         );
                     })}
