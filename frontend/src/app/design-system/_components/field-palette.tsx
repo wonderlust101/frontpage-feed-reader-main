@@ -2,9 +2,7 @@
 
 import { useCategoryFields } from '@/features/categories/category-field-store';
 import { BRAND_FIELD, FIELDS, NO_FIELD } from '@/features/categories/fields';
-import { CATEGORIES, CATEGORY_PRESETS } from '../_data/sample-data';
-
-const CATEGORY_IDS = CATEGORIES.map((category) => category.id);
+import { CATEGORIES, CATEGORY_IDS, CATEGORY_PRESETS } from '../_data/sample-data';
 
 export function FieldPalette() {
     const [fields] = useCategoryFields(CATEGORY_IDS, CATEGORY_PRESETS);

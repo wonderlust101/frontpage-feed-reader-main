@@ -6,13 +6,11 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import { useCategoryFields } from '@/features/categories/category-field-store';
 import { CategorySwitch } from '@/features/categories/components/category-switch';
 import { BRAND_FIELD } from '@/features/categories/fields';
-import { CATEGORIES, CATEGORY_PRESETS } from '../_data/sample-data';
+import { CATEGORIES, CATEGORY_IDS, CATEGORY_PRESETS } from '../_data/sample-data';
 
 type HeroChoice = { choice: string; setChoice: (id: string) => void };
 
 const HeroChoiceContext = createContext<HeroChoice | null>(null);
-
-export const CATEGORY_IDS = CATEGORIES.map((category) => category.id);
 
 export function HeroChoiceProvider({ children }: { children: ReactNode }) {
     const [choice, setChoice] = useState('all');

@@ -71,7 +71,7 @@ export function ImagerySection() {
                             <a href={credit.url} className="underline hover:text-ink">
                                 {credit.name}
                             </a>
-                            {index < CREDITS.length - 2 ? ', ' : index === CREDITS.length - 2 ? ' and ' : '.'}
+                            {creditSeparator(index)}
                         </span>
                     ))}
                 </p>
@@ -115,4 +115,15 @@ function MoodTile({ photo }: { photo: MoodPhoto }) {
             <Image src={photo.image} alt={photo.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" placeholder="blur" />
         </div>
     );
+}
+
+// ", " between names, " and " before the last one, "." after it.
+function creditSeparator(index: number): string {
+    if (index === CREDITS.length - 1)
+        return '.';
+
+    if (index === CREDITS.length - 2)
+        return ' and ';
+
+    return ', ';
 }

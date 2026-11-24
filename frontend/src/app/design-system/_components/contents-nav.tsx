@@ -11,7 +11,9 @@ export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
     useEffect(() => {
         const observer = new IntersectionObserver(
             (observed) => {
-                const visible = observed.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+                const visible = observed
+                    .filter((observation) => observation.isIntersecting)
+                    .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
 
                 if (visible[0])
                     setCurrentId(visible[0].target.id);

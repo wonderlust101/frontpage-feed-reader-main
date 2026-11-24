@@ -9,7 +9,7 @@ import type { SearchSource } from '@/components/app-shell/search-results';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { categoryColor } from '@/features/categories/category-field-vars';
 import { fieldOrNone } from '@/features/categories/fields';
-import { GUEST_CATEGORIES } from '@/features/categories/guest-categories';
+import { GUEST_CATEGORIES, guestCategoryHref } from '@/features/categories/guest-categories';
 import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
 
 type GuestShellProps = {
@@ -19,16 +19,18 @@ type GuestShellProps = {
     children: ReactNode;
 };
 
+// The colours are CSS properties the guest's choices override, so this list never changes.
+const SHELL_CATEGORIES = GUEST_CATEGORIES.map((category) => ({
+    href: guestCategoryHref(category.id),
+    name: category.name,
+    color: categoryColor(category.id, fieldOrNone(category.preset).color),
+})) satisfies ShellCategory[];
+
 export function GuestShell({ views, sources, account, children }: GuestShellProps) {
     const [fields, choose] = useGuestCategoryFields();
-    const categories = GUEST_CATEGORIES.map((category) => ({
-        href: `/guest/c/${category.id}`,
-        name: category.name,
-        color: categoryColor(category.id, fieldOrNone(category.preset).color),
-    })) satisfies ShellCategory[];
 
     function colorMenu(shellCategory: ShellCategory) {
-        const category = GUEST_CATEGORIES.find((entry) => `/guest/c/${entry.id}` === shellCategory.href);
+        const category = GUEST_CATEGORIES.find((entry) => guestCategoryHref(entry.id) === shellCategory.href);
 
         return (
             category && (
@@ -38,7 +40,7 @@ export function GuestShell({ views, sources, account, children }: GuestShellProp
     }
 
     return (
-        <AppShell homeHref="/guest" views={views} categories={categories} sources={sources} account={account} rowMenu={colorMenu}>
+        <AppShell homeHref="/guest" views={views} categories={SHELL_CATEGORIES} sources={sources} account={account} rowMenu={colorMenu}>
             {children}
         </AppShell>
     );

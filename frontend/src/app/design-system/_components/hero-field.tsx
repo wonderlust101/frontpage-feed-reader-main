@@ -1,85 +1,16 @@
 'use client';
 
 import { Logo } from '@/components/logo';
-import { Stickers, type Sticker } from '@/components/stickers';
+import { Stickers } from '@/components/stickers';
 import { useCategoryFields } from '@/features/categories/category-field-store';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import { ReaderSettings } from '@/features/preferences/components/reader-settings';
-import { CATEGORIES, CATEGORY_PRESETS } from '../_data/sample-data';
+import { CATEGORIES, CATEGORY_IDS, CATEGORY_PRESETS } from '../_data/sample-data';
 import { SECTIONS } from '../_data/sections';
-import { CATEGORY_IDS, useHeroChoice } from './hero-choice';
+import { HERO_STICKERS } from '../_data/hero-stickers';
+import { useHeroChoice } from './hero-choice';
 
 const SOURCE_COUNT = CATEGORIES.reduce((total, category) => total + category.sources.length, 0);
-
-// In the pile's container units (a 4:3 box), so it keeps its arrangement at any width and never leaves its column.
-const HERO_STICKERS: Sticker[] = [
-    {
-        shape: 'pill',
-        field: 'var(--color-field-sky)',
-        icon: 'newsletter',
-        label: 'Newsletters',
-        size: '3.8cqi',
-        x: '8.7cqi',
-        y: '3cqi',
-        tilt: -6,
-        drift: ['3.4cqi', '3cqi'],
-    },
-    { shape: 'square', field: 'var(--color-field-lemon)', label: 'New!', size: '15.3cqi', x: '45.7cqi', y: '0cqi', tilt: -9, drift: ['-1.5cqi', '4cqi'] },
-    {
-        shape: 'circle',
-        field: 'var(--color-field-rose)',
-        icon: 'ai-summary',
-        size: '16.5cqi',
-        x: '66.6cqi',
-        y: '0.5cqi',
-        tilt: 12,
-        drift: ['-3.7cqi', '3.7cqi'],
-    },
-    {
-        shape: 'square',
-        field: 'var(--color-field-leaf)',
-        label: '24 unread',
-        size: '22.2cqi',
-        x: '35.8cqi',
-        y: '16.8cqi',
-        tilt: -8,
-        drift: ['-3.2cqi', '2cqi'],
-    },
-    {
-        shape: 'circle',
-        field: 'var(--color-field-tangerine)',
-        icon: 'caught-up',
-        size: '20.5cqi',
-        x: '3.8cqi',
-        y: '27.2cqi',
-        tilt: -12,
-        drift: ['2.5cqi', '-0.7cqi'],
-    },
-    { shape: 'circle', field: 'var(--color-field-coral)', icon: 'feed', size: '25.6cqi', x: '65.4cqi', y: '27.4cqi', tilt: 10, drift: ['-4.4cqi', '-1.5cqi'] },
-    {
-        shape: 'pill',
-        field: 'var(--color-field-lilac)',
-        icon: 'saved',
-        label: 'Saved for later',
-        size: '3.8cqi',
-        x: '0.1cqi',
-        y: '55.8cqi',
-        tilt: 6,
-        drift: ['3cqi', '-2.5cqi'],
-    },
-    {
-        shape: 'pill',
-        field: 'var(--color-field-aqua)',
-        icon: 'website',
-        label: 'Any website',
-        size: '3.8cqi',
-        x: '45.7cqi',
-        y: '55.8cqi',
-        tilt: -3,
-        drift: ['-1cqi', '-2.5cqi'],
-    },
-    { shape: 'circle', field: 'var(--color-field-sky)', icon: 'mark-unread', size: '13.8cqi', x: '86.2cqi', y: '55.8cqi', tilt: 6, drift: ['-4cqi', '-2cqi'] },
-];
 
 export function HeroField() {
     const { choice } = useHeroChoice();

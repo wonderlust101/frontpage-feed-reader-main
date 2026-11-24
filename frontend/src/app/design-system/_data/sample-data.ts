@@ -23,6 +23,8 @@ export type SampleItem = {
     health: HealthMarkState;
 };
 
+export const CATEGORY_IDS = GUEST_CATEGORIES.map((category) => category.id);
+
 export const CATEGORY_PRESETS: FieldChoices = Object.fromEntries(GUEST_CATEGORIES.map((category) => [category.id, category.preset]));
 
 export const CATEGORIES: Category[] = GUEST_CATEGORIES.map(({ preset, sources, ...category }) => ({

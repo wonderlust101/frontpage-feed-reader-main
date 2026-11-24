@@ -43,3 +43,7 @@ export const GUEST_CATEGORIES = [
 ] as const satisfies readonly GuestCategory[];
 
 export type GuestCategoryId = (typeof GUEST_CATEGORIES)[number]['id'];
+
+export function guestCategoryHref(id: string): string {
+    return `/guest/c/${id}`;
+}

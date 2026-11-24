@@ -16,12 +16,12 @@ import { AccountMenu } from '@/features/auth/components/account-menu';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { categoryColor } from '@/features/categories/category-field-vars';
-import { categoryFieldById, fieldOrNone } from '@/features/categories/fields';
+import { BRAND_FIELD, categoryFieldById, fieldOrNone } from '@/features/categories/fields';
 import { deleteCategory, isNameTaken, updateCategory, type Library } from '@/features/categories/library';
 import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
-import { FeedItemRow } from '@/features/items/components/feed-item-row';
 import { ChoiceControl } from '@/features/preferences/components/choice-control';
-import { CATEGORIES, READER_CATEGORIES, SAMPLE_ITEMS, SAMPLE_READER, getCategory, type CategoryId } from '../_data/sample-data';
+import { CATEGORIES, READER_CATEGORIES, SAMPLE_ITEMS, SAMPLE_READER, type CategoryId } from '../_data/sample-data';
+import { SampleItemRow } from './sample-item-row';
 
 type DemoMode = 'reader' | 'guest';
 
@@ -69,8 +69,7 @@ const CATEGORY_BY_HREF = new Map<string, CategoryId>([
 
 export function AppShellDemo() {
     const [mode, setMode] = useState<DemoMode>('reader');
-    const [library, setLibrary] = useState(START_LIBRARY);
-    const [toast, setToast] = useState<DemoToast | null>(null);
+    const { library, toast, change, undo, dismissToast } = useUndoableLibrary();
     const [guestFields, chooseGuestField] = useGuestCategoryFields();
     const isReader = mode === 'reader';
     const homeHref = isReader ? '#patterns' : THIS_PAGE;
@@ -91,33 +90,8 @@ export function AppShellDemo() {
     const account = isReader ? <AccountMenu user={SAMPLE_READER} /> : <GuestMenu />;
     const firstCategory = library.categories.find((category) => category.id === FIRST_CATEGORY);
     const title = isReader ? (firstCategory?.name ?? 'Frontend') : 'All items';
-    const titleField = isReader ? fieldOrNone(firstCategory?.fieldId).color : 'var(--color-field-lemon)';
+    const titleField = isReader ? fieldOrNone(firstCategory?.fieldId).color : BRAND_FIELD.color;
     const items = isReader ? SAMPLE_ITEMS.filter((item) => item.category === 'frontend') : SAMPLE_ITEMS.slice(0, 4);
-
-    useEffect(() => {
-        // Outside text fields only, so Ctrl/⌘ + Z still undoes typing.
-        function undoOnShortcut(event: KeyboardEvent) {
-            const inField = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
-
-            if (toast && !inField && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
-                event.preventDefault();
-                undo(toast.undo);
-            }
-        }
-        window.addEventListener('keydown', undoOnShortcut);
-
-        return () => window.removeEventListener('keydown', undoOnShortcut);
-    }, [toast]);
-
-    function change(next: Library, message: string) {
-        setToast({ message, undo: library });
-        setLibrary(next);
-    }
-
-    function undo(previous: Library) {
-        setLibrary(previous);
-        setToast(null);
-    }
 
     function rowMenu(shellCategory: ShellCategory) {
         if (!isReader) {
@@ -143,13 +117,15 @@ export function AppShellDemo() {
                         change(updateCategory(library, category.id, { fieldId }), `${category.name} is now ${categoryFieldById(fieldId)?.name}.`)
                     }
                     onRename={(name) => {
-                        if (name.trim() === '')
+                        const newName = name.trim();
+
+                        if (newName === '')
                             return 'Give it a name.';
 
                         if (isNameTaken(library, name, category.id))
-                            return `You already have a category called ${name.trim()}.`;
+                            return `You already have a category called ${newName}.`;
 
-                        change(updateCategory(library, category.id, { name: name.trim() }), `Renamed ${category.name} to ${name.trim()}.`);
+                        change(updateCategory(library, category.id, { name: newName }), `Renamed ${category.name} to ${newName}.`);
 
                         return undefined;
                     }}
@@ -198,24 +174,14 @@ export function AppShellDemo() {
                         </p>
                         <ul className="mt-6 rule-t">
                             {items.map((item, index) => (
-                                <FeedItemRow
-                                    key={item.id}
-                                    title={item.title}
-                                    href="#patterns"
-                                    source={item.source}
-                                    time={item.time}
-                                    isNew={item.isNew}
-                                    health={item.health}
-                                    category={getCategory(item.category)}
-                                    isSelected={index === 0}
-                                />
+                                <SampleItemRow key={item.id} item={item} href="#patterns" isSelected={index === 0} />
                             ))}
                         </ul>
                     </div>
                 </div>
                 <div role="status" className="pointer-events-none absolute inset-x-4 bottom-4 flex justify-center *:pointer-events-auto">
                     {toast && (
-                        <Toast key={toast.message} onUndo={() => undo(toast.undo)} onDismiss={() => setToast(null)}>
+                        <Toast key={toast.message} onUndo={() => undo(toast.undo)} onDismiss={dismissToast}>
                             {toast.message}
                             <span className="sr-only"> Press Control or Command Z to undo.</span>
                         </Toast>
@@ -226,15 +192,56 @@ export function AppShellDemo() {
     );
 }
 
+// The sample library with one step of Undo: a toast after each edit, and Ctrl/⌘ + Z while it shows.
+function useUndoableLibrary() {
+    const [library, setLibrary] = useState(START_LIBRARY);
+    const [toast, setToast] = useState<DemoToast | null>(null);
+
+    function change(next: Library, message: string) {
+        setToast({ message, undo: library });
+        setLibrary(next);
+    }
+
+    function undo(previous: Library) {
+        setLibrary(previous);
+        setToast(null);
+    }
+
+    function dismissToast() {
+        setToast(null);
+    }
+
+    useEffect(() => {
+        // Outside text fields only, so Ctrl/⌘ + Z still undoes typing.
+        function undoOnShortcut(event: KeyboardEvent) {
+            const inField = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
+
+            if (toast && !inField && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
+                event.preventDefault();
+                undo(toast.undo);
+            }
+        }
+
+        window.addEventListener('keydown', undoOnShortcut);
+
+        return () => window.removeEventListener('keydown', undoOnShortcut);
+    }, [toast]);
+
+    return { library, toast, change, undo, dismissToast };
+}
+
 // This page for the first category, so the matcher marks it current; an anchor for the rest.
 function categoryHref(id: string): string {
     return id === FIRST_CATEGORY ? THIS_PAGE : `#${id}`;
 }
 
-function searchSamples(query: string, categoryHref: string | null): SearchResults {
+function searchSamples(query: string, scopeHref: string | null): SearchResults {
     const needle = query.toLowerCase();
-    const categoryId = categoryHref ? CATEGORY_BY_HREF.get(categoryHref) : undefined;
-    const inScope = (id: CategoryId) => !categoryHref || id === categoryId;
+    const scopeId = scopeHref ? CATEGORY_BY_HREF.get(scopeHref) : undefined;
+
+    function inScope(id: CategoryId) {
+        return !scopeHref || id === scopeId;
+    }
 
     return {
         articles: SAMPLE_ITEMS.filter((item) => inScope(item.category) && item.title.toLowerCase().includes(needle)).map((item) => ({
