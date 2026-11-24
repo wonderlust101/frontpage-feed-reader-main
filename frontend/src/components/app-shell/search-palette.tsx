@@ -4,9 +4,9 @@
 // palette (a native modal <dialog>) that both searches and navigates. Typing finds views and categories to jump to
 // ("Go to"), articles (when a `search` function is given) and sources (from `search`, or the plain `sources` list).
 // Before anything is typed it lists every view and category, so arrow keys and Enter work at once. It searches
-// everything, with the current category's sources first; once there is a query, a "Search in" select (its row's space
-// kept, so results never jump) narrows articles and sources to one category when the reader wants that. Locked views (a guest's account-only ones)
-// say so, with a lock. Reopening selects the last query, so typing replaces it. The query field is a combobox: arrow
+// everything, with the current category's sources first; once there is a query, a "Search in" select appears in the
+// query's own row (so the results never move) and narrows articles and sources to one category when the reader wants
+// that. Locked views (a guest's account-only ones) say so, with a lock. Reopening selects the last query, so typing replaces it. The query field is a combobox: arrow
 // keys move through the results, Enter opens one, Escape (or Cancel on touch) closes.
 
 import { useRouter, usePathname } from 'next/navigation';
@@ -193,6 +193,27 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             placeholder="Views, categories, sources"
                             className="palette-input h-16 min-w-0 flex-1 bg-transparent text-body placeholder:text-muted"
                         />
+                        {categories.length > 0 && trimmedQuery && (
+                            <span className="flex max-w-[45%] flex-none items-center gap-2">
+                                <label htmlFor={scopeId} className="text-meta font-semibold text-ink-2">
+                                    in
+                                </label>
+                                <select
+                                    id={scopeId}
+                                    aria-label="Search in"
+                                    value={scopeHref ?? ''}
+                                    onChange={(event) => setScopeHref(event.target.value || null)}
+                                    className="h-9 min-w-0 rounded-toggle border-[1.5px] border-control-edge bg-workspace px-2 text-meta font-semibold text-ink"
+                                >
+                                    <option value="">All categories</option>
+                                    {categories.map((category) => (
+                                        <option key={category.href} value={category.href}>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </span>
+                        )}
                         <kbd className="rounded-tag border border-edge px-1.5 font-sans text-meta font-semibold text-ink-2 pointer-coarse:hidden">Esc</kbd>
                         <button
                             type="button"
@@ -202,26 +223,6 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             Cancel
                         </button>
                     </div>
-                    {categories.length > 0 && (
-                        <div inert={!trimmedQuery} className={`flex items-center gap-2 border-b border-edge px-4 py-2 ${trimmedQuery ? '' : 'invisible'}`}>
-                            <label htmlFor={scopeId} className="text-meta font-semibold text-ink-2">
-                                Search in
-                            </label>
-                            <select
-                                id={scopeId}
-                                value={scopeHref ?? ''}
-                                onChange={(event) => setScopeHref(event.target.value || null)}
-                                className="h-9 rounded-toggle border-[1.5px] border-control-edge bg-workspace px-2 text-meta font-semibold text-ink"
-                            >
-                                <option value="">All categories</option>
-                                {categories.map((category) => (
-                                    <option key={category.href} value={category.href}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
                     <div className="min-h-0 flex-1 overflow-y-auto py-2 md:min-h-80">
                         {options.length > 0 ? (
                             <ul id={listId} role="listbox" aria-label="Results">
