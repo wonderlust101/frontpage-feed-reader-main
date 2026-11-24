@@ -8,56 +8,67 @@ Read the Next.js 16 docs in `node_modules/next/dist/docs/` before changing any o
 
 What the shell must do:
 
-- Frame `/guest` and `/user` with one header, one sidebar (a drawer below `lg`) and one sheet the page renders into.
-- Show where the reader is: the current entry is marked by more than colour (bold text, paper row, outlined marker, `aria-current="page"`).
-- Give the tools that work on every page: theme and contrast (the Aa menu), the account menu for readers, and the sign-up nudge for guests.
+- Frame `/guest` and `/user` sidebar first: a rail (views, account), a collapsible category panel, and the workspace with its toolbar (location, search, Aa) above the page's `<main>`. Below `lg`, the rail and panel move into a drawer.
+- Show where the reader is: the current entry is marked by more than colour (bold text, a field tint, a field bar, `aria-current="page"`), and the toolbar names it.
+- Keep three areas apart: navigation in the sidebar, global utilities (search, reader settings) in the toolbar, personal account management in the menu at the sidebar's foot.
 
 Non-functional:
 
-- **Accessible:** one `<main>`, a skip link, labelled navigation, keyboard-only use, the two-tone focus ring, no state by colour alone.
+- **Accessible:** one `<main>`, a skip link, labelled navigation, keyboard-only use (including Ctrl/Cmd + K and `[`), the two-tone focus ring, no state by colour alone.
 - **Fast for guests:** `/guest` reads nothing at request time, so it is prerendered and served as static HTML.
+- **No flash:** saved preferences (theme, contrast, reading settings, the collapsed sidebar) are on `<html>` before the first paint.
 - **Survives the API being down:** the shell still renders; only the account slot and the page show the failure.
-- **No dead controls:** a control appears in the live app only when what it does exists. Everything else is shown working on `/design-system` with sample data.
+- **No dead controls:** a control appears in the live app only when what it does exists; search that has nothing to search says so. Everything else is shown working on `/design-system` with sample data.
 
 ## How the parts fit
 
 ```mermaid
 graph TD
-    Root["app/layout.tsx<br/>fonts, saved theme and contrast"] --> Guest["app/guest/layout.tsx<br/>static"]
+    Root["app/layout.tsx<br/>fonts, early script from lib/saved-preferences"] --> Guest["app/guest/layout.tsx<br/>static"]
     Root --> User["app/user/layout.tsx<br/>noindex"]
-    Guest --> Shell1["AppShell<br/>header · sidebar or drawer · sheet"]
+    Guest --> Shell1["AppShell<br/>rail · panel · toolbar · main"]
     User --> Shell2["AppShell"]
-    Shell2 --> Slot["Account slot<br/>catchError → Suspense → currentUser()"]
+    Shell1 --> GuestMenu["account: GuestMenu"]
+    Shell2 --> Slot["account: catchError → Suspense → currentUser() → AccountMenu"]
     Shell1 --> GuestPage["app/guest/page.tsx"]
     Shell2 --> UserPage["app/user/page.tsx<br/>Suspense → requireUser('/user')"]
     Slot -. "React cache: one session read per request" .- UserPage
-    UserPage -. "API down" .-> UserError["app/user/error.tsx<br/>(inside the sheet)"]
+    UserPage -. "API down" .-> UserError["app/user/error.tsx<br/>(inside main)"]
 ```
 
 ## Files
 
 ```
+src/lib/
+  saved-preferences.ts             every saved preference (key, data attribute, values) + the early script built from them
+  html-preference.ts               client: createHtmlPreference(preference) → a shared hook for one preference
 src/components/app-shell/          feature-agnostic: plain data and ReactNode slots, never imports features/
   nav-entries.ts                   ShellView, ShellCategory, currentHref(), formatCount(): pure, unit tested
-  shell-nav.tsx                    client: <nav aria-label="Feeds">, current entry from usePathname
+  nav-row.tsx                      a panel/drawer row: field tint, field bar, count; FieldDot
+  shell-rail.tsx                   client: logo, view icons with tooltips, the panel toggle, the account slot
+  sidebar-toggle.tsx               client: collapses the panel (saved preference, the [ key); RailTooltip
+  shell-panel.tsx                  client: "All categories" and the categories; collapses by width
+  shell-toolbar.tsx                client: drawer button (below lg), location tag, search, utilities
+  search-palette.tsx               client: the Ctrl/Cmd + K command palette (native <dialog>, combobox)
+  search-match.ts                  matchParts(): marks query matches, pure, unit tested
+  shell-menu.tsx                   client: a button and a native popover panel (Aa, account, guest)
   shell-drawer.tsx                 client: menu button + native <dialog> holding ShellNav, below lg
-  shell-menu.tsx                   a button and a native popover panel (the Aa and account menus)
-  shell-header.tsx                 server: the ink bar with the Lemon stripe, logo, drawer slot, actions
-  app-shell.tsx                    server: skip link, grid, header, sidebar, <main id="main"> sheet
+  shell-nav.tsx                    client: the drawer's contents (logo, views, categories, account row)
+  app-shell.tsx                    server: skip link, rail + panel (lg up), toolbar, <main id="main">
 src/features/preferences/
-  html-preference.ts               createHtmlPreference + the one useTheme and useContrast
-  components/choice-control.tsx    the radio pills shared by ReadingControls and the Aa menu
-  components/appearance-menu.tsx   client: the Aa menu (theme, contrast)
+  reader-preferences.ts            client: one hook per reader setting and the options the Aa menu offers
+  components/choice-control.tsx    stacked radio pills (the reader settings, the design system's switches)
+  components/reader-settings.tsx   client: the Aa popover
 src/features/auth/
   require-user.ts                  currentUser() (no redirect) and requireUser() (redirects)
-  components/account-menu.tsx      name, email, Verify email, Change password, Sign out
-  components/account-boundary.tsx  client: catchError around the account slot, a Retry control
-  components/guest-card.tsx        the guest nudge in the sidebar foot
+  components/account-menu.tsx      avatar button and menu: name, email, Verify email, Change password, Sign out
+  components/guest-menu.tsx        "Guest" button and menu: what an account keeps, Create account, Sign in
+  components/account-boundary.tsx  client: catchError around the account slot, a "Try again" control
 src/app/guest/layout.tsx           AppShell for guests (static)
 src/app/user/layout.tsx            AppShell for readers; metadata robots noindex
 ```
 
-The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<div>`, not a `<main>`: the shell owns `<main id="main">`. The `/design-system` demo builds the same frame from `ShellHeader`, `ShellDrawer` and `ShellNav` (not `AppShell`, which would nest a second `<main>` and skip link in that page).
+The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<div>`, not a `<main>`: the shell owns `<main id="main">`. The `/design-system` demo builds the same frame from `ShellRail`, `ShellPanel`, `ShellToolbar` and `ShellDrawer` (not `AppShell`, which would nest a second `<main>` and skip link in that page), with sample categories and a sample `search` function.
 
 ## Decisions
 
@@ -66,61 +77,60 @@ The pages (`guest/page.tsx`, `user/page.tsx`) and `user/error.tsx` render a `<di
 - **Status:** Accepted
 - **Context:** `/guest` and `/user` share the shell but differ in what they read: the reader layout reads the session, the guest one reads nothing.
 - **Decision:** `app/guest/layout.tsx` and `app/user/layout.tsx`, each rendering `AppShell` with its own data and slots. No `(app)` route group.
-- **Alternatives:** an `(app)` group with one shared layout. It would have to know which mode it is in (from the path, a client concern) and would make `/guest` read the session too, losing its static render. A group without a shared layout only moves folders.
-- **Consequences:** a few lines are alike in the two layouts (the views list, `AppShell` props). `robots: { index: false }` lives in `user/layout.tsx`, so every `/user/*` page inherits it.
+- **Alternatives:** an `(app)` group with one shared layout, which would have to know its mode (from the path, a client concern) and would make `/guest` read the session too, losing its static render.
+- **Consequences:** a few lines are alike in the two layouts. `robots: { index: false }` lives in `user/layout.tsx`, so every `/user/*` page inherits it.
 
 ### ADR-002: The account slot has its own Suspense and error boundary, and never redirects
 
 - **Status:** Accepted
 - **Context:** `error.tsx` does not wrap the layout in its own segment, and with Cache Components any session read in a layout must sit in `<Suspense>`. A layout also doesn't know the current path, so a redirect from it would send `/user/saved` back with `next=/user`.
-- **Decision:** the reader layout renders `<AccountBoundary><Suspense fallback={…}><Account /></Suspense></AccountBoundary>`. `AccountBoundary` is `catchError` from `next/error` and shows a Retry control. `Account` calls `currentUser()`, which returns the user or null and throws when the API is down; it never redirects. The page keeps `requireUser('/user')`, which redirects with the right return path (a layout redirect would not protect the page's data anyway).
-- **Alternatives:** `requireUser` in the layout (wrong return path; an outage escapes to the root, which has no error boundary); a hand-written React error boundary class (`catchError` already handles `redirect()`, `notFound()` and clears on navigation).
-- **Consequences:** React `cache` in `require-user.ts` means the layout and the page share one session request. When the API is down, the header shows Retry and the page shows `user/error.tsx` inside the sheet; the shell stays usable.
+- **Decision:** the reader layout passes `<AccountBoundary><Suspense fallback={…}><Account /></Suspense></AccountBoundary>` as the shell's `account`. `AccountBoundary` is `catchError` from `next/error` and shows a "Try again" control. `Account` calls `currentUser()`, which returns the user or null and throws when the API is down; it never redirects. The page keeps `requireUser('/user')`.
+- **Alternatives:** `requireUser` in the layout (wrong return path; an outage escapes to the root, which has no error boundary); a hand-written error boundary class (`catchError` already handles `redirect()`, `notFound()` and clears on navigation).
+- **Consequences:** the shell renders `account` twice (the rail's foot and the drawer's), so the slot reads the session twice; React `cache` in `require-user.ts` makes that, and the page's read, one request.
 
 ### ADR-003: Shell components take plain data and slots
 
 - **Status:** Accepted
-- **Context:** `components/` must not import a feature (AGENTS.md). The shell needs feature pieces (account menu, Aa menu, guest card).
-- **Decision:** `AppShell` takes `homeHref`, `views` (plain objects), `actions` and `foot` (ReactNode). The layouts in `app/` are where features meet the shell.
+- **Context:** `components/` must not import a feature (AGENTS.md). The shell needs feature pieces (account and guest menus, the Aa popover).
+- **Decision:** `AppShell` takes `homeHref`, `views` and `categories` (plain objects), and `account` and `utilities` (ReactNode). The layouts in `app/` are where features meet the shell. `ShellToolbar` also takes an optional `search` function, which the demo passes and a future search feature will.
 - **Alternatives:** a `mode: 'guest' | 'reader'` prop with the shell choosing what to render, which would pull features into `components/`.
-- **Consequences:** the same parts power `/design-system`, with sample data and every planned control.
+- **Consequences:** the same parts power `/design-system`, with sample data. A server layout can't pass a function, so live search arrives through a client wrapper or a Server Action when the data exists.
 
 ### ADR-004: Native dialog and popover, no menu library
 
 - **Status:** Accepted
-- **Context:** the drawer needs a modal with focus kept inside; the Aa and account menus need a small panel that closes on Escape and outside clicks. No such component exists yet.
-- **Decision:** the drawer is a native `<dialog>` opened with `showModal()` (as `ConfirmDialog` does). It closes on a click on its backdrop or on any link inside it, so it also closes when the reader taps the page they are on. The menus use the `popover` attribute with `popoverTarget` (no JavaScript), placed under their button with CSS anchor positioning (`position-area`) and a fixed-position fallback. They are not `role="menu"`, because they hold ordinary links and buttons.
-- **Alternatives:** a headless UI library (a new dependency for two small panels); closing the drawer when the pathname changes (fails when the link is the current page).
-- **Consequences:** Escape, focus return and outside clicks come from the browser. Anchor positioning needs a fallback in browsers without it.
+- **Context:** the drawer and the palette need modals with focus kept inside; the Aa, account and guest menus need small panels that close on Escape and outside clicks.
+- **Decision:** the drawer and the palette are native `<dialog>`s opened with `showModal()`; the drawer closes on its backdrop or any link inside, the palette on its backdrop, Escape or a result. The menus use the `popover` attribute with `popoverTarget` (ids from `useId`, so a page can hold two), placed by CSS anchor positioning with a fixed-position fallback. They are named non-modal dialogs, not `role="menu"`, because they hold ordinary links, buttons and radios.
+- **Alternatives:** a headless UI library (a new dependency for a few small panels).
+- **Consequences:** Escape, focus return and outside clicks come from the browser. The palette's query field is a text field, not `type="search"`, so the first Escape closes it rather than clearing it.
 
-### ADR-005: One store each for theme and contrast
-
-- **Status:** Accepted
-- **Context:** `createHtmlPreference` makes a separate store each time it is called. The Aa menu and `ReadingControls` both control contrast; two stores would not update each other.
-- **Decision:** `html-preference.ts` exports `useTheme`, `useContrast` and their options; everything imports them. The storage keys are written once there (and mirrored in the root layout's early script).
-- **Consequences:** radio groups that control the same setting need different `name`s (`appearance-theme`, `appearance-contrast` in the Aa menu), or the browser treats them as one group.
-
-### ADR-006: Categories and navigation data come later
+### ADR-005: Saved preferences live in one list in lib/
 
 - **Status:** Accepted
-- **Context:** each category link needs a category page, and those are part of the feed work. Unread counts need items and read state, which don't exist yet.
-- **Decision:** the live sidebar shows only "All items". `ShellNav` already accepts categories and counts, and `/design-system` shows them. Collapsing the sidebar and the layout switch wait too (nothing to collapse, no page reads the layout).
-- **Consequences:** see "Later" below for what the category work must add.
+- **Context:** theme, contrast, five reading settings and the collapsed sidebar are all saved in localStorage and must be on `<html>` before the first paint. `createHtmlPreference` makes a separate store each time it is called, and the sidebar toggle (in `components/`) can't import from a feature.
+- **Decision:** `lib/saved-preferences.ts` lists every preference (storage key, data attribute, allowed values) and builds the root layout's early script from that list; `lib/html-preference.ts` turns one entry into a hook. Each hook is created once: the reader settings in `features/preferences/reader-preferences.ts`, the sidebar in `sidebar-toggle.tsx`. A preference stores only its non-default values ("auto" removes the attribute), and `styles/tokens.css` maps each value to its CSS variables.
+- **Alternatives:** keys repeated in the script and the hooks (they drift); continuous sliders saved as numbers (a second kind of preference, and heavier in a small popover).
+- **Consequences:** text size and line height are fixed steps. Radio groups that control a setting from two places need different `name`s (the Aa popover takes them from `useId`).
+
+### ADR-006: Categories, counts and search data come later
+
+- **Status:** Accepted
+- **Context:** each category link needs a category page, unread counts need items and read state, and search needs articles and sources; none exist yet.
+- **Decision:** the live sidebar shows the views and "All categories"; `ShellPanel`, `ShellNav` and the toolbar already take categories and counts, and `/design-system` shows them. The live palette has no `search` function and says "Nothing to search yet".
+- **Consequences:** see "Later" for what that work must add.
 
 ## Risks
 
-| Risk                                                                                                                                                      | What we do                                                                                                               |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `usePathname` suspends once a page with a dynamic segment (e.g. `/user/c/[id]`) without `generateStaticParams` sits under the layout, and the build fails | When the category pages land, wrap `ShellNav` in `<Suspense>` with the same nav (no marker) as the fallback              |
-| Browsers without CSS anchor positioning                                                                                                                   | `.shell-menu` falls back to a fixed position under the header                                                            |
-| The header overflowing at 320px                                                                                                                           | Below `sm`: the small logo, tighter padding, and the guest "Create account" link hidden (the drawer's guest card has it) |
-| The API down or slow (5-second timeout in `lib/api.ts`)                                                                                                   | The account slot shows Retry; the page shows `user/error.tsx`; the header and sidebar still work                         |
-| `proxy.ts` only checks that a cookie exists                                                                                                               | Unchanged: the page's `requireUser` checks the session and redirects; the layout never trusts the cookie alone           |
+| Risk                                                                                                                                                      | What we do                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `usePathname` suspends once a page with a dynamic segment (e.g. `/user/c/[id]`) without `generateStaticParams` sits under the layout, and the build fails | When the category pages land, wrap the rail, panel, toolbar and drawer nav in `<Suspense>` with the same markup (no current entry) as the fallback |
+| Browsers without CSS anchor positioning                                                                                                                   | `.menu-panel` falls back to a fixed spot near its button                                                                                           |
+| The toolbar at 320px                                                                                                                                      | Below md the search button is an icon and the tag stays short; checked at 320px                                                                    |
+| The API down or slow (5-second timeout in `lib/api.ts`)                                                                                                   | The account slot shows "Try again"; the page shows `user/error.tsx`; navigation still works                                                        |
+| The Tailwind Turbopack loader caches a failed CSS compile and doesn't watch `@import`ed files after a failure                                             | If a CSS error persists after the fix, touch `src/app/globals.css` to force a rebuild                                                              |
 
 ## Later (not built now)
 
-- **Navigation data:** a shared `NavigationResponse = { categories: { id: string; name: string; unread: number | null }[]; unreadTotal: number | null }` (`null` = not known yet, so the shell shows no count) and a `navigation` backend module with `GET /api/navigation` (reader, `requireAuth`) and a public guest endpoint.
-- **Guest categories:** the `starter_feeds` table is never seeded. The guest endpoint can import `backend/data/sample-feeds.json` directly (`resolveJsonModule` is on and the file ships with the Railway source), or a seed script can fill the table first.
-- **Caching:** the default `'use cache'` handler is in-memory per server instance. That is fine for guest navigation (`cacheLife('days')`); a reader's navigation is per person and stays uncached, inside `<Suspense>`.
-- **Collapse and layout:** the sidebar collapse (a `data-sidebar` attribute set by the root layout's early script, so it never flashes) and the layout switch (localStorage for guests, `user_preferences.layout` for readers) arrive with the pages that need them.
-- **Phones:** settled on the drawer.
+- **Navigation data:** a shared `NavigationResponse = { categories: { id: string; name: string; unread: number | null }[]; unreadTotal: number | null }` (`null` = not known yet) and a `navigation` backend module with `GET /api/navigation` (reader, `requireAuth`) and a public guest endpoint. The guest catalogue can import `backend/data/sample-feeds.json` directly; the `starter_feeds` table is never seeded.
+- **Search:** an endpoint over articles and sources, per reader, with a category filter; the palette's `search` becomes async when it lands.
+- **Caching:** the default `'use cache'` handler is in-memory per server instance, fine for guest navigation (`cacheLife('days')`); a reader's data is per person and stays uncached, inside `<Suspense>`.
