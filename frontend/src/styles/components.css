@@ -490,15 +490,16 @@
         }
     }
 
-    /* The current row's tint, mixed in OKLCH so pale fields stay clean: 30% over the panel in light mode, a gentler */
+    /* The current row's tint, mixed in OKLab: it blends toward the near-grey panel without OKLCH's hue interpolation, */
+    /* which swung Lilac through red on its way to the panel's warm hue. 30% over the panel in light mode, a gentler */
     /* 14% over the workspace tone in dark, where a stronger mix turns Lemon olive and Coral maroon. */
     /* A near-neutral field ("No color") would vanish as a light tint or bar, so in light mode a low-chroma field is */
     /* darkened first (--row-field-strong); colored fields have chroma above 0.05 and pass through unchanged. */
     .nav-current {
         --row-field-strong: oklch(from var(--row-field) calc(l - max(0, 0.05 - c) * 6) c h);
         background: light-dark(
-            color-mix(in oklch, var(--row-field-strong) 30%, var(--color-panel)),
-            color-mix(in oklch, var(--row-field) 14%, var(--color-workspace))
+            color-mix(in oklab, var(--row-field-strong) 30%, var(--color-panel)),
+            color-mix(in oklab, var(--row-field) 14%, var(--color-workspace))
         );
     }
 
