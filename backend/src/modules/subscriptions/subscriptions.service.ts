@@ -53,9 +53,8 @@ export async function listSubscriptions(db: Database, userId: string, now = new 
 export async function subscribe(db: Database, userId: string, input: SubscribeRequest, now = new Date()): Promise<Subscription> {
     const url = parseFeedUrl(input.url).href;
     const categoryId = input.categoryId ?? null;
-    if (categoryId) {
+    if (categoryId)
         await assertOwnCategory(db, userId, categoryId);
-    }
 
     // A feed the reader already follows is refused before anything is fetched.
     const [stored] = await db
@@ -63,9 +62,8 @@ export async function subscribe(db: Database, userId: string, input: SubscribeRe
         .from(feeds)
         .where(eq(feeds.url, url));
     const existingId = stored ? await findSubscriptionId(db, userId, stored.id) : undefined;
-    if (existingId) {
+    if (existingId)
         throw alreadySubscribedError(existingId);
-    }
 
     const isFresh = stored !== undefined && !stored.lastErrorCode && !!stored.lastSuccessAt && now.getTime() - stored.lastSuccessAt.getTime() < FRESH_FETCH_MS;
     const feedId = isFresh ? stored.id : (await ingestFeed(db, url, { now })).feedId;
@@ -75,9 +73,9 @@ export async function subscribe(db: Database, userId: string, input: SubscribeRe
         .values({ userId, feedId, categoryId })
         .onConflictDoNothing({ target: [subscriptions.userId, subscriptions.feedId] })
         .returning({ id: subscriptions.id });
-    if (!created) {
+    if (!created)
         throw alreadySubscribedError(await findSubscriptionId(db, userId, feedId));
-    }
+
     return findSubscription(db, userId, created.id, now);
 }
 
@@ -90,18 +88,17 @@ export async function updateSubscription(
     changes: UpdateSubscriptionRequest,
     now = new Date(),
 ): Promise<Subscription> {
-    if (changes.categoryId) {
+    if (changes.categoryId)
         await assertOwnCategory(db, userId, changes.categoryId);
-    }
 
     const [updated] = await db
         .update(subscriptions)
         .set(changes)
         .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)))
         .returning({ id: subscriptions.id });
-    if (!updated) {
+    if (!updated)
         throw new NotFoundError('not_found', 'Subscription not found');
-    }
+
     return findSubscription(db, userId, updated.id, now);
 }
 
@@ -113,9 +110,8 @@ export async function unsubscribe(db: Database, userId: string, id: string): Pro
             .delete(subscriptions)
             .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)))
             .returning({ feedId: subscriptions.feedId });
-        if (!deleted) {
+        if (!deleted)
             throw new NotFoundError('not_found', 'Subscription not found');
-        }
 
         const feedItemIds = tx.select({ id: items.id }).from(items).where(eq(items.feedId, deleted.feedId));
         await tx.delete(itemReadStates).where(and(eq(itemReadStates.userId, userId), inArray(itemReadStates.itemId, feedItemIds)));
@@ -165,8 +161,8 @@ function alreadySubscribedError(subscriptionId: string | undefined) {
 // One of the reader's subscriptions, read like the list; throws `not_found` (404) if it isn't theirs (or was just deleted).
 async function findSubscription(db: Database, userId: string, id: string, now: Date): Promise<Subscription> {
     const [row] = await selectSubscriptions(db).where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)));
-    if (!row) {
+    if (!row)
         throw new NotFoundError('not_found', 'Subscription not found');
-    }
+
     return toSubscription(row, now);
 }

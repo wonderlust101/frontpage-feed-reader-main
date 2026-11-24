@@ -233,9 +233,9 @@ describe('listSubscriptions', () => {
     test("derives each feed's health and reports the last error and last success", async () => {
         const reader = await newUser();
         const now = after(10 * DAY_MS);
-        for (const name of ['active', 'stale', 'error', 'dead']) {
+        for (const name of ['active', 'stale', 'error', 'dead'])
             await subscribe(testDb.db, reader, { url: serveFeed(`/${name}.xml`, name) }, T1);
-        }
+
         const update = (name: string, values: Partial<typeof feeds.$inferInsert>) =>
             testDb.db
                 .update(feeds)
@@ -259,9 +259,9 @@ describe('listSubscriptions', () => {
 
     test('costs one query however many subscriptions there are', async () => {
         const reader = await newUser();
-        for (const name of ['q1', 'q2', 'q3']) {
+        for (const name of ['q1', 'q2', 'q3'])
             await subscribe(testDb.db, reader, { url: serveFeed(`/${name}.xml`, name) }, T1);
-        }
+
         testDb.queries.length = 0;
 
         await listSubscriptions(testDb.db, reader, T1);

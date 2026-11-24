@@ -32,9 +32,9 @@ describe('sanitizeFeedHtml', () => {
             '<figure><img src="https://cdn.example/a.png" alt="A"><figcaption>Cap</figcaption></figure>' +
             '<table><tr><td>cell</td></tr></table>';
         const out = sanitizeFeedHtml(html, BASE);
-        for (const tag of ['<h2>', '<em>', '<strong>', '<ul>', '<li>', '<blockquote>', '<figcaption>', '<td>']) {
+        for (const tag of ['<h2>', '<em>', '<strong>', '<ul>', '<li>', '<blockquote>', '<figcaption>', '<td>'])
             expect(out).toContain(tag);
-        }
+
         expect(out).toContain('<code class="language-ts">');
         expect(out).toContain('alt="A"');
     });

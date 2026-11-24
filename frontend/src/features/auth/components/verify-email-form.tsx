@@ -84,9 +84,8 @@ export function VerifyEmailForm() {
         [],
     );
 
-    if (!mounted || isPending) {
+    if (!mounted || isPending)
         return <FormSkeleton fields={1} />;
-    }
 
     const codeSentTo = changingEmail ? null : (sentTo ?? storedEmail);
 
@@ -118,9 +117,8 @@ function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
     } = useForm<EmailValues>({ resolver: zodResolver(emailSchema), defaultValues: { email: defaultEmail }, reValidateMode: 'onChange' });
 
     useEffect(() => {
-        if (focusEmail) {
+        if (focusEmail)
             setFocus('email', { shouldSelect: true });
-        }
     }, [focusEmail, setFocus]);
 
     async function sendCode({ email }: EmailValues) {
@@ -180,9 +178,9 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
     }, [setFocus]);
 
     useEffect(() => {
-        if (cooldown === 0) {
+        if (cooldown === 0)
             return;
-        }
+
         const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
         return () => clearTimeout(timer);
     }, [cooldown]);
@@ -244,9 +242,8 @@ function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
                     onChange: (event: { target: { value: string }; nativeEvent?: { inputType?: string } }) => {
                         const digits = event.target.value.replace(/\s/g, '');
                         const typed = event.nativeEvent?.inputType?.startsWith('insertText') || event.nativeEvent?.inputType?.startsWith('delete');
-                        if (!typed && digits.length === CODE_LENGTH && /^\d+$/.test(digits) && !isSubmitting) {
+                        if (!typed && digits.length === CODE_LENGTH && /^\d+$/.test(digits) && !isSubmitting)
                             void handleSubmit(verify)();
-                        }
                     },
                 })}
                 aria-describedby={[errors.code ? 'code-error' : null, descriptionId].filter(Boolean).join(' ') || undefined}

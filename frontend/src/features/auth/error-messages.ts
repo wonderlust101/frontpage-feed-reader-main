@@ -33,19 +33,19 @@ const FALLBACK = 'Something went wrong on our end. Try again in a moment.';
 // down, a known code, else a generic retry. A request with no answer only blames the connection when the browser says
 // it is offline; otherwise the server is down or unreachable, and the reader shouldn't go checking their wifi.
 export function authErrorMessage(failure: AuthFailure): string {
-    if (failure.status === 0) {
+    if (failure.status === 0)
         return failure.offline ? OFFLINE : UNREACHABLE;
-    }
+
     if (failure.status === 429) {
         const seconds = failure.retryAfterSeconds;
-        if (!seconds) {
+        if (!seconds)
             return TOO_MANY_REQUESTS;
-        }
+
         const wait = seconds === 1 ? '1 second' : `${seconds} seconds`;
         return `Too many tries in a row. Try again in ${wait}.`;
     }
-    if (failure.status >= 500) {
+    if (failure.status >= 500)
         return UNAVAILABLE;
-    }
+
     return (failure.code && MESSAGES[failure.code]) || FALLBACK;
 }

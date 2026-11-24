@@ -29,9 +29,8 @@ export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: Cat
 
     useEffect(() => {
         // Shows the current name when it changes elsewhere (an Undo), leaving the field alone while it is being edited.
-        if (nameRef.current && document.activeElement !== nameRef.current) {
+        if (nameRef.current && document.activeElement !== nameRef.current)
             nameRef.current.value = category.name;
-        }
     }, [category.name]);
 
     // Applies the new name, or shows why not.

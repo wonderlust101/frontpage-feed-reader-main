@@ -207,8 +207,8 @@ function panel(headline: string, line: string, guestLink: boolean, wide: WideDec
 // Returns the CSS colour for a field, e.g. field('coral') → 'var(--color-field-coral)', from the shared field list.
 function field(id: Exclude<FieldId, 'none'>): string {
     const match = FIELDS.find((candidate) => candidate.id === id);
-    if (!match) {
+    if (!match)
         throw new Error(`Unknown field: ${id}`);
-    }
+
     return match.color;
 }

@@ -114,16 +114,14 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
     for (let i = 0; i < max; i++) {
         lastKeptItem = closingTag.exec(xml);
 
-        if (!lastKeptItem) {
+        if (!lastKeptItem)
             return { xml, limited: false };
-        }
     }
 
     const keptXml = xml.slice(0, closingTag.lastIndex);
     const hasMoreItems = /<(item|entry)[\s>]/i.test(xml.slice(closingTag.lastIndex));
-    if (!lastKeptItem || !hasMoreItems) {
+    if (!lastKeptItem || !hasMoreItems)
         return { xml, limited: false };
-    }
 
     const isAtom = lastKeptItem[1]!.toLowerCase() === 'entry';
     const closingRootTag = isAtom ? '</feed>' : isRdf(xml) ? '</rdf:RDF>' : '</channel></rss>';
@@ -132,12 +130,11 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
 
 // Throws `not_a_feed` for an empty response or a normal web page, before spending time on parsing.
 function rejectNonFeeds(xml: string) {
-    if (!xml.trim()) {
+    if (!xml.trim())
         throw new UnprocessableEntityError('not_a_feed', 'The response was empty');
-    }
-    if (looksLikeHtmlPage(xml)) {
+
+    if (looksLikeHtmlPage(xml))
         throw new UnprocessableEntityError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
-    }
 }
 
 // Runs the feed parser; throws `not_a_feed` for XML that isn't RSS or Atom, and `parse_error` for anything else it can't read.
@@ -145,9 +142,9 @@ function parseXml(xml: string): ParsedFeed {
     try {
         return parseFeed(xml);
     } catch (err) {
-        if ((err as { code?: string })?.code === 'INVALID_FEED') {
+        if ((err as { code?: string })?.code === 'INVALID_FEED')
             throw new UnprocessableEntityError('not_a_feed', 'No RSS or Atom feed was found at this URL');
-        }
+
         throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${(err as Error)?.message ?? err}`);
     }
 }
@@ -172,9 +169,9 @@ function collectItems(rawItems: ParsedItem[], ctx: ItemContext): CollectedItems 
         }
 
         seenIds.add(item.id);
-        if (!item.publishedAt) {
+        if (!item.publishedAt)
             collected.missingDates++;
-        }
+
         collected.items.push(item);
     }
 
@@ -183,15 +180,15 @@ function collectItems(rawItems: ParsedItem[], ctx: ItemContext): CollectedItems 
 
 // Sort order for items: newest first; undated items go last and keep their feed order (the sort is stable).
 function byNewestFirst(a: NormalizedItem, b: NormalizedItem): number {
-    if (a.publishedAt && b.publishedAt) {
+    if (a.publishedAt && b.publishedAt)
         return b.publishedAt.localeCompare(a.publishedAt);
-    }
-    if (a.publishedAt) {
+
+    if (a.publishedAt)
         return -1;
-    }
-    if (b.publishedAt) {
+
+    if (b.publishedAt)
         return 1;
-    }
+
     return 0;
 }
 
@@ -199,24 +196,23 @@ function byNewestFirst(a: NormalizedItem, b: NormalizedItem): number {
 function buildWarnings(found: FeedProblems): string[] {
     const warnings: string[] = [];
 
-    if (found.itemLimitHit) {
+    if (found.itemLimitHit)
         warnings.push(`The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`);
-    }
-    if (found.missingDates) {
+
+    if (found.missingDates)
         warnings.push(`${found.missingDates} item(s) have no usable date`);
-    }
-    if (found.duplicates) {
+
+    if (found.duplicates)
         warnings.push(`${found.duplicates} duplicate item(s) were removed`);
-    }
-    if (found.dropped) {
+
+    if (found.dropped)
         warnings.push(`${found.dropped} item(s) could not be read and were skipped`);
-    }
-    if (found.noItems) {
+
+    if (found.noItems)
         warnings.push('The feed has no items');
-    }
-    if (found.truncated) {
+
+    if (found.truncated)
         warnings.push('The feed XML is malformed; it was parsed partially');
-    }
 
     return warnings;
 }
@@ -229,13 +225,11 @@ function looksLikeHtmlPage(xml: string): boolean {
 
 // Which feed standard the document uses: 'atom', 'rss1' (the older RDF-based RSS 1.0) or 'rss2'.
 function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
-    if (feed.meta.type === 'atom') {
+    if (feed.meta.type === 'atom')
         return 'atom';
-    }
 
-    if (feed.meta.version?.startsWith('1') || isRdf(xml)) {
+    if (feed.meta.version?.startsWith('1') || isRdf(xml))
         return 'rss1';
-    }
 
     return 'rss2';
 }
@@ -287,9 +281,8 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
 // The feed's own id for an item (guid, else link) when it's short enough; otherwise a stable hash of it,
 // or, for items with neither, a hash of `fallbackKey` (title, date and position).
 function itemId(ownId: string | null | undefined, fallbackKey: string): string {
-    if (!ownId) {
+    if (!ownId)
         return hashedId(fallbackKey);
-    }
 
     return ownId.length <= ID_MAX ? ownId : hashedId(ownId);
 }
@@ -303,9 +296,8 @@ function joinAuthors(names: string[]): string | null {
 function firstDate(candidates: Array<string | Date | null | undefined>, now: number): string | null {
     for (const c of candidates) {
         const iso = c instanceof Date ? parseFeedDate(c.toISOString(), now) : parseFeedDate(c, now);
-        if (iso) {
+        if (iso)
             return iso;
-        }
     }
 
     return null;
@@ -316,9 +308,8 @@ function rawText(item: ParsedItem, tags: string[]): string[] {
     const out: string[] = [];
 
     for (const tag of tags) {
-        for (const el of item.element.findElementsWithName(tag)) {
+        for (const el of item.element.findElementsWithName(tag))
             out.push(el.textContent);
-        }
     }
 
     return out;

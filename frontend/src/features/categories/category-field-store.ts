@@ -51,9 +51,9 @@ function readChoices(): FieldChoices {
     } catch {
         // Storage can be unavailable in private windows; fall back to this visit's choices.
     }
-    if (raw !== cached.raw) {
+    if (raw !== cached.raw)
         cached = { raw, choices: parseChoices(raw) };
-    }
+
     return cached.choices;
 }
 
@@ -61,9 +61,9 @@ function readChoices(): FieldChoices {
 function parseChoices(raw: string | null): FieldChoices {
     try {
         const parsed: unknown = raw ? JSON.parse(raw) : {};
-        if (!parsed || typeof parsed !== 'object') {
+        if (!parsed || typeof parsed !== 'object')
             return NO_CHOICES;
-        }
+
         return Object.fromEntries(
             Object.entries(parsed).filter((entry): entry is [string, FieldId] => typeof entry[1] === 'string' && categoryFieldById(entry[1]) !== undefined),
         );

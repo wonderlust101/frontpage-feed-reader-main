@@ -22,9 +22,9 @@ async function expectError(promise: Promise<unknown>, code: HttpError['code'], r
     );
     expect(err).toBeInstanceOf(HttpError);
     expect((err as HttpError).code).toBe(code);
-    if (retryable !== undefined) {
+    if (retryable !== undefined)
         expect((err as HttpError).retryable).toBe(retryable);
-    }
+
     return err as HttpError;
 }
 
@@ -32,9 +32,9 @@ describe('fetchFeed', () => {
     test('returns the body, content type and final URL', async () => {
         const res = await fetchFeed(`${upstream.url}/feed.xml`, opts);
         expect(res.notModified).toBe(false);
-        if (res.notModified) {
+        if (res.notModified)
             return;
-        }
+
         expect(new TextDecoder().decode(res.bytes)).toContain('<rss');
         expect(res.contentType).toContain('application/rss+xml');
         expect(res.finalUrl).toBe(`${upstream.url}/feed.xml`);
@@ -109,9 +109,9 @@ describe('fetchFeed', () => {
 
     test.each(['/gzip', '/deflate', '/brotli'])('decompresses %s responses', async (path) => {
         const res = await fetchFeed(`${upstream.url}${path}`, opts);
-        if (res.notModified) {
+        if (res.notModified)
             throw new Error('unexpected 304');
-        }
+
         expect(new TextDecoder().decode(res.bytes)).toStartWith('<?xml');
         expect(upstream.lastHeaders[path]?.get('accept-encoding')).toContain('gzip');
     });

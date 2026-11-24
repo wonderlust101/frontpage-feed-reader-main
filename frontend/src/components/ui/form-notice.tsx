@@ -42,9 +42,8 @@ export function FormNotice({ tone = 'neutral', icon, lead, children, action, tak
         : { role: tone === 'error' ? 'alert' : 'status' };
 
     useEffect(() => {
-        if (takesFocus) {
+        if (takesFocus)
             noticeRef.current?.focus();
-        }
     }, [takesFocus]);
 
     return (

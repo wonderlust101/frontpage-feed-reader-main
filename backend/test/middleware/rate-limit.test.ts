@@ -59,17 +59,17 @@ describe('perUserRateLimit', () => {
     });
 
     test("one user's limit doesn't affect another", async () => {
-        for (let i = 0; i < LIMIT; i++) {
+        for (let i = 0; i < LIMIT; i++)
             await hit('alan');
-        }
+
         expect((await hit('alan')).status).toBe(429);
         expect((await hit('barbara')).status).toBe(204);
     });
 
     test('allows requests again once the window has passed', async () => {
-        for (let i = 0; i < LIMIT; i++) {
+        for (let i = 0; i < LIMIT; i++)
             await hit('linus');
-        }
+
         expect((await hit('linus')).status).toBe(429);
 
         await Bun.sleep(WINDOW_MS + 100);

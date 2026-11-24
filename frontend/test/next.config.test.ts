@@ -10,9 +10,9 @@ import nextConfig, { securityHeaders, vercelDeployment } from '../next.config';
 async function readPolicy(): Promise<Record<string, string>> {
     const rules = (await nextConfig.headers?.()) ?? [];
     const policy = rules.find((rule) => rule.source === '/:path*')?.headers.find((header) => header.key === 'Content-Security-Policy');
-    if (!policy) {
+    if (!policy)
         throw new Error('No Content-Security-Policy header on /:path*');
-    }
+
     return Object.fromEntries(
         policy.value.split('; ').map((directive) => {
             const [name = '', ...sources] = directive.split(' ');

@@ -91,9 +91,9 @@ export function AuthPanelText({ headline, line }: PanelText) {
 // Renders the page-switch link: the one a form set (useAuthFrameLinks; nothing when it hid it), else the page's `target`.
 export function AuthSwitchLink({ target }: { target: SwitchLinkTarget }) {
     const links = use(FrameLinksContext);
-    if (links?.switchLink === null) {
+    if (links?.switchLink === null)
         return null;
-    }
+
     const link = links?.switchLink ?? target;
 
     return (
@@ -109,9 +109,8 @@ export function AuthSwitchLink({ target }: { target: SwitchLinkTarget }) {
 // Renders the "Just looking? Read as a guest" footer when the page offers it (`show`) and no form has hidden it.
 export function AuthGuestLink({ show }: { show: boolean }) {
     const links = use(FrameLinksContext);
-    if (!(links?.guestLink ?? show)) {
+    if (!(links?.guestLink ?? show))
         return null;
-    }
 
     return (
         <div className="mt-8 border-t border-rule-soft pt-5 text-ink-2 lg:mt-10">
@@ -135,9 +134,9 @@ export function useAuthHeading(heading: Heading | null) {
     const panelLine = heading?.panel?.line;
 
     useEffect(() => {
-        if (!setStep || title === undefined || description === undefined) {
+        if (!setStep || title === undefined || description === undefined)
             return;
-        }
+
         const panel = panelHeadline !== undefined && panelLine !== undefined ? { headline: panelHeadline, line: panelLine } : undefined;
         setStep({ title, description, panel });
         return () => setStep(null);
@@ -162,9 +161,9 @@ export function useAuthFrameLinks(links: FrameLinks | null) {
     const guestLink = links?.guestLink;
 
     useEffect(() => {
-        if (!setLinks || !active || guestLink === undefined) {
+        if (!setLinks || !active || guestLink === undefined)
             return;
-        }
+
         const switchLink = hidesSwitch || label === undefined || href === undefined ? null : { prompt, label, href, onClick };
         setLinks({ switchLink, guestLink });
         return () => setLinks(null);

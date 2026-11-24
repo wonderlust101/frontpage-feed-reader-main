@@ -79,14 +79,14 @@ export function securityHeaders(isDevelopment: boolean): { key: string; value: s
 // Returns which deployment a build is for, from Vercel's VERCEL_ENV: unset (not on Vercel) or "development" (vercel
 // dev) is local. Throws on a value Vercel doesn't document, rather than guessing.
 export function vercelDeployment(vercelEnv: string | undefined): DeploymentName {
-    if (!vercelEnv || vercelEnv === 'development') {
+    if (!vercelEnv || vercelEnv === 'development')
         return 'local';
-    }
-    if (vercelEnv === 'production') {
+
+    if (vercelEnv === 'production')
         return 'production';
-    }
-    if (vercelEnv === 'preview') {
+
+    if (vercelEnv === 'preview')
         return 'staging';
-    }
+
     throw new Error(`Unknown VERCEL_ENV "${vercelEnv}": add it to vercelDeployment in next.config.ts`);
 }

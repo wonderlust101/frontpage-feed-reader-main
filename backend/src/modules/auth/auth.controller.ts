@@ -10,9 +10,8 @@ const betterAuthHandler = auth ? toNodeHandler(auth) : null;
 
 // ALL /api/auth/*: answered by Better Auth; throws `database_unavailable` (503) when the API runs without a database.
 export async function authController(req: Request, res: Response) {
-    if (!betterAuthHandler) {
+    if (!betterAuthHandler)
         throw new ServiceUnavailableError('database_unavailable', 'Accounts are unavailable: the API has no database');
-    }
 
     await betterAuthHandler(req, res);
 }

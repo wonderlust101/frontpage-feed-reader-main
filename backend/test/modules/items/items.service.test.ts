@@ -119,9 +119,9 @@ async function listAll(userId: string, overrides: Partial<ItemListQuery> = {}): 
     for (let page = 0; page < 100; page++) {
         const result = await listItems(testDb.db, userId, query({ ...overrides, cursor }), NOW);
         all.push(...result.items);
-        if (!result.nextCursor) {
+        if (!result.nextCursor)
             return all;
-        }
+
         cursor = decodeCursor(result.nextCursor);
     }
     throw new Error('listAll: more than 100 pages');
@@ -187,9 +187,8 @@ describe('listItems: scopes', () => {
             { kind: 'category', categoryId: null },
             { kind: 'feed', feedId: quietFeed },
             { kind: 'all' },
-        ] as const) {
+        ] as const)
             expect(await listItems(testDb.db, reader, query({ scope }), NOW)).toEqual({ items: [], nextCursor: null });
-        }
     });
 });
 
@@ -310,14 +309,13 @@ describe('listItems: order and paging', () => {
     test('newest and oldest across three interleaved feeds, two per page, give the full order with no repeats', async () => {
         const reader = await newUser();
         const feedIds = [await newFeed('A'), await newFeed('B'), await newFeed('C')];
-        for (const feedId of feedIds) {
+        for (const feedId of feedIds)
             await follow(reader, feedId);
-        }
+
         // Item i is published at minute i, round-robin across the feeds (the first is dated differently from when it was seen).
         const created: string[] = [];
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 7; i++)
             created.push(await newItem(feedIds[i % 3]!, minutes(100 + i), { publishedAt: minutes(i) }));
-        }
 
         expect(idsOf(await listAll(reader, { limit: 2 }))).toEqual([...created].reverse());
         expect(idsOf(await listAll(reader, { limit: 2, order: 'oldest' }))).toEqual(created);
@@ -327,9 +325,8 @@ describe('listItems: order and paging', () => {
         const reader = await newUser();
         const feed = await newFeed('Feed');
         await follow(reader, feed);
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 4; i++)
             await newItem(feed, minutes(i));
-        }
 
         const first = await listItems(testDb.db, reader, query({ limit: 2 }), NOW);
         const second = await listItems(testDb.db, reader, query({ limit: 2, cursor: decodeCursor(first.nextCursor!) }), NOW);
@@ -346,9 +343,8 @@ describe('listItems: order and paging', () => {
         for (let feedNumber = 0; feedNumber < 3; feedNumber++) {
             const feed = await newFeed(`Feed ${feedNumber}`);
             await follow(reader, feed);
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 5; i++)
                 created.push(await newItem(feed, minutes(feedNumber * 5 + i)));
-            }
         }
 
         expect(idsOf(await listAll(reader, { limit: 1 }))).toEqual([...created].reverse());
@@ -514,13 +510,13 @@ describe('countItems', () => {
         await follow(ada, looseFeed);
         await follow(grace, looseFeed);
         const cutItems = [];
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 8; i++)
             cutItems.push(await newItem(cutFeed, minutes(i)));
-        }
+
         const markedItems = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 5; i++)
             markedItems.push(await newItem(markedFeed, minutes(i)));
-        }
+
         const looseItems = [await newItem(looseFeed, minutes(1)), await newItem(looseFeed, minutes(2))];
         await mark(ada, cutItems[1]!, false);
         await mark(ada, cutItems[7]!, true);

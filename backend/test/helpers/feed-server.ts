@@ -21,18 +21,18 @@ export function startFeedServer() {
             hits[pathname] = (hits[pathname] ?? 0) + 1;
             lastHeaders[pathname] = req.headers;
             const override = served.get(pathname);
-            if (override) {
+            if (override)
                 return new Response(override.body, override.init);
-            }
+
             const xml = { 'Content-Type': 'application/rss+xml; charset=utf-8' };
 
             switch (pathname) {
                 case '/feed.xml':
                     return new Response(rss, { headers: xml });
                 case '/cached.xml':
-                    if (req.headers.get('if-none-match') === ETAG) {
+                    if (req.headers.get('if-none-match') === ETAG)
                         return new Response(null, { status: 304 });
-                    }
+
                     return new Response(rss, { headers: { ...xml, ETag: ETAG, 'Last-Modified': LAST_MODIFIED } });
                 case '/latin1.xml':
                     return new Response(latin1, { headers: { 'Content-Type': 'text/xml; charset=ISO-8859-1' } });

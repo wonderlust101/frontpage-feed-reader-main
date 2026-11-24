@@ -106,9 +106,9 @@ describe('foreign keys', () => {
 
         await testDb.db.delete(users).where(eq(users.id, user));
 
-        for (const table of [categories, subscriptions, itemReadStates, bookmarks, userPreferences]) {
+        for (const table of [categories, subscriptions, itemReadStates, bookmarks, userPreferences])
             expect(await testDb.db.select().from(table).where(eq(table.userId, user))).toEqual([]);
-        }
+
         expect(await testDb.db.select().from(items).where(eq(items.id, item.id))).toHaveLength(1);
     });
 

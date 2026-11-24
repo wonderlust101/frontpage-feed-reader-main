@@ -40,9 +40,9 @@ export const env = {
 // Returns the committed settings for the Railway environment `name` ("production" or "staging"), the local ones when
 // not on Railway (no name), or undefined for a Railway environment the map doesn't know (e.g. a PR environment).
 export function deploymentDefaults(name: string | undefined): Deployment | undefined {
-    if (!name) {
+    if (!name)
         return DEPLOYMENTS.local;
-    }
+
     return name === 'production' || name === 'staging' ? DEPLOYMENTS[name] : undefined;
 }
 

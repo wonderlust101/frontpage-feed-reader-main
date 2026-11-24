@@ -23,9 +23,9 @@ for (const feed of feeds) {
     const file = `${slug}.xml`;
     try {
         const res = await fetchFeed(feed.feedUrl, { timeoutMs: 20_000, userAgent: env.FEED_USER_AGENT });
-        if (res.notModified) {
+        if (res.notModified)
             throw new Error('unexpected 304');
-        }
+
         let bytes = res.bytes;
         if (bytes.byteLength > MAX_BYTES) {
             // Node's latin1 maps bytes 1:1 (TextDecoder's "latin1" doesn't), so trimming can't corrupt characters.

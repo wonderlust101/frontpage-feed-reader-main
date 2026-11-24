@@ -12,9 +12,9 @@ function rejection(call: () => unknown): HttpError {
     try {
         call();
     } catch (err) {
-        if (err instanceof HttpError) {
+        if (err instanceof HttpError)
             return err;
-        }
+
         throw err;
     }
     throw new Error('expected the call to throw');

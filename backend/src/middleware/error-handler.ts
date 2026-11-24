@@ -8,9 +8,8 @@ import { HttpError } from './errors';
 // Unexpected errors (bugs) are logged and answered with a generic 500 that hides the details.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     const error = toHttpError(err);
-    if (error.code === 'internal_error') {
+    if (error.code === 'internal_error')
         console.error(err);
-    }
 
     const body: ApiErrorResponse = {
         error: {
@@ -26,9 +25,8 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
 
 // Any thrown value as an HttpError: ours pass through, Express's own 4xx (e.g. bad JSON) keep their status, anything else becomes a 500.
 function toHttpError(err: unknown): HttpError {
-    if (err instanceof HttpError) {
+    if (err instanceof HttpError)
         return err;
-    }
 
     const expressError = err as { status?: number; type?: string; message?: string } | undefined;
     const status = expressError?.status ?? 500;

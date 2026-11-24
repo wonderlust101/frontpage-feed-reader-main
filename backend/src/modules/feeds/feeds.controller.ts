@@ -17,12 +17,12 @@ export async function fetchFeedController(req: Request, res: Response) {
     });
 
     // Pass on the feed's ETag / Last-Modified so the client can ask "has it changed?" next time.
-    if (result.cache.etag) {
+    if (result.cache.etag)
         res.set('ETag', result.cache.etag);
-    }
-    if (result.cache.lastModified) {
+
+    if (result.cache.lastModified)
         res.set('Last-Modified', result.cache.lastModified);
-    }
+
     res.set('Cache-Control', CACHE_CONTROL);
 
     // When those headers match the request's If-None-Match / If-Modified-Since, Express turns this into a bodiless 304 itself (req.fresh).

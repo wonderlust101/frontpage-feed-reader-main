@@ -16,9 +16,9 @@ const readSession = cache(async (): Promise<SessionResponse> => getSession((awai
 // Returns the signed-in user, or redirects to /sign-in?next=<returnTo> when there is no valid session (redirect throws).
 export async function requireUser(returnTo: string): Promise<SessionUser> {
     const user = await currentUser();
-    if (!user) {
+    if (!user)
         redirect(`/sign-in?next=${encodeURIComponent(returnTo)}`);
-    }
+
     return user;
 }
 

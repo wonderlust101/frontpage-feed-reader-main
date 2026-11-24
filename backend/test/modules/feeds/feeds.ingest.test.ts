@@ -452,9 +452,8 @@ describe('odd feeds', () => {
     test('scripts and event handlers never reach the database', async () => {
         const { stored } = await ingestFixture('odd/xss.xml');
 
-        for (const item of stored.values()) {
+        for (const item of stored.values())
             expect(item.contentHtml).not.toMatch(/<script|\son\w+=/i);
-        }
     });
 
     test('a truncated feed is stored with a warning', async () => {

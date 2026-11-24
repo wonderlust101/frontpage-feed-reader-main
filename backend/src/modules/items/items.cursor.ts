@@ -19,9 +19,8 @@ export function encodeCursor(cursor: ItemCursor): string {
 // The cursor inside `value`, or null when it isn't one encodeCursor made: too long, wrong shape, unknown order, an impossible
 // time (Feb 30, 24:00) or a bad id.
 export function decodeCursor(value: string): ItemCursor | null {
-    if (value.length > MAX_CURSOR_LENGTH) {
+    if (value.length > MAX_CURSOR_LENGTH)
         return null;
-    }
 
     const parts = Buffer.from(value, 'base64url').toString('utf8').split(SEPARATOR);
     const [order, sortAt = '', id] = parts;
@@ -30,8 +29,8 @@ export function decodeCursor(value: string): ItemCursor | null {
     const date = new Date(millisecondTime);
     const isRealTime = SORT_AT_PATTERN.test(sortAt) && !Number.isNaN(date.getTime()) && date.toISOString() === millisecondTime;
 
-    if (parts.length !== 3 || (order !== 'newest' && order !== 'oldest') || !isRealTime || !isUuid(id)) {
+    if (parts.length !== 3 || (order !== 'newest' && order !== 'oldest') || !isRealTime || !isUuid(id))
         return null;
-    }
+
     return { order, sortAt, id };
 }

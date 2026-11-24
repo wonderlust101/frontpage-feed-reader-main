@@ -66,9 +66,8 @@ async function ResetPanelText({ searchParams }: ResetPageProps) {
 async function ResetFromUrl({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
 
-    if (token) {
+    if (token)
         return <ResetPasswordForm token={token} />;
-    }
 
     return (
         <div className="flex flex-col gap-4">

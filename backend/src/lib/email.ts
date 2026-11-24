@@ -45,9 +45,8 @@ export async function sendEmail(email: Email, config: EmailConfig): Promise<'sen
         signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
     });
 
-    if (!res.ok) {
+    if (!res.ok)
         throw new Error(`Resend answered ${res.status}: ${await res.text()}`);
-    }
 
     return 'sent';
 }
@@ -72,16 +71,15 @@ async function sendToMailpit(email: Email, mailpitUrl: string, from: string | un
         signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
     });
 
-    if (!res.ok) {
+    if (!res.ok)
         throw new Error(`Mailpit answered ${res.status}: ${await res.text()}`);
-    }
 }
 
 // The bare address from EMAIL_FROM ("Frontpage <hi@example.com>" → "hi@example.com"), or a local fallback when it's unset.
 function senderAddress(from: string | undefined) {
-    if (!from) {
+    if (!from)
         return MAILPIT_FALLBACK_FROM;
-    }
+
     // The part between < and >, when the value has a display name.
     return from.match(/<([^>]+)>/)?.[1] ?? from;
 }

@@ -45,15 +45,13 @@ export function ForgotPasswordForm() {
 
     useEffect(() => {
         const email = readSignInEmail() ?? knownEmail;
-        if (email && !getValues('email')) {
+        if (email && !getValues('email'))
             setValue('email', email);
-        }
     }, [knownEmail, getValues, setValue]);
 
     useEffect(() => {
-        if (returning && !sentTo) {
+        if (returning && !sentTo)
             setFocus('email', { shouldSelect: true });
-        }
     }, [returning, sentTo, setFocus]);
 
     async function requestLink({ email }: EmailValues) {

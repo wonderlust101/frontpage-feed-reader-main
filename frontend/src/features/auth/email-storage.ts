@@ -62,13 +62,13 @@ export function readSignInEmail(): string | null {
 // Parses a saved `{ email, savedAt }` value; returns the address, or null when it is missing, malformed or older than `maxAgeMs`.
 // Throws on invalid JSON (tryStorage turns that into null).
 function readFreshEmail(saved: string | null, maxAgeMs: number): string | null {
-    if (!saved) {
+    if (!saved)
         return null;
-    }
+
     const parsed: unknown = JSON.parse(saved);
-    if (typeof parsed !== 'object' || parsed === null || !('email' in parsed) || !('savedAt' in parsed)) {
+    if (typeof parsed !== 'object' || parsed === null || !('email' in parsed) || !('savedAt' in parsed))
         return null;
-    }
+
     const { email, savedAt } = parsed;
     const fresh = typeof savedAt === 'number' && Date.now() - savedAt < maxAgeMs;
     return fresh && typeof email === 'string' ? email : null;

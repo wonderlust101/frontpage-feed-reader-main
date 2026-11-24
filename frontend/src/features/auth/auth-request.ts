@@ -32,9 +32,9 @@ export async function authRequest<T>(call: (fetchOptions: ErrorHook) => Promise<
 
     try {
         const result = await call(fetchOptions);
-        if (result.error) {
+        if (result.error)
             return { data: null, failure: { code: result.error.code, status: result.error.status, retryAfterSeconds } };
-        }
+
         return { data: result.data, failure: null };
     } catch {
         return { data: null, failure: { status: 0, offline: typeof navigator !== 'undefined' && navigator.onLine === false } };

@@ -131,12 +131,12 @@ describe('broken and odd feeds', () => {
     test('RFC 822 / ISO variants are normalized; anything else becomes null', () => {
         const feed = load('odd/weird-dates.xml');
         const byKey = Object.fromEntries(feed.items.map((i) => [i.url!.split('/').pop(), i.publishedAt]));
-        for (const key of ['rfc822', 'named-tz', 'no-seconds', 'no-dayname', 'wrong-dayname', 'two-digit-year', 'iso-no-zone', 'iso-offset', 'full-month']) {
+        for (const key of ['rfc822', 'named-tz', 'no-seconds', 'no-dayname', 'wrong-dayname', 'two-digit-year', 'iso-no-zone', 'iso-offset', 'full-month'])
             expect(byKey[key]).toBe('2024-10-02T15:00:00.000Z');
-        }
-        for (const key of ['month-first', 'garbage', 'impossible']) {
+
+        for (const key of ['month-first', 'garbage', 'impossible'])
             expect(byKey[key]).toBeNull();
-        }
+
         expect(feed.items.slice(-3).map((i) => i.title)).toEqual(['Date month-first', 'Date garbage', 'Date impossible']);
         expect(feed.warnings).toContain('3 item(s) have no usable date');
     });

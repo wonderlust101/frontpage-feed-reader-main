@@ -21,8 +21,7 @@ export function categoryColor(id: string, preset: string): string {
 // Sets every chosen color on <html>, for a change made in this tab or another one.
 export function applyCategoryFields(choices: FieldChoices) {
     for (const [id, fieldId] of Object.entries(choices)) {
-        if (new RegExp(SAFE_ID).test(id)) {
+        if (new RegExp(SAFE_ID).test(id))
             document.documentElement.style.setProperty(`--category-${id}`, `var(--color-field-${fieldId})`);
-        }
     }
 }

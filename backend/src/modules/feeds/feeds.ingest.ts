@@ -55,9 +55,9 @@ export async function ingestFeed(db: Database, url: string, opts: IngestOptions 
             throw new BadGatewayError('http_5xx', 'The feed server answered 304 to a request without validators', { upstreamStatus: 304 });
         }
     } catch (err) {
-        if (stored && err instanceof HttpError) {
+        if (stored && err instanceof HttpError)
             await recordFailure(db, stored.id, err, now);
-        }
+
         throw err;
     }
 
@@ -93,14 +93,12 @@ async function recordFailure(db: Database, feedId: string, err: HttpError, now: 
 // Applies a permanent redirect: renames the stored feed to the new URL, or merges it into the feed already stored there.
 // Returns the URL to store the result under. Temporary redirects change nothing.
 async function resolveTarget(tx: Transaction, stored: StoredFeed | null, key: string, redirect: FeedRedirect | null): Promise<Target> {
-    if (!redirect?.permanent) {
+    if (!redirect?.permanent)
         return { url: key, movedFrom: null, mergedFeedId: null };
-    }
 
     // A new feed is simply stored under the new URL; upsertFeed reuses the row if one is already there.
-    if (!stored) {
+    if (!stored)
         return { url: redirect.to, movedFrom: null, mergedFeedId: null };
-    }
 
     const [existing] = await tx.select({ id: feeds.id }).from(feeds).where(eq(feeds.url, redirect.to));
     if (existing) {
@@ -196,9 +194,8 @@ async function upsertFeed(tx: Transaction, url: string, feed: NormalizedFeed, va
 // Writes the new and edited items of one fetch in a single statement, skipping those whose stored hash already matches,
 // then refreshes the feed's latest_item_at. Items missing from the fetch are kept. Returns how many were inserted, updated or unchanged.
 async function writeItems(tx: Transaction, feedId: string, fetched: NormalizedItem[], now: Date): Promise<ItemCounts> {
-    if (fetched.length === 0) {
+    if (fetched.length === 0)
         return { inserted: 0, updated: 0, unchanged: 0 };
-    }
 
     const stored = await tx
         .select({ guid: items.guid, contentHash: items.contentHash })
@@ -219,13 +216,12 @@ async function writeItems(tx: Transaction, feedId: string, fetched: NormalizedIt
     for (const item of fetched) {
         const contentHash = itemHash(item);
         const storedHash = storedHashes.get(item.id);
-        if (storedHash === contentHash) {
+        if (storedHash === contentHash)
             continue;
-        }
 
-        if (storedHash === undefined) {
+        if (storedHash === undefined)
             inserted++;
-        }
+
         rows.push({
             feedId,
             guid: item.id,

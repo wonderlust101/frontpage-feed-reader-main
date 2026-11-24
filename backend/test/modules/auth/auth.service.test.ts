@@ -139,9 +139,9 @@ describe('production cookies and rate limits', () => {
     test('each reader (X-Real-IP) gets their own sign-in limit', async () => {
         const prodAuth = createInProduction();
         const statuses = [];
-        for (let i = 0; i < 4; i += 1) {
+        for (let i = 0; i < 4; i += 1)
             statuses.push((await prodAuth.handler(signInRequest('ada@example.com', '203.0.113.10'))).status);
-        }
+
         expect(statuses).toEqual([401, 401, 401, 429]);
         expect((await prodAuth.handler(signInRequest('ada@example.com', '203.0.113.11'))).status).toBe(401);
     });
@@ -265,9 +265,9 @@ describe('email verification by code', () => {
     test('after 3 wrong codes even the right one fails with TOO_MANY_ATTEMPTS', async () => {
         await signUp('guesser@example.com');
         const otp = codeFor('guesser@example.com')!;
-        for (let attempt = 0; attempt < 3; attempt++) {
+        for (let attempt = 0; attempt < 3; attempt++)
             await expect(auth.api.verifyEmailOTP({ body: { email: 'guesser@example.com', otp: wrongCode(otp) } })).rejects.toThrow();
-        }
+
         await expect(auth.api.verifyEmailOTP({ body: { email: 'guesser@example.com', otp } })).rejects.toMatchObject({ body: { code: 'TOO_MANY_ATTEMPTS' } });
     });
 

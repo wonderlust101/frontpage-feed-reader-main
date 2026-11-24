@@ -41,9 +41,8 @@ export const auth = db ? createAuth(db) : null;
 
 // The signed-in user and session for these request headers (from the session cookie), or null when not signed in or without a database.
 export async function getSession(headers: IncomingHttpHeaders) {
-    if (!auth) {
+    if (!auth)
         return null;
-    }
 
     return auth.api.getSession({ headers: fromNodeHeaders(headers) });
 }
@@ -64,9 +63,9 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
         );
     }
     // The secret signs session cookies: a missing or short one would let someone forge a sign-in.
-    if (env.NODE_ENV === 'production' && (env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH) {
+    if (env.NODE_ENV === 'production' && (env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH)
         throw new Error(`AUTH_SECRET is required in production and must be at least ${MIN_SECRET_LENGTH} characters`);
-    }
+
     // Without it the cookie belongs to the API's host only, and the site's pages would never see anyone signed in.
     if (env.NODE_ENV === 'production' && !env.AUTH_COOKIE_DOMAIN) {
         throw new Error(

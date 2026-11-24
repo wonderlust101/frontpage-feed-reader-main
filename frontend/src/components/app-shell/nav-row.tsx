@@ -42,9 +42,9 @@ export function NavRow({ href, label, lead, color, isCurrent, count, menu }: Nav
         </Link>
     );
 
-    if (!menu) {
+    if (!menu)
         return link;
-    }
+
     return (
         <div className="group/row relative">
             {link}

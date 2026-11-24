@@ -99,9 +99,9 @@ const FORCED_ATTRIBUTES: Record<string, sanitize.Attributes> = {
 
 // Makes feed HTML safe to render: keeps semantic tags, removes scripts, styles, event handlers and unsafe URLs, and makes links absolute.
 export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: string): string {
-    if (!html) {
+    if (!html)
         return '';
-    }
+
     return sanitize(html, {
         allowedTags: ALLOWED_TAGS,
         allowedAttributes: {
@@ -136,9 +136,8 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
 
 // Turns HTML into plain text: removes tags and script/style contents, decodes entities like &amp;, collapses spaces, and cuts to `max`.
 export function htmlToText(html: string | null | undefined, max?: number): string {
-    if (!html) {
+    if (!html)
         return '';
-    }
 
     // Block-level boundaries become spaces so "<p>a</p><p>b</p>" reads "a b", not "ab".
     const spaced = html.replace(/<(?:br|hr)\b[^>]*>|<\/(?:p|div|li|h[1-6]|blockquote|tr|td|th|dd|dt|pre|figure)>/gi, '$& ');
@@ -162,9 +161,8 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
 
 // Shortens text to at most `max` characters at a word boundary, adding "…", without splitting an emoji in half.
 export function truncate(text: string, max: number): string {
-    if (text.length <= max) {
+    if (text.length <= max)
         return text;
-    }
 
     // Emoji and other astral characters are two UTF-16 units; don't keep only the first half.
     const cut = text.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '');

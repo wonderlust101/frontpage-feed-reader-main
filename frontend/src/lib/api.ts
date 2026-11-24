@@ -10,9 +10,9 @@ const API_URL = process.env.API_URL;
 export async function getHealth(): Promise<HealthResponse | null> {
     try {
         const res = await fetch(`${API_URL}/api/health`, { signal: AbortSignal.timeout(5000) });
-        if (!res.ok) {
+        if (!res.ok)
             return null;
-        }
+
         return (await res.json()) as HealthResponse;
     } catch {
         return null;
@@ -24,18 +24,18 @@ export async function getHealth(): Promise<HealthResponse | null> {
 // seconds, or a server error), so the page shows its error boundary instead of treating the reader as signed out.
 // Never cached: with Cache Components, fetch is uncached by default, and the answer is per person anyway.
 export async function getSession(cookieHeader: string): Promise<SessionResponse> {
-    if (!cookieHeader) {
+    if (!cookieHeader)
         return null;
-    }
+
     const res = await fetch(`${API_URL}/api/auth/get-session`, {
         headers: { cookie: cookieHeader },
         signal: AbortSignal.timeout(5000),
     });
-    if (res.status === 401) {
+    if (res.status === 401)
         return null;
-    }
-    if (!res.ok) {
+
+    if (!res.ok)
         throw new Error(`Session check failed with status ${res.status}`);
-    }
+
     return (await res.json()) as SessionResponse;
 }

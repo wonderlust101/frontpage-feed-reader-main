@@ -19,21 +19,19 @@ export async function getFeed(input: string | undefined, clientValidators: Valid
     const validators = hasValidators(clientValidators) ? clientValidators : (cached?.validators ?? {});
 
     const result = await fetchUpstream(url, validators);
-    if (!result.notModified) {
+    if (!result.notModified)
         return answerFresh(url, result);
-    }
 
     const entry = cached ?? recall(result.finalUrl);
-    if (entry) {
+    if (entry)
         return answerNotModified(result, entry);
-    }
 
     // Upstream says the client's copy is current, but we have no copy to answer with: ask again without validators.
     // (If we sent none, asking again can't help: the 304 we already have stands.)
     const full = hasValidators(validators) ? await fetchUpstream(url, {}) : result;
-    if (full.notModified) {
+    if (full.notModified)
         throw new BadGatewayError('http_5xx', 'The feed server answered 304 without a cached copy', { upstreamStatus: 304 });
-    }
+
     return answerFresh(url, full);
 }
 
@@ -89,9 +87,9 @@ const cache = new Map<string, CacheEntry>();
 function recall(key: string): CacheEntry | undefined {
     const entry = cache.get(key);
 
-    if (entry) {
+    if (entry)
         remember(key, entry);
-    }
+
     return entry;
 }
 
@@ -100,7 +98,6 @@ function remember(key: string, entry: CacheEntry) {
     cache.delete(key);
     cache.set(key, entry);
 
-    if (cache.size > CACHE_LIMIT) {
+    if (cache.size > CACHE_LIMIT)
         cache.delete(cache.keys().next().value!);
-    }
 }

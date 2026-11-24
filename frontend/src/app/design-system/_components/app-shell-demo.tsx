@@ -146,12 +146,12 @@ export function AppShellDemo() {
                         change(updateCategory(library, category.id, { fieldId }), `${category.name} is now ${categoryFieldById(fieldId)?.name}.`)
                     }
                     onRename={(name) => {
-                        if (name.trim() === '') {
+                        if (name.trim() === '')
                             return 'Give it a name.';
-                        }
-                        if (isNameTaken(library, name, category.id)) {
+
+                        if (isNameTaken(library, name, category.id))
                             return `You already have a category called ${name.trim()}.`;
-                        }
+
                         change(updateCategory(library, category.id, { name: name.trim() }), `Renamed ${category.name} to ${name.trim()}.`);
                         return undefined;
                     }}

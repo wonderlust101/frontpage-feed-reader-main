@@ -25,9 +25,9 @@ export function HeroChoiceProvider({ children }: { children: ReactNode }) {
 // Reads the choice; only valid inside HeroChoiceProvider.
 export function useHeroChoice() {
     const context = useContext(HeroChoiceContext);
-    if (!context) {
+    if (!context)
         throw new Error('useHeroChoice must be used inside HeroChoiceProvider');
-    }
+
     return context;
 }
 

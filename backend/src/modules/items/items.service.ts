@@ -65,9 +65,8 @@ const SUMMARY_COLUMNS = {
 // Throws `feed_not_found` or `category_not_found` (404) when the page is empty because the feed or category isn't the reader's.
 export async function listItems(db: Database, userId: string, query: ItemListQuery, now = new Date()): Promise<ItemListResponse> {
     const rows = await selectPage(db, userId, query);
-    if (rows.length === 0) {
+    if (rows.length === 0)
         await assertScopeBelongsToReader(db, userId, query.scope);
-    }
 
     // selectPage reads one row more than a page: if it came back, there is a next page, starting after the page's last item.
     const lastShown = rows.length > query.limit ? rows[query.limit - 1] : undefined;
@@ -123,9 +122,8 @@ export async function getItem(db: Database, userId: string, id: string, now = ne
         .innerJoin(feeds, eq(feeds.id, items.feedId))
         .leftJoin(itemReadStates, and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId)))
         .where(eq(items.id, id));
-    if (!row) {
+    if (!row)
         throw new NotFoundError('not_found', 'Item not found');
-    }
 
     return { ...toItemSummary(row, now), contentHtml: row.contentHtml, updatedAt: row.updatedAt?.toISOString() ?? null };
 }
@@ -195,17 +193,15 @@ async function assertScopeBelongsToReader(db: Database, userId: string, scope: I
         await assertOwnCategory(db, userId, scope.categoryId);
         return;
     }
-    if (scope.kind !== 'feed') {
+    if (scope.kind !== 'feed')
         return;
-    }
 
     const [subscription] = await db
         .select({ id: subscriptions.id })
         .from(subscriptions)
         .where(and(eq(subscriptions.userId, userId), eq(subscriptions.feedId, scope.feedId)));
-    if (!subscription) {
+    if (!subscription)
         throw new NotFoundError('feed_not_found', 'Feed not found');
-    }
 }
 
 // A list or item row as the API sends it: the feed under the reader's title for it, with its icon and health at `now`; ISO dates.

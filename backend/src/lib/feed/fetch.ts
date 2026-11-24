@@ -79,9 +79,8 @@ let loopbackAgents: Agents | undefined;
 // Turns a user-typed feed URL into a URL (adding "https://" if needed); throws `invalid_url` if it's empty, invalid, not http(s) or has a password.
 export function parseFeedUrl(input: string | undefined | null): URL {
     const raw = input?.trim();
-    if (!raw) {
+    if (!raw)
         throw new BadRequestError('invalid_url', 'A feed URL is required');
-    }
 
     let url: URL;
     try {
@@ -90,12 +89,11 @@ export function parseFeedUrl(input: string | undefined | null): URL {
         throw new BadRequestError('invalid_url', `Not a valid URL: ${raw}`);
     }
 
-    if (!WEB_PROTOCOLS.has(url.protocol)) {
+    if (!WEB_PROTOCOLS.has(url.protocol))
         throw new BadRequestError('invalid_url', 'Only http and https URLs are supported');
-    }
-    if (url.username || url.password) {
+
+    if (url.username || url.password)
         throw new BadRequestError('invalid_url', 'URLs with credentials are not allowed');
-    }
 
     url.hash = '';
     return url;
@@ -166,9 +164,8 @@ async function followRedirects(startUrl: URL, ctx: RequestContext, maxRedirects:
         }
 
         res.destroy();
-        if (hops === maxRedirects) {
+        if (hops === maxRedirects)
             throw new BadGatewayError('network', 'Too many redirects', { retryable: false });
-        }
 
         url = nextRedirectUrl(res, url);
         allPermanent &&= PERMANENT_REDIRECT_STATUSES.has(status);
@@ -196,12 +193,11 @@ function requestHeaders(userAgent: string, validators: Partial<FeedCacheValidato
         'Accept-Encoding': ACCEPT_ENCODING,
     };
 
-    if (validators.etag) {
+    if (validators.etag)
         headers['If-None-Match'] = validators.etag;
-    }
-    if (validators.lastModified) {
+
+    if (validators.lastModified)
         headers['If-Modified-Since'] = validators.lastModified;
-    }
 
     return headers;
 }
@@ -225,17 +221,15 @@ function header(res: IncomingMessage, name: string): string | null {
 // Where a redirect response points, checked like the first URL: throws if the Location is missing, not http(s) or has a password.
 function nextRedirectUrl(res: IncomingMessage, currentUrl: URL): URL {
     const location = header(res, 'location');
-    if (!location) {
+    if (!location)
         throw new BadGatewayError('network', `Redirect (${res.statusCode}) without a Location header`);
-    }
 
     const next = new URL(location, currentUrl);
-    if (!WEB_PROTOCOLS.has(next.protocol)) {
+    if (!WEB_PROTOCOLS.has(next.protocol))
         throw new BadRequestError('blocked_url', 'Redirected to an unsupported protocol');
-    }
-    if (next.username || next.password) {
+
+    if (next.username || next.password)
         throw new BadRequestError('blocked_url', 'Redirected to a URL with credentials');
-    }
 
     next.hash = '';
     return next;
@@ -278,22 +272,18 @@ function decompress(res: IncomingMessage): Readable {
 
 // Turns any error from a fetch into an HttpError: blocked address, timeout, unknown host, or another network failure.
 function toFetchError(err: unknown, url: URL, ctx: RequestContext): HttpError {
-    if (err instanceof HttpError) {
+    if (err instanceof HttpError)
         return err;
-    }
 
     // request-filtering-agent refuses private addresses with a plain Error, recognisable only by its message.
-    if (err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message)) {
+    if (err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message))
         return new BadRequestError('blocked_url', 'That host is not allowed');
-    }
 
-    if (ctx.signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError'))) {
+    if (ctx.signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')))
         return new GatewayTimeoutError('timeout', `The feed took longer than ${ctx.timeoutMs / 1000}s to respond`);
-    }
 
-    if ((err as NodeJS.ErrnoException)?.code === 'ENOTFOUND') {
+    if ((err as NodeJS.ErrnoException)?.code === 'ENOTFOUND')
         return new BadGatewayError('network', `Could not resolve host ${url.hostname}`, { retryable: false });
-    }
 
     return new BadGatewayError('network', `Could not reach the feed: ${(err as Error)?.message ?? 'unknown error'}`);
 }

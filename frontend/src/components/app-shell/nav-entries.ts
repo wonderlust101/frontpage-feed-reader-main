@@ -41,8 +41,8 @@ export function shellPlace(pathname: string, homeHref: string, viewHrefs: readon
 
 // Returns the text for an unread count: null when there is none (null, undefined or 0), "99+" above 99, else the number.
 export function formatCount(count: number | null | undefined): string | null {
-    if (!count) {
+    if (!count)
         return null;
-    }
+
     return count > MAX_SHOWN_COUNT ? `${MAX_SHOWN_COUNT}+` : String(count);
 }

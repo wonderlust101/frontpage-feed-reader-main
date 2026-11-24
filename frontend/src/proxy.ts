@@ -14,9 +14,9 @@ export const config = {
 
 // Redirects to /sign-in?next=<this page> when the request has no Better Auth session cookie; otherwise lets it through.
 export function proxy(request: NextRequest) {
-    if (getSessionCookie(request, { cookiePrefix: COOKIE_PREFIX })) {
+    if (getSessionCookie(request, { cookiePrefix: COOKIE_PREFIX }))
         return NextResponse.next();
-    }
+
     const signIn = new URL('/sign-in', request.url);
     signIn.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signIn);

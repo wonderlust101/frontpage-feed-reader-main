@@ -136,9 +136,9 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
 
     // Moves through the results with the arrow keys (wrapping at either end) and opens the active one on Enter.
     function moveOrOpen(event: KeyboardEvent<HTMLInputElement>) {
-        if (options.length === 0) {
+        if (options.length === 0)
             return;
-        }
+
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
             const step = event.key === 'ArrowDown' ? 1 : -1;
@@ -257,9 +257,9 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
     // Renders one titled group of options, numbered from `offset` in the whole list so ids and the active row line up.
     // The visible label is for sighted readers; the group's aria-label names it for screen readers.
     function renderGroup({ label, options: groupOptions }: ResultGroup, offset: number) {
-        if (groupOptions.length === 0) {
+        if (groupOptions.length === 0)
             return null;
-        }
+
         return (
             <li key={label} role="presentation">
                 <p aria-hidden="true" className="px-4 pt-2 pb-1 text-meta font-semibold text-muted">

@@ -47,8 +47,7 @@ describe('/api/subscriptions signed out', () => {
     });
 
     test('a signed-out subscribe never reaches the feed server or the rate limiter', async () => {
-        for (let i = 0; i < 35; i++) {
+        for (let i = 0; i < 35; i++)
             expect((await send('POST', '', { url: 'https://a.test/feed' })).status).toBe(401);
-        }
     });
 });

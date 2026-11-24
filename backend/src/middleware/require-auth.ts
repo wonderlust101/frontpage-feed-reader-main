@@ -9,9 +9,8 @@ import { UnauthorizedError } from './errors';
 export const requireAuth: RequestHandler = async (req, res, next) => {
     const session = await getSession(req.headers);
 
-    if (!session) {
+    if (!session)
         throw new UnauthorizedError('unauthorized', 'Sign in to continue');
-    }
 
     res.locals.auth = session;
     next();
@@ -21,9 +20,8 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
 export function currentUser(res: Response): AuthUser {
     const user = res.locals.auth?.user;
 
-    if (!user) {
+    if (!user)
         throw new Error('currentUser() needs requireAuth on this route');
-    }
 
     return user;
 }

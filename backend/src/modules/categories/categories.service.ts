@@ -12,7 +12,6 @@ export async function assertOwnCategory(db: Database, userId: string, categoryId
         .select({ id: categories.id })
         .from(categories)
         .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)));
-    if (!category) {
+    if (!category)
         throw new NotFoundError('category_not_found', 'Category not found');
-    }
 }
