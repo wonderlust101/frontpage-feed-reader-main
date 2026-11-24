@@ -42,7 +42,7 @@ export function AccountMenu({ user }: AccountMenuProps) {
                         <span className="block truncate text-meta text-muted">{user.email}</span>
                     </span>
                     <span className="sr-only in-data-[account=row]:hidden">Account menu for {user.name}</span>
-                    <span className="in-data-[account=row]:hidden">
+                    <span className="contents in-data-[account=row]:hidden">
                         <RailTooltip>{user.name} · Account</RailTooltip>
                     </span>
                     <span className="sr-only hidden in-data-[account=row]:block">, account menu</span>

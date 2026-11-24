@@ -29,7 +29,7 @@ export function GuestMenu() {
                         <span className="block text-meta text-muted">Create account · Sign in</span>
                     </span>
                     <span className="sr-only in-data-[account=row]:hidden">Guest menu</span>
-                    <span className="in-data-[account=row]:hidden">
+                    <span className="contents in-data-[account=row]:hidden">
                         <RailTooltip>Guest · Create account or sign in</RailTooltip>
                     </span>
                     <span className="sr-only hidden in-data-[account=row]:block">, guest menu</span>
