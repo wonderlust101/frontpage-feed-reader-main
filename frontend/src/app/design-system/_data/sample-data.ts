@@ -1,7 +1,7 @@
 // Item titles are illustrative. READER_CATEGORIES adds categories a reader might make, two still on "No color".
 
-import type { FeedHealth } from '@/components/ui/health-mark';
-import { NO_FIELD, categoryFieldById, type Field, type FieldChoices } from '@/features/categories/fields';
+import type { HealthMarkState } from '@/components/ui/health-mark';
+import { NO_FIELD, fieldOrNone, type Field, type FieldChoices } from '@/features/categories/fields';
 import { GUEST_CATEGORIES, type GuestCategoryId } from '@/features/categories/guest-categories';
 
 export type CategoryId = GuestCategoryId;
@@ -20,7 +20,7 @@ export type SampleItem = {
     category: CategoryId;
     time: string;
     isNew: boolean;
-    health: FeedHealth;
+    health: HealthMarkState;
 };
 
 export const CATEGORY_PRESETS: FieldChoices = Object.fromEntries(GUEST_CATEGORIES.map((category) => [category.id, category.preset]));
@@ -28,14 +28,14 @@ export const CATEGORY_PRESETS: FieldChoices = Object.fromEntries(GUEST_CATEGORIE
 export const CATEGORIES: Category[] = GUEST_CATEGORIES.map(({ preset, sources, ...category }) => ({
     ...category,
     sources: [...sources],
-    field: categoryFieldById(preset) ?? NO_FIELD,
+    field: fieldOrNone(preset),
 }));
 
 export const READER_CATEGORIES: { name: string; field: Field }[] = [
     ...CATEGORIES.map((category) => ({ name: category.name, field: category.field })),
     { name: 'World news', field: NO_FIELD },
-    { name: 'Film & TV', field: categoryFieldById('rose') ?? NO_FIELD },
-    { name: 'Football', field: categoryFieldById('leaf') ?? NO_FIELD },
+    { name: 'Film & TV', field: fieldOrNone('rose') },
+    { name: 'Football', field: fieldOrNone('leaf') },
     { name: 'Cooking', field: NO_FIELD },
 ];
 

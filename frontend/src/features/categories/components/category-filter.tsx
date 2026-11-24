@@ -1,5 +1,5 @@
 import { Capsule } from '@/components/ui/capsule';
-import type { Field } from '@/features/categories/fields';
+import type { Field } from '../fields';
 
 type FilterCategory = {
     id: string;

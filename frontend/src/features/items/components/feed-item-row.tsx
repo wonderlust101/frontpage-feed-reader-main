@@ -1,8 +1,9 @@
 // Renders an <li>; the caller provides the <ul>. The title link stretches over the whole row, so the row is the
 // target and shows focus.
 
-import { HealthMark, type FeedHealth } from '@/components/ui/health-mark';
+import { HealthMark, type HealthMarkState } from '@/components/ui/health-mark';
 import { CategoryTag, NewTag } from '@/components/ui/tags';
+import type { ItemCategory } from '../types';
 
 type FeedItemRowProps = {
     title: string;
@@ -10,8 +11,8 @@ type FeedItemRowProps = {
     source: string;
     time: string;
     isNew: boolean;
-    health: FeedHealth;
-    category: { name: string; field: { color: string } };
+    health: HealthMarkState;
+    category: ItemCategory;
     isSelected?: boolean;
 };
 

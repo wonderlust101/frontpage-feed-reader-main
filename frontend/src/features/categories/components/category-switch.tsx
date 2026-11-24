@@ -4,7 +4,7 @@
 
 import { useRef, type KeyboardEvent } from 'react';
 import { Capsule } from '@/components/ui/capsule';
-import type { Field } from '@/features/categories/fields';
+import type { Field } from '../fields';
 
 type SwitchOption = {
     id: string;
@@ -20,17 +20,15 @@ type CategorySwitchProps = {
     className?: string;
 };
 
-const NEXT_KEYS = ['ArrowRight', 'ArrowDown'];
-
-const PREVIOUS_KEYS = ['ArrowLeft', 'ArrowUp'];
+const ARROW_STEPS: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
 
 export function CategorySwitch({ options, value, onChange, label, className = '' }: CategorySwitchProps) {
     const groupRef = useRef<HTMLDivElement>(null);
 
     function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-        const step = NEXT_KEYS.includes(event.key) ? 1 : PREVIOUS_KEYS.includes(event.key) ? -1 : 0;
+        const step = ARROW_STEPS[event.key];
 
-        if (step === 0)
+        if (!step)
             return;
 
         event.preventDefault();

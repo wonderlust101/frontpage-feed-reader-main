@@ -8,7 +8,7 @@ import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entrie
 import type { SearchSource } from '@/components/app-shell/search-results';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { categoryColor } from '@/features/categories/category-field-vars';
-import { NO_FIELD, categoryFieldById } from '@/features/categories/fields';
+import { fieldOrNone } from '@/features/categories/fields';
 import { GUEST_CATEGORIES } from '@/features/categories/guest-categories';
 import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
 
@@ -24,7 +24,7 @@ export function GuestShell({ views, sources, account, children }: GuestShellProp
     const categories = GUEST_CATEGORIES.map((category) => ({
         href: `/guest/c/${category.id}`,
         name: category.name,
-        color: categoryColor(category.id, (categoryFieldById(category.preset) ?? NO_FIELD).color),
+        color: categoryColor(category.id, fieldOrNone(category.preset).color),
     })) satisfies ShellCategory[];
 
     function colorMenu(shellCategory: ShellCategory) {

@@ -2,8 +2,8 @@
 // and set the CSS properties on <html> that the shell paints from.
 
 import 'client-only';
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import { applyCategoryFields, CATEGORY_FIELDS_KEY as STORAGE_KEY } from './category-field-vars';
+import { useMemo, useSyncExternalStore } from 'react';
+import { applyCategoryFields, CATEGORY_FIELDS_KEY } from './category-field-vars';
 import { assignFields, categoryFieldById, type Field, type FieldChoices, type FieldId } from './fields';
 
 const NO_CHOICES: FieldChoices = {};
@@ -17,17 +17,18 @@ let cached: { raw: string | null; choices: FieldChoices } = { raw: null, choices
 // `presets` are fields categories start with before the reader chooses; without one a category has "No color".
 export function useCategoryFields(categoryIds: string[], presets?: FieldChoices): [Record<string, Field>, (id: string, fieldId: FieldId) => void] {
     const choices = useSyncExternalStore(subscribe, readChoices, () => NO_CHOICES);
+
+    // Callers often pass a new array on every render; a joined key keeps the memo stable while the ids are the same.
     const idsKey = categoryIds.join('\n');
     const fields = useMemo(() => assignFields(idsKey.split('\n'), choices, presets), [idsKey, choices, presets]);
-    const choose = useCallback((id: string, fieldId: FieldId) => storeChoice(id, fieldId), []);
 
-    return [fields, choose];
+    return [fields, storeChoice];
 }
 
 function subscribe(listener: () => void) {
     listeners.add(listener);
     const onStorage = (event: StorageEvent) => {
-        if (event.key === STORAGE_KEY) {
+        if (event.key === CATEGORY_FIELDS_KEY) {
             applyCategoryFields(readChoices());
             listener();
         }
@@ -46,8 +47,9 @@ function readChoices(): FieldChoices {
     let raw = memoryRaw;
 
     try {
-        raw = localStorage.getItem(STORAGE_KEY);
+        raw = localStorage.getItem(CATEGORY_FIELDS_KEY);
     } catch {
+        // Blocked storage: this visit's in-memory copy stands in.
     }
 
     if (raw !== cached.raw)
@@ -75,7 +77,7 @@ function storeChoice(id: string, fieldId: FieldId) {
     memoryRaw = JSON.stringify({ ...readChoices(), [id]: fieldId });
 
     try {
-        localStorage.setItem(STORAGE_KEY, memoryRaw);
+        localStorage.setItem(CATEGORY_FIELDS_KEY, memoryRaw);
     } catch {
         // Storage can be unavailable in private windows; the in-memory copy still holds for this visit.
     }

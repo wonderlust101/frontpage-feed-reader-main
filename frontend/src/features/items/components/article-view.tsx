@@ -3,12 +3,13 @@
 import type { ReactNode } from 'react';
 import { AiSummary } from '@/components/ui/ai-summary';
 import { CategoryTag } from '@/components/ui/tags';
+import type { ItemCategory } from '../types';
 
 type ArticleViewProps = {
     id?: string;
     title: string;
     titleAs?: 'h1' | 'h2' | 'h3' | 'h4';
-    category: { name: string; field: { color: string } };
+    category: ItemCategory;
     source: string;
     meta: string;
     summary?: ReactNode;

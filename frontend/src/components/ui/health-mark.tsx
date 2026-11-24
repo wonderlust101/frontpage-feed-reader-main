@@ -1,20 +1,20 @@
 // Feed health as line form and colour, with a label that always spells the state out.
 
-export type FeedHealth = 'healthy' | 'stale' | 'failing';
+export type HealthMarkState = 'healthy' | 'stale' | 'failing';
 
-const HEALTH_COLORS: Record<FeedHealth, string> = {
+const HEALTH_COLORS: Record<HealthMarkState, string> = {
     healthy: 'text-ink-2',
     stale: 'text-warning font-semibold',
     failing: 'text-error font-semibold',
 };
 
-const HEALTH_LABELS: Record<FeedHealth, string> = {
+const HEALTH_LABELS: Record<HealthMarkState, string> = {
     healthy: 'Healthy',
     stale: 'Stale',
     failing: 'Failing',
 };
 
-export function HealthMark({ health, showLabel = true }: { health: FeedHealth; showLabel?: boolean }) {
+export function HealthMark({ health, showLabel = true }: { health: HealthMarkState; showLabel?: boolean }) {
     const label = HEALTH_LABELS[health];
 
     return (

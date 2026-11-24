@@ -85,8 +85,6 @@ export const FIELDS: Field[] = [
 
 export const BRAND_FIELD = FIELDS[0];
 
-export const CATEGORY_FIELDS = FIELDS;
-
 export const NO_FIELD: Field = {
     id: 'none',
     name: 'No color',
@@ -96,9 +94,9 @@ export const NO_FIELD: Field = {
     inkContrast: { light: '12.1 : 1', dark: '12.1 : 1' },
 };
 
-export const PICKABLE_FIELDS = [NO_FIELD, ...CATEGORY_FIELDS];
+export const PICKABLE_FIELDS = [NO_FIELD, ...FIELDS];
 
-const FIELD_BY_ID = new Map<FieldId, Field>(PICKABLE_FIELDS.map((field) => [field.id, field]));
+const FIELD_BY_ID = new Map<string, Field>(PICKABLE_FIELDS.map((field) => [field.id, field]));
 
 // The reader's choice, else the category's preset, else "No color".
 export function assignFields(categoryIds: string[], choices: FieldChoices, presets: FieldChoices = {}): Record<string, Field> {
@@ -106,5 +104,10 @@ export function assignFields(categoryIds: string[], choices: FieldChoices, prese
 }
 
 export function categoryFieldById(id: string | undefined): Field | undefined {
-    return id ? FIELD_BY_ID.get(id as FieldId) : undefined;
+    return id ? FIELD_BY_ID.get(id) : undefined;
+}
+
+// "No color" for a missing or unknown id.
+export function fieldOrNone(id: string | undefined): Field {
+    return categoryFieldById(id) ?? NO_FIELD;
 }

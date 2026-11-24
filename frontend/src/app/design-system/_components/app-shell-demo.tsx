@@ -16,7 +16,7 @@ import { AccountMenu } from '@/features/auth/components/account-menu';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { categoryColor } from '@/features/categories/category-field-vars';
-import { NO_FIELD, categoryFieldById } from '@/features/categories/fields';
+import { categoryFieldById, fieldOrNone } from '@/features/categories/fields';
 import { deleteCategory, isNameTaken, updateCategory, type Library } from '@/features/categories/library';
 import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
 import { FeedItemRow } from '@/features/items/components/feed-item-row';
@@ -79,7 +79,7 @@ export function AppShellDemo() {
         ? library.categories.map((category) => ({
                 href: categoryHref(category.id),
                 name: category.name,
-                color: (categoryFieldById(category.fieldId) ?? NO_FIELD).color,
+                color: fieldOrNone(category.fieldId).color,
                 count: COUNT_BY_ID.get(category.id),
             }))
         : CATEGORIES.map((category, index) => ({
@@ -91,7 +91,7 @@ export function AppShellDemo() {
     const account = isReader ? <AccountMenu user={SAMPLE_READER} /> : <GuestMenu />;
     const firstCategory = library.categories.find((category) => category.id === FIRST_CATEGORY);
     const title = isReader ? (firstCategory?.name ?? 'Frontend') : 'All items';
-    const titleField = isReader ? (categoryFieldById(firstCategory?.fieldId) ?? NO_FIELD).color : 'var(--color-field-lemon)';
+    const titleField = isReader ? fieldOrNone(firstCategory?.fieldId).color : 'var(--color-field-lemon)';
     const items = isReader ? SAMPLE_ITEMS.filter((item) => item.category === 'frontend') : SAMPLE_ITEMS.slice(0, 4);
 
     useEffect(() => {
