@@ -20,11 +20,11 @@ test/
 ├── app.test.ts             ← src/app.ts: CORS, JSON 404, error handler
 ├── lib/feed/*.test.ts      ← src/lib/feed/*.ts: pure engine logic (dates, decode, sanitize, normalize, fetch)
 ├── db/schema.test.ts       ← src/db/schema.ts: migrations apply; keys, cascades and checks hold
-├── modules/<feature>/      ← src/modules/<feature>/: HTTP routes via startTestServer()
+├── modules/<feature>/      ← src/modules/<feature>/: HTTP routes via startTestServer(), services via createTestDb()
 ├── live/*.live.test.ts     ← real network; skipped unless LIVE_FEEDS=1
 ├── helpers/                ← shared test code, no tests
 │   ├── test-server.ts      ← startTestServer(): the Express app on a random port
-│   ├── feed-server.ts      ← fake upstream feed server (redirects, 304, timeouts, 4xx/5xx)
+│   ├── feed-server.ts      ← fake upstream feed server (redirects, 304, timeouts, 4xx/5xx); serve() swaps a path's body
 │   ├── fixtures.ts         ← readFixture(), curatedFixtures
 │   └── test-db.ts          ← createTestDb(): in-memory Postgres (PGlite) with every migration applied
 └── fixtures/feeds/

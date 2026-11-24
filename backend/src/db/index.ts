@@ -4,9 +4,13 @@
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
+import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 import { env } from '../env';
 import * as schema from './schema';
 import type { DbStatus } from '@frontpage/shared';
+
+// Any Drizzle database with our schema: the node-postgres pool in the server, or PGlite in tests (createTestDb()).
+export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 export const pool = env.DATABASE_URL
     ? new Pool({

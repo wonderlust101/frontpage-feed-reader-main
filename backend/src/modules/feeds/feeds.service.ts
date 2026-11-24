@@ -43,7 +43,7 @@ export function clearFeedCache() {
 }
 
 // Downloads the feed with the server's fetch settings, sending `validators` so an unchanged feed is a 304.
-function fetchUpstream(url: URL, validators: Validators): Promise<FetchFeedResult> {
+export function fetchUpstream(url: URL, validators: Validators): Promise<FetchFeedResult> {
     return fetchFeed(url, {
         ...validators,
         timeoutMs: env.FEED_FETCH_TIMEOUT_MS,
