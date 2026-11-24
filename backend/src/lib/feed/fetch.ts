@@ -28,10 +28,10 @@ type FetchedFrom = {
 export type FetchFeedResult =
     | (FetchedFrom & { notModified: true })
     | (FetchedFrom & {
-          notModified: false;
-          bytes: Uint8Array;
-          contentType: string | null;
-      });
+        notModified: false;
+        bytes: Uint8Array;
+        contentType: string | null;
+    });
 
 type Agents = {
     http: http.Agent;

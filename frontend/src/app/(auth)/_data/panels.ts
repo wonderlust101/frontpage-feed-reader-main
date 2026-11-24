@@ -1,7 +1,8 @@
 // Each auth page's sticker panel: a headline, one line of flavour text under it, and its stickers. Every page uses the
 // same twelve sticker slots: nine for wide screens (the "grounded frame": light along the top, heavier toward the
 // bottom and the form, and always well clear of the logo and the headline) and three for the phone band. A page may
-// leave wide slots empty (null), so the pages share one composition but each has its own decals and lead colour. Slots are in the panel's container units (cqi),
+// leave wide slots empty (null), so the pages share one composition but each has its own decals and lead colour. Slots
+// are in the panel's container units (cqi),
 // so the frame scales with the panel; bottom slots are measured from the bottom so they stay down on tall screens.
 // Wide-only slots drop out on phones, where the panel is a short band: the top-right sticker stays, and three small
 // narrow-only slots (the last three) cluster along the band's bottom edge, right of the flavour line (capped at 62cqi)

@@ -15,11 +15,11 @@ export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 export const pool = env.DATABASE_URL
     ? new Pool({
-          connectionString: env.DATABASE_URL,
-          max: 10,
-          idleTimeoutMillis: 30_000,
-          connectionTimeoutMillis: 10_000,
-      })
+            connectionString: env.DATABASE_URL,
+            max: 10,
+            idleTimeoutMillis: 30_000,
+            connectionTimeoutMillis: 10_000,
+        })
     : null;
 
 // Neon can drop idle connections (e.g. when compute suspends): log it instead of crashing; the pool reconnects.

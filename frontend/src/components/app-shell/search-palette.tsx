@@ -6,7 +6,8 @@
 // Before anything is typed it lists every view and category, so arrow keys and Enter work at once. It searches
 // everything, with the current category's sources first; once there is a query, a "Search in" select appears in the
 // query's own row (so the results never move) and narrows articles and sources to one category when the reader wants
-// that. Locked views (a guest's account-only ones) say so, with a lock. Reopening selects the last query, so typing replaces it. The query field is a combobox: arrow
+// that. Locked views (a guest's account-only ones) say so, with a lock. Reopening selects the last query, so typing
+// replaces it. The query field is a combobox: arrow
 // keys move through the results, Enter opens one, Escape (or Cancel on touch) closes.
 
 import { useRouter, usePathname } from 'next/navigation';
@@ -307,9 +308,9 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
     function renderEmpty() {
         const [title, hint] = !trimmedQuery
             ? [
-                  'Jump anywhere',
-                  search ? 'Type a view, a category, an article or a source.' : 'Type a view, a category or a source. Article search arrives with the feeds.',
-              ]
+                    'Jump anywhere',
+                    search ? 'Type a view, a category, an article or a source.' : 'Type a view, a category or a source. Article search arrives with the feeds.',
+                ]
             : [`Nothing matches “${trimmedQuery}”`, scopeHref ? 'Try every category, or fewer letters.' : 'Try fewer letters, or another word.'];
         return (
             <div role="status" className="flex flex-col items-center gap-2 px-6 py-10 text-center">

@@ -6,7 +6,8 @@
 // The logo, headline and flavour line under it have no plate: the sticker slots keep well clear of all three. The
 // flavour line is header-like (display face, a step below the headline) and capped at 62cqi, so the right-edge
 // stickers never come near it. On desktop the headline and its line sit together in the panel's vertical middle
-// (nudged a little above it, so the heavier bottom stickers keep their distance). It balances its lines inline, since the global paragraph wrap outranks utilities.
+// (nudged a little above it, so the heavier bottom stickers keep their distance). It balances its lines inline, since
+// the global paragraph wrap outranks utilities.
 // The h1 and description, the panel's headline and line, and the switch and guest links follow the reader's step
 // (auth-heading.tsx): the page passes the defaults, and a form that moves on in the browser swaps in its own.
 // The panel is the page's header: on phones it holds the logo link (so that link sits in a landmark); its text is

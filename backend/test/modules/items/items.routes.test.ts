@@ -32,7 +32,7 @@ describe('/api/items signed out', () => {
     });
 
     test('auth runs before validation: bad parameters or a bad id are still 401, not 400 or 404', async () => {
-        expect((await get(`?feed=x&category=y&limit=0&cursor=%25`)).status).toBe(401);
+        expect((await get('?feed=x&category=y&limit=0&cursor=%25')).status).toBe(401);
         expect((await get('?limit=1&limit=2')).status).toBe(401);
         expect((await get('?feed=not-a-uuid')).status).toBe(401);
         expect((await get('/not-a-uuid')).status).toBe(401);

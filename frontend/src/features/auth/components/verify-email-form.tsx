@@ -6,7 +6,8 @@
 // the browser has read storage and the session, it shows a skeleton, so neither step flashes before the other.
 // The right code also signs the reader in, so it always ends on /user.
 // Signed-in readers (straight after sign-up, the usual case) can leave it for later: the frame's switch link becomes
-// "Not now? Do this later" (which forgets the pending code, so coming back asks to send a new one) and the guest shortcut goes, since "Sign in" and "Read as a guest" would tell someone who
+// "Not now? Do this later" (which forgets the pending code, so coming back asks to send a new one) and the guest
+// shortcut goes, since "Sign in" and "Read as a guest" would tell someone who
 // is already in that they aren't. Straight after sign-up, the code step opens with an "Account created." notice.
 // The email step has its own heading ("Where should the code go?"); the code step's description says where the code
 // went and how long it lasts, and the code field is described by it. Every arrival at a step puts focus in its field,

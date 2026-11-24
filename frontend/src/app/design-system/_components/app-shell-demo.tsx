@@ -82,17 +82,17 @@ export function AppShellDemo() {
     const views = isReader ? VIEWS : GUEST_VIEWS;
     const categories = isReader
         ? library.categories.map((category) => ({
-              href: categoryHref(category.id),
-              name: category.name,
-              color: (categoryFieldById(category.fieldId) ?? NO_FIELD).color,
-              count: COUNT_BY_ID.get(category.id),
-          }))
+                href: categoryHref(category.id),
+                name: category.name,
+                color: (categoryFieldById(category.fieldId) ?? NO_FIELD).color,
+                count: COUNT_BY_ID.get(category.id),
+            }))
         : CATEGORIES.map((category, index) => ({
-              href: `#category-${category.id}`,
-              name: category.name,
-              color: categoryColor(category.id, category.field.color),
-              count: UNREAD_COUNTS[index],
-          }));
+                href: `#category-${category.id}`,
+                name: category.name,
+                color: categoryColor(category.id, category.field.color),
+                count: UNREAD_COUNTS[index],
+            }));
     const account = isReader ? <AccountMenu user={SAMPLE_READER} /> : <GuestMenu />;
     const firstCategory = library.categories.find((category) => category.id === FIRST_CATEGORY);
     const title = isReader ? (firstCategory?.name ?? 'Frontend') : 'All items';

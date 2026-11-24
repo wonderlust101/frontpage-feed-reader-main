@@ -1,7 +1,8 @@
 'use client';
 
 // The reader's settings behind the Aa button: text size, line height, reading width, density, typeface, theme and
-// contrast, in one light popover: Reading open, Display (theme, contrast, density) folded away, and a reset. Each change applies at once to every reading surface and is saved (see
+// contrast, in one light popover: Reading open, Display (theme, contrast, density) folded away, and a reset. Each
+// change applies at once to every reading surface and is saved (see
 // reader-preferences.ts), and a sample line at the top reflows as you go, so a setting is seen before it's read.
 
 import { useId } from 'react';
