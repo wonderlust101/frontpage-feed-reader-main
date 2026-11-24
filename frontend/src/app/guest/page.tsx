@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Guest' };
 
 export default function GuestPage() {
     return (
-        <main id="main" className="mx-auto flex w-full max-w-page flex-col gap-4 px-gutter py-12">
+        <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-gutter py-12">
             <h1 className="type-headline">Guest page (placeholder)</h1>
             <p>You are browsing as a guest. The sample feeds will load here.</p>
             <p>
@@ -21,6 +21,6 @@ export default function GuestPage() {
                     Back to the home page
                 </Link>
             </p>
-        </main>
+        </div>
     );
 }

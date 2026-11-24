@@ -10,7 +10,7 @@ import { Icon } from '@/components/ui/icon';
 export const AccountBoundary = catchError(AccountRetry);
 
 // Renders the retry control; the visible "Try again" is part of its accessible name, as WCAG 2.5.3 asks.
-function AccountRetry(_props: Record<string, never>, { retry }: ErrorInfo) {
+function AccountRetry(_props: Record<string, unknown>, { retry }: ErrorInfo) {
     return (
         <button type="button" onClick={() => retry()} aria-label="Couldn't load your account. Try again" className="shell-control">
             <Icon name="refresh" />
