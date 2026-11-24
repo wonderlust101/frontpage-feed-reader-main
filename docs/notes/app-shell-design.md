@@ -67,3 +67,4 @@ Small and quick, all off under reduced motion: the palette and menus scale in (1
 - **Flat:** menus are panels with a 1.5px control edge, no shadow, like every other layer.
 - **High contrast:** edges and rules turn to ink; the tonal steps still separate the areas.
 - **Open decisions** are tracked in Jira: the Settings page that will hold the reader settings and category management ([KAN-29](https://sergeiborja.atlassian.net/browse/KAN-29)), and storing signed-in readers' category colours ([KAN-27](https://sergeiborja.atlassian.net/browse/KAN-27)).
+
