@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
 import { errorHandler } from '../../src/middleware/error-handler';
-import { BadGatewayError, GatewayTimeoutError } from '../../src/middleware/errors';
+import { BadGatewayError, ConflictError, GatewayTimeoutError, TooManyRequestsError } from '../../src/middleware/errors';
 
 // A minimal fake Express Response that records the status and JSON body, so the error handler can be tested without a server.
 function fakeRes() {
@@ -43,6 +43,21 @@ describe('errorHandler', () => {
         expect(handle(err)).toEqual({
             status: 502,
             body: { error: { code: 'http_4xx', message: 'The feed server responded with 404', retryable: false, status: 404 } },
+        });
+    });
+
+    test('a conflict that names the existing subscription sends its id as `subscriptionId`', () => {
+        const err = new ConflictError('already_subscribed', 'You already follow this feed', { subscriptionId: 'sub-1' });
+        expect(handle(err)).toEqual({
+            status: 409,
+            body: { error: { code: 'already_subscribed', message: 'You already follow this feed', retryable: false, subscriptionId: 'sub-1' } },
+        });
+    });
+
+    test('a rate limit error is a retryable 429 without extra keys', () => {
+        expect(handle(new TooManyRequestsError('rate_limited', 'Slow down'))).toEqual({
+            status: 429,
+            body: { error: { code: 'rate_limited', message: 'Slow down', retryable: true } },
         });
     });
 

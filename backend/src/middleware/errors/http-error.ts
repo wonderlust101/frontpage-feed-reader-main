@@ -6,15 +6,18 @@ import type { ApiErrorCode } from '@frontpage/shared';
 export type HttpErrorOptions = {
     retryable?: boolean;
     upstreamStatus?: number;
+    subscriptionId?: string;
 };
 
 // An error that's safe to show API clients: an HTTP status, a machine-readable `code` and a message.
-// `upstreamStatus` is a feed server's own error status (e.g. 404), sent to clients as `status`.
+// `upstreamStatus` is a feed server's own error status (e.g. 404), sent to clients as `status`;
+// `subscriptionId` points an `already_subscribed` client at the subscription that already exists.
 export class HttpError extends Error {
     readonly status: number;
     readonly code: ApiErrorCode;
     readonly retryable: boolean;
     readonly upstreamStatus: number | undefined;
+    readonly subscriptionId: string | undefined;
 
     constructor(status: number, code: ApiErrorCode, message: string, opts: HttpErrorOptions = {}) {
         super(message);
@@ -23,6 +26,7 @@ export class HttpError extends Error {
         this.code = code;
         this.retryable = opts.retryable ?? isRetryableStatus(status);
         this.upstreamStatus = opts.upstreamStatus;
+        this.subscriptionId = opts.subscriptionId;
     }
 }
 
