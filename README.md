@@ -59,8 +59,8 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       │   ├── auth/         #   /api/auth/* (Better Auth) + "users", "sessions", "accounts", "verifications" tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
 │       │   ├── feeds/        #   GET /api/fetch (routes → controller → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
-│       │   ├── items/        #   "items", "item_read_states" tables
-│       │   ├── categories/   #   "categories" table
+│       │   ├── items/        #   /api/items (routes → controller → validation + cursor → service; read rule) + "items", "item_read_states" tables
+│       │   ├── categories/   #   "categories" table + the "is this category yours?" check
 │       │   ├── subscriptions/#   /api/subscriptions (routes → controller → validation → service; health rule) + "subscriptions" table
 │       │   ├── preferences/  #   "user_preferences" table
 │       │   └── bookmarks/    #   "bookmarks" table
@@ -192,17 +192,17 @@ Decisions worth knowing before changing it:
 
 Accounts use [Better Auth](https://www.better-auth.com) on the backend (`backend/src/modules/auth/`) and its React client on the frontend (`frontend/src/features/auth/`).
 
-| Route                  | What it does                                                                                                                                                                       |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/sign-in`             | Email and password. `?next=` (same-site paths only) says where to go after; `?reset=1` greets a reader back from a password reset and fills in their email                         |
-| `/sign-up`             | Name, email and password, then `/verify-email`                                                                                                                                     |
-| `/verify-email`        | The 6-digit code from the email (it asks for the address first when no code was sent yet); the right code signs the reader in and opens `/user`; signed-in readers can do it later |
-| `/forgot-password`     | Emails a reset link; always answers the same, so it never reveals who has an account                                                                                               |
-| `/reset-password`      | Opened from the link: choose a new password (the API then signs every session out)                                                                                                 |
-| `/account/password`    | Signed in: change the password, optionally signing out other devices                                                                                                               |
-| `/`                    | Placeholder marketing page with the three ways in (sign in, sign up, guest)                                                                                                        |
-| `/guest`, `/guest/c/…` | Guest mode inside the app shell (rail, category panel, search) with a page per curated category; the article lists are placeholders until the items API lands                      |
-| `/user`                | The signed-in home inside the app shell; placeholder content until the items API lands                                                                                             |
+| Route                  | What it does                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/sign-in`             | Email and password. `?next=` (same-site paths only) says where to go after; `?reset=1` greets a reader back from a password reset and fills in their email                                                               |
+| `/sign-up`             | Name, email and password, then `/verify-email`                                                                                                                                                                           |
+| `/verify-email`        | The 6-digit code from the email (it asks for the address first when no code was sent yet); the right code signs the reader in and opens `/user`; signed-in readers can do it later                                       |
+| `/forgot-password`     | Emails a reset link; always answers the same, so it never reveals who has an account                                                                                                                                     |
+| `/reset-password`      | Opened from the link: choose a new password (the API then signs every session out)                                                                                                                                       |
+| `/account/password`    | Signed in: change the password, optionally signing out other devices                                                                                                                                                     |
+| `/`                    | Placeholder marketing page with the three ways in (sign in, sign up, guest)                                                                                                                                              |
+| `/guest`, `/guest/c/…` | Guest mode inside the app shell (rail, category panel, search) with a page per curated category; the article lists are placeholders until the guest catalogue endpoint (KAN-34) and the article list pages (KAN-30) land |
+| `/user`                | The signed-in home inside the app shell; placeholder content until the article list pages (KAN-30) use `/api/items`                                                                                                      |
 
 Decisions worth knowing:
 
@@ -231,6 +231,17 @@ Running with `bun dev` instead of Docker: start only Mailpit with `docker compos
 - **Fetch bookkeeping:** every fetch sets `last_fetched_at`. A success (a 304 counts) sets `last_success_at`, resets `consecutive_failures` and clears the last error. A failure records the error code, message and upstream status and adds one to `consecutive_failures`, as a single atomic update. A URL we don't store yet whose first fetch fails stores nothing: the caller gets the error.
 - **Permanent redirects** (301 or 308 on every hop) move `feeds.url`. If another feed already has the new URL, the two are merged: items, subscriptions, bookmarks, read states and the starter-feed entry move onto that feed (its own copy wins where both have one), and the old row is deleted.
 - **Trying it by hand:** `docker compose run --rm --no-deps backend bun run ingest:feed <url>` ingests one feed into the local Docker database and prints what changed. The script refuses any database host but `localhost` or `db`, so it can't write to Neon.
+
+## Items API
+
+`backend/src/modules/items/` serves a signed-in reader's articles: a page of a list, the sidebar counts, and one article for the reader view.
+
+- **Pages use a cursor, not an offset.** Each page ends with `nextCursor`, which marks where it stopped (its last item's sort time and id). The next page asks for "the items after this one", so page 50 costs the same as page 1, and marking items read while scrolling never skips or repeats one. `nextCursor` is null exactly when there is nothing more.
+- **No query sorts all of a reader's articles.** For each followed feed, a `LATERAL` subquery reads only that feed's next page from the `items_feed_id_sort_at_idx` index; the outer query keeps the best page of those. A reader with 100 feeds reads at most 100 × (page size + 1) rows.
+- **The cursor keeps microseconds.** Postgres stores times to the microsecond and a JS `Date` only to the millisecond, so the cursor's time is read from Postgres as text and sent back as text. Rounding it would skip items that share a millisecond.
+- **One read rule.** An item is read if the reader marked it, either way; otherwise if it was first seen before their subscription's `read_cutoff` ("mark all as read"). Lists, counts and the single item all use the same SQL fragment (`IS_READ` in `items.service.ts`), so the unread numbers always match the unread lists.
+- **Only the reader's data.** Every query starts from the reader's own subscriptions, so another reader's feeds, categories and read marks never appear. A feed, category or article that isn't theirs gets the same 404 as one that doesn't exist. Because rows only come from their subscriptions, a non-empty page already proves a feed or category filter is theirs: only an empty page runs the extra ownership check.
+- **Opening an article doesn't mark it read.** Marking read and unread is a separate API.
 
 ## Scripts (repo root)
 
@@ -403,12 +414,15 @@ The AI ignore lists deliberately **don't** hide `docs/`, `AGENTS.md` or `CLAUDE.
 
 Example requests for every route are in [`backend/requests/api.http`](backend/requests/api.http).
 
-| Method | Path                     | Description                                                                                                                                           |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/health`            | `{ api: "ok", database: "connected" \| "skipped" \| "error" }`                                                                                        |
-| GET    | `/api/fetch`             | `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304  |
-| \*     | `/api/auth/*`            | Better Auth: sign-up, sign-in, sign-out, session, email verification by code, password reset and change (see [Auth](#auth))                           |
-| GET    | `/api/subscriptions`     | Signed in: the reader's subscriptions (`SubscriptionListResponse`) with each feed's health (active / stale / error / dead), sorted by title           |
-| POST   | `/api/subscriptions`     | Signed in: `{ url, categoryId? }` fetches and checks the feed, then subscribes → 201 + `Location`; 409 `already_subscribed`; 30 per reader per 10 min |
-| PATCH  | `/api/subscriptions/:id` | Signed in: `{ customTitle?, categoryId? }` renames and/or moves it (`null` = clear / Uncategorized); another reader's id → 404                        |
-| DELETE | `/api/subscriptions/:id` | Signed in: unsubscribes → 204; bookmarks stay; another reader's id → 404                                                                              |
+| Method | Path                     | Description                                                                                                                                                                                                    |
+| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/health`            | `{ api: "ok", database: "connected" \| "skipped" \| "error" }`                                                                                                                                                 |
+| GET    | `/api/fetch`             | `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304                                                           |
+| \*     | `/api/auth/*`            | Better Auth: sign-up, sign-in, sign-out, session, email verification by code, password reset and change (see [Auth](#auth))                                                                                    |
+| GET    | `/api/subscriptions`     | Signed in: the reader's subscriptions (`SubscriptionListResponse`) with each feed's health (active / stale / error / dead), sorted by title                                                                    |
+| POST   | `/api/subscriptions`     | Signed in: `{ url, categoryId? }` fetches and checks the feed, then subscribes → 201 + `Location`; 409 `already_subscribed`; 30 per reader per 10 min                                                          |
+| PATCH  | `/api/subscriptions/:id` | Signed in: `{ customTitle?, categoryId? }` renames and/or moves it (`null` = clear / Uncategorized); another reader's id → 404                                                                                 |
+| DELETE | `/api/subscriptions/:id` | Signed in: unsubscribes → 204; bookmarks stay; another reader's id → 404                                                                                                                                       |
+| GET    | `/api/items`             | Signed in: one page of articles (`ItemListResponse`), newest first; `?feed=` or `?category=` (`uncategorized` too), `unread=true`, `order=oldest`, `limit=` (1–100, default 30), `cursor=` (from `nextCursor`) |
+| GET    | `/api/items/counts`      | Signed in: item and unread counts per feed, per category (empty ones included, Uncategorized last) and in total (`ItemCountsResponse`)                                                                         |
+| GET    | `/api/items/:id`         | Signed in: one article with its sanitized `contentHtml` (`ItemResponse`); doesn't mark it read; a feed the reader doesn't follow → 404                                                                         |

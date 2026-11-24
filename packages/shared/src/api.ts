@@ -2,6 +2,8 @@
 // Dates are ISO 8601 UTC strings (or null); only `contentHtml` is HTML (sanitized), all other text is plain.
 // In a Subscription, `title` is the reader's custom title or else the feed's own, `iconUrl` is the feed's image or else
 // the site's /favicon.ico (unchecked, so hide it if it fails to load), and a null `categoryId` means Uncategorized.
+// An item's `feed` follows the same rules. `sortAt` (what lists are sorted by) is `publishedAt`, or else when the article was
+// first seen; `nextCursor` is opaque: send it back as `cursor` for the next page, and null means there are no more.
 
 export type DbStatus = 'connected' | 'skipped' | 'error';
 
@@ -70,6 +72,7 @@ export type ApiErrorCode =
     | 'unauthorized'
     | 'already_subscribed'
     | 'category_not_found'
+    | 'feed_not_found'
     | 'rate_limited'
     | 'database_unavailable'
     | 'internal_error';
@@ -137,4 +140,66 @@ export type SubscribeRequest = {
 export type UpdateSubscriptionRequest = {
     customTitle?: string | null;
     categoryId?: string | null;
+};
+
+export const ITEM_PAGE_SIZE = 30;
+export const MAX_ITEM_PAGE_SIZE = 100;
+export const UNCATEGORIZED = 'uncategorized';
+
+export type ItemOrder = 'newest' | 'oldest';
+
+export type ItemListParams = {
+    feed?: string;
+    category?: string;
+    unread?: boolean;
+    order?: ItemOrder;
+    limit?: number;
+    cursor?: string;
+};
+
+export type ItemFeed = {
+    id: string;
+    title: string;
+    iconUrl: string | null;
+    categoryId: string | null;
+    health: FeedHealth;
+};
+
+export type ItemSummary = {
+    id: string;
+    feed: ItemFeed;
+    title: string;
+    url: string | null;
+    author: string | null;
+    summary: string;
+    imageUrl: string | null;
+    publishedAt: string | null;
+    sortAt: string;
+    hasFullContent: boolean;
+    isRead: boolean;
+};
+
+export type ItemDetail = ItemSummary & {
+    contentHtml: string;
+    updatedAt: string | null;
+};
+
+export type ItemListResponse = {
+    items: ItemSummary[];
+    nextCursor: string | null;
+};
+
+export type ItemResponse = {
+    item: ItemDetail;
+};
+
+export type ItemCount = {
+    items: number;
+    unread: number;
+};
+
+export type ItemCountsResponse = {
+    total: ItemCount;
+    categories: (ItemCount & { categoryId: string | null })[];
+    feeds: (ItemCount & { feedId: string; categoryId: string | null })[];
 };

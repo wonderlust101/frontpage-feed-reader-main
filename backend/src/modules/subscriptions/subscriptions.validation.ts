@@ -3,13 +3,12 @@
 // (which would reject it with an error). The feed URL itself is checked by parseFeedUrl in the service.
 
 import { MAX_CUSTOM_TITLE_LENGTH, type SubscribeRequest, type UpdateSubscriptionRequest } from '@frontpage/shared';
+import { isUuid } from '../../lib/uuid';
 import { BadRequestError, NotFoundError } from '../../middleware/errors';
-
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // The subscription id from the URL; throws `not_found` (404) when it isn't a UUID.
 export function parseSubscriptionId(value: string): string {
-    if (!UUID_PATTERN.test(value)) {
+    if (!isUuid(value)) {
         throw new NotFoundError('not_found', 'Subscription not found');
     }
 
@@ -57,7 +56,7 @@ function toObject(body: unknown): Record<string, unknown> {
 
 // A category id, or null for Uncategorized; throws `bad_request` for anything else.
 function parseCategoryId(value: unknown): string | null {
-    if (value === null || (typeof value === 'string' && UUID_PATTERN.test(value))) {
+    if (value === null || isUuid(value)) {
         return value;
     }
 

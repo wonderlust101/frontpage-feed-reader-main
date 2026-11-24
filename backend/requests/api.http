@@ -157,3 +157,30 @@ Content-Type: application/json
 
 ### Subscriptions — unsubscribe → 204 (bookmarks stay; someone else's or a missing id → 404 not_found)
 DELETE {{baseUrl}}/api/subscriptions/paste-subscription-id-here
+
+### Items — the first page of everything I follow, newest first (sign in first; signed out → 401 unauthorized)
+GET {{baseUrl}}/api/items
+
+### Items — the next page: paste the previous page's nextCursor (null means there are no more)
+GET {{baseUrl}}/api/items?cursor=paste-next-cursor-here
+
+### Items — one category, unread only (someone else's or a missing category → 404 category_not_found)
+GET {{baseUrl}}/api/items?category=paste-category-id-here&unread=true
+
+### Items — Uncategorized, oldest first, 10 per page
+GET {{baseUrl}}/api/items?category=uncategorized&order=oldest&limit=10
+
+### Items — one feed: its feedId from GET /api/subscriptions (a feed I don't follow → 404 feed_not_found)
+GET {{baseUrl}}/api/items?feed=paste-feed-id-here
+
+### Items — feed and category together → 400 bad_request
+GET {{baseUrl}}/api/items?feed=paste-feed-id-here&category=uncategorized
+
+### Items — a limit over 100 → 400 bad_request
+GET {{baseUrl}}/api/items?limit=101
+
+### Items — counts per feed, per category and in total, for the sidebar
+GET {{baseUrl}}/api/items/counts
+
+### Items — one article with its full content (doesn't mark it read; a feed I don't follow → 404 not_found)
+GET {{baseUrl}}/api/items/paste-item-id-here
