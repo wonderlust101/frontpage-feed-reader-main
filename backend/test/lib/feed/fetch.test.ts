@@ -10,8 +10,8 @@ beforeAll(() => {
     upstream = startFeedServer();
 });
 
-afterAll(() => {
-    upstream.stop();
+afterAll(async () => {
+    await upstream.stop();
 });
 
 // Asserts the promise rejects with an HttpError of this `code` (and `retryable`, if given) and returns the error for further checks.

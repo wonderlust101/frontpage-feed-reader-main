@@ -1,4 +1,4 @@
-import { style } from '@frontpage/eslint-config';
+import { style, typescript } from '@frontpage/eslint-config';
 import { defineConfig } from 'eslint/config';
 
-export default defineConfig([...style]);
+export default defineConfig([...typescript, ...style]);

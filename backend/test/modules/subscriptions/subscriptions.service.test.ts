@@ -23,7 +23,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    server.stop();
+    await server.stop();
     await testDb.close();
 });
 

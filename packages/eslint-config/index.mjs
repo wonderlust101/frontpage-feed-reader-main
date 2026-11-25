@@ -4,6 +4,8 @@
 import stylistic from '@stylistic/eslint-plugin';
 import tseslint from 'typescript-eslint';
 
+const TS_FILES = ['**/*.{ts,tsx,mts,cts}'];
+
 const CONTROL_FLOW = ['if', 'for', 'while', 'do', 'switch', 'try'];
 
 const BASE = stylistic.configs.customize({
@@ -56,5 +58,14 @@ export const style = [
             '@stylistic/padded-blocks': ['error', 'never'],
             curly: 'off',
         },
+    },
+];
+
+// typescript-eslint's syntax-only rules. The type-aware ones need TypeScript's JS API, which the backend's TS 7 doesn't have.
+export const typescript = [
+    ...tseslint.configs.recommended.map((config) => ({ ...config, files: TS_FILES })),
+    {
+        files: TS_FILES,
+        rules: { '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
     },
 ];

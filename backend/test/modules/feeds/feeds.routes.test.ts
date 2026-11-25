@@ -13,7 +13,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    upstream.stop();
+    await upstream.stop();
     await api.close();
 });
 

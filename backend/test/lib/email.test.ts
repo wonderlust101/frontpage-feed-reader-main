@@ -21,8 +21,8 @@ beforeAll(() => {
     });
 });
 
-afterAll(() => {
-    mailpit.stop(true);
+afterAll(async () => {
+    await mailpit.stop(true);
 });
 
 describe('sendEmail to Mailpit (no API key, MAILPIT_URL set)', () => {
