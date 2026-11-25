@@ -9,18 +9,18 @@ import { emailOTP } from 'better-auth/plugins/email-otp';
 import type { IncomingHttpHeaders } from 'node:http';
 import { db } from '../../db';
 import { env } from '../../env';
-import { escapeHtml, sendEmail, type Email } from '../../lib/email';
+import { sendEmail, type Email } from '../../lib/email';
+import { passwordResetEmail, RESET_TOKEN_MINUTES, verificationCodeEmail } from './auth.emails';
 import { accounts, sessions, users, verifications } from './auth.schema';
 
 type AuthDatabase = Parameters<typeof drizzleAdapter>[0];
 
-type ResetEmailUser = { email: string; name: string };
+type RateLimitRule = { window: number; max: number };
 
 type SendAuthEmail = (email: Email) => Promise<void>;
 
 const SESSION_DAYS = 30;
 const SECONDS_PER_DAY = 60 * 60 * 24;
-const RESET_TOKEN_MINUTES = 60;
 const MIN_SECRET_LENGTH = 32;
 const DEV_RATE_LIMIT_DIVISOR = 10;
 
@@ -46,30 +46,7 @@ export async function getSession(headers: IncomingHttpHeaders) {
 
 // `send` delivers the reset and code emails; tests pass one that records them.
 export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliverEmail) {
-    // Without a fixed base URL, Better Auth builds reset links from the request's Host header, which a client controls.
-    if (env.NODE_ENV === 'production' && !env.AUTH_URL) {
-        throw new Error(
-            'AUTH_URL is required in production: password-reset links are built from it (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
-        );
-    }
-
-    // Without an allowed origin, the browser's CORS check and Better Auth's origin check would refuse every sign-in.
-    if (env.NODE_ENV === 'production' && env.WEB_ORIGINS.length === 0) {
-        throw new Error(
-            'WEB_ORIGIN is required in production: the site that may call the API (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
-        );
-    }
-
-    // The secret signs session cookies: a missing or short one would let someone forge a sign-in.
-    if (env.NODE_ENV === 'production' && (env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH)
-        throw new Error(`AUTH_SECRET is required in production and must be at least ${MIN_SECRET_LENGTH} characters`);
-
-    // Without it the cookie belongs to the API's host only, and the site's pages would never see anyone signed in.
-    if (env.NODE_ENV === 'production' && !env.AUTH_COOKIE_DOMAIN) {
-        throw new Error(
-            'AUTH_COOKIE_DOMAIN is required in production: the site and the API share the session cookie through it (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
-        );
-    }
+    assertProductionAuthConfig();
 
     return betterAuth({
         appName: 'Frontpage',
@@ -118,9 +95,7 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
             enabled: env.NODE_ENV !== 'test',
             customRules: {
                 '/get-session': false,
-                ...(env.NODE_ENV === 'production'
-                    ? {}
-                    : { '/**': (_request: Request, rule) => ({ ...rule, window: Math.ceil(rule.window / DEV_RATE_LIMIT_DIVISOR) }) }),
+                ...(env.NODE_ENV === 'production' ? {} : { '/**': shortenRateLimitWindow }),
             },
         },
         advanced: {
@@ -138,27 +113,40 @@ export function createAuth(database: AuthDatabase, send: SendAuthEmail = deliver
     });
 }
 
-// The password-reset email for `user`: plain text plus HTML, with the name and link escaped in the HTML.
-export function passwordResetEmail(user: ResetEmailUser, url: string): Email {
-    const greeting = user.name ? `Hi ${user.name},` : 'Hi,';
+// A missing setting would leave production quietly broken, so the server refuses to start; the first missing one is reported.
+function assertProductionAuthConfig() {
+    if (env.NODE_ENV !== 'production')
+        return;
 
-    return {
-        to: user.email,
-        subject: 'Reset your Frontpage password',
-        text: `${greeting}\n\nOpen this link to choose a new password (it expires in ${RESET_TOKEN_MINUTES} minutes):\n${url}\n\nIf you didn't ask for this, you can ignore this email.`,
-        html: `<p>${escapeHtml(greeting)}</p><p><a href="${escapeHtml(url)}">Choose a new password</a> (the link expires in ${RESET_TOKEN_MINUTES} minutes).</p><p>If you didn't ask for this, you can ignore this email.</p>`,
-    };
+    // Without a fixed base URL, Better Auth builds reset links from the request's Host header, which a client controls.
+    if (!env.AUTH_URL) {
+        throw new Error(
+            'AUTH_URL is required in production: password-reset links are built from it (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
+        );
+    }
+
+    // Without an allowed origin, the browser's CORS check and Better Auth's origin check would refuse every sign-in.
+    if (env.WEB_ORIGINS.length === 0) {
+        throw new Error(
+            'WEB_ORIGIN is required in production: the site that may call the API (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
+        );
+    }
+
+    // The secret signs session cookies: a missing or short one would let someone forge a sign-in.
+    if ((env.AUTH_SECRET?.length ?? 0) < MIN_SECRET_LENGTH)
+        throw new Error(`AUTH_SECRET is required in production and must be at least ${MIN_SECRET_LENGTH} characters`);
+
+    // Without it the cookie belongs to the API's host only, and the site's pages would never see anyone signed in.
+    if (!env.AUTH_COOKIE_DOMAIN) {
+        throw new Error(
+            'AUTH_COOKIE_DOMAIN is required in production: the site and the API share the session cookie through it (set it, or add this Railway environment to packages/shared/src/deployments.ts)',
+        );
+    }
 }
 
-// The email-verification email: the code in plain text and HTML (escaped, though Better Auth only makes digits).
-export function verificationCodeEmail(to: string, code: string): Email {
-    return {
-        to,
-        // No code in the subject: subjects are written to the server log when sending fails or is skipped.
-        subject: 'Your Frontpage confirmation code',
-        text: `Your Frontpage code is ${code}\n\nEnter it to confirm your email address. It expires in ${CODE_LIFETIME_MINUTES} minutes.\n\nIf you didn't create an account, you can ignore this email.`,
-        html: `<p>Your Frontpage code is</p><p style="font-size:24px;font-weight:bold;letter-spacing:4px">${escapeHtml(code)}</p><p>Enter it to confirm your email address. It expires in ${CODE_LIFETIME_MINUTES} minutes.</p><p>If you didn't create an account, you can ignore this email.</p>`,
-    };
+// Outside production every window is a tenth as long, so local testing rarely waits but still hits the limits.
+function shortenRateLimitWindow(_fetchRequest: Request, rule: RateLimitRule): RateLimitRule {
+    return { ...rule, window: Math.ceil(rule.window / DEV_RATE_LIMIT_DIVISOR) };
 }
 
 // Sends an auth email; logs (never throws) when sending fails, because nobody is waiting on it.
