@@ -79,6 +79,12 @@ describe('fetchFeed', () => {
         await expectError(fetchFeed(`${upstream.url}/redirect-with-credentials`, opts), 'blocked_url', false);
     });
 
+    test('a redirect without a Location header is a network error', async () => {
+        const err = await expectError(fetchFeed(`${upstream.url}/redirect-without-location`, opts), 'network');
+
+        expect(err.message).toBe('Redirect (301) without a Location header');
+    });
+
     test('refuses redirects to non-http protocols', async () => {
         await expectError(fetchFeed(`${upstream.url}/redirect-to-file`, opts), 'blocked_url');
     });

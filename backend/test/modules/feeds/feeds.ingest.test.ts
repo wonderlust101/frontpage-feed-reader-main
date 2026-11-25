@@ -3,7 +3,7 @@
 
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
-import { bookmarks, feeds, itemReadStates, items, subscriptions, users } from '../../../src/db/schema';
+import { bookmarks, feeds, itemReadStates, items, starterFeeds, subscriptions, users } from '../../../src/db/schema';
 import { HttpError } from '../../../src/middleware/errors';
 import { ingestFeed } from '../../../src/modules/feeds/feeds.ingest';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
@@ -247,6 +247,44 @@ describe('304 Not Modified', () => {
         });
         expect(await itemsOf(feedId)).toEqual(itemsBefore);
     });
+
+    test('a 304 for a URL with no stored feed is a bad gateway, and nothing is stored', async () => {
+        const url = `${server.url}/always-not-modified`;
+
+        const err = await feedError(ingestFeed(testDb.db, url, { now: T1 }));
+
+        expect(err.code).toBe('http_5xx');
+        expect(err.upstreamStatus).toBe(304);
+        expect(await testDb.db.select().from(feeds)).toEqual([]);
+    });
+
+    test('a 304 after a permanent redirect moves the stored feed to the new URL and keeps its validators', async () => {
+        const oldUrl = `${server.url}/moved-to-cached`;
+        const newUrl = `${server.url}/cached.xml`;
+        const [old] = await testDb.db.insert(feeds).values({ url: oldUrl, title: 'Old', etag: ETAG, lastModified: LAST_MODIFIED }).returning();
+
+        const result = await ingestFeed(testDb.db, oldUrl, { now: T1 });
+
+        expect(result).toMatchObject({ feedId: old!.id, url: newUrl, movedFrom: oldUrl, mergedFeedId: null, notModified: true });
+        expect(await feedAt(oldUrl)).toBeUndefined();
+        expect(await feedAt(newUrl)).toMatchObject({ id: old!.id, etag: ETAG, lastModified: LAST_MODIFIED, lastSuccessAt: T1 });
+    });
+
+    test('a 304 after a permanent redirect onto a stored feed merges into it and writes the old feed\'s validators there', async () => {
+        const newUrl = `${server.url}/cached.xml`;
+        const keep = await ingestFeed(testDb.db, newUrl, { now: T1 });
+
+        await testDb.db.update(feeds).set({ etag: '"target"', lastModified: 'Wed, 01 Jan 2025 00:00:00 GMT' }).where(eq(feeds.id, keep.feedId));
+
+        const oldUrl = `${server.url}/moved-to-cached`;
+        const [old] = await testDb.db.insert(feeds).values({ url: oldUrl, title: 'Old', etag: ETAG, lastModified: LAST_MODIFIED }).returning();
+
+        const result = await ingestFeed(testDb.db, oldUrl, { now: T2 });
+
+        expect(result).toMatchObject({ feedId: keep.feedId, url: newUrl, movedFrom: oldUrl, mergedFeedId: old!.id, notModified: true });
+        expect(await feedAt(oldUrl)).toBeUndefined();
+        expect(await feedAt(newUrl)).toMatchObject({ id: keep.feedId, etag: ETAG, lastModified: LAST_MODIFIED, lastSuccessAt: T2 });
+    });
 });
 
 describe('failures', () => {
@@ -435,6 +473,55 @@ describe('redirects', () => {
         expect(subs).toHaveLength(2);
         expect(subs).toContainEqual({ userId: both, feedId: keep.feedId, customTitle: 'Kept' });
         expect(subs).toContainEqual({ userId: oldOnly, feedId: keep.feedId, customTitle: null });
+    });
+
+    test('a merge keeps one bookmark and one read state when a reader has them on both copies of an item', async () => {
+        const keep = await ingestFeed(testDb.db, `${server.url}/feed.xml`, { now: T1 });
+        const sharedGuid = [...(await itemsOf(keep.feedId)).keys()][0]!;
+        const keptItem = (await itemsOf(keep.feedId)).get(sharedGuid)!;
+
+        const oldUrl = `${server.url}/moved-permanently`;
+        const [old] = await testDb.db.insert(feeds).values({ url: oldUrl, title: 'Old copy' }).returning();
+        const [duplicate] = await testDb.db
+            .insert(items)
+            .values({ feedId: old!.id, guid: sharedGuid, title: 'Old copy', summary: '', contentHtml: '', hasFullContent: false, contentHash: 'old' })
+            .returning();
+
+        const reader = await newUser();
+
+        await testDb.db.insert(bookmarks).values([
+            { userId: reader, itemId: keptItem.id },
+            { userId: reader, itemId: duplicate!.id },
+        ]);
+        await testDb.db.insert(itemReadStates).values([
+            { userId: reader, itemId: keptItem.id, isRead: false },
+            { userId: reader, itemId: duplicate!.id, isRead: true },
+        ]);
+
+        await ingestFeed(testDb.db, oldUrl, { now: T2 });
+
+        expect(await testDb.db.select({ itemId: bookmarks.itemId }).from(bookmarks)).toEqual([{ itemId: keptItem.id }]);
+        expect(await testDb.db.select({ itemId: itemReadStates.itemId, isRead: itemReadStates.isRead }).from(itemReadStates)).toEqual([
+            { itemId: keptItem.id, isRead: false },
+        ]);
+    });
+
+    test('a merge moves the old feed\'s starter entry to the kept feed, unless the kept feed has its own', async () => {
+        const keep = await ingestFeed(testDb.db, `${server.url}/feed.xml`, { now: T1 });
+        const oldUrl = `${server.url}/moved-permanently`;
+        const [old] = await testDb.db.insert(feeds).values({ url: oldUrl, title: 'Old copy' }).returning();
+
+        await testDb.db.insert(starterFeeds).values({ feedId: old!.id, categoryName: 'Frontend', position: 3 });
+        await ingestFeed(testDb.db, oldUrl, { now: T2 });
+
+        expect(await testDb.db.select().from(starterFeeds)).toEqual([{ feedId: keep.feedId, categoryName: 'Frontend', position: 3 }]);
+
+        const [secondOld] = await testDb.db.insert(feeds).values({ url: oldUrl, title: 'Old copy again' }).returning();
+
+        await testDb.db.insert(starterFeeds).values({ feedId: secondOld!.id, categoryName: 'Design', position: 7 });
+        await ingestFeed(testDb.db, oldUrl, { now: T3 });
+
+        expect(await testDb.db.select().from(starterFeeds)).toEqual([{ feedId: keep.feedId, categoryName: 'Frontend', position: 3 }]);
     });
 });
 

@@ -35,6 +35,12 @@ export function startFeedServer() {
                         return new Response(null, { status: 304 });
 
                     return new Response(rss, { headers: { ...xml, ETag: ETAG, 'Last-Modified': LAST_MODIFIED } });
+                case '/always-not-modified':
+                    return new Response(null, { status: 304 });
+                case '/redirect-without-location':
+                    return new Response(null, { status: 301 });
+                case '/moved-to-cached':
+                    return Response.redirect('/cached.xml', 301);
                 case '/latin1.xml':
                     return new Response(latin1, { headers: { 'Content-Type': 'text/xml; charset=ISO-8859-1' } });
                 case '/moved-permanently':

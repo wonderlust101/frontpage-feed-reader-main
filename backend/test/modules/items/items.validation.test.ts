@@ -92,13 +92,13 @@ describe('parseItemListQuery', () => {
     });
 
     test.each(['not-a-uuid', '', `${ID}x`])('feed=%p → 404 feed_not_found, like a feed the reader does not follow', (feed) => {
-        expect(rejection(() => parseItemListQuery({ feed }))).toMatchObject({ status: 404, code: 'feed_not_found' });
+        expect(rejection(() => parseItemListQuery({ feed }))).toMatchObject({ status: 404, code: 'feed_not_found', message: 'Feed not found' });
     });
 
     test.each(['not-a-uuid', '', 'Uncategorized', 'UNCATEGORIZED'])(
         'category=%p → 404 category_not_found (only the exact word means Uncategorized)',
         (category) => {
-            expect(rejection(() => parseItemListQuery({ category }))).toMatchObject({ status: 404, code: 'category_not_found' });
+            expect(rejection(() => parseItemListQuery({ category }))).toMatchObject({ status: 404, code: 'category_not_found', message: 'Category not found' });
         },
     );
 
@@ -115,6 +115,6 @@ describe('parseItemId', () => {
     });
 
     test.each(['not-a-uuid', '', 'counts', `${ID}x`])('%p → 404 not_found', (value) => {
-        expect(rejection(() => parseItemId(value))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(rejection(() => parseItemId(value))).toMatchObject({ status: 404, code: 'not_found', message: 'Item not found' });
     });
 });

@@ -28,7 +28,7 @@ describe('parseSubscriptionId', () => {
     });
 
     test.each(['not-a-uuid', '', `${ID}x`, '123'])('%p → 404 not_found, like an id that is not yours', (value) => {
-        expect(rejection(() => parseSubscriptionId(value))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(rejection(() => parseSubscriptionId(value))).toMatchObject({ status: 404, code: 'not_found', message: 'Subscription not found' });
     });
 });
 

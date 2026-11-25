@@ -63,9 +63,10 @@ function codeFor(to: string) {
 }
 
 // As production would build it (rate limits on, Secure cookies); restores the real env afterwards.
-function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN' | 'AUTH_COOKIE_PREFIX' | 'WEB_ORIGINS'>> = {}) {
+function createInProduction(overrides: Partial<Pick<typeof env, 'AUTH_URL' | 'AUTH_SECRET' | 'AUTH_COOKIE_DOMAIN' | 'AUTH_COOKIE_PREFIX' | 'WEB_ORIGINS'>> = {}) {
     const saved = {
         NODE_ENV: env.NODE_ENV,
+        AUTH_URL: env.AUTH_URL,
         AUTH_SECRET: env.AUTH_SECRET,
         AUTH_COOKIE_DOMAIN: env.AUTH_COOKIE_DOMAIN,
         AUTH_COOKIE_PREFIX: env.AUTH_COOKIE_PREFIX,
@@ -101,6 +102,20 @@ function wrongCode(code: string) {
 }
 
 describe('production settings guard', () => {
+    test('refuses to start without AUTH_URL', () => {
+        expect(() => createInProduction({ AUTH_URL: undefined })).toThrow('AUTH_URL is required in production');
+    });
+
+    test('reports AUTH_URL first when several settings are missing', () => {
+        const everythingMissing = { AUTH_URL: undefined, WEB_ORIGINS: [], AUTH_SECRET: undefined, AUTH_COOKIE_DOMAIN: undefined };
+
+        expect(() => createInProduction(everythingMissing)).toThrow('AUTH_URL is required in production');
+    });
+
+    test('reports WEB_ORIGIN before AUTH_SECRET and AUTH_COOKIE_DOMAIN', () => {
+        expect(() => createInProduction({ WEB_ORIGINS: [], AUTH_SECRET: undefined, AUTH_COOKIE_DOMAIN: undefined })).toThrow('WEB_ORIGIN is required');
+    });
+
     test('refuses to start without AUTH_SECRET', () => {
         expect(() => createInProduction({ AUTH_SECRET: undefined })).toThrow('AUTH_SECRET is required');
     });
