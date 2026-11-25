@@ -4,16 +4,15 @@ import { describe, expect, test } from 'bun:test';
 import { MAX_CUSTOM_TITLE_LENGTH } from '@frontpage/shared';
 import { parseSubscribeRequest, parseSubscriptionId, parseUpdateSubscriptionRequest } from '../../../src/modules/subscriptions/subscriptions.validation';
 import { httpErrorThrownBy } from '../../helpers/errors';
-
-const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
+import { SAMPLE_UUID } from '../../helpers/factories';
 
 describe('parseSubscriptionId', () => {
     test('accepts a UUID in any case', () => {
-        expect(parseSubscriptionId(ID)).toBe(ID);
-        expect(parseSubscriptionId(ID.toUpperCase())).toBe(ID.toUpperCase());
+        expect(parseSubscriptionId(SAMPLE_UUID)).toBe(SAMPLE_UUID);
+        expect(parseSubscriptionId(SAMPLE_UUID.toUpperCase())).toBe(SAMPLE_UUID.toUpperCase());
     });
 
-    test.each(['not-a-uuid', '', `${ID}x`, '123'])('%p → 404 not_found, like an id that is not yours', (value) => {
+    test.each(['not-a-uuid', '', `${SAMPLE_UUID}x`, '123'])('%p → 404 not_found, like an id that is not yours', (value) => {
         expect(httpErrorThrownBy(() => parseSubscriptionId(value))).toMatchObject({ status: 404, code: 'not_found', message: 'Subscription not found' });
     });
 });
@@ -24,7 +23,7 @@ describe('parseSubscribeRequest', () => {
     });
 
     test('keeps a category id or null', () => {
-        expect(parseSubscribeRequest({ url: 'a.test', categoryId: ID })).toEqual({ url: 'a.test', categoryId: ID });
+        expect(parseSubscribeRequest({ url: 'a.test', categoryId: SAMPLE_UUID })).toEqual({ url: 'a.test', categoryId: SAMPLE_UUID });
         expect(parseSubscribeRequest({ url: 'a.test', categoryId: null })).toEqual({ url: 'a.test', categoryId: null });
     });
 
@@ -66,15 +65,15 @@ describe('parseUpdateSubscriptionRequest', () => {
     });
 
     test('moves to a category, or to Uncategorized with null', () => {
-        expect(parseUpdateSubscriptionRequest({ categoryId: ID })).toEqual({ categoryId: ID });
+        expect(parseUpdateSubscriptionRequest({ categoryId: SAMPLE_UUID })).toEqual({ categoryId: SAMPLE_UUID });
         expect(parseUpdateSubscriptionRequest({ categoryId: null })).toEqual({ categoryId: null });
     });
 
     test('changes both fields at once and drops unknown ones', () => {
-        expect(parseUpdateSubscriptionRequest({ customTitle: 'A', categoryId: null, feedId: ID })).toEqual({ customTitle: 'A', categoryId: null });
+        expect(parseUpdateSubscriptionRequest({ customTitle: 'A', categoryId: null, feedId: SAMPLE_UUID })).toEqual({ customTitle: 'A', categoryId: null });
     });
 
-    test.each([{}, { feedId: ID }])('a body with neither field (%p) → 400 bad_request', (body) => {
+    test.each([{}, { feedId: SAMPLE_UUID }])('a body with neither field (%p) → 400 bad_request', (body) => {
         expect(httpErrorThrownBy(() => parseUpdateSubscriptionRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 

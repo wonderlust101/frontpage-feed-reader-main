@@ -26,6 +26,7 @@ test/
 │   ├── test-server.ts      ← startTestServer(): the Express app on a random port
 │   ├── feed-server.ts      ← fake upstream feed server (redirects, 304, timeouts, 4xx/5xx); serve() swaps a path's body
 │   ├── errors.ts           ← httpErrorFrom() / httpErrorThrownBy(): the HttpError a call rejects or throws with
+│   ├── factories.ts        ← newUser(db), newCategory(db, …) and SAMPLE_UUID, shared by the database tests
 │   ├── fixtures.ts         ← readFixture(), curatedFixtures
 │   └── test-db.ts          ← createTestDb(): in-memory Postgres (PGlite) with every migration applied
 └── fixtures/feeds/

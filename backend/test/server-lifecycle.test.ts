@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from 'bun:test';
+import { afterEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import { shutdown } from '../src/server-lifecycle';
 
 // A server whose close() finishes at once, as Node's does once open requests end.
@@ -11,6 +11,10 @@ function exitCodeOf(closeDatabase: () => Promise<void>): Promise<number> {
     });
 }
 
+afterEach(() => {
+    mock.restore();
+});
+
 describe('shutdown', () => {
     test('exits with 0 once the database is closed', async () => {
         const closeDatabase = mock(() => Promise.resolve());
@@ -20,16 +24,9 @@ describe('shutdown', () => {
     });
 
     test('still exits, with 1, when closing the database fails', async () => {
-        const logged = mock(() => {});
-        const realError = console.error;
+        const logged = spyOn(console, 'error').mockImplementation(() => {});
 
-        console.error = logged;
-
-        try {
-            expect(await exitCodeOf(() => Promise.reject(new Error('pool already ended')))).toBe(1);
-            expect(logged).toHaveBeenCalledWith('Shutdown failed:', 'pool already ended');
-        } finally {
-            console.error = realError;
-        }
+        expect(await exitCodeOf(() => Promise.reject(new Error('pool already ended')))).toBe(1);
+        expect(logged).toHaveBeenCalledWith('Shutdown failed:', 'pool already ended');
     });
 });

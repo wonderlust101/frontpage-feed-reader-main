@@ -3,8 +3,8 @@
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { startTestServer } from '../../helpers/test-server';
+import { SAMPLE_UUID } from '../../helpers/factories';
 
-const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
 const UNAUTHORIZED = { error: { code: 'unauthorized', message: 'Sign in to continue', retryable: false } };
 
 let server: Awaited<ReturnType<typeof startTestServer>>;
@@ -30,8 +30,8 @@ describe('/api/subscriptions signed out', () => {
     test.each([
         ['GET', ''],
         ['POST', ''],
-        ['PATCH', `/${ID}`],
-        ['DELETE', `/${ID}`],
+        ['PATCH', `/${SAMPLE_UUID}`],
+        ['DELETE', `/${SAMPLE_UUID}`],
     ])('%s %s → 401 unauthorized', async (method, path) => {
         const res = await send(method, path, method === 'POST' || method === 'PATCH' ? { url: 'https://a.test/feed', customTitle: 'A' } : undefined);
 

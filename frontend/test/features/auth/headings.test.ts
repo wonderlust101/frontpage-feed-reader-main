@@ -1,6 +1,7 @@
 // signInArrival: which greeting the sign-in page shows, read from ?reset=. codeStepHeading: what the code step says.
 
 import { describe, expect, test } from 'bun:test';
+import { CODE_LENGTH, CODE_LIFETIME_MINUTES } from '@frontpage/shared';
 import { codeStepHeading, signInArrival } from '../../../src/features/auth/headings';
 
 describe('signInArrival', () => {
@@ -17,6 +18,8 @@ describe('signInArrival', () => {
 
 describe('codeStepHeading', () => {
     test('says where the code went and how long it lasts', () => {
-        expect(codeStepHeading('ada@example.com').description).toBe('We sent a 6-digit code to ada@example.com. It expires in 5 minutes.');
+        expect(codeStepHeading('ada@example.com').description).toBe(
+            `We sent a ${CODE_LENGTH}-digit code to ada@example.com. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
+        );
     });
 });

@@ -4,8 +4,8 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { itemsRouter } from '../../../src/modules/items/items.routes';
 import { startTestServer } from '../../helpers/test-server';
+import { SAMPLE_UUID } from '../../helpers/factories';
 
-const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
 const UNAUTHORIZED = { error: { code: 'unauthorized', message: 'Sign in to continue', retryable: false } };
 
 let server: Awaited<ReturnType<typeof startTestServer>>;
@@ -24,7 +24,7 @@ function get(path: string) {
 }
 
 describe('/api/items signed out', () => {
-    test.each(['', '/counts', `/${ID}`])('GET /api/items%s → 401 unauthorized', async (path) => {
+    test.each(['', '/counts', `/${SAMPLE_UUID}`])('GET /api/items%s → 401 unauthorized', async (path) => {
         const res = await get(path);
 
         expect(res.status).toBe(401);

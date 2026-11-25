@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { bookmarks, categories, feeds, itemReadStates, items, subscriptions, userPreferences, users } from '../../src/db/schema';
 import { createTestDb } from '../helpers/test-db';
+import { newUser } from '../helpers/factories';
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
 
@@ -14,15 +15,6 @@ beforeAll(async () => {
 afterAll(async () => {
     await testDb.close();
 });
-
-// Inserts a user and returns their id.
-async function newUser(): Promise<string> {
-    const id = crypto.randomUUID();
-
-    await testDb.db.insert(users).values({ id, name: 'Test User', email: `${id}@example.com` });
-
-    return id;
-}
 
 // Inserts a feed and returns its id.
 async function newFeed(): Promise<string> {
@@ -93,7 +85,7 @@ describe('items', () => {
 
 describe('foreign keys', () => {
     test('a bookmarked item and a followed feed cannot be deleted', async () => {
-        const user = await newUser();
+        const user = await newUser(testDb.db);
         const feedId = await newFeed();
         const item = await newItem(feedId);
 
@@ -105,7 +97,7 @@ describe('foreign keys', () => {
     });
 
     test('deleting a user deletes all of their data, but not the shared feeds and items', async () => {
-        const user = await newUser();
+        const user = await newUser(testDb.db);
         const feedId = await newFeed();
         const item = await newItem(feedId);
         const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
@@ -124,7 +116,7 @@ describe('foreign keys', () => {
     });
 
     test('deleting a category moves its subscriptions to Uncategorized', async () => {
-        const user = await newUser();
+        const user = await newUser(testDb.db);
         const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
         const [sub] = await testDb.db
             .insert(subscriptions)
@@ -142,7 +134,7 @@ describe('updated_at', () => {
     test('moves forward when a row is updated through Drizzle', async () => {
         const [category] = await testDb.db
             .insert(categories)
-            .values({ userId: await newUser(), name: 'News', position: 0 })
+            .values({ userId: await newUser(testDb.db), name: 'News', position: 0 })
             .returning();
 
         await Bun.sleep(5);
@@ -154,15 +146,15 @@ describe('updated_at', () => {
 
 describe('checks and unique names', () => {
     test('category names are unique per user ignoring case', async () => {
-        const user = await newUser();
+        const user = await newUser(testDb.db);
 
         await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 });
         expect(await errorCode(testDb.db.insert(categories).values({ userId: user, name: 'news', position: 1 }))).toBe('23505');
-        await testDb.db.insert(categories).values({ userId: await newUser(), name: 'news', position: 0 });
+        await testDb.db.insert(categories).values({ userId: await newUser(testDb.db), name: 'news', position: 0 });
     });
 
     test('preferences reject an unsupported refresh interval or order', async () => {
-        const user = await newUser();
+        const user = await newUser(testDb.db);
 
         expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, refreshIntervalMinutes: 45 }))).toBe('23514');
         expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, itemOrder: 'random' as 'newest' }))).toBe('23514');

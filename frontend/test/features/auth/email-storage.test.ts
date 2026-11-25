@@ -101,7 +101,9 @@ describe('sign-in email', () => {
         rememberSignInEmail('ada@example.com');
         Date.now = () => realNow() + HOUR_MS + 1;
         expect(takeSignInEmail()).toBeNull();
-        expect(localStorage.getItem(SIGN_IN_KEY)).toBeNull();
+
+        Date.now = realNow;
+        expect(readSignInEmail()).toBeNull();
     });
 
     test('is null for broken or unexpected saved values', () => {

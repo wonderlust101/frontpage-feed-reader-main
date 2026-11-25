@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { HttpError } from '../../../src/errors';
 import { fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed/fetch';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
+import { httpErrorFrom } from '../../helpers/errors';
 
 let upstream: ReturnType<typeof startFeedServer>;
 const opts: FetchFeedOptions = { allowLoopback: true, timeoutMs: 2_000 };
@@ -16,18 +17,14 @@ afterAll(async () => {
 
 // Asserts the promise rejects with an HttpError of this `code` (and `retryable`, if given) and returns the error for further checks.
 async function expectError(promise: Promise<unknown>, code: HttpError['code'], retryable?: boolean) {
-    const err = await promise.then(
-        () => null,
-        (e: unknown) => e,
-    );
+    const err = await httpErrorFrom(promise);
 
-    expect(err).toBeInstanceOf(HttpError);
-    expect((err as HttpError).code).toBe(code);
+    expect(err.code).toBe(code);
 
     if (retryable !== undefined)
-        expect((err as HttpError).retryable).toBe(retryable);
+        expect(err.retryable).toBe(retryable);
 
-    return err as HttpError;
+    return err;
 }
 
 describe('fetchFeed', () => {

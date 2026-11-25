@@ -1,22 +1,21 @@
 import { describe, expect, test } from 'bun:test';
 import { isUuid } from '../../src/lib/uuid';
-
-const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
+import { SAMPLE_UUID } from '../helpers/factories';
 
 describe('isUuid', () => {
     test('accepts a UUID in lower or upper case', () => {
-        expect(isUuid(ID)).toBe(true);
-        expect(isUuid(ID.toUpperCase())).toBe(true);
+        expect(isUuid(SAMPLE_UUID)).toBe(true);
+        expect(isUuid(SAMPLE_UUID.toUpperCase())).toBe(true);
     });
 
     test.each([
         ['an empty string', ''],
-        ['one character short', ID.slice(1)],
-        ['one character long', `${ID}a`],
-        ['a missing hyphen', ID.replace('-', '0')],
-        ['braces around it', `{${ID}}`],
-        ['a non-hex character', ID.replace('b', 'g')],
-        ['surrounding spaces', ` ${ID} `],
+        ['one character short', SAMPLE_UUID.slice(1)],
+        ['one character long', `${SAMPLE_UUID}a`],
+        ['a missing hyphen', SAMPLE_UUID.replace('-', '0')],
+        ['braces around it', `{${SAMPLE_UUID}}`],
+        ['a non-hex character', SAMPLE_UUID.replace('b', 'g')],
+        ['surrounding spaces', ` ${SAMPLE_UUID} `],
     ])('rejects %s', (_case, value) => {
         expect(isUuid(value)).toBe(false);
     });
@@ -25,6 +24,6 @@ describe('isUuid', () => {
         expect(isUuid(42)).toBe(false);
         expect(isUuid(null)).toBe(false);
         expect(isUuid(undefined)).toBe(false);
-        expect(isUuid([ID])).toBe(false);
+        expect(isUuid([SAMPLE_UUID])).toBe(false);
     });
 });

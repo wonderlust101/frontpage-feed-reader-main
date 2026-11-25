@@ -3,7 +3,7 @@
 
 import { afterAll, beforeAll, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
-import { bookmarks, feeds, itemReadStates, items, starterFeeds, subscriptions, users } from '../../../src/db/schema';
+import { bookmarks, feeds, itemReadStates, items, starterFeeds, subscriptions } from '../../../src/db/schema';
 import { HttpError } from '../../../src/errors';
 import { ingestFeed } from '../../../src/modules/feeds/feeds.ingest';
 import * as feedsService from '../../../src/modules/feeds/feeds.service';
@@ -11,6 +11,7 @@ import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server'
 import { readFixture } from '../../helpers/fixtures';
 import { createTestDb } from '../../helpers/test-db';
 import { httpErrorFrom } from '../../helpers/errors';
+import { newUser } from '../../helpers/factories';
 
 type TestItem = { guid: string; title: string; date?: string };
 
@@ -62,15 +63,6 @@ async function itemsOf(feedId: string) {
     const rows = await testDb.db.select().from(items).where(eq(items.feedId, feedId));
 
     return new Map(rows.map((row) => [row.guid, row]));
-}
-
-// Inserts a user and returns their id.
-async function newUser(): Promise<string> {
-    const id = crypto.randomUUID();
-
-    await testDb.db.insert(users).values({ id, name: 'Reader', email: `${id}@example.com` });
-
-    return id;
 }
 
 describe('first ingest', () => {
@@ -457,8 +449,8 @@ describe('redirects', () => {
             .values({ ...oldItem, guid: 'only-in-old-feed', title: 'Old-only article' })
             .returning();
 
-        const both = await newUser();
-        const oldOnly = await newUser();
+        const both = await newUser(testDb.db);
+        const oldOnly = await newUser(testDb.db);
 
         await testDb.db.insert(subscriptions).values([
             { userId: both, feedId: keep.feedId, customTitle: 'Kept' },
@@ -502,7 +494,7 @@ describe('redirects', () => {
             .values({ feedId: old!.id, guid: sharedGuid, title: 'Old copy', summary: '', contentHtml: '', hasFullContent: false, contentHash: 'old' })
             .returning();
 
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
 
         await testDb.db.insert(bookmarks).values([
             { userId: reader, itemId: keptItem.id },

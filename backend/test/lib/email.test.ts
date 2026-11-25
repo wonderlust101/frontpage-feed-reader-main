@@ -1,7 +1,7 @@
 // sendEmail's no-API-key paths (Mailpit, log, skip) and escapeHtml. Real sending is not tested (it would need the network
 // and a Resend key); Mailpit is a local stub server that records what it receives.
 
-import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test';
+import { afterAll, afterEach, beforeAll, describe, expect, mock, spyOn, test } from 'bun:test';
 import { escapeHtml, sendEmail } from '../../src/lib/email';
 
 const EMAIL = { to: 'a@example.com', subject: 'Hello', text: 'Hi there', html: '<p>Hi there</p>' };
@@ -19,6 +19,12 @@ beforeAll(() => {
             return Response.json({ ID: 'stub' }, { status: mailpitStatus });
         },
     });
+});
+
+// Runs even when an assertion fails, so a spy or a refusing Mailpit never leaks into the next test.
+afterEach(() => {
+    mock.restore();
+    mailpitStatus = 200;
 });
 
 afterAll(async () => {
@@ -43,11 +49,11 @@ describe('sendEmail to Mailpit (no API key, MAILPIT_URL set)', () => {
 
     test('is never used in production', async () => {
         const before = mailpitRequests.length;
-        const warn = spyOn(console, 'warn').mockImplementation(() => {});
+
+        spyOn(console, 'warn').mockImplementation(() => {});
 
         expect(await sendEmail(EMAIL, { apiKey: undefined, from: 'x@example.com', production: true, mailpitUrl: mailpit.url.href })).toBe('skipped');
         expect(mailpitRequests.length).toBe(before);
-        warn.mockRestore();
     });
 
     test('throws when Mailpit refuses the email', async () => {
@@ -55,7 +61,6 @@ describe('sendEmail to Mailpit (no API key, MAILPIT_URL set)', () => {
         await expect(sendEmail(EMAIL, { apiKey: undefined, from: undefined, production: false, mailpitUrl: mailpit.url.href })).rejects.toThrow(
             'Mailpit answered 400',
         );
-        mailpitStatus = 200;
     });
 });
 
@@ -65,7 +70,6 @@ describe('sendEmail without an API key', () => {
 
         expect(await sendEmail(EMAIL, { apiKey: undefined, from: 'x@example.com', production: false })).toBe('logged');
         expect(log.mock.calls[0]?.[0]).toContain('Hi there');
-        log.mockRestore();
     });
 
     test('skips with a warning in production', async () => {
@@ -73,7 +77,6 @@ describe('sendEmail without an API key', () => {
 
         expect(await sendEmail(EMAIL, { apiKey: undefined, from: 'x@example.com', production: true })).toBe('skipped');
         expect(warn).toHaveBeenCalled();
-        warn.mockRestore();
     });
 });
 

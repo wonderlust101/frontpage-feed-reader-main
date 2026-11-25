@@ -5,6 +5,7 @@ import { decodeFeed } from '../../../src/lib/feed/decode';
 import { MAX_ITEMS, normalizeFeed } from '../../../src/lib/feed/normalize';
 import { limitItems } from '../../../src/lib/feed/raw-xml';
 import { curatedFixtures, readFixture } from '../../helpers/fixtures';
+import { httpErrorThrownBy } from '../../helpers/errors';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');
 const FEED_URL = 'https://odd.example/feed.xml';
@@ -15,17 +16,8 @@ function load(path: string, contentType?: string, now = NOW): NormalizedFeed {
 }
 
 // Asserts `fn` throws an HttpError with this `code`.
-function expectHttpError(fn: () => unknown, code: string) {
-    try {
-        fn();
-    } catch (err) {
-        expect(err).toBeInstanceOf(HttpError);
-        expect((err as HttpError).code).toBe(code as HttpError['code']);
-
-        return;
-    }
-
-    throw new Error(`expected HttpError(${code})`);
+function expectHttpError(fn: () => unknown, code: HttpError['code']) {
+    expect(httpErrorThrownBy(fn).code).toBe(code);
 }
 
 // Asserts a feed is complete and safe: titled items with ids, URLs and valid ISO dates, short summaries, no scripts, newest first.

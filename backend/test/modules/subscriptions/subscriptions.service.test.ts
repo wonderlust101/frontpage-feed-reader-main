@@ -3,16 +3,16 @@
 
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { and, eq, sql } from 'drizzle-orm';
-import { bookmarks, categories, feeds, itemReadStates, items, subscriptions, users } from '../../../src/db/schema';
+import { bookmarks, feeds, itemReadStates, items, subscriptions } from '../../../src/db/schema';
 import { listSubscriptions, subscribe, unsubscribe, updateSubscription } from '../../../src/modules/subscriptions/subscriptions.service';
 import { startFeedServer } from '../../helpers/feed-server';
 import { createTestDb } from '../../helpers/test-db';
 import { httpErrorFrom } from '../../helpers/errors';
+import { SAMPLE_UUID, newCategory, newUser } from '../../helpers/factories';
 
 const T1 = new Date('2026-03-01T10:00:00.000Z');
 const MINUTE_MS = 60 * 1000;
 const DAY_MS = 24 * 60 * MINUTE_MS;
-const RANDOM_ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
 let server: ReturnType<typeof startFeedServer>;
@@ -50,22 +50,6 @@ function serveFeed(path: string, title: string, opts: { image?: string } = {}): 
     return `${server.url}${path}`;
 }
 
-// Inserts a reader and returns their id.
-async function newUser(): Promise<string> {
-    const id = crypto.randomUUID();
-
-    await testDb.db.insert(users).values({ id, name: 'Reader', email: `${id}@example.com` });
-
-    return id;
-}
-
-// Inserts a category for `userId` and returns its id.
-async function newCategory(userId: string, name: string): Promise<string> {
-    const [row] = await testDb.db.insert(categories).values({ userId, name, position: 0 }).returning({ id: categories.id });
-
-    return row!.id;
-}
-
 // Every stored subscription row of `userId`.
 function subscriptionRowsOf(userId: string) {
     return testDb.db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
@@ -74,7 +58,7 @@ function subscriptionRowsOf(userId: string) {
 describe('subscribe', () => {
     test('fetches and stores a new feed, and answers with its title, description, icon, health and last success', async () => {
         const url = serveFeed('/new.xml', 'CSS Weekly', { image: 'https://site.example/logo.png' });
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
 
         const subscription = await subscribe(testDb.db, reader, { url }, T1);
 
@@ -97,7 +81,7 @@ describe('subscribe', () => {
     });
 
     test("falls back to the site's /favicon.ico when the feed has no image", async () => {
-        const subscription = await subscribe(testDb.db, await newUser(), { url: serveFeed('/no-image.xml', 'Plain') }, T1);
+        const subscription = await subscribe(testDb.db, await newUser(testDb.db), { url: serveFeed('/no-image.xml', 'Plain') }, T1);
 
         expect(subscription.iconUrl).toBe('https://site.example/favicon.ico');
     });
@@ -105,9 +89,9 @@ describe('subscribe', () => {
     test('reuses a stored feed fetched successfully under 15 minutes ago, without fetching it again', async () => {
         const url = serveFeed('/fresh.xml', 'Fresh');
 
-        await subscribe(testDb.db, await newUser(), { url }, T1);
+        await subscribe(testDb.db, await newUser(testDb.db), { url }, T1);
 
-        const second = await subscribe(testDb.db, await newUser(), { url }, after(14 * MINUTE_MS));
+        const second = await subscribe(testDb.db, await newUser(testDb.db), { url }, after(14 * MINUTE_MS));
 
         expect(server.hits['/fresh.xml']).toBe(1);
         expect(second.lastSuccessAt).toBe(T1.toISOString());
@@ -116,9 +100,9 @@ describe('subscribe', () => {
     test('fetches a stored feed again when its last success is 15+ minutes old', async () => {
         const url = serveFeed('/older.xml', 'Older');
 
-        await subscribe(testDb.db, await newUser(), { url }, T1);
+        await subscribe(testDb.db, await newUser(testDb.db), { url }, T1);
 
-        const second = await subscribe(testDb.db, await newUser(), { url }, after(20 * MINUTE_MS));
+        const second = await subscribe(testDb.db, await newUser(testDb.db), { url }, after(20 * MINUTE_MS));
 
         expect(server.hits['/older.xml']).toBe(2);
         expect(second.lastSuccessAt).toBe(after(20 * MINUTE_MS).toISOString());
@@ -127,17 +111,17 @@ describe('subscribe', () => {
     test('fetches a stored feed again when its last fetch failed, even a minute later', async () => {
         const url = serveFeed('/flaky.xml', 'Flaky');
 
-        await subscribe(testDb.db, await newUser(), { url }, T1);
+        await subscribe(testDb.db, await newUser(testDb.db), { url }, T1);
         await testDb.db.update(feeds).set({ lastErrorCode: 'http_5xx', lastErrorMessage: 'boom', consecutiveFailures: 1 }).where(eq(feeds.url, url));
 
-        const second = await subscribe(testDb.db, await newUser(), { url }, after(MINUTE_MS));
+        const second = await subscribe(testDb.db, await newUser(testDb.db), { url }, after(MINUTE_MS));
 
         expect(server.hits['/flaky.xml']).toBe(2);
         expect(second).toMatchObject({ health: 'active', lastError: null });
     });
 
     test('a page that is not a feed → 422 not_a_feed, and nothing is stored', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
 
         const err = await httpErrorFrom(subscribe(testDb.db, reader, { url: `${server.url}/html` }, T1));
 
@@ -147,19 +131,19 @@ describe('subscribe', () => {
     });
 
     test('a feed that is gone → 502 http_4xx with the upstream status, and nothing is stored', async () => {
-        const err = await httpErrorFrom(subscribe(testDb.db, await newUser(), { url: `${server.url}/gone` }, T1));
+        const err = await httpErrorFrom(subscribe(testDb.db, await newUser(testDb.db), { url: `${server.url}/gone` }, T1));
 
         expect(err).toMatchObject({ status: 502, code: 'http_4xx', upstreamStatus: 410 });
         expect(await testDb.db.select().from(feeds)).toEqual([]);
     });
 
     test('an empty URL → 400 invalid_url', async () => {
-        expect(await httpErrorFrom(subscribe(testDb.db, await newUser(), { url: '' }, T1))).toMatchObject({ status: 400, code: 'invalid_url' });
+        expect(await httpErrorFrom(subscribe(testDb.db, await newUser(testDb.db), { url: '' }, T1))).toMatchObject({ status: 400, code: 'invalid_url' });
     });
 
     test("subscribes into one of the reader's categories", async () => {
-        const reader = await newUser();
-        const design = await newCategory(reader, 'Design');
+        const reader = await newUser(testDb.db);
+        const design = await newCategory(testDb.db, reader, 'Design');
 
         const subscription = await subscribe(testDb.db, reader, { url: serveFeed('/design.xml', 'Design'), categoryId: design }, T1);
 
@@ -169,7 +153,7 @@ describe('subscribe', () => {
     test('a categoryId that does not exist → 404 category_not_found, before any fetch', async () => {
         const url = serveFeed('/nowhere.xml', 'Nowhere');
 
-        const err = await httpErrorFrom(subscribe(testDb.db, await newUser(), { url, categoryId: RANDOM_ID }, T1));
+        const err = await httpErrorFrom(subscribe(testDb.db, await newUser(testDb.db), { url, categoryId: SAMPLE_UUID }, T1));
 
         expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
         expect(server.hits['/nowhere.xml']).toBeUndefined();
@@ -178,7 +162,7 @@ describe('subscribe', () => {
 
 describe('subscribing to a feed the reader already follows', () => {
     test('→ 409 already_subscribed with the existing subscription id, without fetching again', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
         const url = serveFeed('/twice.xml', 'Twice');
         const first = await subscribe(testDb.db, reader, { url }, T1);
 
@@ -190,7 +174,7 @@ describe('subscribing to a feed the reader already follows', () => {
     });
 
     test('→ 409 also when a different URL permanently redirects to it', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
         const first = await subscribe(testDb.db, reader, { url: `${server.url}/feed.xml` }, T1);
 
         const err = await httpErrorFrom(subscribe(testDb.db, reader, { url: `${server.url}/moved-permanently` }, T1));
@@ -200,7 +184,7 @@ describe('subscribing to a feed the reader already follows', () => {
     });
 
     test('two subscribes racing for the same feed → one subscription and one 409', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
         const url = serveFeed('/race.xml', 'Race');
 
         const results = await Promise.allSettled([subscribe(testDb.db, reader, { url }, T1), subscribe(testDb.db, reader, { url }, T1)]);
@@ -215,11 +199,11 @@ describe('subscribing to a feed the reader already follows', () => {
 
 describe('listSubscriptions', () => {
     test('a new reader has none', async () => {
-        expect(await listSubscriptions(testDb.db, await newUser(), T1)).toEqual([]);
+        expect(await listSubscriptions(testDb.db, await newUser(testDb.db), T1)).toEqual([]);
     });
 
     test('sorts by the title the reader sees (custom title first), ignoring case', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
 
         await subscribe(testDb.db, reader, { url: serveFeed('/beta.xml', 'beta') }, T1);
         await subscribe(testDb.db, reader, { url: serveFeed('/alpha.xml', 'Alpha') }, T1);
@@ -233,7 +217,7 @@ describe('listSubscriptions', () => {
     });
 
     test("derives each feed's health and reports the last error and last success", async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
         const now = after(10 * DAY_MS);
 
         for (const name of ['active', 'stale', 'error', 'dead'])
@@ -262,7 +246,7 @@ describe('listSubscriptions', () => {
     });
 
     test('costs one query however many subscriptions there are', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
 
         for (const name of ['q1', 'q2', 'q3'])
             await subscribe(testDb.db, reader, { url: serveFeed(`/${name}.xml`, name) }, T1);
@@ -277,7 +261,7 @@ describe('listSubscriptions', () => {
 
 describe('updateSubscription', () => {
     test("renames, then clearing the custom title shows the feed's own title again", async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
         const subscription = await subscribe(testDb.db, reader, { url: serveFeed('/rename.xml', 'CSS-Tricks') }, T1);
 
         const renamed = await updateSubscription(testDb.db, reader, subscription.id, { customTitle: 'My CSS' }, T1);
@@ -290,8 +274,8 @@ describe('updateSubscription', () => {
     });
 
     test('moves to a category and back to Uncategorized, leaving the custom title alone', async () => {
-        const reader = await newUser();
-        const design = await newCategory(reader, 'Design');
+        const reader = await newUser(testDb.db);
+        const design = await newCategory(testDb.db, reader, 'Design');
         const subscription = await subscribe(testDb.db, reader, { url: serveFeed('/move.xml', 'Move') }, T1);
 
         await updateSubscription(testDb.db, reader, subscription.id, { customTitle: 'Mine' }, T1);
@@ -308,8 +292,8 @@ describe('updateSubscription', () => {
 
 describe('unsubscribe', () => {
     test("removes the subscription and the reader's read marks on that feed; keeps bookmarks, the feed and everyone else's data", async () => {
-        const reader = await newUser();
-        const other = await newUser();
+        const reader = await newUser(testDb.db);
+        const other = await newUser(testDb.db);
         const leaving = await subscribe(testDb.db, reader, { url: serveFeed('/leave.xml', 'Leave') }, T1);
         const staying = await subscribe(testDb.db, reader, { url: serveFeed('/stay.xml', 'Stay') }, T1);
 
@@ -340,7 +324,7 @@ describe('unsubscribe', () => {
     });
 
     test('unsubscribing twice → 404 not_found the second time', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
         const subscription = await subscribe(testDb.db, reader, { url: serveFeed('/again.xml', 'Again') }, T1);
 
         await unsubscribe(testDb.db, reader, subscription.id);
@@ -351,8 +335,8 @@ describe('unsubscribe', () => {
 
 describe('only the owner can touch a subscription', () => {
     test("another reader can't rename or move it (404 not_found), and it stays unchanged", async () => {
-        const owner = await newUser();
-        const intruder = await newUser();
+        const owner = await newUser(testDb.db);
+        const intruder = await newUser(testDb.db);
         const subscription = await subscribe(testDb.db, owner, { url: serveFeed('/owned.xml', 'Owned') }, T1);
 
         const renaming = await httpErrorFrom(updateSubscription(testDb.db, intruder, subscription.id, { customTitle: 'Mine now' }, T1));
@@ -364,23 +348,23 @@ describe('only the owner can touch a subscription', () => {
     });
 
     test("another reader can't unsubscribe it (404 not_found), and it is still there", async () => {
-        const owner = await newUser();
+        const owner = await newUser(testDb.db);
         const subscription = await subscribe(testDb.db, owner, { url: serveFeed('/keep.xml', 'Keep') }, T1);
 
-        expect(await httpErrorFrom(unsubscribe(testDb.db, await newUser(), subscription.id))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(await httpErrorFrom(unsubscribe(testDb.db, await newUser(testDb.db), subscription.id))).toMatchObject({ status: 404, code: 'not_found' });
         expect(await subscriptionRowsOf(owner)).toHaveLength(1);
     });
 
     test('an id that matches no subscription → 404 not_found for update and unsubscribe', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
 
-        expect(await httpErrorFrom(updateSubscription(testDb.db, reader, RANDOM_ID, { customTitle: 'X' }, T1))).toMatchObject({ status: 404, code: 'not_found' });
-        expect(await httpErrorFrom(unsubscribe(testDb.db, reader, RANDOM_ID))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(await httpErrorFrom(updateSubscription(testDb.db, reader, SAMPLE_UUID, { customTitle: 'X' }, T1))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(await httpErrorFrom(unsubscribe(testDb.db, reader, SAMPLE_UUID))).toMatchObject({ status: 404, code: 'not_found' });
     });
 
     test("a reader can't subscribe into another reader's category (404 category_not_found), and nothing is fetched", async () => {
-        const othersCategory = await newCategory(await newUser(), 'Private');
-        const reader = await newUser();
+        const othersCategory = await newCategory(testDb.db, await newUser(testDb.db), 'Private');
+        const reader = await newUser(testDb.db);
         const url = serveFeed('/sneaky.xml', 'Sneaky');
 
         const err = await httpErrorFrom(subscribe(testDb.db, reader, { url, categoryId: othersCategory }, T1));
@@ -391,8 +375,8 @@ describe('only the owner can touch a subscription', () => {
     });
 
     test("a reader can't move their own subscription into another reader's category, and it stays where it was", async () => {
-        const othersCategory = await newCategory(await newUser(), 'Private');
-        const reader = await newUser();
+        const othersCategory = await newCategory(testDb.db, await newUser(testDb.db), 'Private');
+        const reader = await newUser(testDb.db);
         const subscription = await subscribe(testDb.db, reader, { url: serveFeed('/mine.xml', 'Mine') }, T1);
 
         const err = await httpErrorFrom(updateSubscription(testDb.db, reader, subscription.id, { categoryId: othersCategory }, T1));
@@ -404,8 +388,8 @@ describe('only the owner can touch a subscription', () => {
     });
 
     test('each reader lists only their own subscriptions, even when they follow the same feed', async () => {
-        const ada = await newUser();
-        const grace = await newUser();
+        const ada = await newUser(testDb.db);
+        const grace = await newUser(testDb.db);
         const url = serveFeed('/shared.xml', 'Shared');
         const adas = await subscribe(testDb.db, ada, { url }, T1);
         const graces = await subscribe(testDb.db, grace, { url }, T1);
