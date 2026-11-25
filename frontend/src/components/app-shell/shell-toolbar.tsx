@@ -5,7 +5,7 @@
 
 import type { ReactNode } from 'react';
 import { CategoryTag } from '@/components/ui/tags';
-import type { ShellCategory, ShellView } from './nav-entries';
+import { VIEW_COLOR, type ShellCategory, type ShellView } from './nav-entries';
 import { SearchPalette } from './search-palette';
 import type { SearchFn, SearchSource } from './search-results';
 import { useShellPlace } from './use-shell-place';
@@ -19,20 +19,18 @@ type ShellToolbarProps = {
     search?: SearchFn;
 };
 
-const VIEW_COLOR = 'var(--color-field-lemon)';
-
 export function ShellToolbar({ homeHref, views, categories, sources, drawer, search }: ShellToolbarProps) {
     const place = useShellPlace(homeHref, views, categories);
     const category = categories.find((entry) => entry.href === place.category);
     const view = views.find((entry) => entry.href === place.view);
 
-    // The current category, else the current view, as a tag in its field.
     let tag: { name: string; color: string } | null = null;
 
-    if (category)
+    if (category) {
         tag = { name: category.name, color: category.color };
-    else if (view)
+    } else if (view) {
         tag = { name: view.label, color: VIEW_COLOR };
+    }
 
     return (
         <header className="@container sticky top-0 z-20 flex h-15 items-center gap-2 border-b border-edge bg-workspace px-3 sm:gap-3 sm:px-5">

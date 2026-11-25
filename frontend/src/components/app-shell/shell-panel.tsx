@@ -1,5 +1,3 @@
-'use client';
-
 // The category panel (lg up). Collapsing animates its width while the inner column keeps its own, so nothing reflows.
 
 import { CategoryList, type RowMenu } from './category-list';

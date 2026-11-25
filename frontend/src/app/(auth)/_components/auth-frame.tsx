@@ -9,6 +9,7 @@ import { AuthGuestLink, AuthHeadingProvider, AuthPanelText, AuthSwitchLink } fro
 import type { SwitchLinkTarget } from '@/features/auth/hooks/use-auth-step';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import type { AuthPanel } from '../_data/panels';
+import { SkipLink } from '@/components/ui/skip-link';
 
 type AuthFrameProps = {
     panel: AuthPanel;
@@ -23,12 +24,9 @@ export function AuthFrame({ panel, panelText, heading, aside, children }: AuthFr
     return (
         <AuthHeadingProvider>
             <div className="flex flex-1">
-                <a
-                    href="#form"
-                    className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-control focus:bg-ink focus:px-5 focus:py-3 focus:text-ui focus:font-semibold focus:text-ground"
-                >
+                <SkipLink href="#form" className="focus:top-4 focus:left-4">
                     Skip to form
-                </a>
+                </SkipLink>
                 <div className="grid w-full lg:min-h-dvh lg:grid-cols-[1.15fr_1fr] xl:grid-cols-2">
                     <header
                         className="sticker-field on-field relative flex flex-col overflow-hidden text-on-field lg:order-2 lg:m-4 lg:ml-0 lg:rounded-stage"

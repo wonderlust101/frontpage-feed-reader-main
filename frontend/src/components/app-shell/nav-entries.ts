@@ -20,6 +20,9 @@ export type ShellCategory = {
 
 export type ShellPlace = { view: string | null; category: string | null };
 
+// Views (and "All items") are drawn in Lemon, Frontpage's own field.
+export const VIEW_COLOR = 'var(--color-field-lemon)';
+
 const MAX_SHOWN_COUNT = 99;
 
 // The longest href that is the pathname or its parent, so /user matches /user/saved but never /username; else null.
@@ -44,7 +47,6 @@ export function shellPlace(pathname: string, homeHref: string, viewHrefs: readon
     return { view: inCategory ? null : findCurrentHref(pathname, viewHrefs), category };
 }
 
-// null when there is nothing to show (null, undefined or 0), "99+" above 99.
 export function formatCount(count: number | null | undefined): string | null {
     if (!count)
         return null;

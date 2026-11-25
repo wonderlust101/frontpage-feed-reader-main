@@ -1,6 +1,7 @@
 // A native checkbox drawn as an ink square; the whole label is the hit area.
 
 import type { ComponentProps } from 'react';
+import { CheckMark } from './check-mark';
 
 type CheckboxProps = Omit<ComponentProps<'input'>, 'type' | 'id'> & {
     id: string;
@@ -21,9 +22,7 @@ export function Checkbox({ id, label, hint, className = '', ...inputProps }: Che
                     className="peer size-5 cursor-pointer appearance-none rounded-tag border-[1.5px] border-control-edge bg-control-fill checked:border-ink checked:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
                     {...inputProps}
                 />
-                <svg aria-hidden="true" viewBox="0 0 14 14" className="pointer-events-none absolute size-3.5 text-ground opacity-0 peer-checked:opacity-100">
-                    <path d="M2.5 7.5L5.5 10.5L11.5 3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <CheckMark aria-hidden="true" className="pointer-events-none absolute size-3.5 text-ground opacity-0 peer-checked:opacity-100" />
             </span>
             <span className="text-ui font-semibold">{label}</span>
             {hint && (

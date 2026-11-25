@@ -1,6 +1,5 @@
 // Native radios, so Tab enters on the chosen swatch and the arrow keys move and choose.
 
-import type { CSSProperties } from 'react';
 import { PICKABLE_FIELDS, type FieldId } from '../fields';
 
 type FieldPickerProps = {
@@ -23,7 +22,7 @@ export function FieldPicker({ name, legend, value, onChange }: FieldPickerProps)
                             title={field.name}
                             className="field-swatch"
                             data-field={field.id}
-                            style={{ '--swatch-field': field.color } as CSSProperties}
+                            style={{ '--swatch-field': field.color }}
                         >
                             <input
                                 type="radio"

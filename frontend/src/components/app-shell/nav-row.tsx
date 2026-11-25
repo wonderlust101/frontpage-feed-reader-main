@@ -2,7 +2,7 @@
 // row's quick-actions `menu` sits beside the link, never inside it.
 
 import Link from 'next/link';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { formatCount } from './nav-entries';
 
 type NavRowProps = {
@@ -32,7 +32,7 @@ export function NavRow({ href, label, lead, color, isCurrent, count, menu }: Nav
             href={href}
             aria-current={isCurrent ? 'page' : undefined}
             className={linkClasses}
-            style={isCurrent ? ({ '--row-field': color } as CSSProperties) : undefined}
+            style={isCurrent ? { '--row-field': color } : undefined}
         >
             {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" />}
             {lead}

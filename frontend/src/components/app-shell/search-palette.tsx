@@ -19,6 +19,34 @@ type SearchPaletteProps = {
     search?: SearchFn;
 };
 
+type PaletteTriggerProps = {
+    shortcut: string;
+    onOpen: () => void;
+};
+
+type ScopeSelectProps = {
+    id: string;
+    categories: ShellCategory[];
+    scopeHref: string | null;
+    onChange: (scopeHref: string | null) => void;
+};
+
+type ResultListProps = {
+    group: ResultGroup;
+    listId: string;
+    query: string;
+    activeIndex: number;
+    onOpen: (option: ResultOption) => void;
+    onActivate: (index: number) => void;
+};
+
+type NoResultsProps = {
+    query: string;
+    scopeHref: string | null;
+    canSearchArticles: boolean;
+    onSearchEverywhere: () => void;
+};
+
 export function SearchPalette({ homeHref, views, categories, sources = [], search }: SearchPaletteProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -42,12 +70,6 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
     const activeOption = options[activePosition];
     const shortcut = isMac ? '⌘K' : 'Ctrl K';
 
-    // Selects the last query, so typing starts a new search.
-    function openPalette() {
-        dialogRef.current?.showModal();
-        inputRef.current?.select();
-    }
-
     useEffect(() => {
         function openOnShortcut(event: globalThis.KeyboardEvent) {
             if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
@@ -60,6 +82,12 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
 
         return () => window.removeEventListener('keydown', openOnShortcut);
     }, []);
+
+    // Selects the last query, so typing starts a new search.
+    function openPalette() {
+        dialogRef.current?.showModal();
+        inputRef.current?.select();
+    }
 
     function openResult(option: ResultOption) {
         dialogRef.current?.close();
@@ -89,20 +117,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
 
     return (
         <>
-            <button
-                id="shell-search"
-                type="button"
-                aria-haspopup="dialog"
-                aria-keyshortcuts="Meta+K Control+K"
-                onClick={openPalette}
-                className="tool-button flex-none justify-start text-ink-2 @max-lg:min-w-11 @lg:w-88 @lg:px-3"
-            >
-                <Icon name="search" />
-                <span className="truncate font-medium @max-lg:sr-only">Search and jump</span>
-                <kbd className="ml-auto rounded-tag border border-edge bg-workspace px-1.5 font-sans text-meta font-semibold whitespace-nowrap text-ink-2 @max-lg:hidden">
-                    {shortcut}
-                </kbd>
-            </button>
+            <PaletteTrigger shortcut={shortcut} onOpen={openPalette} />
             <dialog
                 ref={dialogRef}
                 aria-label="Search"
@@ -133,25 +148,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             className="palette-input h-16 min-w-0 flex-1 bg-transparent text-body placeholder:text-muted"
                         />
                         {categories.length > 0 && trimmedQuery && (
-                            <span className="flex max-w-[45%] flex-none items-center gap-2">
-                                <label htmlFor={scopeId} className="text-meta font-semibold text-ink-2">
-                                    in
-                                </label>
-                                <select
-                                    id={scopeId}
-                                    aria-label="Search in"
-                                    value={scopeHref ?? ''}
-                                    onChange={(event) => setScopeHref(event.target.value || null)}
-                                    className="h-9 min-w-0 rounded-toggle border-[1.5px] border-control-edge bg-workspace px-2 text-meta font-semibold text-ink"
-                                >
-                                    <option value="">All categories</option>
-                                    {categories.map((category) => (
-                                        <option key={category.href} value={category.href}>
-                                            {category.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </span>
+                            <ScopeSelect id={scopeId} categories={categories} scopeHref={scopeHref} onChange={setScopeHref} />
                         )}
                         <kbd className="rounded-tag border border-edge px-1.5 font-sans text-meta font-semibold text-ink-2 pointer-coarse:hidden">Esc</kbd>
                         <button
@@ -186,31 +183,64 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
                             />
                         )}
                     </div>
-                    <p className="flex gap-4 border-t border-edge px-4 py-2.5 text-meta text-muted pointer-coarse:hidden">
-                        <span>
-                            <Keycap>↑</Keycap> <Keycap>↓</Keycap> move
-                        </span>
-                        <span>
-                            <Keycap>↵</Keycap> open
-                        </span>
-                        <span>
-                            <Keycap>Esc</Keycap> close
-                        </span>
-                    </p>
+                    <PaletteFooter />
                 </div>
             </dialog>
         </>
     );
 }
 
-type ResultListProps = {
-    group: ResultGroup;
-    listId: string;
-    query: string;
-    activeIndex: number;
-    onOpen: (option: ResultOption) => void;
-    onActivate: (index: number) => void;
-};
+// The platform never changes while the page is open.
+function subscribeToNothing() {
+    return () => {};
+}
+
+function isApplePlatform() {
+    return /Mac|iPhone|iPad/.test(navigator.platform);
+}
+
+function PaletteTrigger({ shortcut, onOpen }: PaletteTriggerProps) {
+    return (
+        <button
+            id="shell-search"
+            type="button"
+            aria-haspopup="dialog"
+            aria-keyshortcuts="Meta+K Control+K"
+            onClick={onOpen}
+            className="tool-button flex-none justify-start text-ink-2 @max-lg:min-w-11 @lg:w-88 @lg:px-3"
+        >
+            <Icon name="search" />
+            <span className="truncate font-medium @max-lg:sr-only">Search and jump</span>
+            <kbd className="ml-auto rounded-tag border border-edge bg-workspace px-1.5 font-sans text-meta font-semibold whitespace-nowrap text-ink-2 @max-lg:hidden">
+                {shortcut}
+            </kbd>
+        </button>
+    );
+}
+
+function ScopeSelect({ id, categories, scopeHref, onChange }: ScopeSelectProps) {
+    return (
+        <span className="flex max-w-[45%] flex-none items-center gap-2">
+            <label htmlFor={id} className="text-meta font-semibold text-ink-2">
+                in
+            </label>
+            <select
+                id={id}
+                aria-label="Search in"
+                value={scopeHref ?? ''}
+                onChange={(event) => onChange(event.target.value || null)}
+                className="h-9 min-w-0 rounded-toggle border-[1.5px] border-control-edge bg-workspace px-2 text-meta font-semibold text-ink"
+            >
+                <option value="">All categories</option>
+                {categories.map((category) => (
+                    <option key={category.href} value={category.href}>
+                        {category.name}
+                    </option>
+                ))}
+            </select>
+        </span>
+    );
+}
 
 // The group's aria-label names it for screen readers; the visible label is for sighted readers.
 function ResultList({ group, listId, query, activeIndex, onOpen, onActivate }: ResultListProps) {
@@ -246,6 +276,32 @@ function ResultList({ group, listId, query, activeIndex, onOpen, onActivate }: R
     );
 }
 
+function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
+    const box = 'grid size-7 flex-none place-items-center rounded-tag';
+
+    if ('icon' in lead) {
+        return (
+            <span aria-hidden="true" className={`${box} text-ink-2`}>
+                <Icon name={lead.icon} />
+            </span>
+        );
+    }
+
+    if ('color' in lead) {
+        return (
+            <span aria-hidden="true" className={box}>
+                <span className="fill-edge size-3 rounded-full" style={{ background: lead.color }} />
+            </span>
+        );
+    }
+
+    return (
+        <span aria-hidden="true" className={`${box} bg-panel text-meta font-bold text-ink-2`}>
+            {lead.initial}
+        </span>
+    );
+}
+
 function HighlightedText({ text, query }: { text: string; query: string }) {
     return matchParts(text, query).map((part, index) => {
         if (!part.isMatch)
@@ -258,13 +314,6 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
         );
     });
 }
-
-type NoResultsProps = {
-    query: string;
-    scopeHref: string | null;
-    canSearchArticles: boolean;
-    onSearchEverywhere: () => void;
-};
 
 // Says what to type before a query, or why nothing matched, with a way to widen a scoped search.
 function NoResults({ query, scopeHref, canSearchArticles, onSearchEverywhere }: NoResultsProps) {
@@ -295,41 +344,22 @@ function NoResults({ query, scopeHref, canSearchArticles, onSearchEverywhere }: 
     );
 }
 
-function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
-    const box = 'grid size-7 flex-none place-items-center rounded-tag';
-
-    if ('icon' in lead) {
-        return (
-            <span aria-hidden="true" className={`${box} text-ink-2`}>
-                <Icon name={lead.icon} />
-            </span>
-        );
-    }
-
-    if ('color' in lead) {
-        return (
-            <span aria-hidden="true" className={box}>
-                <span className="fill-edge size-3 rounded-full" style={{ background: lead.color }} />
-            </span>
-        );
-    }
-
+function PaletteFooter() {
     return (
-        <span aria-hidden="true" className={`${box} bg-panel text-meta font-bold text-ink-2`}>
-            {lead.initial}
-        </span>
+        <p className="flex gap-4 border-t border-edge px-4 py-2.5 text-meta text-muted pointer-coarse:hidden">
+            <span>
+                <Keycap>↑</Keycap> <Keycap>↓</Keycap> move
+            </span>
+            <span>
+                <Keycap>↵</Keycap> open
+            </span>
+            <span>
+                <Keycap>Esc</Keycap> close
+            </span>
+        </p>
     );
 }
 
 function Keycap({ children }: { children: string }) {
     return <kbd className="rounded-tag border border-edge px-1.5 font-sans font-semibold text-ink-2">{children}</kbd>;
-}
-
-// The platform never changes while the page is open.
-function subscribeToNothing() {
-    return () => {};
-}
-
-function isApplePlatform() {
-    return /Mac|iPhone|iPad/.test(navigator.platform);
 }

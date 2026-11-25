@@ -39,7 +39,7 @@ export function Stickers({ stickers, className = '' }: StickersProps) {
                     '--sticker-order': index,
                     left: sticker.x,
                     top: sticker.y,
-                } as CSSProperties;
+                } satisfies CSSProperties;
 
                 return (
                     <span

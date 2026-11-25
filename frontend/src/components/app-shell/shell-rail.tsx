@@ -8,6 +8,7 @@ import { LogoMark } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
 import { LockedView } from './locked-view';
 import { formatCount, type ShellView } from './nav-entries';
+import { RAIL_BUTTON_CLASSES, RAIL_IDLE_CLASSES } from './rail-styles';
 import { RailTooltip } from './rail-tooltip';
 import { SidebarToggle, useSidebar } from './sidebar-toggle';
 
@@ -20,9 +21,7 @@ type ShellRailProps = {
 
 const MARK_CLASSES = 'bg-field-lemon text-on-field shadow-[inset_0_0_0_1.5px_var(--color-on-field)]';
 
-const IDLE_CLASSES = 'text-ink-2 hover:bg-ink/6 hover:text-ink';
-
-const HOME_MARK_CLASSES = `${IDLE_CLASSES} sidebar-collapsed:bg-field-lemon sidebar-collapsed:text-on-field sidebar-collapsed:shadow-[inset_0_0_0_1.5px_var(--color-on-field)]`;
+const HOME_MARK_CLASSES = `${RAIL_IDLE_CLASSES} sidebar-collapsed:bg-field-lemon sidebar-collapsed:text-on-field sidebar-collapsed:shadow-[inset_0_0_0_1.5px_var(--color-on-field)]`;
 
 export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailProps) {
     const [sidebar] = useSidebar();
@@ -41,10 +40,9 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                         const isHome = view.href === homeHref;
                         const shownCount = formatCount(view.count);
 
-                        // While the panel is open, its "All items" row marks home, so the rail doesn't say it twice.
                         const isMarkedCurrent = isCurrent && (!isHome || sidebar === 'collapsed');
 
-                        let marks = IDLE_CLASSES;
+                        let marks = RAIL_IDLE_CLASSES;
 
                         if (isCurrent)
                             marks = isHome ? HOME_MARK_CLASSES : MARK_CLASSES;
@@ -57,7 +55,7 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                                     <Link
                                         href={view.href}
                                         aria-current={isMarkedCurrent ? 'true' : undefined}
-                                        className={`group relative grid size-11 place-items-center rounded-control transition-colors duration-150 ${marks}`}
+                                        className={`${RAIL_BUTTON_CLASSES} ${marks}`}
                                     >
                                         <Icon name={view.icon} />
                                         <span className="sr-only">

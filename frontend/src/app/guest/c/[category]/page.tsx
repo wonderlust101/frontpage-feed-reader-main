@@ -2,7 +2,7 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Suspense, type CSSProperties } from 'react';
+import { Suspense } from 'react';
 import { categoryColor } from '@/features/categories/category-field-vars';
 import { fieldOrNone } from '@/features/categories/fields';
 import { GUEST_CATEGORIES } from '@/features/categories/guest-categories';
@@ -38,7 +38,7 @@ async function GuestCategory({ params }: Pick<PageProps<'/guest/c/[category]'>, 
         <>
             <h1
                 className="field-underline self-start type-headline underline decoration-[0.12em] underline-offset-[0.16em] [text-decoration-skip-ink:none]"
-                style={{ '--title-field': categoryColor(category.id, fieldOrNone(category.preset).color) } as CSSProperties}
+                style={{ '--title-field': categoryColor(category.id, fieldOrNone(category.preset).color) }}
             >
                 {category.name}
             </h1>

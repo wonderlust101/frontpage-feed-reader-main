@@ -6,6 +6,7 @@ import { buttonClassName } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import type { ShellView } from './nav-entries';
 import { ShellMenu } from './shell-menu';
+import { RAIL_BUTTON_CLASSES, RAIL_IDLE_CLASSES } from './rail-styles';
 import { RailTooltip } from './rail-tooltip';
 
 type LockedViewProps = {
@@ -15,7 +16,7 @@ type LockedViewProps = {
 };
 
 const TRIGGER_CLASSES = {
-    rail: 'group relative grid size-11 place-items-center rounded-control text-ink-2 transition-colors duration-150 hover:bg-ink/6 hover:text-ink',
+    rail: `${RAIL_BUTTON_CLASSES} ${RAIL_IDLE_CLASSES}`,
     row: 'flex min-h-11 w-full items-center gap-3 rounded-toggle px-3 text-left text-ui font-medium text-ink-2 transition-colors duration-150 hover:bg-ink/6 hover:text-ink',
 };
 

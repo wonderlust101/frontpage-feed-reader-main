@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import { Icon } from '@/components/ui/icon';
 import { createHtmlPreference } from '@/lib/html-preference';
 import { SAVED_PREFERENCES } from '@/lib/saved-preferences';
+import { isTypingTarget } from '@/lib/typing-target';
+import { RAIL_BUTTON_CLASSES, RAIL_IDLE_CLASSES } from './rail-styles';
 import { RailTooltip } from './rail-tooltip';
 
 export const useSidebar = createHtmlPreference(SAVED_PREFERENCES.sidebar);
@@ -19,10 +21,7 @@ export function SidebarToggle({ panelId }: { panelId: string }) {
     useEffect(() => {
         // Toggles on [ outside text fields, so typing a bracket in search or a form never moves the sidebar.
         function toggleOnBracket(event: KeyboardEvent) {
-            const isTyping =
-                event.target instanceof HTMLElement && (event.target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName));
-
-            if (event.key === '[' && !isTyping && !event.metaKey && !event.ctrlKey && !event.altKey)
+            if (event.key === '[' && !isTypingTarget(event.target) && !event.metaKey && !event.ctrlKey && !event.altKey)
                 setSidebar(nextChoice);
         }
 
@@ -38,7 +37,7 @@ export function SidebarToggle({ panelId }: { panelId: string }) {
             aria-expanded={!isCollapsed}
             aria-keyshortcuts="["
             onClick={() => setSidebar(nextChoice)}
-            className="group relative grid size-11 place-items-center rounded-control text-ink-2 transition-colors duration-150 hover:bg-ink/6 hover:text-ink"
+            className={`${RAIL_BUTTON_CLASSES} ${RAIL_IDLE_CLASSES}`}
         >
             <Icon name={isCollapsed ? 'sidebar-open' : 'sidebar-close'} />
             <span className="sr-only">{action}</span>

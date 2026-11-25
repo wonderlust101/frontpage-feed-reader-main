@@ -12,7 +12,6 @@ type SearchFieldProps = Omit<ComponentProps<'input'>, 'type' | 'id' | 'value' | 
     onChange: (value: string) => void;
 };
 
-// Clearing empties the query and returns focus to the field.
 export function SearchField({ id, label, value, onChange, className = '', ...inputProps }: SearchFieldProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 

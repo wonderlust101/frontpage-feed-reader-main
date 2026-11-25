@@ -3,7 +3,7 @@
 // The app shell at specimen scale, built from the real shell's parts with sample data. One view and one category
 // link to this page, so the matcher marks them current.
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
 import type { SearchResults } from '@/components/app-shell/search-results';
 import { ShellDrawer } from '@/components/app-shell/shell-drawer';
@@ -20,6 +20,7 @@ import { BRAND_FIELD, categoryFieldById, fieldOrNone } from '@/features/categori
 import { deleteCategory, isNameTaken, updateCategory, type Library } from '@/features/categories/library';
 import { useGuestCategoryFields } from '@/features/categories/hooks/use-guest-category-fields';
 import { ChoiceControl } from '@/features/preferences/components/choice-control';
+import { isTypingTarget } from '@/lib/typing-target';
 import { CATEGORIES, READER_CATEGORIES, SAMPLE_ITEMS, SAMPLE_READER, type CategoryId } from '../_data/sample-data';
 import { SampleItemRow } from './sample-item-row';
 
@@ -166,7 +167,7 @@ export function AppShellDemo() {
                         <p className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
                             <span
                                 className="field-underline type-display underline decoration-[0.12em] underline-offset-[0.14em] [text-decoration-skip-ink:none]"
-                                style={{ '--title-field': titleField } as CSSProperties}
+                                style={{ '--title-field': titleField }}
                             >
                                 {title}
                             </span>
@@ -214,9 +215,7 @@ function useUndoableLibrary() {
     useEffect(() => {
         // Outside text fields only, so Ctrl/⌘ + Z still undoes typing.
         function undoOnShortcut(event: KeyboardEvent) {
-            const inField = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
-
-            if (toast && !inField && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
+            if (toast && !isTypingTarget(event.target) && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
                 event.preventDefault();
                 undo(toast.undo);
             }

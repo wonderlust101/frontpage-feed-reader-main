@@ -8,7 +8,7 @@ import { Logo } from '@/components/logo';
 import { Icon } from '@/components/ui/icon';
 import { CategoryList, type RowMenu } from './category-list';
 import { LockedView } from './locked-view';
-import type { ShellCategory, ShellView } from './nav-entries';
+import { VIEW_COLOR, type ShellCategory, type ShellView } from './nav-entries';
 import { NavRow } from './nav-row';
 import { useShellPlace } from './use-shell-place';
 
@@ -19,8 +19,6 @@ type ShellNavProps = {
     account: ReactNode;
     rowMenu?: RowMenu;
 };
-
-const VIEW_COLOR = 'var(--color-field-lemon)';
 
 export function ShellNav({ homeHref, views, categories, account, rowMenu }: ShellNavProps) {
     const place = useShellPlace(homeHref, views, categories);

@@ -2,7 +2,7 @@
 // own field, which a reader can't recolor.
 
 import { useId, type ReactNode } from 'react';
-import type { ShellCategory } from './nav-entries';
+import { VIEW_COLOR, type ShellCategory } from './nav-entries';
 import { FieldDot, NavRow } from './nav-row';
 
 export type RowMenu = (category: ShellCategory) => ReactNode;
@@ -13,8 +13,6 @@ type CategoryListProps = {
     currentHref: string | null;
     rowMenu?: RowMenu;
 };
-
-const HOME_FIELD = 'var(--color-field-lemon)';
 
 // `currentHref` is the current category's href, or `homeHref` on the home page.
 export function CategoryList({ homeHref, categories, currentHref, rowMenu }: CategoryListProps) {
@@ -32,8 +30,8 @@ export function CategoryList({ homeHref, categories, currentHref, rowMenu }: Cat
                         <NavRow
                             href={homeHref}
                             label="All items"
-                            lead={<FieldDot color={HOME_FIELD} />}
-                            color={HOME_FIELD}
+                            lead={<FieldDot color={VIEW_COLOR} />}
+                            color={VIEW_COLOR}
                             isCurrent={currentHref === homeHref}
                         />
                     </li>
