@@ -4,16 +4,10 @@
 
 import { useRef, type KeyboardEvent } from 'react';
 import { Capsule } from '@/components/ui/capsule';
-import type { Field } from '../fields';
-
-type SwitchOption = {
-    id: string;
-    name: string;
-    field: Pick<Field, 'id' | 'color' | 'onColor'>;
-};
+import type { CapsuleCategory } from '../fields';
 
 type CategorySwitchProps = {
-    options: SwitchOption[];
+    options: CapsuleCategory[];
     value: string;
     onChange: (id: string) => void;
     label: string;

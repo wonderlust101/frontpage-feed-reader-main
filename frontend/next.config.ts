@@ -59,11 +59,6 @@ const nextConfig: NextConfig = {
 
 export default nextConfig;
 
-// The dev server gets no Content Security Policy, which would block dev tools and injected scripts.
-export function securityHeaders(isDevelopment: boolean): { key: string; value: string }[] {
-    return isDevelopment ? BASELINE_HEADERS : [{ key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY }, ...BASELINE_HEADERS];
-}
-
 // Unset (not on Vercel) or "development" is local; throws on a value Vercel doesn't document rather than guessing.
 export function vercelDeployment(vercelEnv: string | undefined): DeploymentName {
     if (!vercelEnv || vercelEnv === 'development')
@@ -76,4 +71,9 @@ export function vercelDeployment(vercelEnv: string | undefined): DeploymentName 
         return 'staging';
 
     throw new Error(`Unknown VERCEL_ENV "${vercelEnv}": add it to vercelDeployment in next.config.ts`);
+}
+
+// The dev server gets no Content Security Policy, which would block dev tools and injected scripts.
+export function securityHeaders(isDevelopment: boolean): { key: string; value: string }[] {
+    return isDevelopment ? BASELINE_HEADERS : [{ key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY }, ...BASELINE_HEADERS];
 }

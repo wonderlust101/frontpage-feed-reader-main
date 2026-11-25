@@ -1,5 +1,3 @@
-// Placeholder: the signed-in reader's home will go here.
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';

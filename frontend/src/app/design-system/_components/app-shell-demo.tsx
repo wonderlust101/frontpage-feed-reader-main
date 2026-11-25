@@ -10,6 +10,7 @@ import { ShellDrawer } from '@/components/app-shell/shell-drawer';
 import { ShellNav } from '@/components/app-shell/shell-nav';
 import { ShellSidebar } from '@/components/app-shell/shell-sidebar';
 import { ShellToolbar } from '@/components/app-shell/shell-toolbar';
+import { FieldTitle } from '@/components/ui/field-title';
 import { Toast } from '@/components/ui/toast';
 import { ACCOUNT_FEATURE_VIEWS } from '@/features/auth/account-features';
 import { AccountMenu } from '@/features/auth/components/account-menu';
@@ -17,11 +18,12 @@ import { GuestMenu } from '@/features/auth/components/guest-menu';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { categoryColor } from '@/features/categories/category-field-vars';
 import { BRAND_FIELD, categoryFieldById, fieldOrNone } from '@/features/categories/fields';
-import { deleteCategory, isNameTaken, updateCategory, type Library } from '@/features/categories/library';
+import { deleteCategory, isNameTaken, updateCategory, type Library, type LibraryCategory } from '@/features/categories/library';
 import { useGuestCategoryFields } from '@/features/categories/hooks/use-guest-category-fields';
 import { ChoiceControl } from '@/features/preferences/components/choice-control';
 import { isTypingTarget } from '@/lib/typing-target';
-import { CATEGORIES, READER_CATEGORIES, SAMPLE_ITEMS, SAMPLE_READER, type CategoryId } from '../_data/sample-data';
+import type { GuestCategoryId } from '@/features/categories/guest-categories';
+import { CATEGORIES, READER_CATEGORIES, SAMPLE_ITEMS, SAMPLE_READER } from '../_data/sample-data';
 import { SampleItemRow } from './sample-item-row';
 
 type DemoMode = 'reader' | 'guest';
@@ -50,91 +52,75 @@ const GUEST_VIEWS = [{ href: THIS_PAGE, label: 'All items', icon: 'all-items' },
 
 const FIRST_CATEGORY = 'category-0';
 
+// Reader category i is named after sample category i and takes its feeds, so search can scope a reader row to it.
+const READER_SAMPLES = READER_CATEGORIES.map((category, index) => ({ id: `category-${index}`, category, sample: CATEGORIES[index] }));
+
 const START_LIBRARY: Library = {
-    categories: READER_CATEGORIES.map((category, index) => ({
-        id: `category-${index}`,
+    categories: READER_SAMPLES.map(({ id, category, sample }) => ({
+        id,
         name: category.name,
         fieldId: category.field.id,
-        feeds: [...(CATEGORIES[index]?.sources ?? [])],
+        feeds: [...(sample?.sources ?? [])],
     })),
     uncategorized: [],
 };
 
 const COUNT_BY_ID = new Map(START_LIBRARY.categories.map((category, index) => [category.id, UNREAD_COUNTS[index]]));
 
-const CATEGORY_BY_HREF = new Map<string, CategoryId>([
-    [THIS_PAGE, 'frontend'],
-    ...CATEGORIES.map((category): [string, CategoryId] => [`#category-${category.id}`, category.id]),
-    ...CATEGORIES.map((category, index): [string, CategoryId] => [`#category-${index}`, category.id]),
+const SAMPLE_BY_HREF = new Map<string, GuestCategoryId>([
+    ...CATEGORIES.map((category): [string, GuestCategoryId] => [guestCategoryHref(category.id), category.id]),
+    ...READER_SAMPLES.flatMap(({ id, sample }): [string, GuestCategoryId][] => (sample ? [[readerCategoryHref(id), sample.id]] : [])),
 ]);
 
 export function AppShellDemo() {
     const [mode, setMode] = useState<DemoMode>('reader');
     const { library, toast, change, undo, dismissToast } = useUndoableLibrary();
     const [guestFields, chooseGuestField] = useGuestCategoryFields();
-    const isReader = mode === 'reader';
-    const homeHref = isReader ? '#patterns' : THIS_PAGE;
-    const views = isReader ? VIEWS : GUEST_VIEWS;
-    const categories = isReader
-        ? library.categories.map((category) => ({
-                href: categoryHref(category.id),
-                name: category.name,
-                color: fieldOrNone(category.fieldId).color,
-                count: COUNT_BY_ID.get(category.id),
-            }))
-        : CATEGORIES.map((category, index) => ({
-                href: `#category-${category.id}`,
-                name: category.name,
-                color: categoryColor(category.id, category.field.color),
-                count: UNREAD_COUNTS[index],
-            }));
-    const account = isReader ? <AccountMenu user={SAMPLE_READER} /> : <GuestMenu />;
-    const firstCategory = library.categories.find((category) => category.id === FIRST_CATEGORY);
-    const title = isReader ? (firstCategory?.name ?? 'Frontend') : 'All items';
-    const titleField = isReader ? fieldOrNone(firstCategory?.fieldId).color : BRAND_FIELD.color;
-    const items = isReader ? SAMPLE_ITEMS.filter((item) => item.category === 'frontend') : SAMPLE_ITEMS.slice(0, 4);
+    const shell = demoShell(mode, library);
 
-    function rowMenu(shellCategory: ShellCategory) {
-        if (!isReader) {
-            const guestCategory = CATEGORIES.find((entry) => `#category-${entry.id}` === shellCategory.href);
+    function guestRowMenu(shellCategory: ShellCategory) {
+        const category = CATEGORIES.find((entry) => guestCategoryHref(entry.id) === shellCategory.href);
 
-            return (
-                guestCategory && (
-                    <CategoryRowMenu
-                        category={{ name: guestCategory.name, fieldId: guestFields[guestCategory.id].id }}
-                        onRecolor={(fieldId) => chooseGuestField(guestCategory.id, fieldId)}
-                    />
-                )
-            );
-        }
-
-        const category = library.categories.find((candidate) => categoryHref(candidate.id) === shellCategory.href);
+        if (!category)
+            return null;
 
         return (
-            category && (
-                <CategoryRowMenu
-                    category={category}
-                    onRecolor={(fieldId) =>
-                        change(updateCategory(library, category.id, { fieldId }), `${category.name} is now ${categoryFieldById(fieldId)?.name}.`)
-                    }
-                    onRename={(name) => {
-                        const newName = name.trim();
-
-                        if (newName === '')
-                            return 'Give it a name.';
-
-                        if (isNameTaken(library, name, category.id))
-                            return `You already have a category called ${newName}.`;
-
-                        change(updateCategory(library, category.id, { name: newName }), `Renamed ${category.name} to ${newName}.`);
-
-                        return undefined;
-                    }}
-                    onDelete={() => change(deleteCategory(library, category.id), `Deleted ${category.name}.`)}
-                />
-            )
+            <CategoryRowMenu
+                category={{ name: category.name, fieldId: guestFields[category.id].id }}
+                onRecolor={(fieldId) => chooseGuestField(category.id, fieldId)}
+            />
         );
     }
+
+    function renameCategory(category: LibraryCategory, name: string) {
+        const newName = name.trim();
+        const problem = renameProblem(library, category.id, newName);
+
+        if (problem)
+            return problem;
+
+        change(updateCategory(library, category.id, { name: newName }), `Renamed ${category.name} to ${newName}.`);
+
+        return undefined;
+    }
+
+    function readerRowMenu(shellCategory: ShellCategory) {
+        const category = library.categories.find((candidate) => readerCategoryHref(candidate.id) === shellCategory.href);
+
+        if (!category)
+            return null;
+
+        return (
+            <CategoryRowMenu
+                category={category}
+                onRecolor={(fieldId) => change(updateCategory(library, category.id, { fieldId }), `${category.name} is now ${categoryFieldById(fieldId)?.name}.`)}
+                onRename={(name) => renameCategory(category, name)}
+                onDelete={() => change(deleteCategory(library, category.id), `Deleted ${category.name}.`)}
+            />
+        );
+    }
+
+    const rowMenu = mode === 'reader' ? readerRowMenu : guestRowMenu;
 
     return (
         <div className="flex flex-col gap-4">
@@ -143,38 +129,41 @@ export function AppShellDemo() {
             </div>
             <div className="relative flex h-[40rem] overflow-hidden rounded-panel border border-edge bg-workspace">
                 <ShellSidebar
-                    homeHref={homeHref}
-                    views={views}
-                    categories={categories}
+                    homeHref={shell.homeHref}
+                    views={shell.views}
+                    categories={shell.categories}
                     panelId={PANEL_ID}
-                    account={account}
+                    account={shell.account}
                     rowMenu={rowMenu}
                     className="hidden flex-none lg:grid"
                 />
                 <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
                     <ShellToolbar
-                        homeHref={homeHref}
-                        views={views}
-                        categories={categories}
+                        homeHref={shell.homeHref}
+                        views={shell.views}
+                        categories={shell.categories}
                         drawer={
                             <ShellDrawer>
-                                <ShellNav homeHref={homeHref} views={views} categories={categories} account={account} rowMenu={rowMenu} />
+                                <ShellNav
+                                    homeHref={shell.homeHref}
+                                    views={shell.views}
+                                    categories={shell.categories}
+                                    account={shell.account}
+                                    rowMenu={rowMenu}
+                                />
                             </ShellDrawer>
                         }
                         search={searchSamples}
                     />
                     <div className="px-5 pt-8 pb-10 sm:px-8">
                         <p className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-                            <span
-                                className="field-underline type-display underline decoration-[0.12em] underline-offset-[0.14em] [text-decoration-skip-ink:none]"
-                                style={{ '--title-field': titleField }}
-                            >
-                                {title}
-                            </span>
-                            <span className="text-ui font-semibold text-ink-2 tabular-nums">{isReader ? '12 unread · 6 feeds' : '37 unread · 19 feeds'}</span>
+                            <FieldTitle color={shell.titleColor} className="type-display underline-offset-[0.14em]">
+                                {shell.title}
+                            </FieldTitle>
+                            <span className="text-ui font-semibold text-ink-2 tabular-nums">{shell.summary}</span>
                         </p>
                         <ul className="mt-6 rule-t">
-                            {items.map((item, index) => (
+                            {shell.items.map((item, index) => (
                                 <SampleItemRow key={item.id} item={item} href="#patterns" isSelected={index === 0} />
                             ))}
                         </ul>
@@ -229,16 +218,69 @@ function useUndoableLibrary() {
     return { library, toast, change, undo, dismissToast };
 }
 
+// Everything that differs between the signed-in and the guest specimen.
+function demoShell(mode: DemoMode, library: Library) {
+    if (mode === 'guest') {
+        return {
+            homeHref: THIS_PAGE,
+            views: GUEST_VIEWS,
+            categories: CATEGORIES.map((category, index) => ({
+                href: guestCategoryHref(category.id),
+                name: category.name,
+                color: categoryColor(category.id, category.field.color),
+                count: UNREAD_COUNTS[index],
+            })),
+            account: <GuestMenu />,
+            title: 'All items',
+            titleColor: BRAND_FIELD.color,
+            summary: '37 unread · 19 feeds',
+            items: SAMPLE_ITEMS.slice(0, 4),
+        };
+    }
+
+    const firstCategory = library.categories.find((category) => category.id === FIRST_CATEGORY);
+
+    return {
+        homeHref: '#patterns',
+        views: VIEWS,
+        categories: library.categories.map((category) => ({
+            href: readerCategoryHref(category.id),
+            name: category.name,
+            color: fieldOrNone(category.fieldId).color,
+            count: COUNT_BY_ID.get(category.id),
+        })),
+        account: <AccountMenu user={SAMPLE_READER} />,
+        title: firstCategory?.name ?? 'Frontend',
+        titleColor: fieldOrNone(firstCategory?.fieldId).color,
+        summary: '12 unread · 6 feeds',
+        items: SAMPLE_ITEMS.filter((item) => item.category === 'frontend'),
+    };
+}
+
+function renameProblem(library: Library, categoryId: LibraryCategory['id'], newName: string): string | undefined {
+    if (newName === '')
+        return 'Give it a name.';
+
+    if (isNameTaken(library, newName, categoryId))
+        return `You already have a category called ${newName}.`;
+
+    return undefined;
+}
+
+function guestCategoryHref(id: GuestCategoryId): string {
+    return `#category-${id}`;
+}
+
 // This page for the first category, so the matcher marks it current; an anchor for the rest.
-function categoryHref(id: string): string {
+function readerCategoryHref(id: string): string {
     return id === FIRST_CATEGORY ? THIS_PAGE : `#${id}`;
 }
 
 function searchSamples(query: string, scopeHref: string | null): SearchResults {
     const needle = query.toLowerCase();
-    const scopeId = scopeHref ? CATEGORY_BY_HREF.get(scopeHref) : undefined;
+    const scopeId = scopeHref ? SAMPLE_BY_HREF.get(scopeHref) : undefined;
 
-    function inScope(id: CategoryId) {
+    function inScope(id: GuestCategoryId) {
         return !scopeHref || id === scopeId;
     }
 
@@ -252,7 +294,7 @@ function searchSamples(query: string, scopeHref: string | null): SearchResults {
         sources: CATEGORIES.filter((category) => inScope(category.id)).flatMap((category) =>
             category.sources
                 .filter((source) => source.toLowerCase().includes(needle))
-                .map((source) => ({ href: '#patterns', name: source, detail: category.name, categoryHref: `#category-${category.id}` })),
+                .map((source) => ({ href: '#patterns', name: source, detail: category.name, categoryHref: guestCategoryHref(category.id) })),
         ),
     };
 }

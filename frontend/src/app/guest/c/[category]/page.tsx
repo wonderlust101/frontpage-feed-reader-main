@@ -3,9 +3,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { FieldTitle } from '@/components/ui/field-title';
 import { categoryColor } from '@/features/categories/category-field-vars';
 import { fieldOrNone } from '@/features/categories/fields';
-import { GUEST_CATEGORIES } from '@/features/categories/guest-categories';
+import { findGuestCategory, GUEST_CATEGORIES } from '@/features/categories/guest-categories';
 
 export function generateStaticParams() {
     return GUEST_CATEGORIES.map((category) => ({ category: category.id }));
@@ -14,7 +15,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<'/guest/c/[category]'>): Promise<Metadata> {
     const { category: id } = await params;
 
-    return { title: GUEST_CATEGORIES.find((category) => category.id === id)?.name ?? 'Guest' };
+    return { title: findGuestCategory(id)?.name ?? 'Guest' };
 }
 
 export default function GuestCategoryPage({ params }: PageProps<'/guest/c/[category]'>) {
@@ -29,19 +30,16 @@ export default function GuestCategoryPage({ params }: PageProps<'/guest/c/[categ
 
 async function GuestCategory({ params }: Pick<PageProps<'/guest/c/[category]'>, 'params'>) {
     const { category: id } = await params;
-    const category = GUEST_CATEGORIES.find((entry) => entry.id === id);
+    const category = findGuestCategory(id);
 
     if (!category)
         notFound();
 
     return (
         <>
-            <h1
-                className="field-underline self-start type-headline underline decoration-[0.12em] underline-offset-[0.16em] [text-decoration-skip-ink:none]"
-                style={{ '--title-field': categoryColor(category.id, fieldOrNone(category.preset).color) }}
-            >
+            <FieldTitle as="h1" color={categoryColor(category.id, fieldOrNone(category.preset).color)} className="self-start type-headline underline-offset-[0.16em]">
                 {category.name}
-            </h1>
+            </FieldTitle>
             <p>Articles from {category.sources.join(', ')} will load here.</p>
         </>
     );

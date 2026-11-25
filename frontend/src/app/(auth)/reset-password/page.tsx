@@ -13,9 +13,9 @@ import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';
 
-export const metadata: Metadata = { title: 'Choose a new password', referrer: 'no-referrer', robots: { index: false } };
-
 type ResetPageProps = Pick<PageProps<'/reset-password'>, 'searchParams'>;
+
+export const metadata: Metadata = { title: 'Choose a new password', referrer: 'no-referrer', robots: { index: false } };
 
 export default function ResetPasswordPage({ searchParams }: PageProps<'/reset-password'>) {
     return (

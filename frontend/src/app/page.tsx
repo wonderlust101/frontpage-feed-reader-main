@@ -1,5 +1,3 @@
-// Placeholder: the three ways in. The backend line is a local-dev check (accounts need the API and its database).
-
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { BackendStatus } from './_components/backend-status';

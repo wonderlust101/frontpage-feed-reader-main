@@ -10,9 +10,9 @@ import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';
 
-export const metadata: Metadata = { title: 'Sign in' };
-
 type SignInPageProps = Pick<PageProps<'/sign-in'>, 'searchParams'>;
+
+export const metadata: Metadata = { title: 'Sign in' };
 
 export default function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
     return (

@@ -44,6 +44,10 @@ export const GUEST_CATEGORIES = [
 
 export type GuestCategoryId = (typeof GUEST_CATEGORIES)[number]['id'];
 
+export function findGuestCategory(id: string) {
+    return GUEST_CATEGORIES.find((category) => category.id === id);
+}
+
 export function guestCategoryHref(id: string): string {
     return `/guest/c/${id}`;
 }

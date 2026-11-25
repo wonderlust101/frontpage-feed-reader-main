@@ -1,5 +1,3 @@
-// Placeholder: guest mode will load the curated sample feeds here.
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 

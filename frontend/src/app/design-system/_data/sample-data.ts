@@ -4,10 +4,8 @@ import type { HealthMarkState } from '@/components/ui/health-mark';
 import { NO_FIELD, fieldOrNone, type Field, type FieldChoices } from '@/features/categories/fields';
 import { GUEST_CATEGORIES, type GuestCategoryId } from '@/features/categories/guest-categories';
 
-export type CategoryId = GuestCategoryId;
-
-export type Category = {
-    id: CategoryId;
+type Category = {
+    id: GuestCategoryId;
     name: string;
     field: Field;
     sources: string[];
@@ -17,7 +15,7 @@ export type SampleItem = {
     id: string;
     title: string;
     source: string;
-    category: CategoryId;
+    category: GuestCategoryId;
     time: string;
     isNew: boolean;
     health: HealthMarkState;
@@ -101,7 +99,7 @@ export const SAMPLE_ITEMS: SampleItem[] = [
 ];
 
 // Throws on an unknown id, which only happens if the sample data is edited wrongly.
-export function getCategory(id: CategoryId): Category {
+export function getCategory(id: GuestCategoryId): Category {
     const category = CATEGORIES.find((candidate) => candidate.id === id);
 
     if (!category)

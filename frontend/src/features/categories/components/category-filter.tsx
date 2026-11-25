@@ -1,14 +1,8 @@
 import { Capsule } from '@/components/ui/capsule';
-import type { Field } from '../fields';
-
-type FilterCategory = {
-    id: string;
-    name: string;
-    field: Pick<Field, 'id' | 'color' | 'onColor'>;
-};
+import type { CapsuleCategory } from '../fields';
 
 type CategoryFilterProps = {
-    categories: FilterCategory[];
+    categories: CapsuleCategory[];
     selected: string[];
     onToggle: (id: string) => void;
     label?: string;

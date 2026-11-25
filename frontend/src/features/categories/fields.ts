@@ -12,6 +12,9 @@ export type Field = {
     inkContrast: { light: string; dark: string };
 };
 
+// A category as the capsule filter and switch draw it.
+export type CapsuleCategory = { id: string; name: string; field: Pick<Field, 'id' | 'color' | 'onColor'> };
+
 export type FieldChoices = Record<string, FieldId>;
 
 const ON_FIELD = 'var(--color-on-field)';
