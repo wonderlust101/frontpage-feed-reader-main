@@ -1,25 +1,20 @@
 'use client';
 
-// The parts of an auth page that follow the reader's step. The page renders the defaults on the server; a form that
-// moves on in the browser swaps in its own heading and frame links, and the defaults return when it unmounts.
+// The auth frame's parts that follow the reader's step (heading, panel text, frame links); hooks/use-auth-step.ts
+// is how a form changes them.
 
-import { createContext, use, useEffect, useId, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { use, useId, useState, type ReactNode } from 'react';
 import { TextLink } from '@/components/ui/text-link';
 import type { Heading, PanelText } from '../headings';
-
-export type SwitchLinkTarget = { prompt?: string; label: string; href: string; onClick?: () => void };
-
-export type FrameLinks = { switchLink: SwitchLinkTarget | null; guestLink: boolean };
-
-const StepHeadingSetterContext = createContext<Dispatch<SetStateAction<Heading | null>> | null>(null);
-
-const StepHeadingContext = createContext<Heading | null>(null);
-
-const FrameLinksSetterContext = createContext<Dispatch<SetStateAction<FrameLinks | null>> | null>(null);
-
-const FrameLinksContext = createContext<FrameLinks | null>(null);
-
-const DescriptionIdContext = createContext<string | undefined>(undefined);
+import {
+    DescriptionIdContext,
+    FrameLinksContext,
+    FrameLinksSetterContext,
+    StepHeadingContext,
+    StepHeadingSetterContext,
+    type FrameLinks,
+    type SwitchLinkTarget,
+} from '../hooks/use-auth-step';
 
 export function AuthHeadingProvider({ children }: { children: ReactNode }) {
     const [step, setStep] = useState<Heading | null>(null);
@@ -78,8 +73,10 @@ export function AuthPanelText({ headline, line }: PanelText) {
 
 export function AuthSwitchLink({ target }: { target: SwitchLinkTarget }) {
     const links = use(FrameLinksContext);
+    // A form sets switchLink to null to hide the link; undefined (no form override) keeps the page's own.
+    const isHidden = links?.switchLink === null;
 
-    if (links?.switchLink === null)
+    if (isHidden)
         return null;
 
     const link = links?.switchLink ?? target;
@@ -96,8 +93,9 @@ export function AuthSwitchLink({ target }: { target: SwitchLinkTarget }) {
 
 export function AuthGuestLink({ show }: { show: boolean }) {
     const links = use(FrameLinksContext);
+    const isVisible = links?.guestLink ?? show;
 
-    if (!(links?.guestLink ?? show))
+    if (!isVisible)
         return null;
 
     return (
@@ -110,43 +108,4 @@ export function AuthGuestLink({ show }: { show: boolean }) {
             </p>
         </div>
     );
-}
-
-// null keeps the page's default heading.
-export function useAuthHeading(heading: Heading | null) {
-    const setStep = use(StepHeadingSetterContext);
-    const title = heading?.title;
-    const description = heading?.description;
-    const panelHeadline = heading?.panel?.headline;
-    const panelLine = heading?.panel?.line;
-
-    useEffect(() => {
-        if (!setStep || title === undefined || description === undefined)
-            return;
-
-        const panel = panelHeadline !== undefined && panelLine !== undefined ? { headline: panelHeadline, line: panelLine } : undefined;
-
-        setStep({ title, description, panel });
-
-        return () => setStep(null);
-    }, [setStep, title, description, panelHeadline, panelLine]);
-}
-
-// For a field's aria-describedby, so landing in it also reads the step's description.
-export function useAuthDescriptionId(): string | undefined {
-    return use(DescriptionIdContext);
-}
-
-// Pass a module constant (or null): a new object on every render would reset the links each time.
-export function useAuthFrameLinks(links: FrameLinks | null) {
-    const setLinks = use(FrameLinksSetterContext);
-
-    useEffect(() => {
-        if (!setLinks || !links)
-            return;
-
-        setLinks(links);
-
-        return () => setLinks(null);
-    }, [setLinks, links]);
 }

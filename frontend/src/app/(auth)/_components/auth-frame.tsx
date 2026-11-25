@@ -1,12 +1,12 @@
-// The frame every auth page shares: the form column and a Lemon sticker panel, which becomes a short band above the
-// form on phones. The heading and links follow the reader's step (auth-heading.tsx). The panel is the page's <header>,
-// so the phone logo link sits in a landmark; "Skip to form" lands on the h1, past the top bar.
+// The frame every auth page shares: the form column and a Lemon sticker panel (a short band above the form on phones).
+// The panel is the page's <header>, so the phone logo link sits in a landmark; "Skip to form" lands on the h1.
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
-import { AuthGuestLink, AuthHeadingProvider, AuthPanelText, AuthSwitchLink, type SwitchLinkTarget } from '@/features/auth/components/auth-heading';
+import { AuthGuestLink, AuthHeadingProvider, AuthPanelText, AuthSwitchLink } from '@/features/auth/components/auth-heading';
+import type { SwitchLinkTarget } from '@/features/auth/hooks/use-auth-step';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import type { AuthPanel } from '../_data/panels';
 

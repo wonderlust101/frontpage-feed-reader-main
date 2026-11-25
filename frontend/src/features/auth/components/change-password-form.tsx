@@ -20,7 +20,7 @@ import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { CHANGE_PASSWORD_HEADINGS } from '../headings';
 import { changePasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
-import { useAuthFrameLinks, useAuthHeading, type FrameLinks } from './auth-heading';
+import { useAuthFrameLinks, useAuthHeading, type FrameLinks } from '../hooks/use-auth-step';
 
 type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 

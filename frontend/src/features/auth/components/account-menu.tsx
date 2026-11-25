@@ -2,17 +2,14 @@
 
 import type { SessionUser } from '@frontpage/shared';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
-import { RailTooltip } from '@/components/app-shell/rail-tooltip';
 import { Icon } from '@/components/ui/icon';
 import { TextLink } from '@/components/ui/text-link';
+import { ACCOUNT_TRIGGER_CLASSES, AccountTrigger } from './account-trigger';
 import { SignOutButton } from './sign-out-button';
 
 type AccountMenuProps = {
     user: Pick<SessionUser, 'name' | 'email' | 'emailVerified'>;
 };
-
-export const ACCOUNT_TRIGGER_CLASSES =
-    'group relative flex items-center gap-3 rounded-control p-1 text-left transition-colors duration-150 hover:bg-ink/6 in-data-[account=row]:w-full in-data-[account=row]:p-2';
 
 export function AccountMenu({ user }: AccountMenuProps) {
     const initials = user.name
@@ -22,29 +19,26 @@ export function AccountMenu({ user }: AccountMenuProps) {
         .map((word) => word.charAt(0).toUpperCase())
         .join('');
 
+    const avatar = (
+        <span aria-hidden="true" className="fill-edge grid size-9 flex-none place-items-center rounded-full bg-field-lemon text-meta font-bold text-on-field">
+            {initials}
+        </span>
+    );
+
     return (
         <ShellMenu
             label="Account"
             placement="beside"
             triggerClassName={ACCOUNT_TRIGGER_CLASSES}
             trigger={
-                <>
-                    <span
-                        aria-hidden="true"
-                        className="fill-edge grid size-9 flex-none place-items-center rounded-full bg-field-lemon text-meta font-bold text-on-field"
-                    >
-                        {initials}
-                    </span>
-                    <span className="hidden min-w-0 in-data-[account=row]:block">
-                        <span className="block truncate text-ui font-semibold">{user.name}</span>
-                        <span className="block truncate text-meta text-muted">{user.email}</span>
-                    </span>
-                    <span className="sr-only in-data-[account=row]:hidden">Account menu for {user.name}</span>
-                    <span className="contents in-data-[account=row]:hidden">
-                        <RailTooltip>{user.name} · Account</RailTooltip>
-                    </span>
-                    <span className="sr-only hidden in-data-[account=row]:block">, account menu</span>
-                </>
+                <AccountTrigger
+                    avatar={avatar}
+                    title={user.name}
+                    subtitle={user.email}
+                    railLabel={`Account menu for ${user.name}`}
+                    tooltip={`${user.name} · Account`}
+                    rowLabelSuffix=", account menu"
+                />
             }
         >
             <p className="truncate font-semibold">{user.name}</p>

@@ -24,7 +24,6 @@ type SignUpValues = z.infer<typeof signUpSchema>;
 
 const EMAIL_TAKEN_CODES = ['USER_ALREADY_EXISTS', 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL'];
 
-// The password is cleared after any failure, as in the other auth forms.
 export function SignUpForm() {
     const router = useRouter();
     const [takenEmail, setTakenEmail] = useState<string | null>(null);

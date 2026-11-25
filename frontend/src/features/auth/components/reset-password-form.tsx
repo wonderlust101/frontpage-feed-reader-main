@@ -18,7 +18,7 @@ import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { RESET_PASSWORD_HEADINGS } from '../headings';
 import { resetPasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
-import { useAuthHeading } from './auth-heading';
+import { useAuthHeading } from '../hooks/use-auth-step';
 
 type ResetPasswordFormProps = {
     token: string;

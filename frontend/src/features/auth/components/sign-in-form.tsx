@@ -19,7 +19,7 @@ import { authErrorMessage } from '../error-messages';
 import { signInSchema } from '../schemas';
 import { rememberPendingEmail, takeSignInEmail } from '../email-storage';
 import { SIGN_IN_HEADINGS, type SignInArrival } from '../headings';
-import { useAuthHeading } from './auth-heading';
+import { useAuthHeading } from '../hooks/use-auth-step';
 import { EmailField } from './email-field';
 
 type SignInFormProps = {

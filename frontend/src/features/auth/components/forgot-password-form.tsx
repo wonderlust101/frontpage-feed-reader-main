@@ -17,7 +17,7 @@ import { authErrorMessage } from '../error-messages';
 import { FORGOT_PASSWORD_HEADINGS } from '../headings';
 import { emailSchema } from '../schemas';
 import { readSignInEmail, rememberSignInEmail } from '../email-storage';
-import { useAuthHeading } from './auth-heading';
+import { useAuthHeading } from '../hooks/use-auth-step';
 import { EmailField } from './email-field';
 
 type EmailValues = z.infer<typeof emailSchema>;

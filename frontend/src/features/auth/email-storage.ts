@@ -11,14 +11,6 @@ const PENDING_MAX_AGE_MS = CODE_LIFETIME_MINUTES * 60 * 1000;
 
 const SIGN_IN_MAX_AGE_MS = 60 * 60 * 1000;
 
-function tryStorage<T>(read: () => T, fallback: T): T {
-    try {
-        return read();
-    } catch {
-        return fallback;
-    }
-}
-
 export function rememberPendingEmail(email: string): void {
     tryStorage(() => sessionStorage.setItem(PENDING_KEY, JSON.stringify({ email, savedAt: Date.now() })), undefined);
 }
@@ -48,6 +40,14 @@ export function takeSignInEmail(): string | null {
 // Reads without clearing (forgot-password only peeks).
 export function readSignInEmail(): string | null {
     return tryStorage(() => readFreshEmail(localStorage.getItem(SIGN_IN_KEY), SIGN_IN_MAX_AGE_MS), null);
+}
+
+function tryStorage<T>(read: () => T, fallback: T): T {
+    try {
+        return read();
+    } catch {
+        return fallback;
+    }
 }
 
 // Throws on invalid JSON; tryStorage turns that into null.

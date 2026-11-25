@@ -7,12 +7,12 @@ export type PanelText = { headline: string; line: string };
 
 export type Heading = { title: string; description: string; panel?: PanelText };
 
+export type SignInArrival = 'reset' | null;
+
 export const SIGN_IN_HEADINGS = {
     default: { title: 'Sign in', description: 'Good to see you again. Your front page is waiting.' },
     reset: { title: 'Password changed', description: "Your new password is set. Sign in with it and you're back." },
 } satisfies Record<string, Heading>;
-
-export type SignInArrival = Exclude<keyof typeof SIGN_IN_HEADINGS, 'default'> | null;
 
 export const SIGN_UP_HEADING = {
     title: 'Create account',
@@ -42,13 +42,6 @@ export const VERIFY_EMAIL_HEADINGS = {
     emailStep: { title: 'Where should the code go?', description: "Pop in your email and we'll send six digits over." },
 } satisfies Record<string, Heading>;
 
-export function codeStepHeading(email: string): Heading {
-    return {
-        title: VERIFY_EMAIL_HEADINGS.default.title,
-        description: `We sent a ${CODE_LENGTH}-digit code to ${email}. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
-    };
-}
-
 export const ACCOUNT_UNAVAILABLE_HEADING = {
     title: "Can't reach your account",
     description: 'Accounts are unavailable right now. Your feeds are safe; try again in a few minutes.',
@@ -58,6 +51,13 @@ export const CHANGE_PASSWORD_HEADINGS = {
     default: { title: 'Change your password', description: "Pick one you don't use anywhere else. Your feeds stay exactly as they are." },
     changed: { title: 'Password changed', description: 'Your new password is set. Use it next time you sign in.' },
 } satisfies Record<string, Heading>;
+
+export function codeStepHeading(email: string): Heading {
+    return {
+        title: VERIFY_EMAIL_HEADINGS.default.title,
+        description: `We sent a ${CODE_LENGTH}-digit code to ${email}. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
+    };
+}
 
 export function signInArrival(params: Record<string, string | string[] | undefined>): SignInArrival {
     return params.reset ? 'reset' : null;
