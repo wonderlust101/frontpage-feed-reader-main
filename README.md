@@ -48,6 +48,7 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │   ├── requests/             # .http files for manual API requests
 │   └── src/
 │       ├── index.ts          # starts the server (PORT, graceful shutdown)
+│       ├── server-lifecycle.ts # shutdown(): close the server and database, then exit (1 if closing fails)
 │       ├── app.ts            # Express app: global middleware + mounts module routers
 │       ├── middleware/       # shared by all modules: error handling, the auth guard and rate limits
 │       │   ├── error-handler.ts      # errorHandler: every thrown error → the standard JSON error body
@@ -57,7 +58,7 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │       ├── errors/           # one file per error class, thrown by services and lib: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
-│       │   ├── auth/         #   /api/auth/* (Better Auth) + "users", "sessions", "accounts", "verifications" tables
+│       │   ├── auth/         #   /api/auth/* (Better Auth; email templates in auth.emails.ts) + "users", "sessions", "accounts", "verifications" tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
 │       │   ├── feeds/        #   GET /api/fetch (routes → controller → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
 │       │   ├── items/        #   /api/items (routes → controller → validation + cursor → service; read rule) + "items", "item_read_states" tables
@@ -66,7 +67,7 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │       │   ├── preferences/  #   "user_preferences" table
 │       │   └── bookmarks/    #   "bookmarks" table
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
-│       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
+│       ├── lib/              # framework-free helpers used across modules: feed/ (fetch, decode, raw-xml scans, normalize, sanitize), email, uuid
 │       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
 │       └── scripts/          # one-off scripts run with `bun src/scripts/<name>.ts` (e.g. seeding)
 ├── docs/                     # notes/: design records (tracked; planned work is in Jira); spec, guidance, brief (local, git-ignored)
@@ -105,7 +106,7 @@ The sample feeds live in `backend/data/` because only the backend reads them.
 
 ### Code style
 
-ESLint formats TypeScript (`.ts`, `.tsx`, `.mjs`) with ESLint Stylistic (`packages/eslint-config`); Prettier formats everything else (CSS, JSON, Markdown, YAML). `bun run format` runs both, and `bun run lint` fails on any layout the formatter would change. Prettier skips TS files because it would pull a brace-free `if` body up onto the `if` line.
+ESLint formats TypeScript (`.ts`, `.tsx`, `.mjs`) with ESLint Stylistic (`packages/eslint-config`); Prettier formats everything else (CSS, JSON, Markdown, YAML). `bun run format` runs both, and `bun run lint` fails on any layout the formatter would change. Prettier skips TS files because it would pull a brace-free `if` body up onto the `if` line. The backend and `packages/shared` also run typescript-eslint's recommended rules (syntax-only: the backend's TypeScript 7 has no JS API for type-aware rules), and backend `src/` warns past complexity 20, nesting depth 3, 5 parameters or 400 lines, limits set above today's code so they only flag new outliers.
 
 **Layout:**
 
