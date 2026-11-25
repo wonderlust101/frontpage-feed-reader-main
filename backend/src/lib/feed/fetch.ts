@@ -103,16 +103,16 @@ export function parseFeedUrl(input: string | undefined | null): URL {
 }
 
 // Follows up to 5 redirects itself, to report permanent moves. Every failure is an HttpError (`timeout`, `http_4xx`…).
-export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}): Promise<FetchFeedResult> {
+export async function fetchFeed(input: string | URL, options: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const {
         timeoutMs = DEFAULT_TIMEOUT_MS,
         userAgent = DEFAULT_USER_AGENT,
         maxRedirects = DEFAULT_MAX_REDIRECTS,
         maxBytes = DEFAULT_MAX_BYTES,
         allowLoopback = false,
-    } = opts;
-    const ctx: RequestContext = {
-        headers: requestHeaders(userAgent, opts),
+    } = options;
+    const context: RequestContext = {
+        headers: requestHeaders(userAgent, options),
         agents: agentsFor(allowLoopback),
         signal: AbortSignal.timeout(timeoutMs),
         timeoutMs,
@@ -120,7 +120,7 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
     const startUrl = typeof input === 'string' ? parseFeedUrl(input) : input;
 
     try {
-        const { res, url, redirect } = await followRedirects(startUrl, ctx, maxRedirects);
+        const { res, url, redirect } = await followRedirects(startUrl, context, maxRedirects);
         const status = res.statusCode ?? 0;
         const fetchedFrom: FetchedFrom = {
             finalUrl: url.href,
@@ -148,17 +148,17 @@ export async function fetchFeed(input: string | URL, opts: FetchFeedOptions = {}
         return { ...fetchedFrom, notModified: false, bytes, contentType: header(res, 'content-type') };
     } catch (err) {
         // Connection errors were already mapped per hop in request(); this catches body, decompression and timeout errors.
-        throw toFetchError(err, startUrl, ctx);
+        throw toFetchError(err, startUrl, context);
     }
 }
 
 // The move counts as permanent only if every hop was (301 or 308).
-async function followRedirects(startUrl: URL, ctx: RequestContext, maxRedirects: number): Promise<Arrival> {
+async function followRedirects(startUrl: URL, context: RequestContext, maxRedirects: number): Promise<Arrival> {
     let url = startUrl;
     let allPermanent = true;
 
     for (let hops = 0; ; hops++) {
-        const res = await request(url, ctx);
+        const res = await request(url, context);
         const status = res.statusCode ?? 0;
 
         if (!REDIRECT_STATUSES.has(status)) {
@@ -179,7 +179,15 @@ async function followRedirects(startUrl: URL, ctx: RequestContext, maxRedirects:
 
 // The shared agents, created on first use: public addresses only, or loopback allowed too for tests.
 function agentsFor(allowLoopback: boolean): Agents {
-    return allowLoopback ? (loopbackAgents ??= createAgents(LOOPBACK)) : (publicAgents ??= createAgents([]));
+    if (allowLoopback) {
+        loopbackAgents ??= createAgents(LOOPBACK);
+
+        return loopbackAgents;
+    }
+
+    publicAgents ??= createAgents([]);
+
+    return publicAgents;
 }
 
 // Creates keep-alive http/https agents that refuse private or reserved IPs, except the exact addresses in `allowIPAddressList`.
@@ -208,11 +216,11 @@ function requestHeaders(userAgent: string, validators: Partial<FeedCacheValidato
 }
 
 // Connection errors are mapped here, where we still know which redirect hop failed.
-function request(url: URL, ctx: RequestContext) {
-    const [client, agent] = url.protocol === 'https:' ? [https, ctx.agents.https] : [http, ctx.agents.http];
+function request(url: URL, context: RequestContext) {
+    const [client, agent] = url.protocol === 'https:' ? [https, context.agents.https] : [http, context.agents.http];
 
     return new Promise<IncomingMessage>((resolve, reject) => {
-        client.get(url, { headers: ctx.headers, agent, signal: ctx.signal }, resolve).on('error', (err) => reject(toFetchError(err, url, ctx)));
+        client.get(url, { headers: context.headers, agent, signal: context.signal }, resolve).on('error', (err) => reject(toFetchError(err, url, context)));
     });
 }
 
@@ -281,7 +289,7 @@ function decompress(res: IncomingMessage): Readable {
 }
 
 // Turns any error from a fetch into an HttpError: blocked address, timeout, unknown host, or another network failure.
-function toFetchError(err: unknown, url: URL, ctx: RequestContext): HttpError {
+function toFetchError(err: unknown, url: URL, context: RequestContext): HttpError {
     if (err instanceof HttpError)
         return err;
 
@@ -289,11 +297,11 @@ function toFetchError(err: unknown, url: URL, ctx: RequestContext): HttpError {
     if (err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message))
         return new BadRequestError('blocked_url', 'That host is not allowed');
 
-    if (ctx.signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')))
-        return new GatewayTimeoutError('timeout', `The feed took longer than ${ctx.timeoutMs / 1000}s to respond`);
+    if (context.signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')))
+        return new GatewayTimeoutError('timeout', `The feed took longer than ${context.timeoutMs / 1000}s to respond`);
 
     if ((err as NodeJS.ErrnoException)?.code === 'ENOTFOUND')
         return new BadGatewayError('network', `Could not resolve host ${url.hostname}`, { retryable: false });
 
-    return new BadGatewayError('network', `Could not reach the feed: ${(err as Error)?.message ?? 'unknown error'}`);
+    return new BadGatewayError('network', `Could not reach the feed: ${err instanceof Error ? err.message : 'unknown error'}`);
 }

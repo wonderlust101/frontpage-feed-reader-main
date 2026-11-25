@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 import type { NormalizedFeed } from '@frontpage/shared';
 import { HttpError } from '../../../src/errors';
-import { MAX_ITEMS, decodeFeed, limitItems, normalizeFeed } from '../../../src/lib/feed';
+import { decodeFeed } from '../../../src/lib/feed/decode';
+import { MAX_ITEMS, normalizeFeed } from '../../../src/lib/feed/normalize';
+import { limitItems } from '../../../src/lib/feed/raw-xml';
 import { curatedFixtures, readFixture } from '../../helpers/fixtures';
 
 const NOW = Date.parse('2026-01-01T00:00:00Z');

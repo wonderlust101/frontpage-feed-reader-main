@@ -80,6 +80,27 @@ const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-prese
 // Tags whose text is never content (code, styles, form options…): dropped along with the tag.
 const NON_TEXT_TAGS = ['script', 'style', 'textarea', 'option', 'noscript', 'template', 'title', 'head'];
 
+const ALLOWED_ATTRIBUTES: sanitize.IOptions['allowedAttributes'] = {
+    a: ['href', 'title', 'name', 'rel', 'target'],
+    img: ['src', 'srcset', 'sizes', 'alt', 'title', 'width', 'height', 'loading'],
+    source: ['src', 'srcset', 'sizes', 'type', 'media'],
+    video: ['src', 'poster', 'controls', 'width', 'height'],
+    audio: ['src', 'controls'],
+    track: ['src', 'kind', 'srclang', 'label'],
+    iframe: ['src', 'width', 'height', 'title', 'allowfullscreen', 'sandbox', 'loading', 'referrerpolicy'],
+    abbr: ['title'],
+    time: ['datetime'],
+    td: ['colspan', 'rowspan'],
+    th: ['colspan', 'rowspan', 'scope'],
+    ol: ['start', 'reversed', 'type'],
+    code: ['class'],
+    pre: ['class'],
+    '*': ['lang', 'dir'],
+};
+
+// The link schemes urls.ts accepts, without the trailing colon sanitize-html leaves off.
+const ALLOWED_SCHEMES = [...LINK_PROTOCOLS].map((protocol) => protocol.replace(/:$/, ''));
+
 // The attributes of each tag that hold URLs: made absolute against the item's link, and removed if unsafe.
 const URL_ATTRIBUTES: Record<string, string[]> = {
     a: ['href'],
@@ -104,25 +125,9 @@ export function sanitizeFeedHtml(html: string | null | undefined, baseUrl?: stri
 
     return sanitize(html, {
         allowedTags: ALLOWED_TAGS,
-        allowedAttributes: {
-            a: ['href', 'title', 'name', 'rel', 'target'],
-            img: ['src', 'srcset', 'sizes', 'alt', 'title', 'width', 'height', 'loading'],
-            source: ['src', 'srcset', 'sizes', 'type', 'media'],
-            video: ['src', 'poster', 'controls', 'width', 'height'],
-            audio: ['src', 'controls'],
-            track: ['src', 'kind', 'srclang', 'label'],
-            iframe: ['src', 'width', 'height', 'title', 'allowfullscreen', 'sandbox', 'loading', 'referrerpolicy'],
-            abbr: ['title'],
-            time: ['datetime'],
-            td: ['colspan', 'rowspan'],
-            th: ['colspan', 'rowspan', 'scope'],
-            ol: ['start', 'reversed', 'type'],
-            code: ['class'],
-            pre: ['class'],
-            '*': ['lang', 'dir'],
-        },
+        allowedAttributes: ALLOWED_ATTRIBUTES,
         allowedClasses: { code: [/^language-/], pre: [/^language-/] },
-        allowedSchemes: ['http', 'https', 'mailto'],
+        allowedSchemes: ALLOWED_SCHEMES,
         allowedIframeHostnames: EMBED_HOSTS,
         allowProtocolRelative: true,
         disallowedTagsMode: 'discard',
@@ -150,9 +155,8 @@ export function htmlToText(html: string | null | undefined, max?: number): strin
     });
 
     // Decode twice to fix double-encoded entities like "&amp;amp;" that some feeds emit.
-    let text = decode(decode(stripped));
-
-    text = text
+    const decoded = decode(decode(stripped));
+    const text = decoded
         .replace(/\s+/g, ' ')
         .replace(/\s+([.,;:!?)])/g, '$1')
         .trim();

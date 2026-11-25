@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { decodeFeed, detectCharset } from '../../../src/lib/feed';
+import { decodeFeed, detectCharset } from '../../../src/lib/feed/decode';
 import { readFixture } from '../../helpers/fixtures';
 
 // The UTF-8 bytes of a string, for building test input.

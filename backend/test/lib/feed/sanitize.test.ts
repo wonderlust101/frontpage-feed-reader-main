@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { htmlToText, sanitizeFeedHtml, truncate } from '../../../src/lib/feed';
+import { htmlToText, sanitizeFeedHtml, truncate } from '../../../src/lib/feed/sanitize';
 
 const BASE = 'https://blog.example/posts/hello';
 

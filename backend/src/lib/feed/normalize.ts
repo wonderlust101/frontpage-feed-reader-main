@@ -6,6 +6,7 @@ import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import { UnprocessableEntityError } from '../../errors';
 import { parseFeedDate } from './dates';
+import { isRdf, limitItems, looksTruncated, rejectNonFeeds } from './raw-xml';
 import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 import { resolveUrl } from './urls';
 
@@ -59,15 +60,13 @@ const ID_MAX = 512;
 
 // Content counts as the full article (not a teaser) when its text is at least 20% longer than the description's.
 const FULL_CONTENT_RATIO = 1.2;
-// How far into the document to look for the root element (<rdf:RDF>); it's always near the top.
-const HEAD_CHARS = 4096;
 
 const PUBLISHED_TAGS = ['pubdate', 'published', 'issued', 'created', 'date', 'updated', 'modified'];
 const UPDATED_TAGS = ['updated', 'modified', 'date'];
 
 // Throws `not_a_feed` for empty responses, web pages and other XML, and `parse_error` if nothing can be read.
-export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFeed {
-    const now = opts.now ?? Date.now();
+export function normalizeFeed(xml: string, options: NormalizeOptions): NormalizedFeed {
+    const now = options.now ?? Date.now();
     const feedXml = xml.replace(BYTE_ORDER_MARK, '');
 
     rejectNonFeeds(feedXml);
@@ -75,10 +74,10 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     const limited = limitItems(feedXml, MAX_ITEMS);
     const feed = parseXml(limited.xml);
 
-    const feedUrl = opts.url;
+    const feedUrl = options.url;
     const siteUrl = resolveUrl(feed.url, feedUrl) ?? new URL('/', feedUrl).href;
     const siteHostname = new URL(siteUrl).hostname.replace(/^www\./, '');
-    const feedAuthor = joinAuthors(feed.authors.map((a) => htmlToText(a.name)));
+    const feedAuthor = joinAuthors(feed.authors.map((author) => htmlToText(author.name)));
 
     const collected = collectItems(feed.items, { siteUrl, feedAuthor, now });
     const items = collected.items.sort(byNewestFirst);
@@ -86,7 +85,7 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
 
     return {
         url: feedUrl,
-        requestedUrl: opts.requestedUrl ?? feedUrl,
+        requestedUrl: options.requestedUrl ?? feedUrl,
         format: detectFormat(feed, feedXml),
         title: truncate(htmlToText(feed.title), TITLE_MAX) || siteHostname,
         description: htmlToText(feed.description, DESCRIPTION_MAX) || null,
@@ -106,39 +105,6 @@ export function normalizeFeed(xml: string, opts: NormalizeOptions): NormalizedFe
     };
 }
 
-// A text scan before parsing, because the parser slows down badly on huge feeds; re-closes the document so it stays valid.
-export function limitItems(xml: string, max: number): { xml: string; limited: boolean } {
-    const closingTag = /<\/(item|entry)\s*>/gi;
-    let lastKeptItem: RegExpExecArray | null = null;
-
-    for (let i = 0; i < max; i++) {
-        lastKeptItem = closingTag.exec(xml);
-
-        if (!lastKeptItem)
-            return { xml, limited: false };
-    }
-
-    const keptXml = xml.slice(0, closingTag.lastIndex);
-    const hasMoreItems = /<(item|entry)[\s>]/i.test(xml.slice(closingTag.lastIndex));
-
-    if (!lastKeptItem || !hasMoreItems)
-        return { xml, limited: false };
-
-    const isAtom = lastKeptItem[1]!.toLowerCase() === 'entry';
-    const closingRootTag = isAtom ? '</feed>' : isRdf(xml) ? '</rdf:RDF>' : '</channel></rss>';
-
-    return { xml: `${keptXml}\n${closingRootTag}\n`, limited: true };
-}
-
-// Throws `not_a_feed` for an empty response or a normal web page, before spending time on parsing.
-function rejectNonFeeds(xml: string) {
-    if (!xml.trim())
-        throw new UnprocessableEntityError('not_a_feed', 'The response was empty');
-
-    if (looksLikeHtmlPage(xml))
-        throw new UnprocessableEntityError('not_a_feed', 'This URL points to a web page, not an RSS or Atom feed');
-}
-
 // Runs the feed parser; throws `not_a_feed` for XML that isn't RSS or Atom, and `parse_error` for anything else it can't read.
 function parseXml(xml: string): ParsedFeed {
     try {
@@ -147,12 +113,12 @@ function parseXml(xml: string): ParsedFeed {
         if ((err as { code?: string })?.code === 'INVALID_FEED')
             throw new UnprocessableEntityError('not_a_feed', 'No RSS or Atom feed was found at this URL');
 
-        throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${(err as Error)?.message ?? err}`);
+        throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${err instanceof Error ? err.message : err}`);
     }
 }
 
 // Normalizes every item in feed order, skipping ones that fail and repeats of an id already seen, and counting both.
-function collectItems(rawItems: ParsedItem[], ctx: ItemContext): CollectedItems {
+function collectItems(rawItems: ParsedItem[], context: ItemContext): CollectedItems {
     const seenIds = new Set<string>();
     const collected: CollectedItems = { items: [], missingDates: 0, duplicates: 0, dropped: 0 };
 
@@ -160,7 +126,7 @@ function collectItems(rawItems: ParsedItem[], ctx: ItemContext): CollectedItems 
         let item: NormalizedItem;
 
         try {
-            item = normalizeItem(raw, ctx, index);
+            item = normalizeItem(raw, context, index);
         } catch {
             collected.dropped++;
             continue;
@@ -221,13 +187,6 @@ function buildWarnings(found: FeedProblems): string[] {
     return warnings;
 }
 
-// True when the response is a normal web page (it starts like HTML and has no <rss> or <feed>),
-function looksLikeHtmlPage(xml: string): boolean {
-    const head = xml.slice(0, 2048).toLowerCase();
-
-    return /<!doctype html|<html[\s>]/.test(head) && !/<(rss|feed|rdf:rdf)[\s>]/.test(head);
-}
-
 // Which feed standard the document uses: 'atom', 'rss1' (the older RDF-based RSS 1.0) or 'rss2'.
 function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
     if (feed.meta.type === 'atom')
@@ -239,15 +198,10 @@ function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
     return 'rss2';
 }
 
-// True when the root element is <rdf:RDF>, i.e. RSS 1.0.
-function isRdf(xml: string): boolean {
-    return /<rdf:rdf[\s>]/i.test(xml.slice(0, HEAD_CHARS));
-}
-
 // Gaps get fallbacks: title from the summary, author from the feed, thumbnail from the first image, id from a hash.
-function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): NormalizedItem {
-    const url = resolveUrl(item.url, ctx.siteUrl);
-    const linkBase = url ?? ctx.siteUrl;
+function normalizeItem(item: ParsedItem, context: ItemContext, index: number): NormalizedItem {
+    const url = resolveUrl(item.url, context.siteUrl);
+    const linkBase = url ?? context.siteUrl;
 
     const descriptionText = htmlToText(item.description);
     const contentText = htmlToText(item.content);
@@ -255,9 +209,9 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
     const contentHtml = sanitizeFeedHtml(item.content, linkBase) || sanitizeFeedHtml(item.description, linkBase);
 
     const title = truncate(htmlToText(item.title), TITLE_MAX) || truncate(summary, FALLBACK_TITLE_MAX) || 'Untitled';
-    const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), ctx.now);
-    const authorNames = item.authors.map((a) => (htmlToText(a.name) || htmlToText(a.email)).replace(/^by\s+/i, ''));
-    const categoryNames = item.categories.map((c) => truncate(htmlToText(c.label || c.term), CATEGORY_MAX));
+    const publishedAt = firstDate(rawText(item, PUBLISHED_TAGS), context.now);
+    const authorNames = item.authors.map((author) => (htmlToText(author.name) || htmlToText(author.email)).replace(/^by\s+/i, ''));
+    const categoryNames = item.categories.map((category) => truncate(htmlToText(category.label || category.term), CATEGORY_MAX));
 
     // Thumbnail: the item's own image, else its first media image, else the first <img> in its (already sanitized) content.
     const firstContentImage = contentHtml.match(/<img\b[^>]*\bsrc="([^"]+)"/i)?.[1];
@@ -267,16 +221,19 @@ function normalizeItem(item: ParsedItem, ctx: ItemContext, index: number): Norma
         resolveUrl(item.mediaImages[0]?.image, linkBase) ??
         resolveUrl(firstContentImage, linkBase);
 
+    const hasFullContent = contentText.length > 0 && contentText.length > descriptionText.length * FULL_CONTENT_RATIO;
+    const fallbackIdKey = `${title}|${publishedAt ?? ''}|${index}`;
+
     return {
-        id: itemId(item.id?.trim() || url, `${title}|${publishedAt ?? ''}|${index}`),
+        id: itemId(item.id?.trim() || url, fallbackIdKey),
         title,
         url,
-        author: joinAuthors(authorNames) ?? ctx.feedAuthor,
+        author: joinAuthors(authorNames) ?? context.feedAuthor,
         publishedAt,
-        updatedAt: firstDate(rawText(item, UPDATED_TAGS), ctx.now) ?? publishedAt,
+        updatedAt: firstDate(rawText(item, UPDATED_TAGS), context.now) ?? publishedAt,
         summary,
         contentHtml,
-        hasFullContent: contentText.length > 0 && contentText.length > descriptionText.length * FULL_CONTENT_RATIO,
+        hasFullContent,
         imageUrl,
         categories: [...new Set(categoryNames.filter(Boolean))].slice(0, CATEGORIES_MAX),
     };
@@ -297,8 +254,8 @@ function joinAuthors(names: string[]): string | null {
 
 // Tries each candidate with parseFeedDate and returns the first valid one as an ISO string, or null.
 function firstDate(candidates: Array<string | Date | null | undefined>, now: number): string | null {
-    for (const c of candidates) {
-        const iso = c instanceof Date ? parseFeedDate(c.toISOString(), now) : parseFeedDate(c, now);
+    for (const candidate of candidates) {
+        const iso = candidate instanceof Date ? parseFeedDate(candidate.toISOString(), now) : parseFeedDate(candidate, now);
 
         if (iso)
             return iso;
@@ -312,8 +269,8 @@ function rawText(item: ParsedItem, tags: string[]): string[] {
     const out: string[] = [];
 
     for (const tag of tags) {
-        for (const el of item.element.findElementsWithName(tag))
-            out.push(el.textContent);
+        for (const element of item.element.findElementsWithName(tag))
+            out.push(element.textContent);
     }
 
     return out;
@@ -322,16 +279,4 @@ function rawText(item: ParsedItem, tags: string[]): string[] {
 // A stable "urn:frontpage:…" id from any text (same input, same id); used when an item has no usable or short-enough guid or link.
 function hashedId(input: string) {
     return `urn:frontpage:${createHash('sha256').update(input).digest('hex').slice(0, 32)}`;
-}
-
-// True when the XML never closes its root element (</rss>, </feed> or </rdf:RDF>), i.e. the feed was cut off and only partly parsed.
-function looksTruncated(xml: string): boolean {
-    // Ignore trailing comments/processing instructions (e.g. cache stats some CMSs append).
-    const tail = xml
-        .slice(-4096)
-        .replace(/<!--[\s\S]*?-->|<\?[\s\S]*?\?>/g, '')
-        .trimEnd()
-        .toLowerCase();
-
-    return !/<\/(rss|feed|rdf:rdf)>\s*$/.test(tail);
 }

@@ -1,6 +1,5 @@
-export { fetchFeed, parseFeedUrl, type FetchFeedOptions, type FetchFeedResult } from './fetch';
-export { decodeFeed, detectCharset } from './decode';
-export { parseFeedDate } from './dates';
-export { sanitizeFeedHtml, htmlToText, truncate } from './sanitize';
-export { MAX_ITEMS, limitItems, normalizeFeed, type NormalizeOptions } from './normalize';
+export { fetchFeed, parseFeedUrl, type FetchFeedResult } from './fetch';
+export { decodeFeed } from './decode';
+export { normalizeFeed } from './normalize';
+export { limitItems } from './raw-xml';
 export { feedIconUrl } from './urls';

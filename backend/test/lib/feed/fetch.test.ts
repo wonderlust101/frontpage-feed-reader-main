@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { HttpError } from '../../../src/errors';
-import { fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed';
+import { fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed/fetch';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 
 let upstream: ReturnType<typeof startFeedServer>;
