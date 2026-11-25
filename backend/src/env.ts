@@ -8,7 +8,7 @@ const deployment = deploymentDefaults(process.env.RAILWAY_ENVIRONMENT_NAME);
 
 export const env = {
     NODE_ENV: process.env.NODE_ENV ?? 'development',
-    PORT: int(process.env.PORT, 4000),
+    PORT: integerOr(process.env.PORT, 4000),
     WEB_ORIGINS: (optional(process.env.WEB_ORIGIN) ?? deployment?.siteUrl ?? '')
         .split(',')
         .map((origin) => origin.trim())
@@ -25,9 +25,9 @@ export const env = {
     EMAIL_FROM: optional(process.env.EMAIL_FROM),
     MAILPIT_URL: optional(process.env.MAILPIT_URL),
 
-    FEED_FETCH_TIMEOUT_MS: int(process.env.FEED_FETCH_TIMEOUT_MS, DEFAULT_TIMEOUT_MS),
+    FEED_FETCH_TIMEOUT_MS: integerOr(process.env.FEED_FETCH_TIMEOUT_MS, DEFAULT_TIMEOUT_MS),
     FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? DEFAULT_USER_AGENT,
-    FEED_MIN_REFETCH_MINUTES: int(process.env.FEED_MIN_REFETCH_MINUTES, 15),
+    FEED_MIN_REFETCH_MINUTES: integerOr(process.env.FEED_MIN_REFETCH_MINUTES, 15),
     FEED_ALLOW_LOOPBACK: process.env.FEED_ALLOW_LOOPBACK === 'true',
 };
 
@@ -44,7 +44,7 @@ function optional(value: string | undefined) {
 }
 
 // `fallback` when missing or not a number (e.g. "abc").
-function int(value: string | undefined, fallback: number) {
+function integerOr(value: string | undefined, fallback: number) {
     const parsed = Number.parseInt(value ?? '', 10);
 
     return Number.isFinite(parsed) ? parsed : fallback;

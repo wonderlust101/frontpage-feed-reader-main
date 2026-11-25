@@ -41,7 +41,7 @@ async function signUp(email: string) {
 function cookieFrom(headers: Headers) {
     return headers
         .getSetCookie()
-        .map((c) => c.split(';')[0])
+        .map((cookie) => cookie.split(';')[0])
         .join('; ');
 }
 
@@ -143,7 +143,8 @@ describe('production cookies and rate limits', () => {
         const res = await prodAuth.handler(signInRequest('nobody-yet@example.com', '203.0.113.1', 'sign-up/email', { name: 'Ada' }));
 
         expect(res.status).toBe(200);
-        const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
+
+        const sessionCookie = res.headers.getSetCookie().find((cookie) => cookie.includes('session_token'));
 
         expect(sessionCookie).toContain('Domain=readfrontpage.com');
     });
@@ -151,7 +152,7 @@ describe('production cookies and rate limits', () => {
     test('staging names its cookie with AUTH_COOKIE_PREFIX, so the production cookie is never read as its own', async () => {
         const stagingAuth = createInProduction({ AUTH_COOKIE_DOMAIN: 'staging.readfrontpage.com', AUTH_COOKIE_PREFIX: 'frontpage-staging' });
         const res = await stagingAuth.handler(signInRequest('staging@example.com', '203.0.113.2', 'sign-up/email', { name: 'Ada' }));
-        const sessionCookie = res.headers.getSetCookie().find((c) => c.includes('session_token'));
+        const sessionCookie = res.headers.getSetCookie().find((cookie) => cookie.includes('session_token'));
 
         expect(sessionCookie).toStartWith('frontpage-staging.session_token=');
         expect(sessionCookie).toContain('Domain=staging.readfrontpage.com');
@@ -196,6 +197,7 @@ describe('sign up and sign in', () => {
         const cookie = await signUp('joan@example.com');
 
         testDb.queries.length = 0;
+
         const session = await auth.api.getSession({ headers: new Headers({ cookie }) });
 
         expect(session?.user.email).toBe('joan@example.com');
@@ -213,6 +215,7 @@ describe('sign up and sign in', () => {
 
     test('sign-in works with the right password and fails with a wrong one', async () => {
         await signUp('grace@example.com');
+
         const ok = await auth.api.signInEmail({ body: { email: 'grace@example.com', password: PASSWORD } });
 
         expect(ok.user.email).toBe('grace@example.com');
@@ -234,12 +237,14 @@ describe('password reset', () => {
         await auth.api.requestPasswordReset({ body: { email: 'forgetful@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
 
         expect(lastEmailTo('forgetful@example.com')?.text).toContain('/api/auth/reset-password/');
+
         const token = resetTokenFor('forgetful@example.com');
 
         await auth.api.resetPassword({ body: { token, newPassword: NEW_PASSWORD } });
 
         expect(await auth.api.getSession({ headers: new Headers({ cookie }) })).toBeNull();
         await expect(auth.api.signInEmail({ body: { email: 'forgetful@example.com', password: PASSWORD } })).rejects.toThrow();
+
         const signedIn = await auth.api.signInEmail({ body: { email: 'forgetful@example.com', password: NEW_PASSWORD } });
 
         expect(signedIn.user.email).toBe('forgetful@example.com');
@@ -253,6 +258,7 @@ describe('password reset', () => {
     test('a used reset token cannot be used again', async () => {
         await signUp('once@example.com');
         await auth.api.requestPasswordReset({ body: { email: 'once@example.com', redirectTo: 'http://localhost:3000/reset-password' } });
+
         const token = resetTokenFor('once@example.com');
 
         await auth.api.resetPassword({ body: { token, newPassword: NEW_PASSWORD } });
@@ -269,6 +275,7 @@ describe('email verification by code', () => {
 
     test('the right code verifies the email and signs the user in', async () => {
         await signUp('verify@example.com');
+
         const { response, headers } = await auth.api.verifyEmailOTP({
             body: { email: 'verify@example.com', otp: codeFor('verify@example.com')! },
             returnHeaders: true,
@@ -276,6 +283,7 @@ describe('email verification by code', () => {
 
         expect(response.status).toBe(true);
         expect(response.token).toBeTruthy();
+
         const session = await auth.api.getSession({ headers: new Headers({ cookie: cookieFrom(headers) }) });
 
         expect(session?.user.email).toBe('verify@example.com');
@@ -284,6 +292,7 @@ describe('email verification by code', () => {
 
     test('a wrong code fails with INVALID_OTP', async () => {
         await signUp('typo@example.com');
+
         const otp = wrongCode(codeFor('typo@example.com')!);
 
         await expect(auth.api.verifyEmailOTP({ body: { email: 'typo@example.com', otp } })).rejects.toMatchObject({ body: { code: 'INVALID_OTP' } });
@@ -299,6 +308,7 @@ describe('email verification by code', () => {
 
     test('after 3 wrong codes even the right one fails with TOO_MANY_ATTEMPTS', async () => {
         await signUp('guesser@example.com');
+
         const otp = codeFor('guesser@example.com')!;
 
         for (let attempt = 0; attempt < 3; attempt++)
@@ -316,6 +326,7 @@ describe('email verification by code', () => {
 
     test('codes are stored hashed, never as the code itself', async () => {
         await signUp('hashed@example.com');
+
         const code = codeFor('hashed@example.com')!;
         const rows = await testDb.db.query.verifications.findMany();
 
@@ -369,6 +380,7 @@ describe('change password', () => {
 describe('untrusted return addresses', () => {
     test('a reset request whose redirectTo is on an untrusted site is refused', async () => {
         await signUp('phished@example.com');
+
         const res = await auth.handler(
             new Request('http://localhost:4000/api/auth/request-password-reset', {
                 method: 'POST',

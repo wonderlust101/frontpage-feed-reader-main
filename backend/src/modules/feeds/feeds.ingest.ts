@@ -12,7 +12,7 @@ import { bookmarks } from '../bookmarks/bookmarks.schema';
 import { itemReadStates, items } from '../items/items.schema';
 import { subscriptions } from '../subscriptions/subscriptions.schema';
 import { feeds, starterFeeds } from './feeds.schema';
-import { fetchUpstream, keepUnsentValidators, readFetchedFeed, unexpectedNotModified, type FreshResult, type NotModifiedResult } from './feeds.service';
+import { fetchUpstream, keepUnsentValidators, readFetchedFeed, unexpectedNotModifiedError, type FreshResult, type NotModifiedResult } from './feeds.service';
 import type { IngestOptions, IngestResult } from './feeds.types';
 
 type StoredFeed = {
@@ -79,7 +79,7 @@ async function fetchForIngest(db: Database, feedUrl: string, stored: StoredFeed 
             return { kind: 'fresh', result, feed: readFetchedFeed(result, feedUrl) };
 
         if (!stored)
-            throw unexpectedNotModified('to a request without validators');
+            throw unexpectedNotModifiedError('to a request without validators');
 
         return { kind: 'notModified', result, stored };
     } catch (err) {
@@ -271,34 +271,45 @@ async function writeItems(tx: Transaction, feedId: string, fetched: NormalizedIt
         rows.push(toItemRow(feedId, item, contentHash, now));
     }
 
-    if (rows.length > 0) {
-        // first_seen_at is left out of the update, so an edited article keeps the date it first appeared.
-        await tx
-            .insert(items)
-            .values(rows)
-            .onConflictDoUpdate({
-                target: [items.feedId, items.guid],
-                set: {
-                    url: excluded(items.url),
-                    title: excluded(items.title),
-                    author: excluded(items.author),
-                    summary: excluded(items.summary),
-                    contentHtml: excluded(items.contentHtml),
-                    hasFullContent: excluded(items.hasFullContent),
-                    imageUrl: excluded(items.imageUrl),
-                    publishedAt: excluded(items.publishedAt),
-                    updatedAt: excluded(items.updatedAt),
-                    contentHash: excluded(items.contentHash),
-                },
-                setWhere: sql`${items.contentHash} is distinct from ${excluded(items.contentHash)}`,
-            });
-        await tx
-            .update(feeds)
-            .set({ latestItemAt: sql`(select max(${items.sortAt}) from ${items} where ${items.feedId} = ${feedId})` })
-            .where(eq(feeds.id, feedId));
-    }
+    const counts = { inserted, updated: rows.length - inserted, unchanged: fetched.length - rows.length };
 
-    return { inserted, updated: rows.length - inserted, unchanged: fetched.length - rows.length };
+    if (rows.length === 0)
+        return counts;
+
+    // first_seen_at is left out of the update, so an edited article keeps the date it first appeared.
+    await tx
+        .insert(items)
+        .values(rows)
+        .onConflictDoUpdate({
+            target: [items.feedId, items.guid],
+            set: {
+                url: excluded(items.url),
+                title: excluded(items.title),
+                author: excluded(items.author),
+                summary: excluded(items.summary),
+                contentHtml: excluded(items.contentHtml),
+                hasFullContent: excluded(items.hasFullContent),
+                imageUrl: excluded(items.imageUrl),
+                publishedAt: excluded(items.publishedAt),
+                updatedAt: excluded(items.updatedAt),
+                contentHash: excluded(items.contentHash),
+            },
+            setWhere: sql`${items.contentHash} is distinct from ${excluded(items.contentHash)}`,
+        });
+
+    await tx
+        .update(feeds)
+        .set({ latestItemAt: sql`(select max(${items.sortAt}) from ${items} where ${items.feedId} = ${feedId})` })
+        .where(eq(feeds.id, feedId));
+
+    return counts;
+}
+
+// A SHA-256 of every stored field of an item: equal hashes mean the stored row is already up to date.
+function itemHash(item: NormalizedItem): string {
+    const fields = [item.title, item.url, item.author, item.summary, item.contentHtml, item.hasFullContent, item.imageUrl, item.publishedAt, item.updatedAt];
+
+    return createHash('sha256').update(JSON.stringify(fields)).digest('hex');
 }
 
 function toItemRow(feedId: string, item: NormalizedItem, contentHash: string, now: Date): ItemRow {
@@ -322,11 +333,4 @@ function toItemRow(feedId: string, item: NormalizedItem, contentHash: string, no
 // The value an upsert tried to insert for `column`, typed so a column rename can't silently break the SQL.
 function excluded(column: AnyPgColumn) {
     return sql`excluded.${sql.identifier(column.name)}`;
-}
-
-// A SHA-256 of every stored field of an item: equal hashes mean the stored row is already up to date.
-function itemHash(item: NormalizedItem): string {
-    const fields = [item.title, item.url, item.author, item.summary, item.contentHtml, item.hasFullContent, item.imageUrl, item.publishedAt, item.updatedAt];
-
-    return createHash('sha256').update(JSON.stringify(fields)).digest('hex');
 }

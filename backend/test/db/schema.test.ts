@@ -23,7 +23,10 @@ async function newFeed(): Promise<string> {
         .values({ url: `https://example.com/${crypto.randomUUID()}.xml`, title: 'Example' })
         .returning({ id: feeds.id });
 
-    return row!.id;
+    if (!row)
+        throw new Error('Inserting the feed returned no row');
+
+    return row.id;
 }
 
 // Inserts an item into a feed and returns the stored row.
@@ -42,7 +45,10 @@ async function newItem(feedId: string, overrides: Partial<typeof items.$inferIns
         })
         .returning();
 
-    return row!;
+    if (!row)
+        throw new Error('Inserting the item returned no row');
+
+    return row;
 }
 
 // The Postgres error code (e.g. 23505 unique violation) a failing query threw.
@@ -124,6 +130,7 @@ describe('foreign keys', () => {
             .returning();
 
         await testDb.db.delete(categories).where(eq(categories.id, category!.id));
+
         const [after] = await testDb.db.select().from(subscriptions).where(eq(subscriptions.id, sub!.id));
 
         expect(after!.categoryId).toBeNull();
@@ -138,6 +145,7 @@ describe('updated_at', () => {
             .returning();
 
         await Bun.sleep(5);
+
         const [renamed] = await testDb.db.update(categories).set({ name: 'World' }).where(eq(categories.id, category!.id)).returning();
 
         expect(renamed!.updatedAt.getTime()).toBeGreaterThan(category!.updatedAt.getTime());
@@ -158,6 +166,7 @@ describe('checks and unique names', () => {
 
         expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, refreshIntervalMinutes: 45 }))).toBe('23514');
         expect(await errorCode(testDb.db.insert(userPreferences).values({ userId: user, itemOrder: 'random' as 'newest' }))).toBe('23514');
+
         const [defaults] = await testDb.db.insert(userPreferences).values({ userId: user }).returning();
 
         expect(defaults).toMatchObject({ layout: 'list', refreshIntervalMinutes: 30, itemOrder: 'newest', showRead: true });

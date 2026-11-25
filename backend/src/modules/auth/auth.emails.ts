@@ -1,11 +1,9 @@
 // The auth emails as plain text plus HTML; anything a reader typed is escaped in the HTML.
 
-import { CODE_LIFETIME_MINUTES } from '@frontpage/shared';
+import { CODE_LIFETIME_MINUTES, RESET_TOKEN_MINUTES } from '@frontpage/shared';
 import { escapeHtml, type Email } from '../../lib/email';
 
 type ResetEmailUser = { email: string; name: string };
-
-export const RESET_TOKEN_MINUTES = 60;
 
 export function passwordResetEmail(user: ResetEmailUser, url: string): Email {
     const greeting = user.name ? `Hi ${user.name},` : 'Hi,';

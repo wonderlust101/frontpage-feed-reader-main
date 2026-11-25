@@ -48,7 +48,7 @@ function expectCleanFeed(feed: NormalizedFeed) {
         expect(Array.isArray(item.categories)).toBe(true);
     }
 
-    const dates = feed.items.map((i) => i.publishedAt!);
+    const dates = feed.items.map((item) => item.publishedAt!);
 
     expect([...dates].sort().reverse()).toEqual(dates);
 }
@@ -58,7 +58,7 @@ describe('curated feeds', () => {
         expect(curatedFixtures).toHaveLength(19);
     });
 
-    test.each(curatedFixtures.map((f) => [f.title, f] as const))('%s normalizes cleanly', (_title, fixture) => {
+    test.each(curatedFixtures.map((fixture) => [fixture.title, fixture] as const))('%s normalizes cleanly', (_title, fixture) => {
         const xml = decodeFeed(readFixture(`curated/${fixture.file}`), fixture.contentType);
         const feed = normalizeFeed(xml, { url: fixture.feedUrl });
 
@@ -67,17 +67,17 @@ describe('curated feeds', () => {
     });
 
     test('full-content feeds are told apart from excerpt feeds', () => {
-        const smashing = curatedFixtures.find((f) => f.slug === 'smashing-magazine')!;
-        const hn = curatedFixtures.find((f) => f.slug === 'hacker-news-best')!;
+        const smashing = curatedFixtures.find((fixture) => fixture.slug === 'smashing-magazine')!;
+        const hn = curatedFixtures.find((fixture) => fixture.slug === 'hacker-news-best')!;
         const full = normalizeFeed(decodeFeed(readFixture(`curated/${smashing.file}`)), { url: smashing.feedUrl });
         const excerpt = normalizeFeed(decodeFeed(readFixture(`curated/${hn.file}`)), { url: hn.feedUrl });
 
-        expect(full.items.every((i) => i.hasFullContent)).toBe(true);
-        expect(excerpt.items.some((i) => i.hasFullContent)).toBe(false);
+        expect(full.items.every((item) => item.hasFullContent)).toBe(true);
+        expect(excerpt.items.some((item) => item.hasFullContent)).toBe(false);
     });
 
     test('Atom feeds are detected as Atom', () => {
-        const simon = curatedFixtures.find((f) => f.slug === 'simon-willison-s-weblog')!;
+        const simon = curatedFixtures.find((fixture) => fixture.slug === 'simon-willison-s-weblog')!;
 
         expect(normalizeFeed(decodeFeed(readFixture(`curated/${simon.file}`)), { url: simon.feedUrl }).format).toBe('atom');
     });
@@ -119,7 +119,7 @@ describe('broken and odd feeds', () => {
 
         expect(feed.format).toBe('rss1');
         expect(feed.language).toBe('en');
-        expect(feed.items.map((i) => i.title)).toEqual(['RDF item B', 'RDF item A']);
+        expect(feed.items.map((item) => item.title)).toEqual(['RDF item B', 'RDF item A']);
         expect(feed.items[1]).toMatchObject({ author: 'Ada Lovelace', publishedAt: '2025-03-01T11:00:00.000Z' });
     });
 
@@ -128,14 +128,14 @@ describe('broken and odd feeds', () => {
 
         expect(feed.format).toBe('atom');
         expect(feed.title).toBe('Atom & No Dates');
-        expect(feed.items.every((i) => i.publishedAt === null)).toBe(true);
+        expect(feed.items.every((item) => item.publishedAt === null)).toBe(true);
         expect(feed.items[1]?.contentHtml).toBe('<p>Escaped <em>HTML</em> content.</p>');
         expect(feed.warnings).toContain('2 item(s) have no usable date');
     });
 
     test('RFC 822 / ISO variants are normalized; anything else becomes null', () => {
         const feed = load('odd/weird-dates.xml');
-        const byKey = Object.fromEntries(feed.items.map((i) => [i.url!.split('/').pop(), i.publishedAt]));
+        const byKey = Object.fromEntries(feed.items.map((item) => [item.url!.split('/').pop(), item.publishedAt]));
 
         for (const key of ['rfc822', 'named-tz', 'no-seconds', 'no-dayname', 'wrong-dayname', 'two-digit-year', 'iso-no-zone', 'iso-offset', 'full-month'])
             expect(byKey[key]).toBe('2024-10-02T15:00:00.000Z');
@@ -143,7 +143,7 @@ describe('broken and odd feeds', () => {
         for (const key of ['month-first', 'garbage', 'impossible'])
             expect(byKey[key]).toBeNull();
 
-        expect(feed.items.slice(-3).map((i) => i.title)).toEqual(['Date month-first', 'Date garbage', 'Date impossible']);
+        expect(feed.items.slice(-3).map((item) => item.title)).toEqual(['Date month-first', 'Date garbage', 'Date impossible']);
         expect(feed.warnings).toContain('3 item(s) have no usable date');
     });
 
@@ -151,6 +151,7 @@ describe('broken and odd feeds', () => {
         const feed = load('odd/missing-fields.xml');
 
         expect(feed.title).toBe('odd.example');
+
         const [fromDescription, empty, titleOnly] = feed.items;
 
         expect(fromDescription?.title).toStartWith('An item with only a description');
@@ -163,7 +164,7 @@ describe('broken and odd feeds', () => {
             expect(item).toMatchObject({ url: null, publishedAt: null, author: null, categories: [] });
         }
 
-        expect(new Set(feed.items.map((i) => i.id)).size).toBe(3);
+        expect(new Set(feed.items.map((item) => item.id)).size).toBe(3);
     });
 
     test('hostile HTML is sanitized everywhere', () => {
@@ -213,7 +214,7 @@ describe('broken and odd feeds', () => {
     test('duplicate guids are removed', () => {
         const feed = load('odd/duplicate-guids.xml');
 
-        expect(feed.items.map((i) => i.title)).toEqual(['Newer', 'Original']);
+        expect(feed.items.map((item) => item.title)).toEqual(['Newer', 'Original']);
         expect(feed.warnings).toContain('1 duplicate item(s) were removed');
     });
 
@@ -235,7 +236,7 @@ describe('limits against hostile or huge feeds', () => {
     // An RSS 2.0 document with the given item XML inside its channel.
     const rss = (items: string) => `<rss version="2.0"><channel><title>t</title>${items}</channel></rss>`;
     // An RSS 2.0 document with `n` minimal items, titled t0, t1, t2…
-    const rssItems = (n: number) => rss(Array.from({ length: n }, (_, i) => `<item><title>t${i}</title><link>https://e.x/${i}</link></item>`).join(''));
+    const rssItems = (count: number) => rss(Array.from({ length: count }, (_, index) => `<item><title>t${index}</title><link>https://e.x/${index}</link></item>`).join(''));
 
     test('a feed with thousands of items is cut to MAX_ITEMS quickly', () => {
         const started = performance.now();
@@ -268,7 +269,7 @@ describe('limits against hostile or huge feeds', () => {
     });
 
     test('oversized fields are capped and overlong ids are hashed', () => {
-        const categories = Array.from({ length: 50 }, (_, i) => `<category>${i} ${'c'.repeat(500)}</category>`).join('');
+        const categories = Array.from({ length: 50 }, (_, index) => `<category>${index} ${'c'.repeat(500)}</category>`).join('');
         const feed = normalizeFeed(rss(`<item><title>${'A'.repeat(1e6)}</title><guid>${'g'.repeat(1e6)}</guid>${categories}</item>`), {
             url: FEED_URL,
             now: NOW,
@@ -278,7 +279,7 @@ describe('limits against hostile or huge feeds', () => {
         expect(item.title.length).toBeLessThanOrEqual(300);
         expect(item.id).toMatch(/^urn:frontpage:[0-9a-f]{32}$/);
         expect(item.categories).toHaveLength(20);
-        expect(item.categories.every((c) => c.length <= 100)).toBe(true);
+        expect(item.categories.every((category) => category.length <= 100)).toBe(true);
     });
 
     test('hashed ids are stable across fetches', () => {

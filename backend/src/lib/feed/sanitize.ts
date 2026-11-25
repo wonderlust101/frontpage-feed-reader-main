@@ -192,7 +192,7 @@ function tagTransforms(baseUrl: string | undefined): Record<string, sanitize.Tra
 }
 
 // A copy of a tag's attributes with its URL attributes (href, src, srcset, poster) resolved; unsafe or invalid ones are removed.
-function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
+function withResolvedUrls(attribs: sanitize.Attributes, names: string[], baseUrl?: string): sanitize.Attributes {
     const result = { ...attribs };
 
     for (const name of names) {
@@ -201,7 +201,7 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
         if (value === undefined)
             continue;
 
-        const resolved = name === 'srcset' ? resolveSrcset(value, base) : resolveUrl(value, base, LINK_PROTOCOLS);
+        const resolved = name === 'srcset' ? resolveSrcset(value, baseUrl) : resolveUrl(value, baseUrl, LINK_PROTOCOLS);
 
         if (resolved) {
             result[name] = resolved;
@@ -214,9 +214,9 @@ function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: 
 }
 
 // Resolves every URL in a srcset and drops unsafe ones (null if none are left); a package parses it, as URLs may contain commas.
-function resolveSrcset(value: string, base?: string): string | null {
+function resolveSrcset(value: string, baseUrl?: string): string | null {
     const candidates = parseSrcset(value).flatMap((candidate) => {
-        const url = resolveUrl(candidate.url, base, LINK_PROTOCOLS);
+        const url = resolveUrl(candidate.url, baseUrl, LINK_PROTOCOLS);
 
         return url ? [{ ...candidate, url }] : [];
     });

@@ -4,7 +4,7 @@ import { readFixture } from './fixtures';
 export const ETAG = '"v1"';
 export const LAST_MODIFIED = 'Tue, 10 Jun 2025 09:00:00 GMT';
 
-// Each path acts out one HTTP behaviour (redirect, 304, timeout, 500…); `serve()` lets a test change a feed between fetches.
+// Each path acts out one HTTP behavior (redirect, 304, timeout, 500…); `serve()` lets a test change a feed between fetches.
 export function startFeedServer() {
     const hits: Record<string, number> = {};
     const served = new Map<string, { body: Uint8Array | string; init: ResponseInit }>();
@@ -20,6 +20,7 @@ export function startFeedServer() {
 
             hits[pathname] = (hits[pathname] ?? 0) + 1;
             lastHeaders[pathname] = req.headers;
+
             const override = served.get(pathname);
 
             if (override)

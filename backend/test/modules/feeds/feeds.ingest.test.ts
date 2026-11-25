@@ -1,7 +1,7 @@
 // ingestFeed against an in-memory Postgres (PGlite) and the local fake feed server: storing feeds and items,
 // deduplicating re-fetches, fetch bookkeeping, redirects and merges, and the number of queries a fetch costs.
 
-import { afterAll, beforeAll, beforeEach, describe, expect, spyOn, test } from 'bun:test';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { bookmarks, feeds, itemReadStates, items, starterFeeds, subscriptions } from '../../../src/db/schema';
 import { HttpError } from '../../../src/errors';
@@ -40,12 +40,16 @@ beforeEach(async () => {
     await testDb.db.execute(sql`truncate table feeds, users cascade`);
 });
 
+afterEach(() => {
+    mock.restore();
+});
+
 // A minimal RSS 2.0 document with these items, so a test can add, edit or drop one between fetches.
 function rss(posts: TestItem[]): string {
     const entries = posts.map(
-        (p) =>
-            `<item><guid>${p.guid}</guid><title>${p.title}</title><link>https://ingest.example/${p.guid}</link>` +
-            `<description>About ${p.title}</description>${p.date ? `<pubDate>${p.date}</pubDate>` : ''}</item>`,
+        (post) =>
+            `<item><guid>${post.guid}</guid><title>${post.title}</title><link>https://ingest.example/${post.guid}</link>` +
+            `<description>About ${post.title}</description>${post.date ? `<pubDate>${post.date}</pubDate>` : ''}</item>`,
     );
 
     return `<?xml version="1.0"?><rss version="2.0"><channel><title>Ingest Test</title><link>https://ingest.example/</link>${entries.join('')}</channel></rss>`;
@@ -70,6 +74,7 @@ describe('first ingest', () => {
         server.serve('/css-tricks.xml', readFixture('curated/css-tricks.xml'), {
             headers: { 'Content-Type': 'application/rss+xml', ETag: ETAG, 'Last-Modified': LAST_MODIFIED },
         });
+
         const url = `${server.url}/css-tricks.xml`;
 
         const result = await ingestFeed(testDb.db, url, { now: T1 });
@@ -113,6 +118,7 @@ describe('first ingest', () => {
 describe('re-fetching', () => {
     test('unchanged content creates no duplicates and keeps ids and first_seen_at', async () => {
         server.serve('/same.xml', rss([POST_A, POST_B]));
+
         const url = `${server.url}/same.xml`;
         const first = await ingestFeed(testDb.db, url, { now: T1 });
         const before = await itemsOf(first.feedId);
@@ -126,11 +132,13 @@ describe('re-fetching', () => {
 
     test('an edited article is updated in place and keeps its first_seen_at', async () => {
         server.serve('/edit.xml', rss([POST_A, POST_B]));
+
         const url = `${server.url}/edit.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
         const before = (await itemsOf(feedId)).get('a')!;
 
         server.serve('/edit.xml', rss([{ ...POST_A, title: 'Post A (corrected)' }, POST_B]));
+
         const result = await ingestFeed(testDb.db, url, { now: T2 });
 
         const after = (await itemsOf(feedId)).get('a')!;
@@ -144,10 +152,12 @@ describe('re-fetching', () => {
 
     test('a change to any stored field, not just the text, counts as an edit', async () => {
         server.serve('/date-edit.xml', rss([POST_A]));
+
         const url = `${server.url}/date-edit.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
 
         server.serve('/date-edit.xml', rss([{ ...POST_A, date: 'Thu, 04 Dec 2025 09:00:00 GMT' }]));
+
         const result = await ingestFeed(testDb.db, url, { now: T2 });
 
         expect(result.updated).toBe(1);
@@ -156,10 +166,12 @@ describe('re-fetching', () => {
 
     test('a new article is added and latest_item_at moves forward', async () => {
         server.serve('/grow.xml', rss([POST_A, POST_B]));
+
         const url = `${server.url}/grow.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
 
         server.serve('/grow.xml', rss([POST_A, POST_B, POST_C]));
+
         const result = await ingestFeed(testDb.db, url, { now: T2 });
 
         const stored = await itemsOf(feedId);
@@ -172,6 +184,7 @@ describe('re-fetching', () => {
 
     test('an article that drops out of the feed is kept', async () => {
         server.serve('/shrink.xml', rss([POST_A, POST_B]));
+
         const url = `${server.url}/shrink.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
 
@@ -183,19 +196,21 @@ describe('re-fetching', () => {
 
     test('an unchanged re-fetch sends no item rows, and one edit sends exactly one', async () => {
         server.serve('/budget.xml', rss([POST_A, POST_B, POST_C]));
+
         const url = `${server.url}/budget.xml`;
 
         await ingestFeed(testDb.db, url, { now: T1 });
 
         testDb.queries.length = 0;
         await ingestFeed(testDb.db, url, { now: T2 });
-        expect(testDb.queries.filter((q) => /^(insert into|update) "items"/.test(q))).toEqual([]);
+        expect(testDb.queries.filter((query) => /^(insert into|update) "items"/.test(query))).toEqual([]);
         expect(testDb.queries).toHaveLength(3);
 
         server.serve('/budget.xml', rss([POST_A, { ...POST_B, title: 'Post B v2' }, POST_C]));
         testDb.queries.length = 0;
         await ingestFeed(testDb.db, url, { now: T3 });
-        const itemInserts = testDb.queries.filter((q) => q.startsWith('insert into "items"'));
+
+        const itemInserts = testDb.queries.filter((query) => query.startsWith('insert into "items"'));
 
         expect(itemInserts).toHaveLength(1);
         expect(itemInserts[0]!.match(/\), \(/g)).toBeNull();
@@ -236,23 +251,19 @@ describe('304 Not Modified', () => {
         await ingestFeed(testDb.db, url, { now: T1 });
 
         // Another ingest renames or merges the stored row away while this fetch is in flight.
-        const fetchUpstream = spyOn(feedsService, 'fetchUpstream').mockImplementation(async () => {
+        spyOn(feedsService, 'fetchUpstream').mockImplementation(async () => {
             await testDb.db.delete(feeds).where(eq(feeds.url, url));
 
             return { notModified: true, finalUrl: url, redirect: null, validators: { etag: null, lastModified: null } };
         });
 
-        try {
-            const err = await ingestFeed(testDb.db, url, { now: T2 }).then(
-                () => null,
-                (e: unknown) => e,
-            );
+        const err = await ingestFeed(testDb.db, url, { now: T2 }).then(
+            () => null,
+            (thrown: unknown) => thrown,
+        );
 
-            expect(err).not.toBeInstanceOf(TypeError);
-            expect((err as Error).message).toBe(`The feed at ${url} changed while it was being ingested`);
-        } finally {
-            fetchUpstream.mockRestore();
-        }
+        expect(err).not.toBeInstanceOf(TypeError);
+        expect((err as Error).message).toBe(`The feed at ${url} changed while it was being ingested`);
     });
 
     test('a 304 for a URL with no stored feed is a bad gateway, and nothing is stored', async () => {
@@ -277,7 +288,7 @@ describe('304 Not Modified', () => {
         expect(await feedAt(newUrl)).toMatchObject({ id: old!.id, etag: ETAG, lastModified: LAST_MODIFIED, lastSuccessAt: T1 });
     });
 
-    test('a 304 after a permanent redirect onto a stored feed merges into it and writes the old feed\'s validators there', async () => {
+    test("a 304 after a permanent redirect onto a stored feed merges into it and writes the old feed's validators there", async () => {
         const newUrl = `${server.url}/cached.xml`;
         const keep = await ingestFeed(testDb.db, newUrl, { now: T1 });
 
@@ -297,14 +308,17 @@ describe('304 Not Modified', () => {
 describe('failures', () => {
     test('a failed fetch is recorded on the stored feed and rethrown; failures count up', async () => {
         server.serve('/flaky.xml', rss([POST_A]));
+
         const url = `${server.url}/flaky.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
         const before = await feedAt(url);
 
         server.serve('/flaky.xml', 'boom', { status: 500 });
+
         const err = await httpErrorFrom(ingestFeed(testDb.db, url, { now: T2 }));
 
         expect(err.code).toBe('http_5xx');
+
         const after = await feedAt(url);
 
         expect(after).toMatchObject({
@@ -325,6 +339,7 @@ describe('failures', () => {
 
     test('a success after failures resets the count and clears the error', async () => {
         server.serve('/recovers.xml', rss([POST_A]));
+
         const url = `${server.url}/recovers.xml`;
         const { feedId } = await ingestFeed(testDb.db, url, { now: T1 });
 
@@ -356,6 +371,7 @@ describe('failures', () => {
             const path = `/fails-${code}.xml`;
 
             server.serve(path, rss([POST_A]));
+
             const url = `${server.url}${path}`;
 
             await ingestFeed(testDb.db, url, { now: T1 });
@@ -380,6 +396,7 @@ describe('failures', () => {
 
     test('a database error rolls everything back and records nothing', async () => {
         server.serve('/db-error.xml', rss([POST_A]));
+
         const url = `${server.url}/db-error.xml`;
 
         await testDb.db.insert(feeds).values({ url, title: 'Before' });
@@ -387,7 +404,7 @@ describe('failures', () => {
         await testDb.db.execute(sql`create trigger reject_items before insert on items for each row execute function reject_items()`);
 
         try {
-            const err = await ingestFeed(testDb.db, url, { now: T1 }).catch((e: unknown) => e);
+            const err = await ingestFeed(testDb.db, url, { now: T1 }).catch((thrown: unknown) => thrown);
 
             expect(err).not.toBeInstanceOf(HttpError);
         } finally {
@@ -513,7 +530,7 @@ describe('redirects', () => {
         ]);
     });
 
-    test('a merge moves the old feed\'s starter entry to the kept feed, unless the kept feed has its own', async () => {
+    test("a merge moves the old feed's starter entry to the kept feed, unless the kept feed has its own", async () => {
         const keep = await ingestFeed(testDb.db, `${server.url}/feed.xml`, { now: T1 });
         const oldUrl = `${server.url}/moved-permanently`;
         const [old] = await testDb.db.insert(feeds).values({ url: oldUrl, title: 'Old copy' }).returning();
@@ -536,6 +553,7 @@ describe('odd feeds', () => {
     // Stores a fixture from test/fixtures/feeds/ and returns the result with the stored items.
     async function ingestFixture(path: string) {
         server.serve(`/${path}`, readFixture(path));
+
         const result = await ingestFeed(testDb.db, `${server.url}/${path}`, { now: T1 });
 
         return { result, stored: await itemsOf(result.feedId) };

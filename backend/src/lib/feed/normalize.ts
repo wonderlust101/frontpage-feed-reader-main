@@ -6,7 +6,7 @@ import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import { UnprocessableEntityError } from '../../errors';
 import { parseFeedDate } from './dates';
-import { hasCode } from '../error-code';
+import { errorMessage, hasCode } from '../error-code';
 import { isRdf, limitItems, looksTruncated, rejectNonFeeds } from './raw-xml';
 import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 import { resolveUrl } from './urls';
@@ -114,7 +114,7 @@ function parseXml(xml: string): ParsedFeed {
         if (hasCode(err, 'INVALID_FEED'))
             throw new UnprocessableEntityError('not_a_feed', 'No RSS or Atom feed was found at this URL');
 
-        throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${err instanceof Error ? err.message : err}`);
+        throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${errorMessage(err)}`);
     }
 }
 
@@ -147,55 +147,6 @@ function collectItems(rawItems: ParsedItem[], context: ItemContext): CollectedIt
     }
 
     return collected;
-}
-
-// Sort order for items: newest first; undated items go last and keep their feed order (the sort is stable).
-function byNewestFirst(a: NormalizedItem, b: NormalizedItem): number {
-    if (a.publishedAt && b.publishedAt)
-        return b.publishedAt.localeCompare(a.publishedAt);
-
-    if (a.publishedAt)
-        return -1;
-
-    if (b.publishedAt)
-        return 1;
-
-    return 0;
-}
-
-function buildWarnings(found: FeedProblems): string[] {
-    const warnings: string[] = [];
-
-    if (found.itemLimitHit)
-        warnings.push(`The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`);
-
-    if (found.missingDates)
-        warnings.push(`${found.missingDates} item(s) have no usable date`);
-
-    if (found.duplicates)
-        warnings.push(`${found.duplicates} duplicate item(s) were removed`);
-
-    if (found.dropped)
-        warnings.push(`${found.dropped} item(s) could not be read and were skipped`);
-
-    if (found.noItems)
-        warnings.push('The feed has no items');
-
-    if (found.truncated)
-        warnings.push('The feed XML is malformed; it was parsed partially');
-
-    return warnings;
-}
-
-// Which feed standard the document uses: 'atom', 'rss1' (the older RDF-based RSS 1.0) or 'rss2'.
-function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
-    if (feed.meta.type === 'atom')
-        return 'atom';
-
-    if (feed.meta.version?.startsWith('1') || isRdf(xml))
-        return 'rss1';
-
-    return 'rss2';
 }
 
 // Gaps get fallbacks: title from the summary, author from the feed, thumbnail from the first image, id from a hash.
@@ -237,6 +188,55 @@ function normalizeItem(item: ParsedItem, context: ItemContext, index: number): N
         imageUrl,
         categories: [...new Set(categoryNames.filter(Boolean))].slice(0, CATEGORIES_MAX),
     };
+}
+
+// Sort order for items: newest first; undated items go last and keep their feed order (the sort is stable).
+function byNewestFirst(a: NormalizedItem, b: NormalizedItem): number {
+    if (a.publishedAt && b.publishedAt)
+        return b.publishedAt.localeCompare(a.publishedAt);
+
+    if (a.publishedAt)
+        return -1;
+
+    if (b.publishedAt)
+        return 1;
+
+    return 0;
+}
+
+// Which feed standard the document uses: 'atom', 'rss1' (the older RDF-based RSS 1.0) or 'rss2'.
+function detectFormat(feed: ParsedFeed, xml: string): FeedFormat {
+    if (feed.meta.type === 'atom')
+        return 'atom';
+
+    if (feed.meta.version?.startsWith('1') || isRdf(xml))
+        return 'rss1';
+
+    return 'rss2';
+}
+
+function buildWarnings(found: FeedProblems): string[] {
+    const warnings: string[] = [];
+
+    if (found.itemLimitHit)
+        warnings.push(`The feed has more than ${MAX_ITEMS} items; only the first ${MAX_ITEMS} were read`);
+
+    if (found.missingDates)
+        warnings.push(`${found.missingDates} item(s) have no usable date`);
+
+    if (found.duplicates)
+        warnings.push(`${found.duplicates} duplicate item(s) were removed`);
+
+    if (found.dropped)
+        warnings.push(`${found.dropped} item(s) could not be read and were skipped`);
+
+    if (found.noItems)
+        warnings.push('The feed has no items');
+
+    if (found.truncated)
+        warnings.push('The feed XML is malformed; it was parsed partially');
+
+    return warnings;
 }
 
 // The feed's own id (guid, else link) when short enough; otherwise a stable hash of it, or of `fallbackKey`.

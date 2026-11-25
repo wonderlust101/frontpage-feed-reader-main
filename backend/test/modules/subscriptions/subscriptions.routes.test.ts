@@ -1,5 +1,5 @@
 // Tests run without a database, so nobody can be signed in: every route must answer 401 before reading the body or
-// the id. Signed-in behaviour is in subscriptions.service.test.ts.
+// the id. Signed-in behavior is in subscriptions.service.test.ts.
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { startTestServer } from '../../helpers/test-server';

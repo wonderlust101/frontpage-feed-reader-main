@@ -45,7 +45,7 @@ export const feeds = pgTable(
     (t) => [index('feeds_next_fetch_at_idx').on(t.nextFetchAt)],
 );
 
-// The curated catalogue (data/sample-feeds.json): feeds shown to guests and offered to new users as starter packs.
+// The curated catalog (data/sample-feeds.json): feeds shown to guests and offered to new users as starter packs.
 export const starterFeeds = pgTable('starter_feeds', {
     feedId: uuid('feed_id')
         .primaryKey()

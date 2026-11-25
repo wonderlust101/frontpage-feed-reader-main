@@ -3,17 +3,15 @@
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import express from 'express';
-import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
 import { errorHandler } from '../../src/middleware/error-handler';
 import { perUserRateLimit } from '../../src/middleware/rate-limit';
 import type { AuthSession } from '../../src/modules/auth/auth.types';
+import { startTestServer } from '../helpers/test-server';
 
 const LIMIT = 2;
 const WINDOW_MS = 300;
 
-let server: Server;
-let baseUrl: string;
+let server: Awaited<ReturnType<typeof startTestServer>>;
 
 beforeAll(async () => {
     const app = express();
@@ -27,19 +25,16 @@ beforeAll(async () => {
     });
     app.use(errorHandler);
 
-    server = await new Promise((resolve) => {
-        const s = app.listen(0, () => resolve(s));
-    });
-    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    server = await startTestServer(app);
 });
 
 afterAll(async () => {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await server.close();
 });
 
 // One request to the limited route as `user`.
 function hit(user: string) {
-    return fetch(`${baseUrl}/limited`, { headers: { 'X-User': user } });
+    return fetch(`${server.url}/limited`, { headers: { 'X-User': user } });
 }
 
 describe('perUserRateLimit', () => {

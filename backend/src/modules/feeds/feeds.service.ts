@@ -6,9 +6,12 @@ import { env } from '../../env';
 import { BadGatewayError } from '../../errors';
 import { decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl, type FetchFeedResult } from '../../lib/feed';
 
-type Validators = Partial<FeedCacheValidators>;
 export type NotModifiedResult = Extract<FetchFeedResult, { notModified: true }>;
+
 export type FreshResult = Extract<FetchFeedResult, { notModified: false }>;
+
+type Validators = Partial<FeedCacheValidators>;
+
 type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
 
 const CACHE_LIMIT = 200;
@@ -35,7 +38,7 @@ export async function getFeed(input: string | undefined, clientValidators: Valid
     const full = hasValidators(validators) ? await fetchUpstream(url, {}) : result;
 
     if (full.notModified)
-        throw unexpectedNotModified('without a cached copy');
+        throw unexpectedNotModifiedError('without a cached copy');
 
     return answerFresh(url, full);
 }
@@ -56,7 +59,7 @@ export function fetchUpstream(url: URL, validators: Validators): Promise<FetchFe
 }
 
 // A 304 we have no stored copy to answer with; `detail` says why.
-export function unexpectedNotModified(detail: string) {
+export function unexpectedNotModifiedError(detail: string) {
     return new BadGatewayError('http_5xx', `The feed server answered 304 ${detail}`, { upstreamStatus: 304 });
 }
 

@@ -1,7 +1,7 @@
 // The Better Auth instance: email + password, sessions in Postgres, reset by link and email verification by code.
 // Without a database there is no auth: `auth` is null and auth routes answer 503.
 
-import { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
+import { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, RESET_TOKEN_MINUTES } from '@frontpage/shared';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { fromNodeHeaders } from 'better-auth/node';
@@ -10,7 +10,8 @@ import type { IncomingHttpHeaders } from 'node:http';
 import { db } from '../../db';
 import { env } from '../../env';
 import { sendEmail, type Email } from '../../lib/email';
-import { passwordResetEmail, RESET_TOKEN_MINUTES, verificationCodeEmail } from './auth.emails';
+import { errorMessage } from '../../lib/error-code';
+import { passwordResetEmail, verificationCodeEmail } from './auth.emails';
 import { accounts, sessions, users, verifications } from './auth.schema';
 
 type AuthDatabase = Parameters<typeof drizzleAdapter>[0];
@@ -161,6 +162,6 @@ async function deliverEmail(email: Email) {
             mailpitUrl: env.MAILPIT_URL,
         });
     } catch (err) {
-        console.error(`Email "${email.subject}" failed:`, err instanceof Error ? err.message : err);
+        console.error(`Email "${email.subject}" failed:`, errorMessage(err));
     }
 }

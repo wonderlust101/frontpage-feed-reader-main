@@ -26,7 +26,7 @@ describe('GET /api/health', () => {
         expect((await res.json()) as HealthResponse).toEqual({ api: 'ok', database: 'skipped' });
     });
 
-    test('reports a failing database without exposing the driver\'s message, which it logs instead', async () => {
+    test("reports a failing database without exposing the driver's message, which it logs instead", async () => {
         const driverMessage = 'password authentication failed for user "frontpage_owner" at db.internal:5432';
         const check = spyOn(database, 'checkDatabase').mockResolvedValue({ status: 'error', error: driverMessage });
         const logged = spyOn(console, 'error').mockImplementation(() => {});

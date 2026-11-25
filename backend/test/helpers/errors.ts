@@ -5,7 +5,7 @@ import { HttpError } from '../../src/errors';
 export async function httpErrorFrom(call: Promise<unknown>): Promise<HttpError> {
     const err = await call.then(
         () => null,
-        (e: unknown) => e,
+        (thrown: unknown) => thrown,
     );
 
     expect(err).toBeInstanceOf(HttpError);

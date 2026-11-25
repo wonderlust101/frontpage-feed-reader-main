@@ -61,7 +61,15 @@ export async function subscribe(db: Database, userId: string, input: SubscribeRe
     if (existingId)
         throw alreadySubscribedError(existingId);
 
-    const feedId = stored && isRecentlySuccessful(stored, now) ? stored.id : (await ingestFeed(db, url, { now })).feedId;
+    let feedId: string;
+
+    if (stored && isRecentlySuccessful(stored, now)) {
+        feedId = stored.id;
+    } else {
+        const ingested = await ingestFeed(db, url, { now });
+
+        feedId = ingested.feedId;
+    }
 
     const [created] = await db
         .insert(subscriptions)
@@ -93,7 +101,7 @@ export async function updateSubscription(
         .returning({ id: subscriptions.id });
 
     if (!updated)
-        throw subscriptionNotFound();
+        throw subscriptionNotFoundError();
 
     return findSubscription(db, userId, updated.id, now);
 }
@@ -107,7 +115,7 @@ export async function unsubscribe(db: Database, userId: string, id: string): Pro
             .returning({ feedId: subscriptions.feedId });
 
         if (!deleted)
-            throw subscriptionNotFound();
+            throw subscriptionNotFoundError();
 
         const feedItemIds = tx.select({ id: items.id }).from(items).where(eq(items.feedId, deleted.feedId));
 
@@ -116,6 +124,14 @@ export async function unsubscribe(db: Database, userId: string, id: string): Pro
 }
 
 // Subscriptions joined to their feeds, before filtering: callers add `where` (and `orderBy`).
+// Throws `feed_not_found` (404) unless the reader follows the feed, the same answer as for one that doesn't exist.
+export async function assertFollowsFeed(db: Database, userId: string, feedId: string): Promise<void> {
+    const subscriptionId = await findSubscriptionId(db, userId, feedId);
+
+    if (!subscriptionId)
+        throw new NotFoundError('feed_not_found', 'Feed not found');
+}
+
 function selectSubscriptions(db: Database) {
     return db.select(SUBSCRIPTION_COLUMNS).from(subscriptions).innerJoin(feeds, eq(feeds.id, subscriptions.feedId));
 }
@@ -154,17 +170,9 @@ async function findSubscription(db: Database, userId: string, id: string, now: D
     const [row] = await selectSubscriptions(db).where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)));
 
     if (!row)
-        throw subscriptionNotFound();
+        throw subscriptionNotFoundError();
 
     return toSubscription(row, now);
-}
-
-// Throws `feed_not_found` (404) unless the reader follows the feed, the same answer as for one that doesn't exist.
-export async function assertFollowsFeed(db: Database, userId: string, feedId: string): Promise<void> {
-    const subscriptionId = await findSubscriptionId(db, userId, feedId);
-
-    if (!subscriptionId)
-        throw new NotFoundError('feed_not_found', 'Feed not found');
 }
 
 async function findSubscriptionId(db: Database, userId: string, feedId: string): Promise<string | undefined> {
@@ -176,7 +184,7 @@ async function findSubscriptionId(db: Database, userId: string, feedId: string):
     return row?.id;
 }
 
-function subscriptionNotFound() {
+function subscriptionNotFoundError() {
     return new NotFoundError('not_found', 'Subscription not found');
 }
 

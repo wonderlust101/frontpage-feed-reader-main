@@ -33,14 +33,14 @@ describe('assertOwnCategory', () => {
         const owner = await newUser(testDb.db);
         const categoryId = await newCategory(testDb.db, owner);
 
-        const err = await assertOwnCategory(testDb.db, await newUser(testDb.db), categoryId).catch((e: unknown) => e);
+        const err = await assertOwnCategory(testDb.db, await newUser(testDb.db), categoryId).catch((thrown: unknown) => thrown);
 
         expect(err).toBeInstanceOf(HttpError);
         expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
     });
 
     test('a category that does not exist → 404 category_not_found', async () => {
-        const err = await assertOwnCategory(testDb.db, await newUser(testDb.db), SAMPLE_UUID).catch((e: unknown) => e);
+        const err = await assertOwnCategory(testDb.db, await newUser(testDb.db), SAMPLE_UUID).catch((thrown: unknown) => thrown);
 
         expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
     });

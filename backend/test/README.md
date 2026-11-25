@@ -17,13 +17,12 @@ test/
 ├── README.md               ← this file
 ├── setup.ts                ← preloaded by bunfig.toml: pins env (no DB, local-only fetching)
 ├── structure.test.ts       ← enforces this layout in CI
-├── app.test.ts             ← src/app.ts: CORS, JSON 404, error handler
-├── lib/feed/*.test.ts      ← src/lib/feed/*.ts: pure engine logic (dates, decode, sanitize, normalize, fetch)
-├── db/schema.test.ts       ← src/db/schema.ts: migrations apply; keys, cascades and checks hold
+├── *.test.ts               ← src/*.ts: app (CORS, JSON 404, error handler), env, server-lifecycle
+├── <folder>/               ← src/<folder>/ for db, errors, middleware and lib (lib/feed/ is the feed engine)
 ├── modules/<feature>/      ← src/modules/<feature>/: HTTP routes via startTestServer(), services via createTestDb()
 ├── live/*.live.test.ts     ← real network; skipped unless LIVE_FEEDS=1
 ├── helpers/                ← shared test code, no tests
-│   ├── test-server.ts      ← startTestServer(): the Express app on a random port
+│   ├── test-server.ts      ← startTestServer(app?): the API (or a test's own app) on a random port
 │   ├── feed-server.ts      ← fake upstream feed server (redirects, 304, timeouts, 4xx/5xx); serve() swaps a path's body
 │   ├── errors.ts           ← httpErrorFrom() / httpErrorThrownBy(): the HttpError a call rejects or throws with
 │   ├── factories.ts        ← newUser(db), newCategory(db, …) and SAMPLE_UUID, shared by the database tests

@@ -19,14 +19,25 @@ export function decodeCursor(value: string): ItemCursor | null {
         return null;
 
     const parts = Buffer.from(value, 'base64url').toString('utf8').split(SEPARATOR);
-    const [order, sortAt = '', id] = parts;
-    // Date rolls impossible dates over (Feb 30 becomes Mar 2), so a real time is one whose millisecond part comes back unchanged.
-    const millisecondTime = `${sortAt.slice(0, MILLISECOND_ISO_LENGTH)}Z`;
-    const date = new Date(millisecondTime);
-    const isRealTime = SORT_AT_PATTERN.test(sortAt) && !Number.isNaN(date.getTime()) && date.toISOString() === millisecondTime;
 
-    if (parts.length !== 3 || (order !== 'newest' && order !== 'oldest') || !isRealTime || !isUuid(id))
+    if (parts.length !== 3)
+        return null;
+
+    const [order, sortAt = '', id] = parts;
+
+    if (order !== 'newest' && order !== 'oldest')
+        return null;
+
+    if (!isRealTime(sortAt) || !isUuid(id))
         return null;
 
     return { order, sortAt, id };
+}
+
+// Date rolls impossible dates over (Feb 30 becomes Mar 2), so a real time is one whose millisecond part comes back unchanged.
+function isRealTime(sortAt: string): boolean {
+    const millisecondTime = `${sortAt.slice(0, MILLISECOND_ISO_LENGTH)}Z`;
+    const date = new Date(millisecondTime);
+
+    return SORT_AT_PATTERN.test(sortAt) && !Number.isNaN(date.getTime()) && date.toISOString() === millisecondTime;
 }

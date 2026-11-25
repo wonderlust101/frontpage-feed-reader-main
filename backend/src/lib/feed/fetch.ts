@@ -53,19 +53,22 @@ type Arrival = {
     redirect: FeedRedirect | null;
 };
 
-const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
-
 export const DEFAULT_TIMEOUT_MS = 10_000;
 
 export const DEFAULT_USER_AGENT = 'Frontpage/0.1 (RSS reader)';
 
+const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
+
 const DEFAULT_MAX_REDIRECTS = 5;
 
-const ACCEPT_ENCODING = 'gzip, deflate, br';
-const ACCEPT = 'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
+const ACCEPT = 'application/rss+xml, application/atom+xml, application/rdf+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
+
+const ACCEPT_ENCODING = 'gzip, deflate, br';
+
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+
 const PERMANENT_REDIRECT_STATUSES = new Set([301, 308]);
 
 const DECOMPRESSORS: Record<string, () => Transform> = {
@@ -76,6 +79,7 @@ const DECOMPRESSORS: Record<string, () => Transform> = {
 };
 
 const LOOPBACK = ['127.0.0.1', '::1'];
+
 let publicAgents: Agents | undefined;
 let loopbackAgents: Agents | undefined;
 
@@ -155,29 +159,21 @@ export async function fetchFeed(input: string | URL, options: FetchFeedOptions =
     }
 }
 
-// The move counts as permanent only if every hop was (301 or 308).
-async function followRedirects(startUrl: URL, context: RequestContext, maxRedirects: number): Promise<Arrival> {
-    let url = startUrl;
-    let allPermanent = true;
+// The headers sent on every request: who we are, what we accept, and the last ETag / Last-Modified so an unchanged feed is a 304.
+function requestHeaders(userAgent: string, validators: Partial<FeedCacheValidators>): Record<string, string> {
+    const headers: Record<string, string> = {
+        'User-Agent': userAgent,
+        Accept: ACCEPT,
+        'Accept-Encoding': ACCEPT_ENCODING,
+    };
 
-    for (let hops = 0; ; hops++) {
-        const res = await request(url, context);
-        const status = res.statusCode ?? 0;
+    if (validators.etag)
+        headers['If-None-Match'] = validators.etag;
 
-        if (!REDIRECT_STATUSES.has(status)) {
-            const redirect = hops > 0 ? { permanent: allPermanent, from: startUrl.href, to: url.href } : null;
+    if (validators.lastModified)
+        headers['If-Modified-Since'] = validators.lastModified;
 
-            return { res, url, redirect };
-        }
-
-        res.destroy();
-
-        if (hops === maxRedirects)
-            throw new BadGatewayError('network', 'Too many redirects', { retryable: false });
-
-        url = nextRedirectUrl(res, url);
-        allPermanent &&= PERMANENT_REDIRECT_STATUSES.has(status);
-    }
+    return headers;
 }
 
 // The shared agents, created on first use: public addresses only, or loopback allowed too for tests.
@@ -201,21 +197,29 @@ function createAgents(allowIPAddressList: string[]): Agents {
     };
 }
 
-// The headers sent on every request: who we are, what we accept, and the last ETag / Last-Modified so an unchanged feed is a 304.
-function requestHeaders(userAgent: string, validators: Partial<FeedCacheValidators>): Record<string, string> {
-    const headers: Record<string, string> = {
-        'User-Agent': userAgent,
-        Accept: ACCEPT,
-        'Accept-Encoding': ACCEPT_ENCODING,
-    };
+// The move counts as permanent only if every hop was (301 or 308).
+async function followRedirects(startUrl: URL, context: RequestContext, maxRedirects: number): Promise<Arrival> {
+    let url = startUrl;
+    let allPermanent = true;
 
-    if (validators.etag)
-        headers['If-None-Match'] = validators.etag;
+    for (let hops = 0; ; hops++) {
+        const res = await request(url, context);
+        const status = res.statusCode ?? 0;
 
-    if (validators.lastModified)
-        headers['If-Modified-Since'] = validators.lastModified;
+        if (!REDIRECT_STATUSES.has(status)) {
+            const redirect = hops > 0 ? { permanent: allPermanent, from: startUrl.href, to: url.href } : null;
 
-    return headers;
+            return { res, url, redirect };
+        }
+
+        res.destroy();
+
+        if (hops === maxRedirects)
+            throw new BadGatewayError('network', 'Too many redirects', { retryable: false });
+
+        url = nextRedirectUrl(res, url);
+        allPermanent &&= PERMANENT_REDIRECT_STATUSES.has(status);
+    }
 }
 
 // Connection errors are mapped here, where we still know which redirect hop failed.
@@ -296,7 +300,7 @@ function toFetchError(err: unknown, url: URL, context: RequestContext): HttpErro
     if (err instanceof HttpError)
         return err;
 
-    // request-filtering-agent refuses private addresses with a plain Error, recognisable only by its message.
+    // request-filtering-agent refuses private addresses with a plain Error, recognizable only by its message.
     if (err instanceof Error && /^DNS lookup .* is not allowed/.test(err.message))
         return new BadRequestError('blocked_url', 'That host is not allowed');
 

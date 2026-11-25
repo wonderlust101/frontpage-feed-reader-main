@@ -1,5 +1,5 @@
 // /api/items over HTTP. Tests run without a database, so nobody can be signed in: every route must answer 401 before
-// reading the query or the id. Signed-in behaviour (scopes, paging, ownership) is in items.service.test.ts.
+// reading the query or the id. Signed-in behavior (scopes, paging, ownership) is in items.service.test.ts.
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { itemsRouter } from '../../../src/modules/items/items.routes';

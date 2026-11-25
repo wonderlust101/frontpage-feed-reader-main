@@ -40,50 +40,53 @@ function itemId(n: number): string {
 }
 
 // Inserts a healthy feed called `title` (a new item at NOW) and returns its id.
-async function newFeed(title: string, opts: { imageUrl?: string; siteUrl?: string; lastErrorCode?: 'timeout' } = {}): Promise<string> {
+async function newFeed(title: string, overrides: { imageUrl?: string; siteUrl?: string; lastErrorCode?: 'timeout' } = {}): Promise<string> {
     const [row] = await testDb.db
         .insert(feeds)
         .values({
             url: `https://feeds.example/${crypto.randomUUID()}`,
             title,
-            imageUrl: opts.imageUrl ?? null,
-            siteUrl: opts.siteUrl ?? null,
-            lastErrorCode: opts.lastErrorCode ?? null,
+            imageUrl: overrides.imageUrl ?? null,
+            siteUrl: overrides.siteUrl ?? null,
+            lastErrorCode: overrides.lastErrorCode ?? null,
             lastSuccessAt: NOW,
             latestItemAt: NOW,
         })
         .returning({ id: feeds.id });
 
-    return row!.id;
+    if (!row)
+        throw new Error('Inserting the feed returned no row');
+
+    return row.id;
 }
 
 // Subscribes `userId` to `feedId`. `readCutoff` is microsecond ISO text, cast in SQL so no digits are lost.
-async function follow(userId: string, feedId: string, opts: { categoryId?: string; customTitle?: string; readCutoff?: string } = {}) {
+async function follow(userId: string, feedId: string, overrides: { categoryId?: string; customTitle?: string; readCutoff?: string } = {}) {
     await testDb.db.insert(subscriptions).values({
         userId,
         feedId,
-        categoryId: opts.categoryId ?? null,
-        customTitle: opts.customTitle ?? null,
-        readCutoff: opts.readCutoff ? sql`${opts.readCutoff}::timestamptz` : null,
+        categoryId: overrides.categoryId ?? null,
+        customTitle: overrides.customTitle ?? null,
+        readCutoff: overrides.readCutoff ? sql`${overrides.readCutoff}::timestamptz` : null,
     });
 }
 
 // Inserts an item in `feedId` first seen at `firstSeenAt` (microsecond ISO text), undated unless `publishedAt` is given; returns its id.
-async function newItem(feedId: string, firstSeenAt: string, opts: { id?: string; publishedAt?: string; title?: string } = {}): Promise<string> {
-    const id = opts.id ?? crypto.randomUUID();
+async function newItem(feedId: string, firstSeenAt: string, overrides: { id?: string; publishedAt?: string; title?: string } = {}): Promise<string> {
+    const id = overrides.id ?? crypto.randomUUID();
 
     await testDb.db.insert(items).values({
         id,
         feedId,
         guid: id,
         url: `https://site.example/${id}`,
-        title: opts.title ?? `Item ${id.slice(-4)}`,
+        title: overrides.title ?? `Item ${id.slice(-4)}`,
         author: 'Jane Doe',
         summary: 'A short excerpt.',
         contentHtml: '<p>The whole article.</p>',
         hasFullContent: true,
         firstSeenAt: sql`${firstSeenAt}::timestamptz`,
-        publishedAt: opts.publishedAt ? sql`${opts.publishedAt}::timestamptz` : null,
+        publishedAt: overrides.publishedAt ? sql`${overrides.publishedAt}::timestamptz` : null,
         contentHash: 'hash',
     });
 
@@ -131,6 +134,7 @@ describe('listItems: scopes', () => {
 
         await follow(reader, css);
         await follow(reader, design);
+
         const cssItem = await newItem(css, minutes(1));
         const designItem = await newItem(design, minutes(2));
 
@@ -150,6 +154,7 @@ describe('listItems: scopes', () => {
         await follow(reader, a, { categoryId: designCategory });
         await follow(reader, b, { categoryId: designCategory });
         await follow(reader, c);
+
         const [itemA, itemB, itemC] = [await newItem(a, minutes(1)), await newItem(b, minutes(2)), await newItem(c, minutes(3))];
 
         const feedPage = await listItems(testDb.db, reader, query({ scope: { kind: 'feed', feedId: a } }), NOW);
@@ -214,6 +219,7 @@ describe('listItems: authorization', () => {
 
         await follow(ada, feed);
         await follow(grace, feed, { customTitle: "Grace's CSS" });
+
         const item = await newItem(feed, minutes(1));
 
         await mark(grace, item, true);
@@ -242,6 +248,7 @@ describe('listItems: the read rule', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed, { readCutoff: '2026-03-01T10:00:00.000002Z' });
+
         const before = await newItem(feed, '2026-03-01T10:00:00.000001Z');
         const at = await newItem(feed, '2026-03-01T10:00:00.000002Z');
         const after = await newItem(feed, '2026-03-01T10:00:00.000003Z');
@@ -256,6 +263,7 @@ describe('listItems: the read rule', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const oldItem = await newItem(feed, minutes(1));
         const newItemId = await newItem(feed, minutes(20));
 
@@ -272,9 +280,11 @@ describe('listItems: the read rule', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const markedUnread = await newItem(feed, minutes(1));
 
         await newItem(feed, minutes(2));
+
         const fresh = await newItem(feed, minutes(20));
         const markedRead = await newItem(feed, minutes(21));
 
@@ -292,6 +302,7 @@ describe('listItems: the read rule', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const oldItem = await newItem(feed, minutes(1));
         const freshItem = await newItem(feed, minutes(20));
 
@@ -362,6 +373,7 @@ describe('listItems: order and paging', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed);
+
         const x = await newItem(feed, '2026-03-01T10:00:00.123457Z', { id: itemId(1) });
         const y = await newItem(feed, '2026-03-01T10:00:00.123456Z', { id: itemId(3) });
         const z = await newItem(feed, '2026-03-01T10:00:00.123456Z', { id: itemId(2) });
@@ -376,6 +388,7 @@ describe('listItems: order and paging', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed);
+
         // a is the newest: newest first, the unread list starts a, b, c, d, e, f.
         const [f, e, d, c, b, a] = [
             await newItem(feed, minutes(1)),
@@ -390,6 +403,7 @@ describe('listItems: order and paging', () => {
 
         await mark(reader, b, true);
         await mark(reader, d, true);
+
         const newer = await newItem(feed, minutes(50));
         const page2 = await listItems(testDb.db, reader, query({ unreadOnly: true, limit: 2, cursor: decodeCursor(page1.nextCursor!) }), NOW);
         const page3 = await listItems(testDb.db, reader, query({ unreadOnly: true, limit: 2, cursor: decodeCursor(page2.nextCursor!) }), NOW);
@@ -406,6 +420,7 @@ describe('listItems: order and paging', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed);
+
         const dated = await newItem(feed, minutes(10), { publishedAt: minutes(1) });
         const undated = await newItem(feed, minutes(20));
 
@@ -423,6 +438,7 @@ describe('listItems: what each item looks like', () => {
         const feed = await newFeed('CSS-Tricks', { siteUrl: 'https://css-tricks.com/blog/', lastErrorCode: 'timeout' });
 
         await follow(reader, feed, { categoryId: category, customTitle: 'CSS' });
+
         const id = await newItem(feed, minutes(1), { title: 'Container queries' });
 
         const [item] = (await listItems(testDb.db, reader, query(), NOW)).items;
@@ -506,6 +522,7 @@ describe('countItems', () => {
         await follow(ada, shared);
         await follow(grace, shared);
         await follow(grace, gracesOwn);
+
         const item = await newItem(shared, minutes(1));
 
         await newItem(gracesOwn, minutes(2));
@@ -527,6 +544,7 @@ describe('countItems', () => {
         await follow(ada, markedFeed, { categoryId: category });
         await follow(ada, looseFeed);
         await follow(grace, looseFeed);
+
         const cutItems = [];
 
         for (let i = 0; i < 8; i++)
@@ -569,6 +587,7 @@ describe('getItem', () => {
         const feed = await newFeed('Feed', { siteUrl: 'https://site.example/' });
 
         await follow(reader, feed);
+
         const id = await newItem(feed, minutes(1), { title: 'Full article' });
         const readStatesBefore = await testDb.db.select().from(itemReadStates);
 
@@ -590,6 +609,7 @@ describe('getItem', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const id = await newItem(feed, minutes(1));
 
         expect((await getItem(testDb.db, reader, id, NOW)).isRead).toBe(true);
@@ -602,6 +622,7 @@ describe('getItem', () => {
 
         await follow(grace, gracesFeed);
         await follow(ada, unfollowed);
+
         const gracesItem = await newItem(gracesFeed, minutes(1));
         const oldItem = await newItem(unfollowed, minutes(2));
 
@@ -643,6 +664,7 @@ describe('how many queries each call makes', () => {
         const feed = await newFeed('Feed');
 
         await follow(reader, feed);
+
         const id = await newItem(feed, minutes(1));
 
         testDb.queries.length = 0;

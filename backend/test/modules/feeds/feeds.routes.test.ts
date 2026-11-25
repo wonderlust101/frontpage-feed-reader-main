@@ -21,10 +21,6 @@ beforeEach(() => {
     clearFeedCache();
 });
 
-// Calls GET /api/fetch for `feedUrl` (or with no `?url=` at all when it's null).
-const fetchApi = (feedUrl: string | null, init?: RequestInit) =>
-    fetch(`${api.url}/api/fetch${feedUrl === null ? '' : `?url=${encodeURIComponent(feedUrl)}`}`, init);
-
 describe('GET /api/fetch', () => {
     test('returns a normalized feed as JSON', async () => {
         const res = await fetchApi(`${upstream.url}/feed.xml`);
@@ -66,6 +62,7 @@ describe('GET /api/fetch', () => {
 
         expect(first.headers.get('etag')).toBe(ETAG);
         expect(first.headers.get('last-modified')).toBe(LAST_MODIFIED);
+
         const firstBody = (await first.json()) as FetchFeedResponse;
 
         expect(firstBody.cache).toEqual({ etag: ETAG, lastModified: LAST_MODIFIED });
@@ -73,6 +70,7 @@ describe('GET /api/fetch', () => {
         const second = await fetchApi(`${upstream.url}/cached.xml`);
 
         expect(second.status).toBe(200);
+
         const secondBody = (await second.json()) as FetchFeedResponse;
 
         expect(secondBody.notModified).toBe(true);
@@ -82,6 +80,7 @@ describe('GET /api/fetch', () => {
 
     test('answers 304 when the client already has the current version', async () => {
         await fetchApi(`${upstream.url}/cached.xml`);
+
         const res = await fetchApi(`${upstream.url}/cached.xml`, { headers: { 'If-None-Match': ETAG } });
 
         expect(res.status).toBe(304);
@@ -116,6 +115,7 @@ describe('GET /api/fetch', () => {
         const res = await fetchApi(target);
 
         expect(res.status).toBe(status);
+
         const body = (await res.json()) as FeedErrorResponse;
 
         expect(body.error.code).toBe(code);
@@ -123,3 +123,10 @@ describe('GET /api/fetch', () => {
         expect(body.error.message).toBeString();
     });
 });
+
+// Calls GET /api/fetch for `feedUrl` (or with no `?url=` at all when it's null).
+function fetchApi(feedUrl: string | null, init?: RequestInit) {
+    const query = feedUrl === null ? '' : `?url=${encodeURIComponent(feedUrl)}`;
+
+    return fetch(`${api.url}/api/fetch${query}`, init);
+}

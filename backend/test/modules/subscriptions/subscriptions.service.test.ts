@@ -37,8 +37,8 @@ function after(ms: number): Date {
 }
 
 // Serves a small RSS feed called `title` at `path` (two undated items, so they count as new when first seen) and returns its URL.
-function serveFeed(path: string, title: string, opts: { image?: string } = {}): string {
-    const image = opts.image ? `<image><url>${opts.image}</url><title>${title}</title><link>https://site.example/</link></image>` : '';
+function serveFeed(path: string, title: string, overrides: { image?: string } = {}): string {
+    const image = overrides.image ? `<image><url>${overrides.image}</url><title>${title}</title><link>https://site.example/</link></image>` : '';
     const entries = ['one', 'two'].map((guid) => `<item><guid>${guid}</guid><title>${title} ${guid}</title><link>https://site.example/${guid}</link></item>`);
 
     server.serve(
@@ -189,8 +189,9 @@ describe('subscribing to a feed the reader already follows', () => {
 
         const results = await Promise.allSettled([subscribe(testDb.db, reader, { url }, T1), subscribe(testDb.db, reader, { url }, T1)]);
 
-        expect(results.map((r) => r.status).sort()).toEqual(['fulfilled', 'rejected']);
-        const failure = results.find((r) => r.status === 'rejected');
+        expect(results.map((result) => result.status).sort()).toEqual(['fulfilled', 'rejected']);
+
+        const failure = results.find((result) => result.status === 'rejected');
 
         expect(failure?.reason).toMatchObject({ status: 409, code: 'already_subscribed' });
         expect(await subscriptionRowsOf(reader)).toHaveLength(1);
@@ -207,13 +208,14 @@ describe('listSubscriptions', () => {
 
         await subscribe(testDb.db, reader, { url: serveFeed('/beta.xml', 'beta') }, T1);
         await subscribe(testDb.db, reader, { url: serveFeed('/alpha.xml', 'Alpha') }, T1);
+
         const gamma = await subscribe(testDb.db, reader, { url: serveFeed('/gamma.xml', 'Gamma') }, T1);
 
         await updateSubscription(testDb.db, reader, gamma.id, { customTitle: 'aardvark' }, T1);
 
         const list = await listSubscriptions(testDb.db, reader, T1);
 
-        expect(list.map((s) => s.title)).toEqual(['aardvark', 'Alpha', 'beta']);
+        expect(list.map((subscription) => subscription.title)).toEqual(['aardvark', 'Alpha', 'beta']);
     });
 
     test("derives each feed's health and reports the last error and last success", async () => {
@@ -236,13 +238,13 @@ describe('listSubscriptions', () => {
 
         const list = await listSubscriptions(testDb.db, reader, now);
 
-        expect(list.map((s) => [s.title, s.health, s.lastError?.code ?? null])).toEqual([
+        expect(list.map((subscription) => [subscription.title, subscription.health, subscription.lastError?.code ?? null])).toEqual([
             ['active', 'active', null],
             ['dead', 'dead', 'http_4xx'],
             ['error', 'error', 'timeout'],
             ['stale', 'stale', null],
         ]);
-        expect(list.find((s) => s.title === 'dead')).toMatchObject({ lastSuccessAt: T1.toISOString(), lastError: { code: 'http_4xx', message: 'Gone' } });
+        expect(list.find((subscription) => subscription.title === 'dead')).toMatchObject({ lastSuccessAt: T1.toISOString(), lastError: { code: 'http_4xx', message: 'Gone' } });
     });
 
     test('costs one query however many subscriptions there are', async () => {
@@ -298,6 +300,7 @@ describe('unsubscribe', () => {
         const staying = await subscribe(testDb.db, reader, { url: serveFeed('/stay.xml', 'Stay') }, T1);
 
         await subscribe(testDb.db, other, { url: `${server.url}/leave.xml` }, T1);
+
         const [leaveOne, leaveTwo] = await testDb.db.select({ id: items.id }).from(items).where(eq(items.feedId, leaving.feedId));
         const [stayOne] = await testDb.db.select({ id: items.id }).from(items).where(eq(items.feedId, staying.feedId));
 
@@ -311,8 +314,9 @@ describe('unsubscribe', () => {
 
         await unsubscribe(testDb.db, reader, leaving.id);
 
-        expect((await subscriptionRowsOf(reader)).map((s) => s.id)).toEqual([staying.id]);
+        expect((await subscriptionRowsOf(reader)).map((subscription) => subscription.id)).toEqual([staying.id]);
         expect(await subscriptionRowsOf(other)).toHaveLength(1);
+
         const marks = await testDb.db.select({ userId: itemReadStates.userId, itemId: itemReadStates.itemId }).from(itemReadStates);
 
         expect(marks).toHaveLength(2);
@@ -382,6 +386,7 @@ describe('only the owner can touch a subscription', () => {
         const err = await httpErrorFrom(updateSubscription(testDb.db, reader, subscription.id, { categoryId: othersCategory }, T1));
 
         expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
+
         const [row] = await subscriptionRowsOf(reader);
 
         expect(row?.categoryId).toBeNull();
@@ -397,8 +402,9 @@ describe('only the owner can touch a subscription', () => {
         await subscribe(testDb.db, grace, { url: serveFeed('/graces.xml', 'Only Grace') }, T1);
 
         expect(adas.feedId).toBe(graces.feedId);
-        expect((await listSubscriptions(testDb.db, ada, T1)).map((s) => s.id)).toEqual([adas.id]);
+        expect((await listSubscriptions(testDb.db, ada, T1)).map((subscription) => subscription.id)).toEqual([adas.id]);
         expect(await listSubscriptions(testDb.db, grace, T1)).toHaveLength(2);
+
         const [stored] = await testDb.db
             .select()
             .from(subscriptions)
