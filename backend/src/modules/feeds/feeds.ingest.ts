@@ -169,7 +169,11 @@ async function recordNotModified(tx: Transaction, url: string, validators: FeedC
         .where(eq(feeds.url, url))
         .returning({ id: feeds.id });
 
-    return row!.id;
+    // A concurrent ingest can rename or merge the row away between the fetch and this transaction.
+    if (!row)
+        throw new Error(`The feed at ${url} changed while it was being ingested`);
+
+    return row.id;
 }
 
 function successColumns(now: Date) {

@@ -1,11 +1,12 @@
 // ingestFeed against an in-memory Postgres (PGlite) and the local fake feed server: storing feeds and items,
 // deduplicating re-fetches, fetch bookkeeping, redirects and merges, and the number of queries a fetch costs.
 
-import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
+import { afterAll, beforeAll, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { bookmarks, feeds, itemReadStates, items, starterFeeds, subscriptions, users } from '../../../src/db/schema';
 import { HttpError } from '../../../src/errors';
 import { ingestFeed } from '../../../src/modules/feeds/feeds.ingest';
+import * as feedsService from '../../../src/modules/feeds/feeds.service';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 import { readFixture } from '../../helpers/fixtures';
 import { createTestDb } from '../../helpers/test-db';
@@ -235,6 +236,31 @@ describe('304 Not Modified', () => {
             title: 'Renamed locally',
         });
         expect(await itemsOf(feedId)).toEqual(itemsBefore);
+    });
+
+    test('a 304 for a feed that disappeared during the fetch fails with a clear error, not a TypeError', async () => {
+        const url = `${server.url}/cached.xml`;
+
+        await ingestFeed(testDb.db, url, { now: T1 });
+
+        // Another ingest renames or merges the stored row away while this fetch is in flight.
+        const fetchUpstream = spyOn(feedsService, 'fetchUpstream').mockImplementation(async () => {
+            await testDb.db.delete(feeds).where(eq(feeds.url, url));
+
+            return { notModified: true, finalUrl: url, redirect: null, validators: { etag: null, lastModified: null } };
+        });
+
+        try {
+            const err = await ingestFeed(testDb.db, url, { now: T2 }).then(
+                () => null,
+                (e: unknown) => e,
+            );
+
+            expect(err).not.toBeInstanceOf(TypeError);
+            expect((err as Error).message).toBe(`The feed at ${url} changed while it was being ingested`);
+        } finally {
+            fetchUpstream.mockRestore();
+        }
     });
 
     test('a 304 for a URL with no stored feed is a bad gateway, and nothing is stored', async () => {
