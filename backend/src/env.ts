@@ -2,6 +2,7 @@
 // RAILWAY_ENVIRONMENT_NAME; an unknown Railway environment gets none, so production's startup checks stop it.
 
 import { DEPLOYMENTS, type Deployment } from '@frontpage/shared';
+import { DEFAULT_TIMEOUT_MS, DEFAULT_USER_AGENT } from './lib/feed/fetch';
 
 const deployment = deploymentDefaults(process.env.RAILWAY_ENVIRONMENT_NAME);
 
@@ -24,13 +25,10 @@ export const env = {
     EMAIL_FROM: optional(process.env.EMAIL_FROM),
     MAILPIT_URL: optional(process.env.MAILPIT_URL),
 
-    FEED_FETCH_TIMEOUT_MS: int(process.env.FEED_FETCH_TIMEOUT_MS, 10_000),
-    FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? 'Frontpage/0.1 (RSS reader)',
-    FEED_MAX_CONCURRENCY: int(process.env.FEED_MAX_CONCURRENCY, 5),
+    FEED_FETCH_TIMEOUT_MS: int(process.env.FEED_FETCH_TIMEOUT_MS, DEFAULT_TIMEOUT_MS),
+    FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? DEFAULT_USER_AGENT,
     FEED_MIN_REFETCH_MINUTES: int(process.env.FEED_MIN_REFETCH_MINUTES, 15),
     FEED_ALLOW_LOOPBACK: process.env.FEED_ALLOW_LOOPBACK === 'true',
-
-    FEED_REFRESH_INTERVAL_MINUTES: int(process.env.FEED_REFRESH_INTERVAL_MINUTES, 30),
 };
 
 // undefined for a Railway environment the map doesn't know (e.g. a PR environment); not on Railway means local.

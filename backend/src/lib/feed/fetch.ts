@@ -52,9 +52,12 @@ type Arrival = {
     redirect: FeedRedirect | null;
 };
 
-export const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
-const DEFAULT_TIMEOUT_MS = 10_000;
-const DEFAULT_USER_AGENT = 'Frontpage/0.1 (RSS reader)';
+const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
+
+export const DEFAULT_TIMEOUT_MS = 10_000;
+
+export const DEFAULT_USER_AGENT = 'Frontpage/0.1 (RSS reader)';
+
 const DEFAULT_MAX_REDIRECTS = 5;
 
 const ACCEPT_ENCODING = 'gzip, deflate, br';

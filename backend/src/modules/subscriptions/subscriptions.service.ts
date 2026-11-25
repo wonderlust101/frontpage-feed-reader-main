@@ -4,18 +4,19 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { SubscribeRequest, Subscription, UpdateSubscriptionRequest } from '@frontpage/shared';
 import type { Database } from '../../db';
+import { env } from '../../env';
 import { feedIconUrl, parseFeedUrl } from '../../lib/feed';
 import { ConflictError, NotFoundError } from '../../errors';
 import { assertOwnCategory } from '../categories/categories.service';
 import { ingestFeed } from '../feeds/feeds.ingest';
 import { feeds } from '../feeds/feeds.schema';
 import { itemReadStates, items } from '../items/items.schema';
-import { deriveHealth } from './subscriptions.health';
+import { deriveRowHealth, FEED_HEALTH_COLUMNS } from './subscriptions.health';
 import { subscriptions } from './subscriptions.schema';
 
 type SubscriptionRow = Awaited<ReturnType<typeof selectSubscriptions>>[number];
 
-const FRESH_FETCH_MS = 15 * 60 * 1000;
+const FRESH_FETCH_MS = env.FEED_MIN_REFETCH_MINUTES * 60 * 1000;
 
 const SUBSCRIPTION_COLUMNS = {
     id: subscriptions.id,
@@ -29,12 +30,8 @@ const SUBSCRIPTION_COLUMNS = {
     siteUrl: feeds.siteUrl,
     imageUrl: feeds.imageUrl,
     lastFetchedAt: feeds.lastFetchedAt,
-    lastSuccessAt: feeds.lastSuccessAt,
-    lastErrorCode: feeds.lastErrorCode,
     lastErrorMessage: feeds.lastErrorMessage,
-    consecutiveFailures: feeds.consecutiveFailures,
-    latestItemAt: feeds.latestItemAt,
-    feedCreatedAt: feeds.createdAt,
+    ...FEED_HEALTH_COLUMNS,
 };
 
 const DISPLAY_TITLE_ORDER = sql`lower(coalesce(${subscriptions.customTitle}, ${feeds.title}))`;
@@ -136,7 +133,7 @@ function toSubscription(row: SubscriptionRow, now: Date): Subscription {
         siteUrl: row.siteUrl,
         iconUrl: feedIconUrl(row.imageUrl, row.siteUrl),
         categoryId: row.categoryId,
-        health: deriveHealth({ ...row, createdAt: row.feedCreatedAt }, now),
+        health: deriveRowHealth(row, now),
         lastSuccessAt: row.lastSuccessAt?.toISOString() ?? null,
         lastFetchedAt: row.lastFetchedAt?.toISOString() ?? null,
         lastError: row.lastErrorCode ? { code: row.lastErrorCode, message: row.lastErrorMessage ?? '' } : null,
@@ -160,6 +157,14 @@ async function findSubscription(db: Database, userId: string, id: string, now: D
         throw subscriptionNotFound();
 
     return toSubscription(row, now);
+}
+
+// Throws `feed_not_found` (404) unless the reader follows the feed, the same answer as for one that doesn't exist.
+export async function assertFollowsFeed(db: Database, userId: string, feedId: string): Promise<void> {
+    const subscriptionId = await findSubscriptionId(db, userId, feedId);
+
+    if (!subscriptionId)
+        throw new NotFoundError('feed_not_found', 'Feed not found');
 }
 
 async function findSubscriptionId(db: Database, userId: string, feedId: string): Promise<string | undefined> {

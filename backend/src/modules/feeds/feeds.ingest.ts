@@ -2,8 +2,8 @@
 // transaction, so a slow feed never holds one open; only new or edited items (by content_hash) are written.
 
 import { createHash } from 'node:crypto';
-import { and, eq, inArray, sql } from 'drizzle-orm';
-import type { AnyPgColumn } from 'drizzle-orm/pg-core';
+import { and, eq, exists, inArray, notExists, sql } from 'drizzle-orm';
+import { alias, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import type { FeedCacheValidators, FeedErrorCode, FeedRedirect, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import type { Database, Transaction } from '../../db';
 import { parseFeedUrl } from '../../lib/feed';
@@ -130,34 +130,64 @@ async function applyPermanentRedirect(tx: Transaction, stored: StoredFeed | null
 // Where both feeds hold the same thing (an item guid, a subscription, a bookmark or read state), `intoId`'s copy wins.
 async function mergeFeeds(tx: Transaction, fromId: string, intoId: string) {
     // Lock both rows in a fixed order so two merges of the same pair can't deadlock.
-    await tx.execute(sql`select id from ${feeds} where id in (${fromId}, ${intoId}) order by id for update`);
+    await tx
+        .select({ id: feeds.id })
+        .from(feeds)
+        .where(inArray(feeds.id, [fromId, intoId]))
+        .orderBy(feeds.id)
+        .for('update');
 
-    const duplicateItems = sql`
-        select dup.id as from_item, keep.id as into_item
-        from ${items} dup join ${items} keep on keep.feed_id = ${intoId} and keep.guid = dup.guid
-        where dup.feed_id = ${fromId}`;
+    // Each item of the old feed whose guid the kept feed also has, paired with the kept feed's copy.
+    const duplicateItem = alias(items, 'duplicate_item');
+    const keptItem = alias(items, 'kept_item');
+    const duplicates = tx
+        .select({ fromItemId: sql<string>`${duplicateItem.id}`.as('from_item_id'), intoItemId: sql<string>`${keptItem.id}`.as('into_item_id') })
+        .from(duplicateItem)
+        .innerJoin(keptItem, and(eq(keptItem.feedId, intoId), eq(keptItem.guid, duplicateItem.guid)))
+        .where(eq(duplicateItem.feedId, fromId))
+        .as('duplicates');
+    const duplicateItemIds = tx.select({ id: duplicates.fromItemId }).from(duplicates);
 
-    await tx.execute(sql`
-        insert into ${bookmarks} (user_id, item_id, created_at)
-        select b.user_id, d.into_item, b.created_at from ${bookmarks} b join (${duplicateItems}) d on d.from_item = b.item_id
-        on conflict do nothing`);
-    await tx.execute(sql`
-        insert into ${itemReadStates} (user_id, item_id, is_read)
-        select r.user_id, d.into_item, r.is_read from ${itemReadStates} r join (${duplicateItems}) d on d.from_item = r.item_id
-        on conflict do nothing`);
+    await tx
+        .insert(bookmarks)
+        .select(
+            tx
+                .select({ userId: bookmarks.userId, itemId: duplicates.intoItemId, createdAt: bookmarks.createdAt })
+                .from(bookmarks)
+                .innerJoin(duplicates, eq(duplicates.fromItemId, bookmarks.itemId)),
+        )
+        .onConflictDoNothing();
+    await tx
+        .insert(itemReadStates)
+        .select(
+            tx
+                .select({ userId: itemReadStates.userId, itemId: duplicates.intoItemId, isRead: itemReadStates.isRead })
+                .from(itemReadStates)
+                .innerJoin(duplicates, eq(duplicates.fromItemId, itemReadStates.itemId)),
+        )
+        .onConflictDoNothing();
+
     // Bookmarks block deleting their item (RESTRICT), so the duplicates' bookmarks go first; read states cascade.
-    await tx.execute(sql`delete from ${bookmarks} where item_id in (select from_item from (${duplicateItems}) d)`);
-    await tx.execute(sql`delete from ${items} where id in (select from_item from (${duplicateItems}) d)`);
+    await tx.delete(bookmarks).where(inArray(bookmarks.itemId, duplicateItemIds));
+    await tx.delete(items).where(inArray(items.id, duplicateItemIds));
     await tx.update(items).set({ feedId: intoId }).where(eq(items.feedId, fromId));
 
-    await tx.execute(sql`
-        delete from ${subscriptions} s where s.feed_id = ${fromId}
-        and exists (select 1 from ${subscriptions} t where t.feed_id = ${intoId} and t.user_id = s.user_id)`);
+    const keptSubscription = alias(subscriptions, 'kept_subscription');
+    const alsoFollowsKeptFeed = tx
+        .select({ id: keptSubscription.id })
+        .from(keptSubscription)
+        .where(and(eq(keptSubscription.feedId, intoId), eq(keptSubscription.userId, subscriptions.userId)));
+
+    await tx.delete(subscriptions).where(and(eq(subscriptions.feedId, fromId), exists(alsoFollowsKeptFeed)));
     await tx.update(subscriptions).set({ feedId: intoId }).where(eq(subscriptions.feedId, fromId));
 
-    await tx.execute(sql`
-        update ${starterFeeds} set feed_id = ${intoId}
-        where feed_id = ${fromId} and not exists (select 1 from ${starterFeeds} where feed_id = ${intoId})`);
+    const keptStarter = alias(starterFeeds, 'kept_starter');
+    const keptFeedIsStarter = tx.select({ feedId: keptStarter.feedId }).from(keptStarter).where(eq(keptStarter.feedId, intoId));
+
+    await tx
+        .update(starterFeeds)
+        .set({ feedId: intoId })
+        .where(and(eq(starterFeeds.feedId, fromId), notExists(keptFeedIsStarter)));
     await tx.delete(feeds).where(eq(feeds.id, fromId));
 }
 

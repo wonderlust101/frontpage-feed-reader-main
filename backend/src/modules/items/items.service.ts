@@ -9,7 +9,8 @@ import { NotFoundError } from '../../errors';
 import { categories } from '../categories/categories.schema';
 import { assertOwnCategory } from '../categories/categories.service';
 import { feeds } from '../feeds/feeds.schema';
-import { deriveHealth } from '../subscriptions/subscriptions.health';
+import { deriveRowHealth, FEED_HEALTH_COLUMNS } from '../subscriptions/subscriptions.health';
+import { assertFollowsFeed } from '../subscriptions/subscriptions.service';
 import { subscriptions } from '../subscriptions/subscriptions.schema';
 import { encodeCursor } from './items.cursor';
 import { itemReadStates, items } from './items.schema';
@@ -38,11 +39,7 @@ const FEED_COLUMNS = {
     feedImageUrl: feeds.imageUrl,
     siteUrl: feeds.siteUrl,
     categoryId: subscriptions.categoryId,
-    lastErrorCode: feeds.lastErrorCode,
-    lastSuccessAt: feeds.lastSuccessAt,
-    consecutiveFailures: feeds.consecutiveFailures,
-    latestItemAt: feeds.latestItemAt,
-    feedCreatedAt: feeds.createdAt,
+    ...FEED_HEALTH_COLUMNS,
 };
 
 // The item's own columns for a list row. Never content_html: lists don't need it, and leaving it out keeps Postgres from reading it.
@@ -202,16 +199,8 @@ async function assertScopeBelongsToReader(db: Database, userId: string, scope: I
         return;
     }
 
-    if (scope.kind !== 'feed')
-        return;
-
-    const [subscription] = await db
-        .select({ id: subscriptions.id })
-        .from(subscriptions)
-        .where(and(eq(subscriptions.userId, userId), eq(subscriptions.feedId, scope.feedId)));
-
-    if (!subscription)
-        throw new NotFoundError('feed_not_found', 'Feed not found');
+    if (scope.kind === 'feed')
+        await assertFollowsFeed(db, userId, scope.feedId);
 }
 
 // A list or item row as the API sends it: the feed under the reader's title for it, with its icon and health at `now`; ISO dates.
@@ -223,7 +212,7 @@ function toItemSummary(row: SummaryRow, now: Date): ItemSummary {
             title: row.customTitle ?? row.feedTitle,
             iconUrl: feedIconUrl(row.feedImageUrl, row.siteUrl),
             categoryId: row.categoryId,
-            health: deriveHealth({ ...row, createdAt: row.feedCreatedAt }, now),
+            health: deriveRowHealth(row, now),
         },
         title: row.title,
         url: row.url,
