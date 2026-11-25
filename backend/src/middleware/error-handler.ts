@@ -24,6 +24,10 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
         },
     };
 
+    // The header CORS exposes, so a cross-origin page can tell the reader how long to wait.
+    if (error.retryAfterSeconds !== undefined)
+        res.set('X-Retry-After', String(error.retryAfterSeconds));
+
     res.status(error.status).json(body);
 };
 

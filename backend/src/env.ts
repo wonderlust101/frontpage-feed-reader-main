@@ -29,6 +29,8 @@ export const env = {
     FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? DEFAULT_USER_AGENT,
     FEED_MIN_REFETCH_MINUTES: integerOr(process.env.FEED_MIN_REFETCH_MINUTES, 15),
     FEED_ALLOW_LOOPBACK: process.env.FEED_ALLOW_LOOPBACK === 'true',
+    FEED_HOST_MAX_CONCURRENT: integerOr(process.env.FEED_HOST_MAX_CONCURRENT, 2),
+    FEED_HOST_MIN_INTERVAL_MS: integerOr(process.env.FEED_HOST_MIN_INTERVAL_MS, 1000),
 };
 
 // undefined for a Railway environment the map doesn't know (e.g. a PR environment); not on Railway means local.

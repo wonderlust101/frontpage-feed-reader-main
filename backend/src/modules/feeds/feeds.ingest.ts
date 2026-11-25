@@ -7,7 +7,7 @@ import { alias, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import type { FeedCacheValidators, FeedErrorCode, FeedRedirect, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import type { Database, Transaction } from '../../db';
 import { parseFeedUrl } from '../../lib/feed';
-import { HttpError } from '../../errors';
+import { HttpError, TooManyRequestsError } from '../../errors';
 import { bookmarks } from '../bookmarks/bookmarks.schema';
 import { itemReadStates, items } from '../items/items.schema';
 import { subscriptions } from '../subscriptions/subscriptions.schema';
@@ -69,7 +69,7 @@ export async function ingestFeed(db: Database, url: string, options: IngestOptio
     });
 }
 
-// Records a failed fetch on the stored feed before rethrowing. A 304 needs a stored copy for it to stand for.
+// Records a failed fetch on the stored feed before rethrowing (except a busy host). A 304 needs a stored copy for it to stand for.
 async function fetchForIngest(db: Database, feedUrl: string, stored: StoredFeed | null, now: Date): Promise<FetchOutcome> {
     try {
         const sentValidators = { etag: stored?.etag ?? null, lastModified: stored?.lastModified ?? null };
@@ -83,7 +83,8 @@ async function fetchForIngest(db: Database, feedUrl: string, stored: StoredFeed 
 
         return { kind: 'notModified', result, stored };
     } catch (err) {
-        if (stored && err instanceof HttpError)
+        // A busy host is our own limit, not the feed failing, so it leaves the stored feed untouched.
+        if (stored && err instanceof HttpError && !(err instanceof TooManyRequestsError))
             await recordFailure(db, stored.id, err, now);
 
         throw err;

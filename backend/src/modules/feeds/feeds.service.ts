@@ -1,10 +1,10 @@
-// Fetches feeds for the API. Keeps the last good result per URL in a small LRU cache (a Map in use order),
-// so an upstream 304 "not modified" can still be answered with a feed.
+// Fetches feeds for the API and ingestion, at most FEED_HOST_MAX_CONCURRENT per host. Keeps the last good result per URL
+// in a small LRU cache (a Map in use order), so an upstream 304 "not modified" can still be answered with a feed.
 
 import type { FeedCacheValidators, FetchFeedResponse, NormalizedFeed } from '@frontpage/shared';
 import { env } from '../../env';
-import { BadGatewayError } from '../../errors';
-import { decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl, type FetchFeedResult } from '../../lib/feed';
+import { BadGatewayError, TooManyRequestsError } from '../../errors';
+import { createHostLimiter, decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl, type FetchFeedResult } from '../../lib/feed';
 
 export type NotModifiedResult = Extract<FetchFeedResult, { notModified: true }>;
 
@@ -16,7 +16,17 @@ type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
 
 const CACHE_LIMIT = 200;
 
+// How long a fetch waits for a free slot on its feed's host, and the wait we then suggest to the reader.
+const HOST_WAIT_MS = 5_000;
+const HOST_BUSY_RETRY_AFTER_SECONDS = 5;
+
 const cache = new Map<string, CacheEntry>();
+
+// Shared by every fetch in this process: the API, subscribing and the background refresh.
+export const hostLimiter = createHostLimiter({
+    maxConcurrent: env.FEED_HOST_MAX_CONCURRENT,
+    minIntervalMs: env.FEED_HOST_MIN_INTERVAL_MS,
+});
 
 // Caches under both the requested and the final URL, so an unchanged feed is just a 304 answered from the cache.
 export async function getFeed(input: string | undefined, clientValidators: Validators = {}): Promise<FetchFeedResponse> {
@@ -48,14 +58,27 @@ export function clearFeedCache() {
     cache.clear();
 }
 
-// Downloads the feed with the server's fetch settings, sending `validators` so an unchanged feed is a 304.
-export function fetchUpstream(url: URL, validators: Validators): Promise<FetchFeedResult> {
-    return fetchFeed(url, {
-        ...validators,
-        timeoutMs: env.FEED_FETCH_TIMEOUT_MS,
-        userAgent: env.FEED_USER_AGENT,
-        allowLoopback: env.FEED_ALLOW_LOOPBACK,
-    });
+// Downloads the feed with the server's fetch settings, sending `validators` so an unchanged feed is a 304. Throws
+// `rate_limited` (429) when its host has no free slot within HOST_WAIT_MS.
+export async function fetchUpstream(url: URL, validators: Validators): Promise<FetchFeedResult> {
+    const release = await hostLimiter.acquire(url.hostname, HOST_WAIT_MS);
+
+    if (!release) {
+        throw new TooManyRequestsError('rate_limited', `Too many requests to ${url.hostname} right now. Try again in a few seconds.`, {
+            retryAfterSeconds: HOST_BUSY_RETRY_AFTER_SECONDS,
+        });
+    }
+
+    try {
+        return await fetchFeed(url, {
+            ...validators,
+            timeoutMs: env.FEED_FETCH_TIMEOUT_MS,
+            userAgent: env.FEED_USER_AGENT,
+            allowLoopback: env.FEED_ALLOW_LOOPBACK,
+        });
+    } finally {
+        release();
+    }
 }
 
 // A 304 we have no stored copy to answer with; `detail` says why.

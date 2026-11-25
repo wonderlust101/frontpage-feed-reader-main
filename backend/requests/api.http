@@ -26,7 +26,7 @@ Content-Type: application/json
 
 { not json
 
-### Fetch a feed (RSS 2.0) → normalized JSON
+### Fetch a feed (RSS 2.0) → normalized JSON (sign in first; signed out → 401 unauthorized; 30 per reader per 10 min → 429 rate_limited)
 GET {{baseUrl}}/api/fetch?url=https://css-tricks.com/feed/
 Accept: application/json
 

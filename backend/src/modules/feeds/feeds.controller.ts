@@ -5,8 +5,8 @@ import type { Request, Response } from 'express';
 import { getFeed } from './feeds.service';
 import { parseFetchUrl } from './feeds.validation';
 
-// Browsers may reuse a feed response for 5 minutes before asking again.
-const CACHE_CONTROL = 'public, max-age=300';
+// The reader's browser may reuse a feed response for 5 minutes. `private`: the route needs a session, so shared caches must not keep it.
+const CACHE_CONTROL = 'private, max-age=300';
 
 // GET /api/fetch?url=… fetches and normalizes one feed.
 export async function fetchFeedController(req: Request, res: Response) {

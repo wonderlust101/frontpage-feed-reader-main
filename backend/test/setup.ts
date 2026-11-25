@@ -10,4 +10,7 @@ process.env.AUTH_SECRET = 'test-secret-not-for-production-0123456789abcdef';
 if (!process.env.LIVE_FEEDS) {
     process.env.FEED_ALLOW_LOOPBACK = 'true';
     process.env.FEED_FETCH_TIMEOUT_MS = '500';
+    // Every fixture feed is on 127.0.0.1, so the real per-host limit would queue the tests; host-limiter.test.ts tests it.
+    process.env.FEED_HOST_MAX_CONCURRENT = '50';
+    process.env.FEED_HOST_MIN_INTERVAL_MS = '0';
 }

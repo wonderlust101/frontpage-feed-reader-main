@@ -394,6 +394,23 @@ describe('failures', () => {
         expect(await feedAt(url)).toMatchObject({ lastErrorCode: 'timeout', lastErrorStatus: null, consecutiveFailures: 1, lastFetchedAt: T1 });
     });
 
+    test("a busy host isn't the feed failing: the 429 is rethrown and nothing is recorded", async () => {
+        server.serve('/busy-host.xml', rss([POST_A]));
+
+        const url = `${server.url}/busy-host.xml`;
+
+        await ingestFeed(testDb.db, url, { now: T1 });
+
+        const before = await feedAt(url);
+
+        spyOn(feedsService.hostLimiter, 'acquire').mockResolvedValue(null);
+
+        const err = await httpErrorFrom(ingestFeed(testDb.db, url, { now: T2 }));
+
+        expect(err).toMatchObject({ status: 429, code: 'rate_limited', retryAfterSeconds: 5 });
+        expect(await feedAt(url)).toEqual(before);
+    });
+
     test('a database error rolls everything back and records nothing', async () => {
         server.serve('/db-error.xml', rss([POST_A]));
 

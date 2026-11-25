@@ -7,15 +7,18 @@ export type HttpErrorOptions = {
     retryable?: boolean;
     upstreamStatus?: number;
     subscriptionId?: string;
+    retryAfterSeconds?: number;
 };
 
-// `upstreamStatus` is a feed server's own status (sent as `status`); `subscriptionId` points at an existing subscription.
+// `upstreamStatus` is a feed server's own status (sent as `status`); `subscriptionId` points at an existing subscription;
+// `retryAfterSeconds` is sent as the X-Retry-After header.
 export class HttpError extends Error {
     readonly status: number;
     readonly code: ApiErrorCode;
     readonly retryable: boolean;
     readonly upstreamStatus: number | undefined;
     readonly subscriptionId: string | undefined;
+    readonly retryAfterSeconds: number | undefined;
 
     constructor(status: number, code: ApiErrorCode, message: string, options: HttpErrorOptions = {}) {
         super(message);
@@ -25,6 +28,7 @@ export class HttpError extends Error {
         this.retryable = options.retryable ?? isRetryableStatus(status);
         this.upstreamStatus = options.upstreamStatus;
         this.subscriptionId = options.subscriptionId;
+        this.retryAfterSeconds = options.retryAfterSeconds;
     }
 }
 

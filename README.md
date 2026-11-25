@@ -60,7 +60,7 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
 │       │   ├── auth/         #   /api/auth/* (Better Auth; email templates in auth.emails.ts) + "users", "sessions", "accounts", "verifications" tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
-│       │   ├── feeds/        #   GET /api/fetch (routes → controller → validation → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
+│       │   ├── feeds/        #   GET /api/fetch (routes → controller → validation → service; per-host fetch limit), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
 │       │   ├── items/        #   /api/items (routes → controller → validation + cursor → service, read-state writes; read rule) + "items", "item_read_states" tables
 │       │   ├── categories/   #   "categories" table + the "is this category yours?" check
 │       │   ├── subscriptions/#   /api/subscriptions (routes → controller → validation → service; health rule) + "subscriptions" table
@@ -253,6 +253,14 @@ Running with `bun dev` instead of Docker: start only Mailpit with `docker compos
 - **Permanent redirects** (301 or 308 on every hop) move `feeds.url`. If another feed already has the new URL, the two are merged: items, subscriptions, bookmarks, read states and the starter-feed entry move onto that feed (its own copy wins where both have one), and the old row is deleted.
 - **Trying it by hand:** `docker compose run --rm --no-deps backend bun run ingest:feed <url>` ingests one feed into the local Docker database and prints what changed. The script refuses any database host but `localhost` or `db`, so it can't write to Neon.
 
+## Fetch limits
+
+Every feed download, whether a preview, a subscribe or ingestion, goes through `fetchUpstream()` (`backend/src/modules/feeds/feeds.service.ts`), so these limits apply to all of them:
+
+- **Per feed host, at most 2 downloads at once, started at least 1 second apart** (`FEED_HOST_MAX_CONCURRENT`, `FEED_HOST_MIN_INTERVAL_MS`; `backend/src/lib/feed/host-limiter.ts`), so a burst of feeds on one site never floods it. A download waits up to 5 seconds for a slot; if none frees up, the request answers 429 `rate_limited` with `X-Retry-After: 5`, and nothing is recorded against the feed, since the feed didn't fail. The host is the one in the URL we ask for: a redirect to another host isn't limited separately.
+- **`GET /api/fetch` needs a session and allows 30 calls per reader per 10 minutes**, like subscribing. It makes the server download any URL the caller names, so left public it was a free fetch proxy. Per-IP limits would have kept it open to guests, but nothing in the site calls it today, so sign-in is the simpler and safer choice. Its responses are `Cache-Control: private`, so shared caches never keep a signed-in answer.
+- Both limits live in the server's memory: they reset on restart, which is enough for the one Railway server.
+
 ## Items API
 
 `backend/src/modules/items/` serves a signed-in reader's articles: a page of a list, the sidebar counts, and one article for the reader view.
@@ -439,7 +447,7 @@ Example requests for every route are in [`backend/requests/api.http`](backend/re
 | Method | Path                            | Description                                                                                                                                                                                                                                                   |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/health`                   | `{ api: "ok", database: "connected" \| "skipped" \| "error" }`                                                                                                                                                                                                |
-| GET    | `/api/fetch`                    | `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304                                                                                                          |
+| GET    | `/api/fetch`                    | Signed in: `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304; 30 per reader per 10 min                                                                     |
 | \*     | `/api/auth/*`                   | Better Auth: sign-up, sign-in, sign-out, session, email verification by code, password reset and change (see [Auth](#auth))                                                                                                                                   |
 | GET    | `/api/subscriptions`            | Signed in: the reader's subscriptions (`SubscriptionListResponse`) with each feed's health (active / stale / error / dead), sorted by title                                                                                                                   |
 | POST   | `/api/subscriptions`            | Signed in: `{ url, categoryId? }` fetches and checks the feed, then subscribes → 201 + `Location`; 409 `already_subscribed`; 30 per reader per 10 min                                                                                                         |
