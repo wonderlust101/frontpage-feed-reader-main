@@ -3,15 +3,11 @@
 // (which would reject it with an error). The feed URL itself is checked by parseFeedUrl in the service.
 
 import { MAX_CUSTOM_TITLE_LENGTH, type SubscribeRequest, type UpdateSubscriptionRequest } from '@frontpage/shared';
-import { isUuid } from '../../lib/uuid';
-import { BadRequestError, NotFoundError } from '../../errors';
+import { isUuid, requireUuid } from '../../lib/uuid';
+import { BadRequestError } from '../../errors';
 
-// The subscription id from the URL; throws `not_found` (404) when it isn't a UUID.
 export function parseSubscriptionId(value: string): string {
-    if (!isUuid(value))
-        throw new NotFoundError('not_found', 'Subscription not found');
-
-    return value;
+    return requireUuid(value, 'not_found', 'Subscription not found');
 }
 
 // A url that isn't a string becomes "", which parseFeedUrl rejects as `invalid_url`.

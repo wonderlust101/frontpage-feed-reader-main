@@ -2,8 +2,8 @@
 // a UUID is "not found" (404), the same answer as for something the reader can't see.
 
 import { ITEM_PAGE_SIZE, MAX_ITEM_PAGE_SIZE, UNCATEGORIZED, type ItemOrder } from '@frontpage/shared';
-import { isUuid } from '../../lib/uuid';
-import { BadRequestError, NotFoundError } from '../../errors';
+import { requireUuid } from '../../lib/uuid';
+import { BadRequestError } from '../../errors';
 import { decodeCursor } from './items.cursor';
 import type { ItemCursor, ItemListQuery, ItemScope } from './items.types';
 
@@ -29,12 +29,8 @@ export function parseItemListQuery(query: Record<string, unknown>): ItemListQuer
     return { scope, unreadOnly, order, limit, cursor };
 }
 
-// The item id from the URL; throws `not_found` (404) when it isn't a UUID.
 export function parseItemId(value: string): string {
-    if (!isUuid(value))
-        throw new NotFoundError('not_found', 'Item not found');
-
-    return value;
+    return requireUuid(value, 'not_found', 'Item not found');
 }
 
 // The list parameters as single strings (undefined when absent). A parameter sent twice arrives as an array: `bad_request`.
@@ -106,12 +102,8 @@ function parseCursor(value: string | undefined, order: ItemOrder): ItemCursor | 
 
 // "uncategorized" means no category; throws `feed_not_found` / `category_not_found` (404) for a value that can't be an id.
 function parseScope(feed: string | undefined, category: string | undefined): ItemScope {
-    if (feed !== undefined) {
-        if (!isUuid(feed))
-            throw new NotFoundError('feed_not_found', 'Feed not found');
-
-        return { kind: 'feed', feedId: feed };
-    }
+    if (feed !== undefined)
+        return { kind: 'feed', feedId: requireUuid(feed, 'feed_not_found', 'Feed not found') };
 
     if (category === undefined)
         return { kind: 'all' };
@@ -119,8 +111,5 @@ function parseScope(feed: string | undefined, category: string | undefined): Ite
     if (category === UNCATEGORIZED)
         return { kind: 'category', categoryId: null };
 
-    if (!isUuid(category))
-        throw new NotFoundError('category_not_found', 'Category not found');
-
-    return { kind: 'category', categoryId: category };
+    return { kind: 'category', categoryId: requireUuid(category, 'category_not_found', 'Category not found') };
 }

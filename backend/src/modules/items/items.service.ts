@@ -23,6 +23,8 @@ type SummaryRow = Omit<PageRow, 'cursorSortAt'>;
 // LEFT JOINed `item_read_states`; never call .mapWith() on it, which would change it for every query.
 export const IS_READ = sql<boolean>`coalesce(${itemReadStates.isRead}, ${subscriptions.readCutoff} is not null and ${items.firstSeenAt} < ${subscriptions.readCutoff})`;
 
+const EMPTY_COUNT: ItemCount = { items: 0, unread: 0 };
+
 // How each order sorts, and which side of the cursor the next page is on.
 const KEYSET = {
     newest: { direction: desc, after: sql.raw('<') },
@@ -74,29 +76,16 @@ export async function listItems(db: Database, userId: string, query: ItemListQue
 // Categories come in sidebar order with zeros included, then Uncategorized when a feed has no category.
 export async function countItems(db: Database, userId: string): Promise<ItemCountsResponse> {
     const [feedCounts, readerCategories] = await Promise.all([
-        db
-            .select({
-                feedId: subscriptions.feedId,
-                categoryId: subscriptions.categoryId,
-                // count(items.id), not count(*): a feed with no items still has one row from the LEFT JOIN, with a null id.
-                items: count(items.id),
-                unread: sql<number>`count(${items.id}) filter (where not ${IS_READ})`.mapWith(Number),
-            })
-            .from(subscriptions)
-            .leftJoin(items, eq(items.feedId, subscriptions.feedId))
-            .leftJoin(itemReadStates, and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId)))
-            .where(eq(subscriptions.userId, userId))
-            .groupBy(subscriptions.id)
-            .orderBy(subscriptions.feedId),
+        selectFeedCounts(db, userId),
         db.select({ id: categories.id }).from(categories).where(eq(categories.userId, userId)).orderBy(categories.position, categories.id),
     ]);
 
-    const total: ItemCount = { items: 0, unread: 0 };
+    const total: ItemCount = { ...EMPTY_COUNT };
     // A Map keeps insertion order: the categories first, then Uncategorized (null), added only when a feed has no category.
-    const byCategory = new Map<string | null, ItemCount>(readerCategories.map((category) => [category.id, { items: 0, unread: 0 }]));
+    const byCategory = new Map<string | null, ItemCount>(readerCategories.map((category) => [category.id, EMPTY_COUNT]));
 
     for (const feed of feedCounts) {
-        const sum = byCategory.get(feed.categoryId) ?? { items: 0, unread: 0 };
+        const sum = byCategory.get(feed.categoryId) ?? EMPTY_COUNT;
 
         byCategory.set(feed.categoryId, { items: sum.items + feed.items, unread: sum.unread + feed.unread });
         total.items += feed.items;
@@ -117,7 +106,7 @@ export async function getItem(db: Database, userId: string, id: string, now = ne
         .from(items)
         .innerJoin(subscriptions, and(eq(subscriptions.feedId, items.feedId), eq(subscriptions.userId, userId)))
         .innerJoin(feeds, eq(feeds.id, items.feedId))
-        .leftJoin(itemReadStates, and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId)))
+        .leftJoin(itemReadStates, readStateJoin(userId))
         .where(eq(items.id, id));
 
     if (!row)
@@ -135,7 +124,7 @@ function selectPage(db: Database, userId: string, query: ItemListQuery) {
     const feedItems = db
         .select({ ...SUMMARY_COLUMNS, isRead: IS_READ.as('is_read') })
         .from(items)
-        .leftJoin(itemReadStates, and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId)))
+        .leftJoin(itemReadStates, readStateJoin(userId))
         .where(
             and(
                 eq(items.feedId, subscriptions.feedId),
@@ -169,6 +158,29 @@ function selectPage(db: Database, userId: string, query: ItemListQuery) {
         .where(and(eq(subscriptions.userId, userId), scopeCondition(query.scope)))
         .orderBy(direction(feedItems.sortAt), direction(feedItems.id))
         .limit(pageSize);
+}
+
+// One row per followed feed with its item and unread counts, in feed order.
+function selectFeedCounts(db: Database, userId: string) {
+    return db
+        .select({
+            feedId: subscriptions.feedId,
+            categoryId: subscriptions.categoryId,
+            // count(items.id), not count(*): a feed with no items still has one row from the LEFT JOIN, with a null id.
+            items: count(items.id),
+            unread: sql<number>`count(${items.id}) filter (where not ${IS_READ})`.mapWith(Number),
+        })
+        .from(subscriptions)
+        .leftJoin(items, eq(items.feedId, subscriptions.feedId))
+        .leftJoin(itemReadStates, readStateJoin(userId))
+        .where(eq(subscriptions.userId, userId))
+        .groupBy(subscriptions.id)
+        .orderBy(subscriptions.feedId);
+}
+
+// The reader's own read mark on the item, if any; IS_READ needs it LEFT JOINed.
+function readStateJoin(userId: string): SQL | undefined {
+    return and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId));
 }
 
 // The filter on the reader's subscriptions for a scope: one feed, one category, Uncategorized (no category), or none for all.
