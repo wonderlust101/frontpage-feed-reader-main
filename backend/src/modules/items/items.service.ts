@@ -1,7 +1,7 @@
 // Keyset pagination: a LATERAL subquery reads at most limit+1 items per followed feed in index order, so page 50 costs
 // the same as page 1. Queries start from the reader's subscriptions, so only an empty page needs an ownership check.
 
-import { and, asc, count, desc, eq, isNull, not, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNull, not, sql, type SQL, type SQLWrapper } from 'drizzle-orm';
 import type { ItemCount, ItemCountsResponse, ItemDetail, ItemListResponse, ItemSummary } from '@frontpage/shared';
 import type { Database } from '../../db';
 import { feedIconUrl } from '../../lib/feed';
@@ -19,9 +19,12 @@ import type { ItemListQuery, ItemScope } from './items.types';
 type PageRow = Awaited<ReturnType<typeof selectPage>>[number];
 type SummaryRow = Omit<PageRow, 'cursorSortAt'>;
 
-// Read if the reader marked it either way, else if first seen before their read cutoff. Needs `subscriptions` and a
-// LEFT JOINed `item_read_states`; never call .mapWith() on it, which would change it for every query.
-export const IS_READ = sql<boolean>`coalesce(${itemReadStates.isRead}, ${subscriptions.readCutoff} is not null and ${items.firstSeenAt} < ${subscriptions.readCutoff})`;
+// An item's state without a mark of its own: read if first seen before the reader's cutoff. Needs `subscriptions`.
+export const READ_BY_CUTOFF = sql<boolean>`(${subscriptions.readCutoff} is not null and ${items.firstSeenAt} < ${subscriptions.readCutoff})`;
+
+// Read if the reader marked it either way, else by the cutoff. Needs `subscriptions` and a LEFT JOINed
+// `item_read_states`; never call .mapWith() on it or READ_BY_CUTOFF, which would change it for every query.
+export const IS_READ = sql<boolean>`coalesce(${itemReadStates.isRead}, ${READ_BY_CUTOFF})`;
 
 const EMPTY_COUNT: ItemCount = { items: 0, unread: 0 };
 
@@ -57,6 +60,8 @@ const SUMMARY_COLUMNS = {
 
 // Throws `feed_not_found` or `category_not_found` (404) when the page is empty because the scope isn't the reader's.
 export async function listItems(db: Database, userId: string, query: ItemListQuery, now = new Date()): Promise<ItemListResponse> {
+    // The clock before the page: an item that arrives in between then stays unread after "mark all", never the reverse.
+    const asOf = await databaseNow(db);
     const rows = await selectPage(db, userId, query);
 
     if (rows.length === 0)
@@ -66,7 +71,7 @@ export async function listItems(db: Database, userId: string, query: ItemListQue
     const lastShown = rows.length > query.limit ? rows[query.limit - 1] : undefined;
     const nextCursor = lastShown ? encodeCursor({ order: query.order, sortAt: lastShown.cursorSortAt, id: lastShown.id }) : null;
 
-    return { items: rows.slice(0, query.limit).map((row) => toItemSummary(row, now)), nextCursor };
+    return { items: rows.slice(0, query.limit).map((row) => toItemSummary(row, now)), nextCursor, asOf: asOf.toISOString() };
 }
 
 // Categories come in sidebar order with zeros included, then Uncategorized when a feed has no category.
@@ -111,8 +116,19 @@ export async function getItem(db: Database, userId: string, id: string, now = ne
     return { ...toItemSummary(row, now), contentHtml: row.contentHtml, updatedAt: row.updatedAt?.toISOString() ?? null };
 }
 
+// Postgres's clock, the one that stamps first_seen_at, so a cutoff never compares two clocks. Rounded down to milliseconds.
+export async function databaseNow(db: Database): Promise<Date> {
+    // Drizzle's select needs a FROM; a one-row stand-in keeps the result typed (db.execute's isn't, across drivers).
+    const [clock] = await db.select({ now: microsecondUtcText(sql`now()`) }).from(sql`(values (1)) as clock`);
+
+    if (!clock)
+        throw new Error('Postgres returned no time');
+
+    return new Date(clock.now);
+}
+
 // Only needed for an empty page (see the top of the file); "All" and Uncategorized always belong to the reader.
-async function assertScopeBelongsToReader(db: Database, userId: string, scope: ItemScope): Promise<void> {
+export async function assertScopeBelongsToReader(db: Database, userId: string, scope: ItemScope): Promise<void> {
     if (scope.kind === 'category' && scope.categoryId !== null) {
         await assertOwnCategory(db, userId, scope.categoryId);
 
@@ -158,7 +174,7 @@ function selectPage(db: Database, userId: string, query: ItemListQuery) {
             sortAt: feedItems.sortAt,
             hasFullContent: feedItems.hasFullContent,
             isRead: feedItems.isRead,
-            cursorSortAt: sql<string>`to_char(${feedItems.sortAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+            cursorSortAt: microsecondUtcText(feedItems.sortAt),
         })
         .from(subscriptions)
         .innerJoin(feeds, eq(feeds.id, subscriptions.feedId))
@@ -168,13 +184,18 @@ function selectPage(db: Database, userId: string, query: ItemListQuery) {
         .limit(pageSize);
 }
 
+// e.g. "2026-03-01T10:00:00.123456Z". Times go out as this text because a JS Date would round them to milliseconds.
+export function microsecondUtcText(timestamp: SQLWrapper): SQL<string> {
+    return sql<string>`to_char(${timestamp} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
+}
+
 // The reader's own read mark on the item, if any; IS_READ needs it LEFT JOINed.
 function readStateJoin(userId: string): SQL | undefined {
     return and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId));
 }
 
 // The filter on the reader's subscriptions for a scope: one feed, one category, Uncategorized (no category), or none for all.
-function scopeCondition(scope: ItemScope): SQL | undefined {
+export function scopeCondition(scope: ItemScope): SQL | undefined {
     switch (scope.kind) {
         case 'all':
             return undefined;
@@ -208,8 +229,8 @@ function toItemSummary(row: SummaryRow, now: Date): ItemSummary {
     };
 }
 
-// One row per followed feed with its item and unread counts, in feed order.
-function selectFeedCounts(db: Database, userId: string) {
+// One row per followed feed with its item and unread counts, in feed order; `feedIds` limits it to those feeds.
+export function selectFeedCounts(db: Database, userId: string, feedIds?: string[]) {
     return db
         .select({
             feedId: subscriptions.feedId,
@@ -221,7 +242,7 @@ function selectFeedCounts(db: Database, userId: string) {
         .from(subscriptions)
         .leftJoin(items, eq(items.feedId, subscriptions.feedId))
         .leftJoin(itemReadStates, readStateJoin(userId))
-        .where(eq(subscriptions.userId, userId))
+        .where(and(eq(subscriptions.userId, userId), feedIds ? inArray(subscriptions.feedId, feedIds) : undefined))
         .groupBy(subscriptions.id)
         .orderBy(subscriptions.feedId);
 }

@@ -163,7 +163,7 @@ describe('listItems: scopes', () => {
             { kind: 'feed', feedId: quietFeed },
             { kind: 'all' },
         ] as const)
-            expect(await listItems(testDb.db, reader, query({ scope }), NOW)).toEqual({ items: [], nextCursor: null });
+            expect(await listItems(testDb.db, reader, query({ scope }), NOW)).toEqual({ items: [], nextCursor: null, asOf: expect.any(String) });
     });
 });
 
@@ -620,8 +620,20 @@ describe('getItem', () => {
     });
 });
 
+describe('listItems: asOf', () => {
+    test('asOf is Postgres\'s time when the page was read', async () => {
+        const reader = await newUser(testDb.db);
+        const before = Date.now();
+
+        const page = await listItems(testDb.db, reader, query(), NOW);
+
+        expect(Date.parse(page.asOf)).toBeGreaterThanOrEqual(before);
+        expect(Date.parse(page.asOf)).toBeLessThanOrEqual(Date.now());
+    });
+});
+
 describe('how many queries each call makes', () => {
-    test('a list page is one query, whatever the number of feeds; an empty filtered page adds one ownership check', async () => {
+    test('a list page is two queries (the page and Postgres\'s clock), whatever the number of feeds; an empty filtered page adds one ownership check', async () => {
         const reader = await newUser(testDb.db);
         const quietFeed = await newHealthyFeed('Quiet');
 
@@ -636,11 +648,11 @@ describe('how many queries each call makes', () => {
 
         testDb.queries.length = 0;
         await listItems(testDb.db, reader, query(), NOW);
-        expect(testDb.queries).toHaveLength(1);
+        expect(testDb.queries).toHaveLength(2);
 
         testDb.queries.length = 0;
         await listItems(testDb.db, reader, query({ scope: { kind: 'feed', feedId: quietFeed } }), NOW);
-        expect(testDb.queries).toHaveLength(2);
+        expect(testDb.queries).toHaveLength(3);
     });
 
     test('counts are two queries and one item is one query', async () => {

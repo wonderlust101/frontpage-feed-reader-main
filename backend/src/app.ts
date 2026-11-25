@@ -29,7 +29,9 @@ app.use(
     }),
 );
 app.use(authRouter);
-app.use(express.json());
+// strict: false parses `null` and other bare values too, so a signed-out request still gets its 401 before any 400;
+// every route that reads a body must check its shape (requireJsonObject).
+app.use(express.json({ strict: false }));
 
 app.use('/api/health', healthRouter);
 app.use('/api/fetch', feedsRouter);

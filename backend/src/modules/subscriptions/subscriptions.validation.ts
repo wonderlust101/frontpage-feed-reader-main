@@ -2,6 +2,7 @@
 // checked by parseFeedUrl in the service.
 
 import { MAX_CUSTOM_TITLE_LENGTH, type SubscribeRequest, type UpdateSubscriptionRequest } from '@frontpage/shared';
+import { requireJsonObject } from '../../lib/request-body';
 import { isUuid, requireUuid } from '../../lib/uuid';
 import { BadRequestError } from '../../errors';
 
@@ -11,7 +12,7 @@ export function parseSubscriptionId(value: string): string {
 
 // A url that isn't a string becomes "", which parseFeedUrl rejects as `invalid_url`.
 export function parseSubscribeRequest(body: unknown): SubscribeRequest {
-    const fields = toObject(body);
+    const fields = requireJsonObject(body);
     const request: SubscribeRequest = { url: typeof fields.url === 'string' ? fields.url : '' };
 
     if (fields.categoryId !== undefined)
@@ -22,7 +23,7 @@ export function parseSubscribeRequest(body: unknown): SubscribeRequest {
 
 // The title is trimmed and "" becomes null, so the feed's own title shows again.
 export function parseUpdateSubscriptionRequest(body: unknown): UpdateSubscriptionRequest {
-    const fields = toObject(body);
+    const fields = requireJsonObject(body);
     const changes: UpdateSubscriptionRequest = {};
 
     if (fields.customTitle !== undefined)
@@ -35,14 +36,6 @@ export function parseUpdateSubscriptionRequest(body: unknown): UpdateSubscriptio
         throw new BadRequestError('bad_request', 'Send customTitle, categoryId or both');
 
     return changes;
-}
-
-// The body as a plain object; throws `bad_request` for anything else (no body, an array, a string).
-function toObject(body: unknown): Record<string, unknown> {
-    if (typeof body !== 'object' || body === null || Array.isArray(body))
-        throw new BadRequestError('bad_request', 'The request body must be a JSON object');
-
-    return body as Record<string, unknown>;
 }
 
 // A category id, or null for Uncategorized; throws `bad_request` for anything else.

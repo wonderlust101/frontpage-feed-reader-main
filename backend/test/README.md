@@ -2,11 +2,12 @@
 
 Tests use `bun:test` and run without a database server or network. Tests that need Postgres use `createTestDb()` (in-memory PGlite, built from the committed migrations). Run them from the repo root:
 
-| Command                  | What it runs                                                           |
-| ------------------------ | ---------------------------------------------------------------------- |
-| `bun run test`           | Every offline test (what CI runs)                                      |
-| `bun run test:live`      | Only `live/`: hits the real curated feeds over the network             |
-| `bun run fixtures:feeds` | Re-downloads the curated feed snapshots into `fixtures/feeds/curated/` |
+| Command                                                                                            | What it runs                                                                                   |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `bun run test`                                                                                     | Every offline test (what CI runs)                                                              |
+| `bun run test:live`                                                                                | Only `live/`: hits the real curated feeds over the network                                     |
+| `RACE_TEST_DATABASE_URL=postgres://frontpage:frontpage@localhost:5432/frontpage bun run test:live` | Also runs the two-tab race test against the local Docker Postgres (localhost only; never Neon) |
+| `bun run fixtures:feeds`                                                                           | Re-downloads the curated feed snapshots into `fixtures/feeds/curated/`                         |
 
 ## Layout
 

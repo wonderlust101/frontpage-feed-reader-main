@@ -184,3 +184,27 @@ GET {{baseUrl}}/api/items/counts
 
 ### Items — one article with its full content (doesn't mark it read; a feed I don't follow → 404 not_found)
 GET {{baseUrl}}/api/items/paste-item-id-here
+
+### Items — mark read (isRead: false marks unread); up to 100 ids, ids outside my feeds are skipped → { updated, counts } (counts: just the touched feeds)
+PUT {{baseUrl}}/api/items/read
+Content-Type: application/json
+
+{ "itemIds": ["paste-item-id-here"], "isRead": true }
+
+### Items — mark all as read: everything, until the first page's asOf (newer items stay unread) → { asOf, undo, counts } (counts: the scoped feeds)
+POST {{baseUrl}}/api/items/mark-all-read
+Content-Type: application/json
+
+{ "asOf": "paste-asOf-from-GET-api-items" }
+
+### Items — mark all as read: one category ("uncategorized" too), or send { "feed": "…" } for one feed
+POST {{baseUrl}}/api/items/mark-all-read
+Content-Type: application/json
+
+{ "category": "uncategorized" }
+
+### Items — undo a mark-all: paste its `undo` object unchanged → { counts } (counts: the touched feeds)
+POST {{baseUrl}}/api/items/mark-all-read/undo
+Content-Type: application/json
+
+{ "asOf": "paste-undo-asOf", "cutoffs": [], "marks": [] }

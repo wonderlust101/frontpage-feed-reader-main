@@ -1,5 +1,5 @@
 // /api/items over HTTP. Tests run without a database, so nobody can be signed in: every route must answer 401 before
-// reading the query or the id. Signed-in behavior (scopes, paging, ownership) is in items.service.test.ts.
+// reading the query, the id or the body. Signed-in behavior is in items.service.test.ts and items.read-state.test.ts.
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { itemsRouter } from '../../../src/modules/items/items.routes';
@@ -23,6 +23,11 @@ function get(path: string) {
     return fetch(`${server.url}/api/items${path}`);
 }
 
+// Sends `body` as JSON to /api/items + `path`, signed out.
+function send(method: 'PUT' | 'POST', path: string, body: unknown) {
+    return fetch(`${server.url}/api/items${path}`, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+}
+
 describe('/api/items signed out', () => {
     test.each(['', '/counts', `/${SAMPLE_UUID}`])('GET /api/items%s → 401 unauthorized', async (path) => {
         const res = await get(path);
@@ -39,10 +44,31 @@ describe('/api/items signed out', () => {
     });
 });
 
+describe('/api/items read-state writes signed out', () => {
+    test.each([
+        ['PUT', '/read', { itemIds: [SAMPLE_UUID], isRead: true }],
+        ['POST', '/mark-all-read', {}],
+        ['POST', '/mark-all-read/undo', { cutoffs: [], marks: [] }],
+    ] as const)('%s /api/items%s → 401 unauthorized', async (method, path, body) => {
+        const res = await send(method, path, body);
+
+        expect(res.status).toBe(401);
+        expect(await res.json()).toEqual(UNAUTHORIZED);
+    });
+
+    test('auth runs before validation: bad bodies are still 401, not 400 or 404', async () => {
+        expect((await send('PUT', '/read', { itemIds: 'nope' })).status).toBe(401);
+        expect((await send('POST', '/mark-all-read', { feed: 'nope', category: 'nope' })).status).toBe(401);
+        expect((await send('POST', '/mark-all-read/undo', [])).status).toBe(401);
+        expect((await send('POST', '/mark-all-read/undo', null)).status).toBe(401);
+        expect((await send('PUT', '/read', 'read')).status).toBe(401);
+    });
+});
+
 describe('itemsRouter', () => {
-    test('registers /counts before /:id, so "counts" is never read as an item id', () => {
+    test('registers every fixed path before /:id, so "counts" or "read" is never read as an item id', () => {
         const paths = itemsRouter.stack.flatMap((layer) => (layer.route ? [layer.route.path] : []));
 
-        expect(paths).toEqual(['/', '/counts', '/:id']);
+        expect(paths).toEqual(['/', '/counts', '/read', '/mark-all-read', '/mark-all-read/undo', '/:id']);
     });
 });
