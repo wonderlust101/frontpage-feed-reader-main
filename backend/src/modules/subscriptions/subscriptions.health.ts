@@ -15,7 +15,7 @@ const DEAD_MIN_FAILURES = 5;
 const DEAD_MIN_DAYS = 7;
 const STALE_DAYS = 30;
 
-// The columns deriveHealth reads, for a select that joins feeds.
+// The columns deriveRowHealth reads, for a select that joins feeds.
 export const FEED_HEALTH_COLUMNS = {
     lastErrorCode: feeds.lastErrorCode,
     lastSuccessAt: feeds.lastSuccessAt,

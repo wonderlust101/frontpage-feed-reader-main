@@ -1,7 +1,7 @@
 // Email hand-offs: the pending email (sessionStorage) for the verify page, and the sign-in email (localStorage) that
-// lasts an hour and is cleared once read. Storage that is blocked must never throw into the page.
+// lasts as long as the reset link and is cleared once read. Storage that is blocked must never throw into the page.
 
-import { CODE_LIFETIME_MINUTES } from '@frontpage/shared';
+import { CODE_LIFETIME_MINUTES, RESET_TOKEN_MINUTES } from '@frontpage/shared';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import {
     forgetPendingEmail,
@@ -14,7 +14,7 @@ import {
 
 const SIGN_IN_KEY = 'frontpage-sign-in-email';
 
-const HOUR_MS = 60 * 60 * 1000;
+const RESET_TOKEN_MS = RESET_TOKEN_MINUTES * 60 * 1000;
 
 const CODE_LIFETIME_MS = CODE_LIFETIME_MINUTES * 60 * 1000;
 
@@ -72,9 +72,9 @@ describe('sign-in email', () => {
         expect(readSignInEmail()).toBeNull();
     });
 
-    test('is dropped after an hour', () => {
+    test('is dropped once the reset link has expired', () => {
         rememberSignInEmail('ada@example.com');
-        Date.now = () => realNow() + HOUR_MS + 1;
+        Date.now = () => realNow() + RESET_TOKEN_MS + 1;
         expect(takeSignInEmail()).toBeNull();
 
         Date.now = realNow;

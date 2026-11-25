@@ -10,9 +10,9 @@ import { AccountMenu } from '@/features/auth/components/account-menu';
 import { ACCOUNT_HOME } from '@/features/auth/redirect-target';
 import { currentUser } from '@/features/auth/require-user';
 
-export const metadata: Metadata = { robots: { index: false } };
-
 const READER_VIEWS = [{ href: ACCOUNT_HOME, label: 'All items', icon: 'all-items' }] satisfies ShellView[];
+
+export const metadata: Metadata = { robots: { index: false } };
 
 export default function UserLayout({ children }: LayoutProps<'/user'>) {
     return (

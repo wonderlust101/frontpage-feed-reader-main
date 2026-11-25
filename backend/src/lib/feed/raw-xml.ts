@@ -16,7 +16,7 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
     const closingTag = /<\/(item|entry)\s*>/gi;
     let lastKeptItem: RegExpExecArray | null = null;
 
-    for (let i = 0; i < max; i++) {
+    for (let keptCount = 0; keptCount < max; keptCount++) {
         lastKeptItem = closingTag.exec(xml);
 
         if (!lastKeptItem)

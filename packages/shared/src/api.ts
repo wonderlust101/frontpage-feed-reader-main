@@ -97,8 +97,6 @@ export type SessionResponse = {
     session: { id: string; expiresAt: string };
 } | null;
 
-export const MAX_CUSTOM_TITLE_LENGTH = 200;
-
 export type FeedHealth = 'active' | 'stale' | 'error' | 'dead';
 
 export type Subscription = {
@@ -139,12 +137,6 @@ export type UpdateSubscriptionRequest = {
     customTitle?: string | null;
     categoryId?: string | null;
 };
-
-export const ITEM_PAGE_SIZE = 30;
-
-export const MAX_ITEM_PAGE_SIZE = 100;
-
-export const UNCATEGORIZED = 'uncategorized';
 
 export type ItemOrder = 'newest' | 'oldest';
 
@@ -206,3 +198,11 @@ export type ItemCountsResponse = {
     categories: (ItemCount & { categoryId: string | null })[];
     feeds: (ItemCount & { feedId: string; categoryId: string | null })[];
 };
+
+export const MAX_CUSTOM_TITLE_LENGTH = 200;
+
+export const ITEM_PAGE_SIZE = 30;
+
+export const MAX_ITEM_PAGE_SIZE = 100;
+
+export const UNCATEGORIZED = 'uncategorized';

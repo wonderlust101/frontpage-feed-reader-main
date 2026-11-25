@@ -4,10 +4,10 @@
 import { describe, expect, test } from 'bun:test';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
+import { curatedFixtures, FIXTURES_DIR } from './helpers/fixtures';
 
 const TEST_DIR = import.meta.dir;
 const SRC_DIR = join(TEST_DIR, '../src');
-const FIXTURES_DIR = join(TEST_DIR, 'fixtures/feeds');
 
 const ROOT_EXCEPTIONS = new Set(['setup.ts', 'README.md', 'structure.test.ts']);
 const SPECIAL_DIRS = new Set(['helpers', 'fixtures', 'live']);
@@ -64,8 +64,7 @@ describe('feed fixtures', () => {
     });
 
     test('curated manifest and files match one-to-one', () => {
-        const manifest: Array<{ file: string }> = JSON.parse(readFileSync(join(FIXTURES_DIR, 'curated/manifest.json'), 'utf8'));
-        const listed = manifest.map((entry) => entry.file).sort();
+        const listed = curatedFixtures.map((fixture) => fixture.file).sort();
         const onDisk = readdirSync(join(FIXTURES_DIR, 'curated'))
             .filter((file) => file !== 'manifest.json')
             .sort();

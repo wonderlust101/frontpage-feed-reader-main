@@ -73,6 +73,9 @@ const ALLOWED_TAGS = [
     'col',
 ];
 
+// truncate() ends at a word only when that still keeps more than this share of the allowed length.
+const MIN_WORD_CUT_RATIO = 0.6;
+
 const EMBED_HOSTS = ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'player.vimeo.com', 'codepen.io', 'codesandbox.io'];
 
 const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-presentation';
@@ -173,7 +176,7 @@ export function truncate(text: string, max: number): string {
     const cut = text.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '');
     const space = cut.lastIndexOf(' ');
 
-    return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, '')}…`;
+    return `${(space > max * MIN_WORD_CUT_RATIO ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, '')}…`;
 }
 
 // One transform per tag listed in URL_ATTRIBUTES or FORCED_ATTRIBUTES: resolve its URLs, then apply its forced attributes.

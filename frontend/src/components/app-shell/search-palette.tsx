@@ -241,6 +241,10 @@ function ScopeSelect({ id, categories, scopeHref, onChange }: ScopeSelectProps) 
     );
 }
 
+function Keycap({ className = '', children }: { className?: string; children: string }) {
+    return <kbd className={`rounded-tag border border-edge px-1.5 font-sans font-semibold text-ink-2 ${className}`}>{children}</kbd>;
+}
+
 // The group's aria-label names it for screen readers; the visible label is for sighted readers.
 function ResultList({ group, listId, query, activeIndex, onOpen, onActivate }: ResultListProps) {
     return (
@@ -276,11 +280,11 @@ function ResultList({ group, listId, query, activeIndex, onOpen, onActivate }: R
 }
 
 function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
-    const box = 'grid size-7 flex-none place-items-center rounded-tag';
+    const boxClasses = 'grid size-7 flex-none place-items-center rounded-tag';
 
     if ('icon' in lead) {
         return (
-            <span aria-hidden="true" className={`${box} text-ink-2`}>
+            <span aria-hidden="true" className={`${boxClasses} text-ink-2`}>
                 <Icon name={lead.icon} />
             </span>
         );
@@ -288,14 +292,14 @@ function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
 
     if ('color' in lead) {
         return (
-            <span aria-hidden="true" className={box}>
+            <span aria-hidden="true" className={boxClasses}>
                 <FieldDot color={lead.color} />
             </span>
         );
     }
 
     return (
-        <span aria-hidden="true" className={`${box} bg-panel text-meta font-bold text-ink-2`}>
+        <span aria-hidden="true" className={`${boxClasses} bg-panel text-meta font-bold text-ink-2`}>
             {lead.initial}
         </span>
     );
@@ -357,8 +361,4 @@ function PaletteFooter() {
             </span>
         </p>
     );
-}
-
-function Keycap({ className = '', children }: { className?: string; children: string }) {
-    return <kbd className={`rounded-tag border border-edge px-1.5 font-sans font-semibold text-ink-2 ${className}`}>{children}</kbd>;
 }

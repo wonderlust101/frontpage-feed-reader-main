@@ -70,7 +70,7 @@ function RailViewLink({ view, isCurrent, isHome, isPanelCollapsed }: RailViewLin
     const isMarkedCurrent = isCurrent && (!isHome || isPanelCollapsed);
 
     return (
-        <Link href={view.href} aria-current={isMarkedCurrent ? 'true' : undefined} className={`${RAIL_BUTTON_CLASSES} ${markClasses(isCurrent, isHome)}`}>
+        <Link href={view.href} aria-current={isMarkedCurrent ? 'page' : undefined} className={`${RAIL_BUTTON_CLASSES} ${markClasses(isCurrent, isHome)}`}>
             <Icon name={view.icon} />
             <span className="sr-only">
                 {view.label}

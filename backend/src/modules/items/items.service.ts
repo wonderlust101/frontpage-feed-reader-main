@@ -111,6 +111,18 @@ export async function getItem(db: Database, userId: string, id: string, now = ne
     return { ...toItemSummary(row, now), contentHtml: row.contentHtml, updatedAt: row.updatedAt?.toISOString() ?? null };
 }
 
+// Only needed for an empty page (see the top of the file); "All" and Uncategorized always belong to the reader.
+async function assertScopeBelongsToReader(db: Database, userId: string, scope: ItemScope): Promise<void> {
+    if (scope.kind === 'category' && scope.categoryId !== null) {
+        await assertOwnCategory(db, userId, scope.categoryId);
+
+        return;
+    }
+
+    if (scope.kind === 'feed')
+        await assertFollowsFeed(db, userId, scope.feedId);
+}
+
 // Each row carries its sort time as microsecond text for the cursor.
 function selectPage(db: Database, userId: string, query: ItemListQuery) {
     const { direction, after } = KEYSET[query.order];
@@ -156,24 +168,6 @@ function selectPage(db: Database, userId: string, query: ItemListQuery) {
         .limit(pageSize);
 }
 
-// One row per followed feed with its item and unread counts, in feed order.
-function selectFeedCounts(db: Database, userId: string) {
-    return db
-        .select({
-            feedId: subscriptions.feedId,
-            categoryId: subscriptions.categoryId,
-            // count(items.id), not count(*): a feed with no items still has one row from the LEFT JOIN, with a null id.
-            items: count(items.id),
-            unread: sql<number>`count(${items.id}) filter (where not ${IS_READ})`.mapWith(Number),
-        })
-        .from(subscriptions)
-        .leftJoin(items, eq(items.feedId, subscriptions.feedId))
-        .leftJoin(itemReadStates, readStateJoin(userId))
-        .where(eq(subscriptions.userId, userId))
-        .groupBy(subscriptions.id)
-        .orderBy(subscriptions.feedId);
-}
-
 // The reader's own read mark on the item, if any; IS_READ needs it LEFT JOINed.
 function readStateJoin(userId: string): SQL | undefined {
     return and(eq(itemReadStates.itemId, items.id), eq(itemReadStates.userId, userId));
@@ -189,18 +183,6 @@ function scopeCondition(scope: ItemScope): SQL | undefined {
         case 'category':
             return scope.categoryId === null ? isNull(subscriptions.categoryId) : eq(subscriptions.categoryId, scope.categoryId);
     }
-}
-
-// Only needed for an empty page (see the top of the file); "All" and Uncategorized always belong to the reader.
-async function assertScopeBelongsToReader(db: Database, userId: string, scope: ItemScope): Promise<void> {
-    if (scope.kind === 'category' && scope.categoryId !== null) {
-        await assertOwnCategory(db, userId, scope.categoryId);
-
-        return;
-    }
-
-    if (scope.kind === 'feed')
-        await assertFollowsFeed(db, userId, scope.feedId);
 }
 
 // A list or item row as the API sends it: the feed under the reader's title for it, with its icon and health at `now`; ISO dates.
@@ -224,4 +206,22 @@ function toItemSummary(row: SummaryRow, now: Date): ItemSummary {
         hasFullContent: row.hasFullContent,
         isRead: row.isRead,
     };
+}
+
+// One row per followed feed with its item and unread counts, in feed order.
+function selectFeedCounts(db: Database, userId: string) {
+    return db
+        .select({
+            feedId: subscriptions.feedId,
+            categoryId: subscriptions.categoryId,
+            // count(items.id), not count(*): a feed with no items still has one row from the LEFT JOIN, with a null id.
+            items: count(items.id),
+            unread: sql<number>`count(${items.id}) filter (where not ${IS_READ})`.mapWith(Number),
+        })
+        .from(subscriptions)
+        .leftJoin(items, eq(items.feedId, subscriptions.feedId))
+        .leftJoin(itemReadStates, readStateJoin(userId))
+        .where(eq(subscriptions.userId, userId))
+        .groupBy(subscriptions.id)
+        .orderBy(subscriptions.feedId);
 }

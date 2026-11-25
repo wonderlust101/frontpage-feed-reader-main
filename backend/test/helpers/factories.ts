@@ -1,6 +1,6 @@
 // Rows that many database tests need, inserted with sensible defaults. Each takes the test's own database.
 
-import { categories, users } from '../../src/db/schema';
+import { categories, feeds, users } from '../../src/db/schema';
 import type { Database } from '../../src/db';
 
 // A well-formed id that no row has.
@@ -19,6 +19,19 @@ export async function newCategory(db: Database, userId: string, name = 'Design',
 
     if (!row)
         throw new Error('Inserting the category returned no row');
+
+    return row.id;
+}
+
+// A feed at a fresh URL; `values` overrides any column.
+export async function newFeed(db: Database, values: Partial<typeof feeds.$inferInsert> = {}): Promise<string> {
+    const [row] = await db
+        .insert(feeds)
+        .values({ url: `https://feeds.example/${crypto.randomUUID()}.xml`, title: 'Example', ...values })
+        .returning({ id: feeds.id });
+
+    if (!row)
+        throw new Error('Inserting the feed returned no row');
 
     return row.id;
 }

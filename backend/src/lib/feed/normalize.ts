@@ -46,7 +46,7 @@ type FeedProblems = {
     truncated: boolean;
 };
 
-const BYTE_ORDER_MARK = /^﻿/;
+const BYTE_ORDER_MARK = /^\uFEFF/;
 
 export const MAX_ITEMS = 500;
 

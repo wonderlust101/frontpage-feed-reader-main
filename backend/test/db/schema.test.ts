@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { bookmarks, categories, feeds, itemReadStates, items, subscriptions, userPreferences, users } from '../../src/db/schema';
 import { createTestDb } from '../helpers/test-db';
-import { newUser } from '../helpers/factories';
+import { newFeed, newUser } from '../helpers/factories';
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
 
@@ -15,19 +15,6 @@ beforeAll(async () => {
 afterAll(async () => {
     await testDb.close();
 });
-
-// Inserts a feed and returns its id.
-async function newFeed(): Promise<string> {
-    const [row] = await testDb.db
-        .insert(feeds)
-        .values({ url: `https://example.com/${crypto.randomUUID()}.xml`, title: 'Example' })
-        .returning({ id: feeds.id });
-
-    if (!row)
-        throw new Error('Inserting the feed returned no row');
-
-    return row.id;
-}
 
 // Inserts an item into a feed and returns the stored row.
 async function newItem(feedId: string, overrides: Partial<typeof items.$inferInsert> = {}) {
@@ -66,14 +53,14 @@ async function errorCode(query: Promise<unknown>): Promise<string | undefined> {
 
 describe('items', () => {
     test('the same guid twice in one feed is rejected', async () => {
-        const feedId = await newFeed();
+        const feedId = await newFeed(testDb.db);
 
         await newItem(feedId, { guid: 'same' });
         expect(await errorCode(newItem(feedId, { guid: 'same' }))).toBe('23505');
     });
 
     test('sort_at falls back to first_seen_at, and search matches title words', async () => {
-        const feedId = await newFeed();
+        const feedId = await newFeed(testDb.db);
         const dated = await newItem(feedId, { publishedAt: new Date('2026-01-02T10:00:00.000Z') });
         const undated = await newItem(feedId);
 
@@ -92,7 +79,7 @@ describe('items', () => {
 describe('foreign keys', () => {
     test('a bookmarked item and a followed feed cannot be deleted', async () => {
         const user = await newUser(testDb.db);
-        const feedId = await newFeed();
+        const feedId = await newFeed(testDb.db);
         const item = await newItem(feedId);
 
         await testDb.db.insert(bookmarks).values({ userId: user, itemId: item.id });
@@ -104,7 +91,7 @@ describe('foreign keys', () => {
 
     test('deleting a user deletes all of their data, but not the shared feeds and items', async () => {
         const user = await newUser(testDb.db);
-        const feedId = await newFeed();
+        const feedId = await newFeed(testDb.db);
         const item = await newItem(feedId);
         const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
 
@@ -126,7 +113,7 @@ describe('foreign keys', () => {
         const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
         const [subscription] = await testDb.db
             .insert(subscriptions)
-            .values({ userId: user, feedId: await newFeed(), categoryId: category!.id })
+            .values({ userId: user, feedId: await newFeed(testDb.db), categoryId: category!.id })
             .returning();
 
         await testDb.db.delete(categories).where(eq(categories.id, category!.id));
