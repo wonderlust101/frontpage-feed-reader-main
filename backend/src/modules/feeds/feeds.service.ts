@@ -7,9 +7,13 @@ import { BadGatewayError } from '../../errors';
 import { decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl, type FetchFeedResult } from '../../lib/feed';
 
 type Validators = Partial<FeedCacheValidators>;
-type NotModifiedResult = Extract<FetchFeedResult, { notModified: true }>;
-type FreshResult = Extract<FetchFeedResult, { notModified: false }>;
+export type NotModifiedResult = Extract<FetchFeedResult, { notModified: true }>;
+export type FreshResult = Extract<FetchFeedResult, { notModified: false }>;
 type CacheEntry = { validators: FeedCacheValidators; feed: NormalizedFeed };
+
+const CACHE_LIMIT = 200;
+
+const cache = new Map<string, CacheEntry>();
 
 // Caches under both the requested and the final URL, so an unchanged feed is just a 304 answered from the cache.
 export async function getFeed(input: string | undefined, clientValidators: Validators = {}): Promise<FetchFeedResponse> {
@@ -51,11 +55,23 @@ export function fetchUpstream(url: URL, validators: Validators): Promise<FetchFe
     });
 }
 
-// A new copy of the feed: parse it, cache it under the requested and the final URL, and send it.
+export function readFetchedFeed(result: FreshResult, requestedUrl: string): NormalizedFeed {
+    const xml = decodeFeed(result.bytes, result.contentType);
+
+    return normalizeFeed(xml, { url: result.finalUrl, requestedUrl });
+}
+
+// A 304 may resend only some validators; the stored value stands for the rest.
+export function keepUnsentValidators(sent: FeedCacheValidators, stored: FeedCacheValidators): FeedCacheValidators {
+    return {
+        etag: sent.etag ?? stored.etag,
+        lastModified: sent.lastModified ?? stored.lastModified,
+    };
+}
+
 function answerFresh(requestedUrl: URL, result: FreshResult): FetchFeedResponse {
     const fetchedAt = new Date().toISOString();
-    const xml = decodeFeed(result.bytes, result.contentType);
-    const feed = normalizeFeed(xml, { url: result.finalUrl, requestedUrl: requestedUrl.href });
+    const feed = readFetchedFeed(result, requestedUrl.href);
 
     const entry = { validators: result.validators, feed };
 
@@ -65,23 +81,15 @@ function answerFresh(requestedUrl: URL, result: FreshResult): FetchFeedResponse 
     return { feed, fetchedAt, notModified: false, cache: result.validators, redirect: result.redirect };
 }
 
-// Upstream says nothing changed: send the cached feed, with upstream's validators where it sent new ones.
 function answerNotModified(result: NotModifiedResult, entry: CacheEntry): FetchFeedResponse {
-    const validators: FeedCacheValidators = {
-        etag: result.validators.etag ?? entry.validators.etag,
-        lastModified: result.validators.lastModified ?? entry.validators.lastModified,
-    };
+    const validators = keepUnsentValidators(result.validators, entry.validators);
 
     return { feed: entry.feed, fetchedAt: new Date().toISOString(), notModified: true, cache: validators, redirect: result.redirect };
 }
 
-// True when there's an ETag or Last-Modified to send, i.e. the request will be conditional.
 function hasValidators(validators: Validators): boolean {
     return Boolean(validators.etag || validators.lastModified);
 }
-
-const CACHE_LIMIT = 200;
-const cache = new Map<string, CacheEntry>();
 
 // The cached entry for a URL (or undefined); reading it also marks it as most recently used.
 function recall(key: string): CacheEntry | undefined {

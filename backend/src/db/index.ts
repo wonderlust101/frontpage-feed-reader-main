@@ -13,6 +13,8 @@ import type { DbStatus } from '@frontpage/shared';
 // Any Drizzle database with our schema: the node-postgres pool in the server, or PGlite in tests (createTestDb()).
 export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
 
+export type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
+
 export const pool = env.DATABASE_URL
     ? new Pool({
             connectionString: env.DATABASE_URL,
