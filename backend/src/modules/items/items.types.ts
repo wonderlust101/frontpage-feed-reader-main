@@ -18,3 +18,9 @@ export type ItemListQuery = {
     limit: number;
     cursor: ItemCursor | null;
 };
+
+// A checked "mark all as read": `asOf` is null when the client sent none (the service uses the current time).
+export type MarkAllReadCommand = {
+    scope: ItemScope;
+    asOf: Date | null;
+};

@@ -182,6 +182,8 @@ export type ItemListResponse = {
     items: ItemSummary[];
     // Opaque: send it back as `cursor` for the next page; null means there are no more.
     nextCursor: string | null;
+    // Server time the page was read. Send the first page's value with "mark all as read", so newer items stay unread.
+    asOf: string;
 };
 
 export type ItemResponse = {
@@ -196,7 +198,54 @@ export type ItemCount = {
 export type ItemCountsResponse = {
     total: ItemCount;
     categories: (ItemCount & { categoryId: string | null })[];
-    feeds: (ItemCount & { feedId: string; categoryId: string | null })[];
+    feeds: FeedItemCount[];
+};
+
+export type FeedItemCount = ItemCount & {
+    feedId: string;
+    categoryId: string | null;
+};
+
+// What a write answers with: the counts of just the feeds it changed. Swap them into the full counts from
+// GET /api/items/counts, then add up categories and the total again.
+export type ChangedCounts = {
+    feeds: FeedItemCount[];
+};
+
+export type MarkItemsReadRequest = {
+    itemIds: string[];
+    isRead: boolean;
+};
+
+export type MarkItemsReadResponse = {
+    // The ids that were changed; ids outside the reader's feeds are skipped.
+    updated: string[];
+    counts: ChangedCounts;
+};
+
+// No feed and no category marks everything. `category` takes UNCATEGORIZED too.
+export type MarkAllReadRequest = {
+    feed?: string;
+    category?: string;
+    asOf?: string;
+};
+
+// What "mark all as read" changed. Send it back unchanged to undo; `readCutoff` keeps Postgres's microseconds.
+export type ReadUndo = {
+    asOf: string;
+    cutoffs: { feedId: string; readCutoff: string | null }[];
+    marks: { itemId: string; isRead: boolean }[];
+};
+
+export type MarkAllReadResponse = {
+    asOf: string;
+    // null when the change was too large to undo.
+    undo: ReadUndo | null;
+    counts: ChangedCounts;
+};
+
+export type UndoMarkAllReadResponse = {
+    counts: ChangedCounts;
 };
 
 export const MAX_CUSTOM_TITLE_LENGTH = 200;
@@ -206,3 +255,7 @@ export const ITEM_PAGE_SIZE = 30;
 export const MAX_ITEM_PAGE_SIZE = 100;
 
 export const UNCATEGORIZED = 'uncategorized';
+
+export const MAX_READ_BATCH = 100;
+
+export const MAX_UNDO_ENTRIES = 1000;
