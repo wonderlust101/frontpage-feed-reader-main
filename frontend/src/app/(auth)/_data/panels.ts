@@ -73,7 +73,7 @@ export const AUTH_PANELS = {
         wide: [
             { field: field('leaf'), icon: 'mark-unread' },
             { field: field('coral'), icon: 'add-feed', label: 'Add a site' },
-            { field: field('sky'), label: 'Pick a colour' },
+            { field: field('sky'), label: 'Pick a color' },
             { field: field('lilac'), icon: 'categories' },
             { field: field('tangerine'), icon: 'save', label: 'Save for later' },
             { field: field('rose'), icon: 'feed' },

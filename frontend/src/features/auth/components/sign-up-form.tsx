@@ -8,15 +8,15 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
-import { PasswordField } from '@/components/ui/password-field';
-import { TextLink } from '@/components/ui/text-link';
-import { TextField } from '@/components/ui/text-field';
 import { FormAlert } from '@/components/ui/form-alert';
+import { PasswordField } from '@/components/ui/password-field';
 import { SubmitButton } from '@/components/ui/submit-button';
+import { TextField } from '@/components/ui/text-field';
+import { TextLink } from '@/components/ui/text-link';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
-import { authErrorMessage } from '../error-messages';
 import { rememberPendingEmail, rememberSignInEmail } from '../email-storage';
+import { authErrorMessage } from '../error-messages';
 import { signUpSchema, NEW_PASSWORD_HINT } from '../schemas';
 import { EmailField } from './email-field';
 
@@ -40,7 +40,10 @@ export function SignUpForm() {
 
         if (failure) {
             resetField('password');
-            setTakenEmail(failure.code && EMAIL_TAKEN_CODES.includes(failure.code) ? values.email : null);
+
+            const isTakenEmail = failure.code !== undefined && EMAIL_TAKEN_CODES.includes(failure.code);
+
+            setTakenEmail(isTakenEmail ? values.email : null);
             setError('root', { message: authErrorMessage(failure) });
 
             return;

@@ -59,7 +59,7 @@ export function AuthPanelText({ headline, line }: PanelText) {
     const text = step?.panel ?? { headline, line };
 
     return (
-        <div aria-hidden className="mt-7 max-lg:[@media(max-height:40em)]:mt-4 lg:my-auto lg:pb-[6cqi]">
+        <div aria-hidden="true" className="mt-7 max-lg:[@media(max-height:40em)]:mt-4 lg:my-auto lg:pb-[6cqi]">
             <p className="type-display text-[clamp(2.75rem,10cqi,3.75rem)] whitespace-pre-line max-lg:[@media(max-height:40em)]:text-[2rem]">{text.headline}</p>
             <p
                 className="mt-3 max-w-[62cqi] font-display text-[clamp(1.25rem,4.2cqi,2.125rem)] leading-[1.15] font-semibold tracking-[-0.015em] max-lg:[@media(max-height:40em)]:hidden lg:mt-5"

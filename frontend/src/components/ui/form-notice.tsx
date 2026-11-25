@@ -29,9 +29,8 @@ export function FormNotice({ tone = 'neutral', icon, lead, children, action, tak
     const id = useId();
     const leadId = `${id}-lead`;
     const bodyId = `${id}-body`;
-    const roleProps = takesFocus
-        ? { role: 'group', tabIndex: -1, 'aria-labelledby': leadId, 'aria-describedby': bodyId }
-        : { role: tone === 'error' ? 'alert' : 'status' };
+    const liveRole = tone === 'error' ? 'alert' : 'status';
+    const roleProps = takesFocus ? { role: 'group', tabIndex: -1, 'aria-labelledby': leadId, 'aria-describedby': bodyId } : { role: liveRole };
 
     useEffect(() => {
         if (takesFocus)

@@ -2,11 +2,11 @@
 
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { ChangePasswordForm } from '@/features/auth/components/change-password-form';
-import { requireUser } from '@/features/auth/require-user';
-import { AuthHeading } from '@/features/auth/components/auth-heading';
-import { CHANGE_PASSWORD_HEADINGS } from '@/features/auth/headings';
 import { FormSkeleton } from '@/components/ui/form-skeleton';
+import { AuthHeading } from '@/features/auth/components/auth-step-frame';
+import { ChangePasswordForm } from '@/features/auth/components/change-password-form';
+import { CHANGE_PASSWORD_HEADINGS } from '@/features/auth/headings';
+import { requireUser } from '@/features/auth/require-user';
 import { AuthFrame } from '../../_components/auth-frame';
 import { AUTH_PANELS } from '../../_data/panels';
 

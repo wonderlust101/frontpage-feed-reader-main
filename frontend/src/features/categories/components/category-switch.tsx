@@ -26,6 +26,7 @@ export function CategorySwitch({ options, value, onChange, label, className = ''
             return;
 
         event.preventDefault();
+
         const current = options.findIndex((option) => option.id === value);
         const next = options[(current + step + options.length) % options.length];
 

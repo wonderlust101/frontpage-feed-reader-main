@@ -1,6 +1,7 @@
 // Email hand-offs: the pending email (sessionStorage) for the verify page, and the sign-in email (localStorage) that
 // lasts an hour and is cleared once read. Storage that is blocked must never throw into the page.
 
+import { CODE_LIFETIME_MINUTES } from '@frontpage/shared';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import {
     forgetPendingEmail,
@@ -10,38 +11,12 @@ import {
     rememberSignInEmail,
     takeSignInEmail,
 } from '../../../src/features/auth/email-storage';
-import { CODE_LIFETIME_MINUTES } from '../../../src/features/auth/schemas';
 
 const SIGN_IN_KEY = 'frontpage-sign-in-email';
 
 const HOUR_MS = 60 * 60 * 1000;
 
 const CODE_LIFETIME_MS = CODE_LIFETIME_MINUTES * 60 * 1000;
-
-// A minimal in-memory Storage, enough for the module under test.
-function memoryStorage(): Storage {
-    const items = new Map<string, string>();
-
-    return {
-        get length() {
-            return items.size;
-        },
-        clear: () => items.clear(),
-        getItem: (key) => items.get(key) ?? null,
-        key: (index) => [...items.keys()][index] ?? null,
-        removeItem: (key) => void items.delete(key),
-        setItem: (key, value) => void items.set(key, String(value)),
-    };
-}
-
-// A Storage that throws on every call, like a blocked one in some private windows.
-function blockedStorage(): Storage {
-    const blocked = () => {
-        throw new Error('blocked');
-    };
-
-    return { length: 0, clear: blocked, getItem: blocked, key: blocked, removeItem: blocked, setItem: blocked };
-}
 
 const realNow = Date.now;
 
@@ -119,3 +94,28 @@ describe('sign-in email', () => {
         expect(takeSignInEmail()).toBeNull();
     });
 });
+
+// A minimal in-memory Storage, enough for the module under test.
+function memoryStorage(): Storage {
+    const items = new Map<string, string>();
+
+    return {
+        get length() {
+            return items.size;
+        },
+        clear: () => items.clear(),
+        getItem: (key) => items.get(key) ?? null,
+        key: (index) => [...items.keys()][index] ?? null,
+        removeItem: (key) => void items.delete(key),
+        setItem: (key, value) => void items.set(key, String(value)),
+    };
+}
+
+// A Storage that throws on every call, like a blocked one in some private windows.
+function blockedStorage(): Storage {
+    const blocked = () => {
+        throw new Error('blocked');
+    };
+
+    return { length: 0, clear: blocked, getItem: blocked, key: blocked, removeItem: blocked, setItem: blocked };
+}

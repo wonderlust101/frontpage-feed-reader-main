@@ -1,15 +1,15 @@
 import { AiSummary } from '@/components/ui/ai-summary';
 import { Button } from '@/components/ui/button';
 import { FormNotice } from '@/components/ui/form-notice';
-import { Icon } from '@/components/ui/icon';
 import { HealthMark } from '@/components/ui/health-mark';
+import { Icon } from '@/components/ui/icon';
 import { PasswordField } from '@/components/ui/password-field';
 import { CategoryTag, NewTag } from '@/components/ui/tags';
 import { TextField } from '@/components/ui/text-field';
 import { CATEGORIES } from '../_data/sample-data';
 import { CategoryFilterDemo } from './category-filter-demo';
-import { FormControlsDemo } from './form-controls-demo';
 import { DocSection, Specimen } from './doc-section';
+import { FormControlsDemo } from './form-controls-demo';
 
 export function ComponentsSection() {
     return (

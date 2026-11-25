@@ -2,11 +2,11 @@
 
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { AuthHeading } from '@/features/auth/components/auth-heading';
+import { FormSkeleton } from '@/components/ui/form-skeleton';
+import { AuthHeading } from '@/features/auth/components/auth-step-frame';
 import { SignInForm } from '@/features/auth/components/sign-in-form';
 import { SIGN_IN_HEADINGS, signInArrival } from '@/features/auth/headings';
 import { safeNextPath } from '@/features/auth/redirect-target';
-import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';
 

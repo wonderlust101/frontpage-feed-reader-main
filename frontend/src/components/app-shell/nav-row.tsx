@@ -1,4 +1,4 @@
-// The current row is tinted, bold and has a field bar and aria-current, so the place never rests on colour alone. A
+// The current row is tinted, bold and has a field bar and aria-current, so the place never rests on color alone. A
 // row's quick-actions `menu` sits beside the link, never inside it.
 
 import Link from 'next/link';

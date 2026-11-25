@@ -1,4 +1,4 @@
-// Category colours a guest has chosen, kept in localStorage. Changes reach every user of the hook and other open tabs,
+// Category colors a guest has chosen, kept in localStorage. Changes reach every user of the hook and other open tabs,
 // and set the CSS properties on <html> that the shell paints from.
 
 import 'client-only';
@@ -27,12 +27,14 @@ export function useCategoryFields(categoryIds: string[], presets?: FieldChoices)
 
 function subscribe(listener: () => void) {
     listeners.add(listener);
-    const onStorage = (event: StorageEvent) => {
-        if (event.key === CATEGORY_FIELDS_KEY) {
-            applyCategoryFields(readChoices());
-            listener();
-        }
-    };
+
+    function onStorage(event: StorageEvent) {
+        if (event.key !== CATEGORY_FIELDS_KEY)
+            return;
+
+        applyCategoryFields(readChoices());
+        listener();
+    }
 
     window.addEventListener('storage', onStorage);
 

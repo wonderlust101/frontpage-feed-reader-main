@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { buttonClassName } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import type { ShellView } from './nav-entries';
-import { ShellMenu } from './shell-menu';
 import { RAIL_BUTTON_CLASSES, RAIL_IDLE_CLASSES } from './rail-styles';
 import { RailTooltip } from './rail-tooltip';
+import { ShellMenu } from './shell-menu';
 
 type LockedViewProps = {
     view: ShellView;

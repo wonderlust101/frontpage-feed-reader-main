@@ -1,8 +1,8 @@
 // Disabled while pending (no double submits) and busy, so the "…ing" label keeps full contrast.
 
 import type { ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { Button } from './button';
+import { Icon } from './icon';
 
 type SubmitButtonProps = {
     pending: boolean;

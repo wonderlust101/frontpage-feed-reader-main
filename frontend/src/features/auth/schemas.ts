@@ -7,8 +7,6 @@ import { z } from 'zod/mini';
 // Zod otherwise probes for `new Function`, which the Content Security Policy blocks, so every page would log a violation.
 z.config({ jitless: true });
 
-export { CODE_LENGTH, CODE_LIFETIME_MINUTES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
-
 export const NEW_PASSWORD_HINT = `At least ${MIN_PASSWORD_LENGTH} characters. Longer is stronger: try a few unrelated words.`;
 
 export const INVALID_EMAIL_MESSAGE = 'Enter an email address like name@example.com.';

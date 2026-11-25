@@ -1,5 +1,5 @@
-// Lemon is Frontpage's own colour, yet readers may give it to categories too. NO_FIELD ("No color") behaves exactly
-// like the coloured fields, so PICKABLE_FIELDS lists it first. `onColor` is the text colour on a filled surface.
+// Lemon is Frontpage's own color, yet readers may give it to categories too. NO_FIELD ("No color") behaves exactly
+// like the colored fields, so PICKABLE_FIELDS lists it first. `onColor` is the text color on a filled surface.
 
 export type FieldId = 'lemon' | 'coral' | 'sky' | 'leaf' | 'lilac' | 'tangerine' | 'aqua' | 'rose' | 'none';
 

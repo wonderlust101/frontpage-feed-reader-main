@@ -1,6 +1,8 @@
 // Only paths on this site are followed, so a crafted "/sign-in?next=//evil.com" link can't redirect off-site.
 
-export const DEFAULT_AFTER_SIGN_IN = '/user';
+export const ACCOUNT_HOME = '/user';
+
+export const DEFAULT_AFTER_SIGN_IN = ACCOUNT_HOME;
 
 const SAME_SITE_BASE = 'https://frontpage.invalid';
 

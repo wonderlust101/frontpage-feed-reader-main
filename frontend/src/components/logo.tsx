@@ -1,5 +1,5 @@
 // Mark variants keep the logo visible on any ground: "lemon" on plain grounds, "ink" on Lemon or category fields,
-// "mono" (current text colour) for one-colour uses.
+// "mono" (current text color) for one-color uses.
 
 type MarkVariant = 'lemon' | 'ink' | 'mono';
 

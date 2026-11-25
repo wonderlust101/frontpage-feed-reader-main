@@ -1,4 +1,4 @@
-// Feed health as line form and colour, with a label that always spells the state out.
+// Feed health as line form and color, with a label that always spells the state out.
 
 export type HealthMarkState = 'healthy' | 'stale' | 'failing';
 

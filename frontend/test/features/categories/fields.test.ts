@@ -13,7 +13,7 @@ describe('fieldOrNone', () => {
 });
 
 describe('assignFields', () => {
-    test('takes the reader\'s choice, else the preset, else "No color"', () => {
+    test(`takes the reader's choice, else the preset, else "No color"`, () => {
         const fields = assignFields(['a', 'b', 'c'], { a: 'rose' }, { a: 'sky', b: 'leaf' });
 
         expect([fields.a.id, fields.b.id, fields.c.id]).toEqual(['rose', 'leaf', 'none']);

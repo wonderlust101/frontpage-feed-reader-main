@@ -2,6 +2,7 @@
 // Feature-agnostic: views, categories and sources are plain data; layouts pass `account` and an optional `rowMenu`.
 
 import type { ReactNode } from 'react';
+import { SkipLink } from '@/components/ui/skip-link';
 import type { RowMenu } from './category-list';
 import type { ShellCategory, ShellView } from './nav-entries';
 import type { SearchSource } from './search-results';
@@ -9,7 +10,6 @@ import { ShellDrawer } from './shell-drawer';
 import { ShellNav } from './shell-nav';
 import { ShellSidebar } from './shell-sidebar';
 import { ShellToolbar } from './shell-toolbar';
-import { SkipLink } from '@/components/ui/skip-link';
 
 type AppShellProps = {
     homeHref: string;

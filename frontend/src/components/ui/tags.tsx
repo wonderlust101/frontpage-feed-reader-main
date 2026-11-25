@@ -1,4 +1,4 @@
-// Tags always carry text, so colour is never the only signal; the transparent border keeps their shape in
+// Tags always carry text, so color is never the only signal; the transparent border keeps their shape in
 // forced-colors mode.
 
 const TAG_CLASSES = 'inline-flex h-7 items-center rounded-tag border border-transparent px-3 text-small font-semibold';

@@ -3,9 +3,9 @@
 // The hero field and the capsules that recolor it sit apart on the page, so they share the choice through context.
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import { useCategoryFields } from '@/features/categories/hooks/use-category-fields';
 import { CategorySwitch } from '@/features/categories/components/category-switch';
 import { BRAND_FIELD } from '@/features/categories/fields';
+import { useCategoryFields } from '@/features/categories/hooks/use-category-fields';
 import { CATEGORIES, CATEGORY_IDS, CATEGORY_PRESETS } from '../_data/sample-data';
 
 type HeroChoice = { choice: string; setChoice: (id: string) => void };

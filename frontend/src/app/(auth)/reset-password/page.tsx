@@ -1,15 +1,16 @@
 // The heading and form read the URL behind their own <Suspense>, so the frame stays in the static shell. No Referer
 // header is sent, so the token can't leak to other sites.
 
+import { RESET_TOKEN_MINUTES } from '@frontpage/shared';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { buttonClassName } from '@/components/ui/button';
 import { DocumentTitle } from '@/components/document-title';
-import { AuthHeading, AuthPanelText } from '@/features/auth/components/auth-heading';
+import { buttonClassName } from '@/components/ui/button';
+import { FormSkeleton } from '@/components/ui/form-skeleton';
+import { AuthHeading, AuthPanelText } from '@/features/auth/components/auth-step-frame';
 import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
 import { RESET_PASSWORD_HEADINGS } from '@/features/auth/headings';
-import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';
 
@@ -47,16 +48,16 @@ async function readToken(searchParams: ResetPageProps['searchParams']): Promise<
     return typeof token === 'string' && token && !error ? token : null;
 }
 
-async function ResetHeading({ searchParams }: ResetPageProps) {
-    const token = await readToken(searchParams);
-
-    return <AuthHeading {...(token ? RESET_PASSWORD_HEADINGS.choose : RESET_PASSWORD_HEADINGS.expired)} />;
-}
-
 async function ResetPanelText({ searchParams }: ResetPageProps) {
     const token = await readToken(searchParams);
 
     return <AuthPanelText {...(token ? AUTH_PANELS.resetPassword : RESET_PASSWORD_HEADINGS.expired.panel)} />;
+}
+
+async function ResetHeading({ searchParams }: ResetPageProps) {
+    const token = await readToken(searchParams);
+
+    return <AuthHeading {...(token ? RESET_PASSWORD_HEADINGS.choose : RESET_PASSWORD_HEADINGS.expired)} />;
 }
 
 // The heading and panel already say what went wrong, so no error box repeats it a third time.
@@ -72,7 +73,7 @@ async function ResetFromUrl({ searchParams }: ResetPageProps) {
             <Link href="/forgot-password" className={buttonClassName('primary', 'w-full justify-center')}>
                 Send a new link
             </Link>
-            <p className="text-ui text-ink-2">New links work once and last 60 minutes.</p>
+            <p className="text-ui text-ink-2">New links work once and last {RESET_TOKEN_MINUTES} minutes.</p>
         </div>
     );
 }

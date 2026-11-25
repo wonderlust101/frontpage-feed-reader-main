@@ -1,7 +1,7 @@
 // authErrorMessage: known codes map to their sentence; status decides offline, rate-limit and server-down messages.
 
-import { describe, expect, test } from 'bun:test';
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
+import { describe, expect, test } from 'bun:test';
 import { authErrorMessage } from '../../../src/features/auth/error-messages';
 
 describe('authErrorMessage', () => {

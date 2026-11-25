@@ -2,13 +2,18 @@
 
 import { useState } from 'react';
 import { CategoryTag } from '@/components/ui/tags';
-import { useCategoryFields } from '../hooks/use-category-fields';
 import { categoryFieldById, type FieldChoices, type FieldId } from '../fields';
+import { useCategoryFields } from '../hooks/use-category-fields';
 import { FieldPicker } from './field-picker';
 
 type ColorCategory = { id: string; name: string };
 
-export function CategoryColors({ categories, presets }: { categories: ColorCategory[]; presets?: FieldChoices }) {
+type CategoryColorsProps = {
+    categories: ColorCategory[];
+    presets?: FieldChoices;
+};
+
+export function CategoryColors({ categories, presets }: CategoryColorsProps) {
     const [fields, choose] = useCategoryFields(
         categories.map((category) => category.id),
         presets,

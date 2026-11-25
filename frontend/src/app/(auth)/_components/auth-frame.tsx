@@ -5,11 +5,11 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
-import { AuthGuestLink, AuthHeadingProvider, AuthPanelText, AuthSwitchLink } from '@/features/auth/components/auth-heading';
+import { SkipLink } from '@/components/ui/skip-link';
+import { AuthGuestLink, AuthHeadingProvider, AuthPanelText, AuthSwitchLink } from '@/features/auth/components/auth-step-frame';
 import type { SwitchLinkTarget } from '@/features/auth/hooks/use-auth-step';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import type { AuthPanel } from '../_data/panels';
-import { SkipLink } from '@/components/ui/skip-link';
 
 type AuthFrameProps = {
     panel: AuthPanel;

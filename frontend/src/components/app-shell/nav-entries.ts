@@ -42,9 +42,13 @@ export function findCurrentHref(pathname: string, hrefs: readonly string[]): str
 // The view is null inside a category, so the rail and the panel never mark two places.
 export function shellPlace(pathname: string, homeHref: string, viewHrefs: readonly string[], categoryHrefs: readonly string[]): ShellPlace {
     const inCategory = findCurrentHref(pathname, categoryHrefs);
-    const category = inCategory ?? (pathname === homeHref ? homeHref : null);
 
-    return { view: inCategory ? null : findCurrentHref(pathname, viewHrefs), category };
+    if (inCategory)
+        return { view: null, category: inCategory };
+
+    const atHome = pathname === homeHref;
+
+    return { view: findCurrentHref(pathname, viewHrefs), category: atHome ? homeHref : null };
 }
 
 export function formatCount(count: number | null | undefined): string | null {

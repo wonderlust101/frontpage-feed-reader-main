@@ -14,9 +14,10 @@ import { forgetPendingEmail, readPendingEmail, rememberPendingEmail } from '../e
 import { authErrorMessage } from '../error-messages';
 import { VERIFY_EMAIL_HEADINGS } from '../headings';
 import { useAuthFrameLinks, useAuthHeading, type FrameLinks } from '../hooks/use-auth-step';
+import { ACCOUNT_HOME } from '../redirect-target';
 import { emailSchema } from '../schemas';
 import { EmailField } from './email-field';
-import { CodeStep } from './verify-email-code-step';
+import { VerifyEmailCodeStep } from './verify-email-code-step';
 
 type EmailValues = z.infer<typeof emailSchema>;
 
@@ -27,7 +28,7 @@ type EmailStepProps = {
 };
 
 const SIGNED_IN_LINKS: FrameLinks = {
-    switchLink: { prompt: 'Not now?', label: 'Do this later', href: '/user', onClick: forgetPendingEmail },
+    switchLink: { prompt: 'Not now?', label: 'Do this later', href: ACCOUNT_HOME, onClick: forgetPendingEmail },
     guestLink: false,
 };
 
@@ -46,8 +47,7 @@ export function VerifyEmailForm() {
 
     useAuthFrameLinks(signedIn ? SIGNED_IN_LINKS : null);
 
-    // Next keeps a visited page alive (hidden) after the reader leaves; forget this visit's code so the next visit
-    // goes by storage alone.
+    // Next keeps a left page alive (hidden), so this visit's code is forgotten and the next visit goes by storage alone.
     useLayoutEffect(() => {
         return function forgetThisVisit() {
             setSentTo(null);
@@ -67,14 +67,17 @@ export function VerifyEmailForm() {
     const codeSentTo = changingEmail ? null : (sentTo ?? storedEmail);
 
     if (codeSentTo)
-        return <CodeStep email={codeSentTo} accountReady={signedIn && sentTo === null} onChangeEmail={() => setChangingEmail(true)} />;
+        return <VerifyEmailCodeStep email={codeSentTo} accountReady={signedIn && sentTo === null} onChangeEmail={() => setChangingEmail(true)} />;
 
     return <EmailStep defaultEmail={session?.user.email ?? ''} focusEmail={changingEmail} onSent={handleSent} />;
 }
 
-function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
-    useAuthHeading(VERIFY_EMAIL_HEADINGS.emailStep);
+// sessionStorage has no change events in a tab; this still reads it safely, and tells whether it runs in the browser yet.
+function subscribeToNothing(): () => void {
+    return () => {};
+}
 
+function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
     const {
         register,
         handleSubmit,
@@ -82,6 +85,8 @@ function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
         setFocus,
         formState: { errors, isSubmitting },
     } = useForm<EmailValues>({ resolver: zodResolver(emailSchema), defaultValues: { email: defaultEmail }, reValidateMode: 'onChange' });
+
+    useAuthHeading(VERIFY_EMAIL_HEADINGS.emailStep);
 
     useEffect(() => {
         if (focusEmail)
@@ -109,10 +114,4 @@ function EmailStep({ defaultEmail, focusEmail, onSent }: EmailStepProps) {
             </SubmitButton>
         </form>
     );
-}
-
-// sessionStorage has no change events within a tab; useSyncExternalStore still reads it safely (null on the server),
-// and the same trick tells the component whether it is running in the browser yet.
-function subscribeToNothing(): () => void {
-    return () => {};
 }

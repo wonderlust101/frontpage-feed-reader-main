@@ -1,7 +1,7 @@
 // signInArrival: which greeting the sign-in page shows, read from ?reset=. codeStepHeading: what the code step says.
 
-import { describe, expect, test } from 'bun:test';
 import { CODE_LENGTH, CODE_LIFETIME_MINUTES } from '@frontpage/shared';
+import { describe, expect, test } from 'bun:test';
 import { codeStepHeading, signInArrival } from '../../../src/features/auth/headings';
 
 describe('signInArrival', () => {

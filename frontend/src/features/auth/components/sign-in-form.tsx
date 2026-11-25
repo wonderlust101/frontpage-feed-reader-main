@@ -9,17 +9,17 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
 import { Button } from '@/components/ui/button';
-import { TextLink } from '@/components/ui/text-link';
-import { PasswordField } from '@/components/ui/password-field';
 import { FormAlert } from '@/components/ui/form-alert';
+import { PasswordField } from '@/components/ui/password-field';
 import { SubmitButton } from '@/components/ui/submit-button';
+import { TextLink } from '@/components/ui/text-link';
 import { authClient, sendVerificationCode } from '../auth-client';
 import { authRequest } from '../auth-request';
-import { authErrorMessage } from '../error-messages';
-import { signInSchema } from '../schemas';
 import { rememberPendingEmail, takeSignInEmail } from '../email-storage';
+import { authErrorMessage } from '../error-messages';
 import { SIGN_IN_HEADINGS, type SignInArrival } from '../headings';
 import { useAuthHeading } from '../hooks/use-auth-step';
+import { signInSchema } from '../schemas';
 import { EmailField } from './email-field';
 
 type SignInFormProps = {
@@ -83,6 +83,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
 
     async function sendCode(email: string) {
         setSendingCode(true);
+
         const { failure } = await sendVerificationCode(email);
 
         setSendingCode(false);
@@ -102,6 +103,8 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
             Forgot your password?
         </TextLink>
     );
+
+    const forgotLinkInAlert = Boolean(errors.root) && wrongCredentials;
 
     let failureAction: ReactNode = null;
 
@@ -135,7 +138,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
                 Sign in
             </SubmitButton>
 
-            {!(errors.root && wrongCredentials) && <p>{forgotPasswordLink}</p>}
+            {!forgotLinkInAlert && <p>{forgotPasswordLink}</p>}
         </form>
     );
 }

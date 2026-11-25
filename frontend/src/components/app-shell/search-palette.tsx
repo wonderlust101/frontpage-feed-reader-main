@@ -9,14 +9,13 @@ import { Icon } from '@/components/ui/icon';
 import type { ShellCategory, ShellView } from './nav-entries';
 import { matchParts } from './search-match';
 import { buildResultGroups, type ResultGroup, type ResultOption, type SearchFn, type SearchSource } from './search-results';
-import { useShellPlace } from './use-shell-place';
 
 type SearchPaletteProps = {
-    homeHref: string;
     views: ShellView[];
     categories: ShellCategory[];
     sources?: SearchSource[];
     search?: SearchFn;
+    currentCategoryHref: string | null;
 };
 
 type PaletteTriggerProps = {
@@ -47,7 +46,7 @@ type NoResultsProps = {
     onSearchEverywhere: () => void;
 };
 
-export function SearchPalette({ homeHref, views, categories, sources = [], search }: SearchPaletteProps) {
+export function SearchPalette({ views, categories, sources = [], search, currentCategoryHref }: SearchPaletteProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
@@ -58,11 +57,9 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
     const [scopeHref, setScopeHref] = useState<string | null>(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
-    const place = useShellPlace(homeHref, views, categories);
-    const currentCategoryHref = place.category !== homeHref ? place.category : null;
     const trimmedQuery = query.trim();
-    const searched = search && trimmedQuery ? search(trimmedQuery, scopeHref) : null;
-    const groups = buildResultGroups({ query, views, categories, sources, searched, scopeHref, currentCategoryHref });
+    const searchResults = search && trimmedQuery ? search(trimmedQuery, scopeHref) : null;
+    const groups = buildResultGroups({ query, views, categories, sources, searchResults, scopeHref, currentCategoryHref });
     const options = groups.flatMap((group) => group.options);
 
     // The list can shrink under a kept index (a new scope), so the active row is clamped to it.
@@ -101,6 +98,7 @@ export function SearchPalette({ homeHref, views, categories, sources = [], searc
 
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
+
             const step = event.key === 'ArrowDown' ? 1 : -1;
 
             setActiveIndex((activePosition + step + options.length) % options.length);

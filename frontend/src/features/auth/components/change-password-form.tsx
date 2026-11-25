@@ -10,17 +10,18 @@ import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
 import { buttonClassName } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TextLink } from '@/components/ui/text-link';
+import { FormAlert } from '@/components/ui/form-alert';
 import { FormNotice } from '@/components/ui/form-notice';
 import { PasswordField } from '@/components/ui/password-field';
-import { FormAlert } from '@/components/ui/form-alert';
 import { SubmitButton } from '@/components/ui/submit-button';
+import { TextLink } from '@/components/ui/text-link';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { CHANGE_PASSWORD_HEADINGS } from '../headings';
-import { changePasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
 import { useAuthFrameLinks, useAuthHeading, type FrameLinks } from '../hooks/use-auth-step';
+import { ACCOUNT_HOME } from '../redirect-target';
+import { changePasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
 
 type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
@@ -35,8 +36,6 @@ export function ChangePasswordForm() {
     const [changed, setChanged] = useState<{ signedOutOthers: boolean } | null>(null);
     const [needsSignIn, setNeedsSignIn] = useState(false);
 
-    useAuthHeading(changed ? CHANGE_PASSWORD_HEADINGS.changed : null);
-    useAuthFrameLinks(changed ? RESULT_LINKS : null);
     const {
         register,
         handleSubmit,
@@ -49,6 +48,9 @@ export function ChangePasswordForm() {
         reValidateMode: 'onChange',
     });
 
+    useAuthHeading(changed ? CHANGE_PASSWORD_HEADINGS.changed : null);
+    useAuthFrameLinks(changed ? RESULT_LINKS : null);
+
     async function changePassword(values: ChangePasswordValues) {
         const { failure } = await authRequest((fetchOptions) => authClient.changePassword(values, fetchOptions));
 
@@ -56,6 +58,7 @@ export function ChangePasswordForm() {
             resetField('currentPassword');
             resetField('newPassword');
             setNeedsSignIn(failure.code === 'UNAUTHORIZED');
+
             const field = failure.code === 'INVALID_PASSWORD' ? 'currentPassword' : 'root';
 
             setError(field, { message: authErrorMessage(failure) }, { shouldFocus: true });
@@ -74,7 +77,7 @@ export function ChangePasswordForm() {
                 <FormNotice icon="healthy" lead={notice.lead} takesFocus>
                     {notice.detail}
                 </FormNotice>
-                <Link href="/user" className={buttonClassName('primary', 'w-full justify-center')}>
+                <Link href={ACCOUNT_HOME} className={buttonClassName('primary', 'w-full justify-center')}>
                     Back to your account
                 </Link>
             </div>

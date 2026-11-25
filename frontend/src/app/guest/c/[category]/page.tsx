@@ -4,9 +4,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { FieldTitle } from '@/components/ui/field-title';
-import { categoryColor } from '@/features/categories/category-field-vars';
-import { fieldOrNone } from '@/features/categories/fields';
-import { findGuestCategory, GUEST_CATEGORIES } from '@/features/categories/guest-categories';
+import { findGuestCategory, GUEST_CATEGORIES, guestCategoryColor } from '@/features/categories/guest-categories';
 
 export function generateStaticParams() {
     return GUEST_CATEGORIES.map((category) => ({ category: category.id }));
@@ -37,7 +35,7 @@ async function GuestCategory({ params }: Pick<PageProps<'/guest/c/[category]'>, 
 
     return (
         <>
-            <FieldTitle as="h1" color={categoryColor(category.id, fieldOrNone(category.preset).color)} className="self-start type-headline underline-offset-[0.16em]">
+            <FieldTitle as="h1" color={guestCategoryColor(category)} className="self-start type-headline underline-offset-[0.16em]">
                 {category.name}
             </FieldTitle>
             <p>Articles from {category.sources.join(', ')} will load here.</p>

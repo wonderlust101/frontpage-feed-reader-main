@@ -1,15 +1,15 @@
 // Moodboard photos are Unsplash stock (credited below); in the app every image comes from the feeds themselves.
 
 import Image, { type StaticImageData } from 'next/image';
+import { ItemThumbnail } from '@/features/items/components/item-thumbnail';
 import concert from '../_assets/concert.jpg';
 import concourse from '../_assets/concourse.jpg';
 import desk from '../_assets/desk.jpg';
 import fog from '../_assets/fog.jpg';
 import oranges from '../_assets/oranges.jpg';
 import reading from '../_assets/reading.jpg';
-import { DocSection, Specimen } from './doc-section';
-import { ItemThumbnail } from '@/features/items/components/item-thumbnail';
 import { getCategory } from '../_data/sample-data';
+import { DocSection, Specimen } from './doc-section';
 
 type MoodPhoto = {
     image: StaticImageData;

@@ -1,4 +1,4 @@
-// A guest's category colours as CSS custom properties on <html>, so the shell paints a chosen colour on the first frame:
+// A guest's category colors as CSS custom properties on <html>, so the shell paints a chosen color on the first frame:
 // the root layout's early script copies the saved choices before first paint.
 
 import { PICKABLE_FIELDS, type FieldChoices } from './fields';

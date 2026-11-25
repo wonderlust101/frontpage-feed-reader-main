@@ -48,6 +48,7 @@ export const style = [
                 { blankLine: 'any', prev: 'import', next: 'import' },
                 { blankLine: 'always', prev: ['const', 'let'], next: '*' },
                 { blankLine: 'any', prev: ['const', 'let'], next: ['const', 'let'] },
+                { blankLine: 'always', prev: 'expression', next: ['const', 'let'] },
                 { blankLine: 'always', prev: '*', next: CONTROL_FLOW },
                 { blankLine: 'always', prev: CONTROL_FLOW, next: '*' },
                 { blankLine: 'always', prev: '*', next: 'return' },

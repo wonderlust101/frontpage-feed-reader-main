@@ -141,7 +141,9 @@ export type UpdateSubscriptionRequest = {
 };
 
 export const ITEM_PAGE_SIZE = 30;
+
 export const MAX_ITEM_PAGE_SIZE = 100;
+
 export const UNCATEGORIZED = 'uncategorized';
 
 export type ItemOrder = 'newest' | 'oldest';

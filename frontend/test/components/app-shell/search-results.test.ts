@@ -24,7 +24,7 @@ function build(overrides: Partial<Parameters<typeof buildResultGroups>[0]> = {})
         views: VIEWS,
         categories: CATEGORIES,
         sources: SOURCES,
-        searched: null,
+        searchResults: null,
         scopeHref: null,
         currentCategoryHref: null,
         ...overrides,
@@ -55,11 +55,11 @@ describe('buildResultGroups', () => {
         expect(titles(build({ query: '  CSS ' }))).toEqual([['Sources', ['CSS-Tricks', 'CSS Weekly']]]);
     });
 
-    test('a scope keeps only that category\'s sources', () => {
+    test("a scope keeps only that category's sources", () => {
         expect(titles(build({ query: 'css', scopeHref: '/guest/c/design' }))).toEqual([['Sources', ['CSS Weekly']]]);
     });
 
-    test('puts the current category\'s sources first, keeping the order within each part', () => {
+    test("puts the current category's sources first, keeping the order within each part", () => {
         expect(titles(build({ query: 'css', currentCategoryHref: '/guest/c/design' }))).toEqual([['Sources', ['CSS Weekly', 'CSS-Tricks']]]);
     });
 
@@ -69,13 +69,13 @@ describe('buildResultGroups', () => {
         expect(goTo.options[0]).toMatchObject({ title: 'Saved', detail: 'View · with an account', locked: true, lead: { icon: 'saved' } });
     });
 
-    test('a search function\'s results replace the plain sources and add articles', () => {
-        const searched: SearchResults = {
+    test("a search function's results replace the plain sources and add articles", () => {
+        const searchResults: SearchResults = {
             articles: [{ href: '#a', title: 'Container queries', source: 'CSS-Tricks', time: '2h' }],
             sources: [SOURCES[2]],
         };
 
-        const groups = build({ query: 'zzz', searched });
+        const groups = build({ query: 'zzz', searchResults });
 
         expect(titles(groups)).toEqual([
             ['Articles', ['Container queries']],

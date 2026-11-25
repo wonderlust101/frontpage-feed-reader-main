@@ -1,7 +1,7 @@
 'use client';
 
 // Deleting is undoable (its feeds move to Uncategorized), so the caller offers Undo rather than asking first. After a
-// delete focus moves to the neighbouring row, so a keyboard user keeps their place.
+// delete focus moves to the neighboring row, so a keyboard user keeps their place.
 
 import { useEffect, useId, useRef, useState, type FormEvent, type MouseEvent } from 'react';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
@@ -32,6 +32,7 @@ export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: Cat
 
     function handleRename(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+
         const name = String(new FormData(event.currentTarget).get('name') ?? '');
 
         setError(onRename?.(name));
@@ -39,22 +40,24 @@ export function CategoryRowMenu({ category, onRecolor, onRename, onDelete }: Cat
 
     function handleDelete(event: MouseEvent<HTMLButtonElement>) {
         const row = event.currentTarget.closest('li');
-        const neighbour = (row?.nextElementSibling ?? row?.previousElementSibling)?.querySelector<HTMLElement>('a');
+        const neighbor = (row?.nextElementSibling ?? row?.previousElementSibling)?.querySelector<HTMLElement>('a');
 
         event.currentTarget.closest<HTMLElement>('[popover]')?.hidePopover();
         onDelete?.();
-        requestAnimationFrame(() => neighbour?.focus());
+        requestAnimationFrame(() => neighbor?.focus());
     }
+
+    const menuKind = onRename ? 'Actions' : 'Color';
 
     return (
         <ShellMenu
-            label={onRename ? `${category.name}: actions` : `${category.name}: color`}
+            label={`${category.name}: ${menuKind.toLowerCase()}`}
             placement="row"
             trigger={
                 <>
                     <Icon name="more" />
                     <span className="sr-only">
-                        {onRename ? 'Actions' : 'Color'} for {category.name}
+                        {menuKind} for {category.name}
                     </span>
                 </>
             }

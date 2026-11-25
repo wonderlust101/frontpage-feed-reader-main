@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { GUEST_CATEGORIES, guestCategoryHref } from '../../../src/features/categories/guest-categories';
 
 describe('guestCategoryHref', () => {
-    test('is the category\'s page under /guest/c/', () => {
+    test("is the category's page under /guest/c/", () => {
         expect(guestCategoryHref('frontend')).toBe('/guest/c/frontend');
     });
 

@@ -30,15 +30,15 @@ type ResultInput = {
     views: ShellView[];
     categories: ShellCategory[];
     sources: SearchSource[];
-    searched: SearchResults | null;
+    searchResults: SearchResults | null;
     scopeHref: string | null;
     currentCategoryHref: string | null;
 };
 
 type UnnumberedOption = Omit<ResultOption, 'index'>;
 
-// Groups with no options are left out. `searched` (from the shell's `search`) replaces the plain `sources` list when given.
-export function buildResultGroups({ query, views, categories, sources, searched, scopeHref, currentCategoryHref }: ResultInput): ResultGroup[] {
+// Groups with no options are left out. `searchResults` (from the shell's `search`) replaces the plain `sources` list when given.
+export function buildResultGroups({ query, views, categories, sources, searchResults, scopeHref, currentCategoryHref }: ResultInput): ResultGroup[] {
     const needle = query.trim().toLowerCase();
 
     const viewOptions: UnnumberedOption[] = views
@@ -55,7 +55,7 @@ export function buildResultGroups({ query, views, categories, sources, searched,
         .filter((category) => category.name.toLowerCase().includes(needle))
         .map((category) => ({ href: category.href, title: category.name, detail: 'Category', lead: { color: category.color } }));
 
-    const articleOptions: UnnumberedOption[] = (searched?.articles ?? []).map((article) => ({
+    const articleOptions: UnnumberedOption[] = (searchResults?.articles ?? []).map((article) => ({
         href: article.href,
         title: article.title,
         detail: article.source,
@@ -63,8 +63,8 @@ export function buildResultGroups({ query, views, categories, sources, searched,
         lead: { initial: article.source.charAt(0) },
     }));
 
-    const matchedSources = searched
-        ? searched.sources
+    const matchedSources = searchResults
+        ? searchResults.sources
         : sources.filter((source) => needle && source.name.toLowerCase().includes(needle) && (!scopeHref || source.categoryHref === scopeHref));
 
     // The current category's sources come first; the sort is stable, so the rest keep their order.

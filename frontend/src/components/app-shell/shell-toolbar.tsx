@@ -23,6 +23,7 @@ export function ShellToolbar({ homeHref, views, categories, sources, drawer, sea
     const place = useShellPlace(homeHref, views, categories);
     const category = categories.find((entry) => entry.href === place.category);
     const view = views.find((entry) => entry.href === place.view);
+    const currentCategoryHref = place.category !== homeHref ? place.category : null;
 
     let tag: { name: string; color: string } | null = null;
 
@@ -35,7 +36,7 @@ export function ShellToolbar({ homeHref, views, categories, sources, drawer, sea
     return (
         <header className="@container sticky top-0 z-20 flex h-15 items-center gap-2 border-b border-edge bg-workspace px-3 sm:gap-3 sm:px-5">
             {drawer}
-            <SearchPalette homeHref={homeHref} views={views} categories={categories} sources={sources} search={search} />
+            <SearchPalette views={views} categories={categories} sources={sources} search={search} currentCategoryHref={currentCategoryHref} />
             {tag && (
                 <span className="flex min-w-0 items-center gap-2 overflow-hidden sm:gap-3">
                     <span aria-hidden="true" className="h-6 w-px flex-none bg-edge" />

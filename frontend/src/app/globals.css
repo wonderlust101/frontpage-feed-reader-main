@@ -138,9 +138,7 @@ body {
     box-shadow: none;
 }
 
-/* Text fields carry their own focus inside their own edge: the border thickens by 2px inward (an inset ring, so */
-/* nothing moves), in the field's own colour: ink, or red when the field is invalid. No floating outline, no glow. */
-/* A 2px change at full ink contrast meets WCAG 2.4.13 (focus appearance, AAA). */
+/* Text fields show focus as an inset 2px ring in their own color, so nothing moves; it meets WCAG 2.4.13 (AAA). */
 .text-field-input:focus,
 .text-field-input:focus-visible {
     outline: none;
@@ -161,8 +159,8 @@ body {
     box-shadow: none;
 }
 
-/* Forced colours (Windows high contrast) drop box shadows, so the focus edge would vanish: draw it as an outline */
-/* in the system's highlight colour instead. */
+/* Forced colors (Windows high contrast) drop box shadows, so the focus edge would vanish: draw it as an outline */
+/* in the system's highlight color instead. */
 @media (forced-colors: active) {
     .text-field-input:focus,
     .text-field-input:focus-visible {
@@ -198,7 +196,7 @@ html {
 }
 
 /* Very wide screens (2560px and up, such as 4K at 100% scaling): the whole rem-based system grows gently with the */
-/* viewport, from 16px at 2560px to 20px (1.25x) at 3840px, so text stays readable at a distance without looming.  */
+/* viewport, from 16px at 2560px to 20px (1.25x) at 3840px, so text stays readable at a distance without looming. */
 @media (min-width: 160rem) {
     html {
         font-size: min(calc(16px + (100vw - 2560px) * 0.003125), 20px);

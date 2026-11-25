@@ -1,7 +1,7 @@
 // Hands the reader's email between auth steps so it never goes in a URL: to the verify page in the same tab
 // (sessionStorage), and to sign-in from a reset link, which usually opens in a new tab (localStorage, at most an hour).
 
-import { CODE_LIFETIME_MINUTES } from './schemas';
+import { CODE_LIFETIME_MINUTES } from '@frontpage/shared';
 
 const PENDING_KEY = 'frontpage-pending-email';
 
@@ -42,9 +42,9 @@ export function readSignInEmail(): string | null {
     return tryStorage(() => readFreshEmail(localStorage.getItem(SIGN_IN_KEY), SIGN_IN_MAX_AGE_MS), null);
 }
 
-function tryStorage<T>(read: () => T, fallback: T): T {
+function tryStorage<T>(action: () => T, fallback: T): T {
     try {
-        return read();
+        return action();
     } catch {
         return fallback;
     }

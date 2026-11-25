@@ -1,9 +1,9 @@
-// Each curated category's preset, or the colour the guest chose for it on this device.
+// Each curated category's preset, or the color the guest chose for it on this device.
 
 import 'client-only';
-import { useCategoryFields } from './use-category-fields';
 import type { FieldChoices } from '../fields';
 import { GUEST_CATEGORIES } from '../guest-categories';
+import { useCategoryFields } from './use-category-fields';
 
 const GUEST_IDS = GUEST_CATEGORIES.map((category) => category.id);
 

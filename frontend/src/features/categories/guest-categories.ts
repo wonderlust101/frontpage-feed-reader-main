@@ -1,6 +1,7 @@
-// The guest's curated categories: the same catalogue as backend/data/sample-feeds.json, so keep the two in step.
+// The guest's curated categories: the same catalog as backend/data/sample-feeds.json, so keep the two in step.
 
-import type { FieldId } from './fields';
+import { categoryColor } from './category-field-vars';
+import { fieldOrNone, type FieldId } from './fields';
 
 type GuestCategory = {
     id: string;
@@ -50,4 +51,9 @@ export function findGuestCategory(id: string) {
 
 export function guestCategoryHref(id: string): string {
     return `/guest/c/${id}`;
+}
+
+// The guest's chosen color when one is saved, else the category's preset.
+export function guestCategoryColor(category: Pick<GuestCategory, 'id' | 'preset'>): string {
+    return categoryColor(category.id, fieldOrNone(category.preset).color);
 }

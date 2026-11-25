@@ -2,6 +2,7 @@
 
 // The verify-email code step. While a code is being resent the button stays (busy), so focus doesn't drop.
 
+import { CODE_LENGTH } from '@frontpage/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -18,7 +19,8 @@ import { forgetPendingEmail, rememberPendingEmail } from '../email-storage';
 import { authErrorMessage } from '../error-messages';
 import { codeStepHeading } from '../headings';
 import { useAuthDescriptionId, useAuthHeading } from '../hooks/use-auth-step';
-import { CODE_LENGTH, codeSchema } from '../schemas';
+import { ACCOUNT_HOME } from '../redirect-target';
+import { codeSchema } from '../schemas';
 
 type CodeValues = z.input<typeof codeSchema>;
 
@@ -26,7 +28,7 @@ type CheckedCode = z.output<typeof codeSchema>;
 
 type CodeInputEvent = { target: { value: string }; nativeEvent?: { inputType?: string } };
 
-type CodeStepProps = {
+type VerifyEmailCodeStepProps = {
     email: string;
     accountReady: boolean;
     onChangeEmail: () => void;
@@ -48,15 +50,13 @@ const RESEND_COOLDOWN_SECONDS = 60;
 
 const CODE_FIELD_CODES = ['INVALID_OTP', 'OTP_EXPIRED', 'TOO_MANY_ATTEMPTS'];
 
-export function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) {
+export function VerifyEmailCodeStep({ email, accountReady, onChangeEmail }: VerifyEmailCodeStepProps) {
     const router = useRouter();
     const descriptionId = useAuthDescriptionId();
     const heading = useMemo(() => codeStepHeading(email), [email]);
     const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
     const [resending, setResending] = useState(false);
     const [resentCount, setResentCount] = useState(0);
-
-    useAuthHeading(heading);
 
     const {
         register,
@@ -70,6 +70,8 @@ export function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) 
         defaultValues: { code: '' },
         reValidateMode: 'onChange',
     });
+
+    useAuthHeading(heading);
 
     useEffect(() => {
         setFocus('code');
@@ -96,13 +98,14 @@ export function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) 
         }
 
         forgetPendingEmail();
-        router.replace('/user');
+        router.replace(ACCOUNT_HOME);
         router.refresh();
     }
 
     async function resend() {
         clearErrors('root');
         setResending(true);
+
         const { failure } = await sendVerificationCode(email);
 
         setResending(false);
@@ -158,6 +161,15 @@ export function CodeStep({ email, accountReady, onChangeEmail }: CodeStepProps) 
     );
 }
 
+// A paste or autofill drops the whole code in at once (it isn't typed text), so it can be confirmed straight away.
+function isWholeCodeInserted(event: CodeInputEvent): boolean {
+    const inputType = event.nativeEvent?.inputType;
+    const isTyped = inputType?.startsWith('insertText') || inputType?.startsWith('delete');
+    const digits = event.target.value.replace(/\s/g, '');
+
+    return !isTyped && digits.length === CODE_LENGTH && /^\d+$/.test(digits);
+}
+
 // One message at a time: an error first, then a resent code, then the welcome straight after sign-up.
 function CodeStepNotice({ error, resentCount, accountReady }: CodeStepNoticeProps) {
     if (error)
@@ -184,9 +196,6 @@ function CodeStepNotice({ error, resentCount, accountReady }: CodeStepNoticeProp
 
 // The wait is plain text at full contrast; a faded, disabled button would hide it.
 function ResendCode({ cooldown, resending, onResend }: ResendCodeProps) {
-    if (cooldown > 0 && !resending)
-        return <span className="inline-flex h-11 items-center text-ui text-ink-2 tabular-nums">Send a new code in {cooldown}s</span>;
-
     if (resending) {
         return (
             <Button variant="quiet" aria-disabled aria-busy>
@@ -195,18 +204,12 @@ function ResendCode({ cooldown, resending, onResend }: ResendCodeProps) {
         );
     }
 
+    if (cooldown > 0)
+        return <span className="inline-flex h-11 items-center text-ui text-ink-2 tabular-nums">Send a new code in {cooldown}s</span>;
+
     return (
         <Button variant="quiet" onClick={onResend}>
             Send a new code
         </Button>
     );
-}
-
-// A paste or autofill drops the whole code in at once (it isn't typed text), so it can be confirmed straight away.
-function isWholeCodeInserted(event: CodeInputEvent): boolean {
-    const inputType = event.nativeEvent?.inputType;
-    const isTyped = inputType?.startsWith('insertText') || inputType?.startsWith('delete');
-    const digits = event.target.value.replace(/\s/g, '');
-
-    return !isTyped && digits.length === CODE_LENGTH && /^\d+$/.test(digits);
 }

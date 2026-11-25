@@ -21,30 +21,36 @@ const MESSAGES: Record<string, string> = {
     TOO_MANY_ATTEMPTS: 'Too many wrong codes. Send a new one.',
 };
 
-const OFFLINE = "You're offline. Check your connection and try again.";
-const UNREACHABLE = "Can't reach Frontpage right now. Try again in a few minutes.";
-const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minutes.';
-const TOO_MANY_REQUESTS = 'Too many tries in a row. Take a minute, then try again.';
-const FALLBACK = 'Something went wrong on our end. Try again in a moment.';
+const OFFLINE_MESSAGE = "You're offline. Check your connection and try again.";
+
+const UNREACHABLE_MESSAGE = "Can't reach Frontpage right now. Try again in a few minutes.";
+
+const UNAVAILABLE_MESSAGE = 'Accounts are unavailable right now. Try again in a few minutes.';
+
+const TOO_MANY_TRIES = 'Too many tries in a row.';
+
+const TOO_MANY_REQUESTS_MESSAGE = `${TOO_MANY_TRIES} Take a minute, then try again.`;
+
+const FALLBACK_MESSAGE = 'Something went wrong on our end. Try again in a moment.';
 
 // A request with no answer only blames the connection when the browser says it is offline.
 export function authErrorMessage(failure: AuthFailure): string {
     if (failure.status === 0)
-        return failure.offline ? OFFLINE : UNREACHABLE;
+        return failure.offline ? OFFLINE_MESSAGE : UNREACHABLE_MESSAGE;
 
     if (failure.status === 429) {
         const seconds = failure.retryAfterSeconds;
 
         if (!seconds)
-            return TOO_MANY_REQUESTS;
+            return TOO_MANY_REQUESTS_MESSAGE;
 
         const wait = seconds === 1 ? '1 second' : `${seconds} seconds`;
 
-        return `Too many tries in a row. Try again in ${wait}.`;
+        return `${TOO_MANY_TRIES} Try again in ${wait}.`;
     }
 
     if (failure.status >= 500)
-        return UNAVAILABLE;
+        return UNAVAILABLE_MESSAGE;
 
-    return (failure.code && MESSAGES[failure.code]) || FALLBACK;
+    return (failure.code && MESSAGES[failure.code]) || FALLBACK_MESSAGE;
 }

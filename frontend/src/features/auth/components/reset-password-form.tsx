@@ -9,16 +9,16 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
 import { DocumentTitle } from '@/components/document-title';
-import { TextLink } from '@/components/ui/text-link';
-import { PasswordField } from '@/components/ui/password-field';
 import { FormAlert } from '@/components/ui/form-alert';
+import { PasswordField } from '@/components/ui/password-field';
 import { SubmitButton } from '@/components/ui/submit-button';
+import { TextLink } from '@/components/ui/text-link';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
 import { authErrorMessage } from '../error-messages';
 import { RESET_PASSWORD_HEADINGS } from '../headings';
-import { resetPasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
 import { useAuthHeading } from '../hooks/use-auth-step';
+import { resetPasswordSchema, NEW_PASSWORD_HINT } from '../schemas';
 
 type ResetPasswordFormProps = {
     token: string;
@@ -30,7 +30,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     const router = useRouter();
     const [linkExpired, setLinkExpired] = useState(false);
 
-    useAuthHeading(linkExpired ? RESET_PASSWORD_HEADINGS.expired : null);
     const {
         register,
         handleSubmit,
@@ -38,6 +37,8 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         resetField,
         formState: { errors, isSubmitting },
     } = useForm<ResetValues>({ resolver: zodResolver(resetPasswordSchema), defaultValues: { password: '' }, reValidateMode: 'onChange' });
+
+    useAuthHeading(linkExpired ? RESET_PASSWORD_HEADINGS.expired : null);
 
     useEffect(() => {
         window.history.replaceState(null, '', '/reset-password');

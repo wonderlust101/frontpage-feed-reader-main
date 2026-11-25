@@ -3,31 +3,32 @@
 // The result is the same whether or not the address has an account, so the page never reveals who is signed up.
 // The reset link must be absolute: Better Auth resolves relative ones against the API's domain.
 
+import { RESET_TOKEN_MINUTES } from '@frontpage/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod/mini';
 import { Button } from '@/components/ui/button';
-import { FormNotice } from '@/components/ui/form-notice';
 import { FormAlert } from '@/components/ui/form-alert';
+import { FormNotice } from '@/components/ui/form-notice';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { authClient } from '../auth-client';
 import { authRequest } from '../auth-request';
+import { readSignInEmail, rememberSignInEmail } from '../email-storage';
 import { authErrorMessage } from '../error-messages';
 import { FORGOT_PASSWORD_HEADINGS } from '../headings';
-import { emailSchema } from '../schemas';
-import { readSignInEmail, rememberSignInEmail } from '../email-storage';
 import { useAuthHeading } from '../hooks/use-auth-step';
+import { emailSchema } from '../schemas';
 import { EmailField } from './email-field';
 
 type EmailValues = z.infer<typeof emailSchema>;
 
 export function ForgotPasswordForm() {
     const [sentTo, setSentTo] = useState<string | null>(null);
-    const [returning, setReturning] = useState(false);
+    const [changingEmail, setChangingEmail] = useState(false);
     const { data: session } = authClient.useSession();
+    const knownEmail = session?.user.email;
 
-    useAuthHeading(sentTo ? FORGOT_PASSWORD_HEADINGS.sent : null);
     const {
         register,
         handleSubmit,
@@ -37,7 +38,8 @@ export function ForgotPasswordForm() {
         getValues,
         formState: { errors, isSubmitting },
     } = useForm<EmailValues>({ resolver: zodResolver(emailSchema), defaultValues: { email: '' }, reValidateMode: 'onChange' });
-    const knownEmail = session?.user.email;
+
+    useAuthHeading(sentTo ? FORGOT_PASSWORD_HEADINGS.sent : null);
 
     useEffect(() => {
         const email = readSignInEmail() ?? knownEmail;
@@ -47,9 +49,9 @@ export function ForgotPasswordForm() {
     }, [knownEmail, getValues, setValue]);
 
     useEffect(() => {
-        if (returning && !sentTo)
+        if (changingEmail && !sentTo)
             setFocus('email', { shouldSelect: true });
-    }, [returning, sentTo, setFocus]);
+    }, [changingEmail, sentTo, setFocus]);
 
     async function requestLink({ email }: EmailValues) {
         const redirectTo = `${window.location.origin}/reset-password`;
@@ -69,7 +71,7 @@ export function ForgotPasswordForm() {
         return (
             <div className="flex flex-col gap-6">
                 <FormNotice icon="newsletter" lead={`Sent to ${sentTo}`} takesFocus>
-                    If that address has an account, the link is waiting there now. It works once and lasts 60 minutes.
+                    If that address has an account, the link is waiting there now. It works once and lasts {RESET_TOKEN_MINUTES} minutes.
                 </FormNotice>
                 <p className="text-ui text-ink-2">Nothing after a few minutes? Peek in your spam folder, or try another address.</p>
                 <div>
@@ -77,7 +79,7 @@ export function ForgotPasswordForm() {
                         variant="secondary"
                         onClick={() => {
                             setSentTo(null);
-                            setReturning(true);
+                            setChangingEmail(true);
                         }}
                     >
                         Use another email

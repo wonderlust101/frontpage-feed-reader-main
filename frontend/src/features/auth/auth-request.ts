@@ -15,7 +15,7 @@ type CallResult<T> = { data: T; error: null } | { data: null; error: { code?: st
 
 type RequestResult<T> = { data: T; failure: null } | { data: null; failure: AuthFailure };
 
-// Example: authRequest((fetchOptions) => authClient.signIn.email(values, fetchOptions))
+// `call` must pass `fetchOptions` on to the auth client, or the 429 wait is never captured.
 export async function authRequest<T>(call: (fetchOptions: ErrorHook) => Promise<CallResult<T>>): Promise<RequestResult<T>> {
     let retryAfterSeconds: number | undefined;
     const fetchOptions: ErrorHook = {

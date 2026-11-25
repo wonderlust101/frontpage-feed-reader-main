@@ -7,9 +7,7 @@ import { AppShell } from '@/components/app-shell/app-shell';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
 import type { SearchSource } from '@/components/app-shell/search-results';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
-import { categoryColor } from '@/features/categories/category-field-vars';
-import { fieldOrNone } from '@/features/categories/fields';
-import { GUEST_CATEGORIES, guestCategoryHref } from '@/features/categories/guest-categories';
+import { GUEST_CATEGORIES, guestCategoryColor, guestCategoryHref } from '@/features/categories/guest-categories';
 import { useGuestCategoryFields } from '@/features/categories/hooks/use-guest-category-fields';
 
 type GuestShellProps = {
@@ -19,11 +17,11 @@ type GuestShellProps = {
     children: ReactNode;
 };
 
-// The colours are CSS properties the guest's choices override, so this list never changes.
+// The colors are CSS properties the guest's choices override, so this list never changes.
 const SHELL_CATEGORIES = GUEST_CATEGORIES.map((category) => ({
     href: guestCategoryHref(category.id),
     name: category.name,
-    color: categoryColor(category.id, fieldOrNone(category.preset).color),
+    color: guestCategoryColor(category),
 })) satisfies ShellCategory[];
 
 export function GuestShell({ views, sources, account, children }: GuestShellProps) {

@@ -2,12 +2,13 @@
 
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
-import { useCategoryFields } from '@/features/categories/hooks/use-category-fields';
+import { SkipLink } from '@/components/ui/skip-link';
 import { BRAND_FIELD } from '@/features/categories/fields';
+import { useCategoryFields } from '@/features/categories/hooks/use-category-fields';
 import { ReaderSettings } from '@/features/preferences/components/reader-settings';
+import { HERO_STICKERS } from '../_data/hero-stickers';
 import { CATEGORIES, CATEGORY_IDS, CATEGORY_PRESETS } from '../_data/sample-data';
 import { SECTIONS } from '../_data/sections';
-import { HERO_STICKERS } from '../_data/hero-stickers';
 import { useHeroChoice } from './hero-choice';
 
 const SOURCE_COUNT = CATEGORIES.reduce((total, category) => total + category.sources.length, 0);
@@ -16,19 +17,19 @@ export function HeroField() {
     const { choice } = useHeroChoice();
     const [fields] = useCategoryFields(CATEGORY_IDS, CATEGORY_PRESETS);
     const category = CATEGORIES.find((candidate) => candidate.id === choice);
-    const field = category ? fields[category.id].color : BRAND_FIELD.color;
+    const fieldColor = category ? fields[category.id].color : BRAND_FIELD.color;
     const caption = category
         ? `${category.name} · ${category.sources.join(', ')}`
         : `All categories · ${SOURCE_COUNT} sources in ${CATEGORIES.length} categories`;
 
     return (
-        <header className="hero-field relative" style={{ color: field }}>
+        <header className="hero-field relative" style={{ color: fieldColor }}>
             <div className="sticker-field bg-current">
-                <div className="hero-field-ink on-field mx-auto max-w-page px-gutter pb-12" style={{ color: 'var(--color-on-field)' }}>
+                <div className="hero-field-ink on-field mx-auto max-w-page px-gutter pb-12 text-on-field">
                     <div className="flex flex-wrap items-center gap-x-8 gap-y-3 py-5">
-                        <a href="#main" className="sr-only focus:not-sr-only">
+                        <SkipLink href="#main" className="focus:top-4 focus:left-4">
                             Skip to content
-                        </a>
+                        </SkipLink>
                         <p className="flex items-baseline gap-3">
                             <Logo size="md" variant="ink" />
                             <span className="text-ui font-medium">Design system</span>

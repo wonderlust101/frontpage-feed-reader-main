@@ -1,8 +1,8 @@
 // A filter capsule is a toggle (any number on); a switch capsule is a radio (exactly one on). A check shows when on,
-// so the state never rests on colour alone.
+// so the state never rests on color alone.
 
-import { CheckMark } from './check-mark';
 import type { ComponentProps, CSSProperties } from 'react';
+import { CheckMark } from './check-mark';
 
 type CapsuleProps = Omit<ComponentProps<'button'>, 'type' | 'role'> & {
     field: { color: string; onColor: string };

@@ -15,14 +15,14 @@ import { Toast } from '@/components/ui/toast';
 import { ACCOUNT_FEATURE_VIEWS } from '@/features/auth/account-features';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { GuestMenu } from '@/features/auth/components/guest-menu';
-import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { categoryColor } from '@/features/categories/category-field-vars';
+import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
 import { BRAND_FIELD, categoryFieldById, fieldOrNone } from '@/features/categories/fields';
-import { deleteCategory, isNameTaken, updateCategory, type Library, type LibraryCategory } from '@/features/categories/library';
+import type { GuestCategoryId } from '@/features/categories/guest-categories';
 import { useGuestCategoryFields } from '@/features/categories/hooks/use-guest-category-fields';
+import { deleteCategory, isNameTaken, updateCategory, type Library, type LibraryCategory } from '@/features/categories/library';
 import { ChoiceControl } from '@/features/preferences/components/choice-control';
 import { isTypingTarget } from '@/lib/typing-target';
-import type { GuestCategoryId } from '@/features/categories/guest-categories';
 import { CATEGORIES, READER_CATEGORIES, SAMPLE_ITEMS, SAMPLE_READER } from '../_data/sample-data';
 import { SampleItemRow } from './sample-item-row';
 
@@ -68,18 +68,18 @@ const START_LIBRARY: Library = {
 const COUNT_BY_ID = new Map(START_LIBRARY.categories.map((category, index) => [category.id, UNREAD_COUNTS[index]]));
 
 const SAMPLE_BY_HREF = new Map<string, GuestCategoryId>([
-    ...CATEGORIES.map((category): [string, GuestCategoryId] => [guestCategoryHref(category.id), category.id]),
+    ...CATEGORIES.map((category): [string, GuestCategoryId] => [sampleCategoryHref(category.id), category.id]),
     ...READER_SAMPLES.flatMap(({ id, sample }): [string, GuestCategoryId][] => (sample ? [[readerCategoryHref(id), sample.id]] : [])),
 ]);
 
 export function AppShellDemo() {
     const [mode, setMode] = useState<DemoMode>('reader');
-    const { library, toast, change, undo, dismissToast } = useUndoableLibrary();
+    const { library, toast, applyEdit, undo, dismissToast } = useUndoableLibrary();
     const [guestFields, chooseGuestField] = useGuestCategoryFields();
     const shell = demoShell(mode, library);
 
     function guestRowMenu(shellCategory: ShellCategory) {
-        const category = CATEGORIES.find((entry) => guestCategoryHref(entry.id) === shellCategory.href);
+        const category = CATEGORIES.find((entry) => sampleCategoryHref(entry.id) === shellCategory.href);
 
         if (!category)
             return null;
@@ -99,7 +99,7 @@ export function AppShellDemo() {
         if (problem)
             return problem;
 
-        change(updateCategory(library, category.id, { name: newName }), `Renamed ${category.name} to ${newName}.`);
+        applyEdit(updateCategory(library, category.id, { name: newName }), `Renamed ${category.name} to ${newName}.`);
 
         return undefined;
     }
@@ -113,9 +113,9 @@ export function AppShellDemo() {
         return (
             <CategoryRowMenu
                 category={category}
-                onRecolor={(fieldId) => change(updateCategory(library, category.id, { fieldId }), `${category.name} is now ${categoryFieldById(fieldId)?.name}.`)}
+                onRecolor={(fieldId) => applyEdit(updateCategory(library, category.id, { fieldId }), `${category.name} is now ${categoryFieldById(fieldId)?.name}.`)}
                 onRename={(name) => renameCategory(category, name)}
-                onDelete={() => change(deleteCategory(library, category.id), `Deleted ${category.name}.`)}
+                onDelete={() => applyEdit(deleteCategory(library, category.id), `Deleted ${category.name}.`)}
             />
         );
     }
@@ -187,7 +187,7 @@ function useUndoableLibrary() {
     const [library, setLibrary] = useState(START_LIBRARY);
     const [toast, setToast] = useState<DemoToast | null>(null);
 
-    function change(next: Library, message: string) {
+    function applyEdit(next: Library, message: string) {
         setToast({ message, undo: library });
         setLibrary(next);
     }
@@ -215,7 +215,7 @@ function useUndoableLibrary() {
         return () => window.removeEventListener('keydown', undoOnShortcut);
     }, [toast]);
 
-    return { library, toast, change, undo, dismissToast };
+    return { library, toast, applyEdit, undo, dismissToast };
 }
 
 // Everything that differs between the signed-in and the guest specimen.
@@ -225,7 +225,7 @@ function demoShell(mode: DemoMode, library: Library) {
             homeHref: THIS_PAGE,
             views: GUEST_VIEWS,
             categories: CATEGORIES.map((category, index) => ({
-                href: guestCategoryHref(category.id),
+                href: sampleCategoryHref(category.id),
                 name: category.name,
                 color: categoryColor(category.id, category.field.color),
                 count: UNREAD_COUNTS[index],
@@ -267,7 +267,7 @@ function renameProblem(library: Library, categoryId: LibraryCategory['id'], newN
     return undefined;
 }
 
-function guestCategoryHref(id: GuestCategoryId): string {
+function sampleCategoryHref(id: GuestCategoryId): string {
     return `#category-${id}`;
 }
 
@@ -294,7 +294,7 @@ function searchSamples(query: string, scopeHref: string | null): SearchResults {
         sources: CATEGORIES.filter((category) => inScope(category.id)).flatMap((category) =>
             category.sources
                 .filter((source) => source.toLowerCase().includes(needle))
-                .map((source) => ({ href: '#patterns', name: source, detail: category.name, categoryHref: guestCategoryHref(category.id) })),
+                .map((source) => ({ href: '#patterns', name: source, detail: category.name, categoryHref: sampleCategoryHref(category.id) })),
         ),
     };
 }

@@ -10,6 +10,7 @@ const DB_LABEL = {
 // Rendered on each request, not cached.
 export async function BackendStatus() {
     await connection();
+
     const health = await getHealth();
 
     return (

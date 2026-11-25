@@ -1,7 +1,7 @@
 // A step whose mood differs from its page's (a sent link, an expired one) carries its own panel text, so the Lemon
 // panel never cheers beside bad news. A plain module, so server pages and client forms can both import it.
 
-import { CODE_LENGTH, CODE_LIFETIME_MINUTES } from './schemas';
+import { CODE_LENGTH, CODE_LIFETIME_MINUTES } from '@frontpage/shared';
 
 export type PanelText = { headline: string; line: string };
 

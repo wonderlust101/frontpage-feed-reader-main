@@ -18,6 +18,7 @@ export function SignOutButton() {
     async function signOut() {
         setSigningOut(true);
         setError(null);
+
         const { failure } = await authRequest((fetchOptions) => authClient.signOut({ fetchOptions }));
 
         if (failure) {

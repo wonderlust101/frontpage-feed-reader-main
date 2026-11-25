@@ -9,7 +9,7 @@ type FieldTitleProps = {
 
 const FIELD_TITLE_CLASSES = 'field-underline underline decoration-[0.12em] [text-decoration-skip-ink:none]';
 
-// A title underlined in a category's field colour; `className` sets its type role and offset.
+// A title underlined in a category's field color; `className` sets its type role and offset.
 export function FieldTitle({ as: Tag = 'span', color, className = '', children }: FieldTitleProps) {
     return (
         <Tag className={`${FIELD_TITLE_CLASSES} ${className}`} style={{ '--title-field': color }}>
