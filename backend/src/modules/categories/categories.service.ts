@@ -3,7 +3,7 @@
 
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '../../db';
-import { NotFoundError } from '../../middleware/errors';
+import { NotFoundError } from '../../errors';
 import { categories } from './categories.schema';
 
 // Throws `category_not_found` (404) unless the category exists and belongs to the reader.

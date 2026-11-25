@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from 'bun:test';
 import { db, requireDatabase } from '../../src/db';
-import { ServiceUnavailableError } from '../../src/middleware/errors';
+import { ServiceUnavailableError } from '../../src/errors';
 
 describe('requireDatabase without DATABASE_URL', () => {
     test('db is null', () => {

@@ -4,7 +4,7 @@
 import { createHash } from 'node:crypto';
 import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
-import { UnprocessableEntityError } from '../../middleware/errors';
+import { UnprocessableEntityError } from '../../errors';
 import { parseFeedDate } from './dates';
 import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 import { resolveUrl } from './urls';

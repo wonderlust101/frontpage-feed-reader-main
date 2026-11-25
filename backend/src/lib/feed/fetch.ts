@@ -8,7 +8,7 @@ import { pipeline, type Readable, type Transform } from 'node:stream';
 import zlib from 'node:zlib';
 import { RequestFilteringHttpAgent, RequestFilteringHttpsAgent } from 'request-filtering-agent';
 import type { FeedCacheValidators, FeedRedirect } from '@frontpage/shared';
-import { HttpError, BadGatewayError, BadRequestError, GatewayTimeoutError, PayloadTooLargeError, isRetryableStatus } from '../../middleware/errors';
+import { HttpError, BadGatewayError, BadRequestError, GatewayTimeoutError, PayloadTooLargeError, isRetryableStatus } from '../../errors';
 import { WEB_PROTOCOLS } from './urls';
 
 export type FetchFeedOptions = Partial<FeedCacheValidators> & {

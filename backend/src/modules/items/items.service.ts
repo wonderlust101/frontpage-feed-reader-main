@@ -6,7 +6,7 @@ import { and, asc, count, desc, eq, isNull, not, sql, type SQL } from 'drizzle-o
 import type { ItemCount, ItemCountsResponse, ItemDetail, ItemListResponse, ItemSummary } from '@frontpage/shared';
 import type { Database } from '../../db';
 import { feedIconUrl } from '../../lib/feed';
-import { NotFoundError } from '../../middleware/errors';
+import { NotFoundError } from '../../errors';
 import { categories } from '../categories/categories.schema';
 import { assertOwnCategory } from '../categories/categories.service';
 import { feeds } from '../feeds/feeds.schema';

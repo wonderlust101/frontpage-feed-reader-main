@@ -4,7 +4,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { and, eq, sql } from 'drizzle-orm';
 import { bookmarks, categories, feeds, itemReadStates, items, subscriptions, users } from '../../../src/db/schema';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { listSubscriptions, subscribe, unsubscribe, updateSubscription } from '../../../src/modules/subscriptions/subscriptions.service';
 import { startFeedServer } from '../../helpers/feed-server';
 import { createTestDb } from '../../helpers/test-db';

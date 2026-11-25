@@ -8,7 +8,7 @@ import {
     PayloadTooLargeError,
     UnprocessableEntityError,
     isRetryableStatus,
-} from '../../../src/middleware/errors';
+} from '../../src/errors';
 
 const STATUS_CLASSES = [
     { ErrorClass: BadRequestError, status: 400, retryable: false },

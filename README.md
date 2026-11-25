@@ -53,8 +53,8 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │       │   ├── error-handler.ts      # errorHandler: every thrown error → the standard JSON error body
 │       │   ├── not-found-handler.ts  # notFoundHandler: unknown routes → 404
 │       │   ├── require-auth.ts       # requireAuth: 401 without a session; currentUser(res) in controllers
-│       │   ├── rate-limit.ts         # perUserRateLimit: 429 + X-Retry-After past N requests per signed-in user
-│       │   └── errors/               # one file per error class: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
+│       │   └── rate-limit.ts         # perUserRateLimit: 429 + X-Retry-After past N requests per signed-in user
+│       ├── errors/           # one file per error class, thrown by services and lib: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
 │       │   ├── auth/         #   /api/auth/* (Better Auth) + "users", "sessions", "accounts", "verifications" tables
@@ -97,9 +97,9 @@ Requests flow **routes → controller → service**: keep handler bodies out of 
 { "error": { "code": "not_found", "message": "Feed not found", "retryable": false } }
 ```
 
-- Services **throw** the class for the status they mean, from `src/middleware/errors/`: `BadRequestError` (400), `UnauthorizedError` (401), `NotFoundError` (404), `ConflictError` (409), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `TooManyRequestsError` (429), `BadGatewayError` (502), `ServiceUnavailableError` (503), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
+- Services **throw** the class for the status they mean, from `src/errors/`: `BadRequestError` (400), `UnauthorizedError` (401), `NotFoundError` (404), `ConflictError` (409), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `TooManyRequestsError` (429), `BadGatewayError` (502), `ServiceUnavailableError` (503), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
 - Controllers **don't catch**. Express 5 forwards thrown errors to `src/middleware/error-handler.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
-- A new kind of error needs no registration: throw the right class with a new code, and add the code to `ApiErrorCode` in `packages/shared/src/api.ts` so the frontend knows it. A new status is a small file in `src/middleware/errors/` (copy one of the others) plus a line in its `index.ts`.
+- A new kind of error needs no registration: throw the right class with a new code, and add the code to `ApiErrorCode` in `packages/shared/src/api.ts` so the frontend knows it. A new status is a small file in `src/errors/` (copy one of the others) plus a line in its `index.ts`.
 
 The sample feeds live in `backend/data/` because only the backend reads them.
 

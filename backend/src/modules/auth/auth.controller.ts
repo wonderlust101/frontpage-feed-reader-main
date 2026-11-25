@@ -3,7 +3,7 @@
 
 import type { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
-import { ServiceUnavailableError } from '../../middleware/errors';
+import { ServiceUnavailableError } from '../../errors';
 import { auth } from './auth.service';
 
 const betterAuthHandler = auth ? toNodeHandler(auth) : null;

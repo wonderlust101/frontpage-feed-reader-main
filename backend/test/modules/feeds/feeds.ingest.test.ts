@@ -4,7 +4,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { bookmarks, feeds, itemReadStates, items, starterFeeds, subscriptions, users } from '../../../src/db/schema';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { ingestFeed } from '../../../src/modules/feeds/feeds.ingest';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 import { readFixture } from '../../helpers/fixtures';

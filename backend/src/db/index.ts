@@ -6,7 +6,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 import { env } from '../env';
-import { ServiceUnavailableError } from '../middleware/errors';
+import { ServiceUnavailableError } from '../errors';
 import * as schema from './schema';
 import type { DbStatus } from '@frontpage/shared';
 

@@ -6,7 +6,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { FeedCacheValidators, FeedErrorCode, FeedRedirect, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import type { Database } from '../../db';
 import { decodeFeed, normalizeFeed, parseFeedUrl, type FetchFeedResult } from '../../lib/feed';
-import { BadGatewayError, HttpError } from '../../middleware/errors';
+import { BadGatewayError, HttpError } from '../../errors';
 import { bookmarks } from '../bookmarks/bookmarks.schema';
 import { itemReadStates, items } from '../items/items.schema';
 import { subscriptions } from '../subscriptions/subscriptions.schema';

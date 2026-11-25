@@ -3,7 +3,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import { categories, users } from '../../../src/db/schema';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { assertOwnCategory } from '../../../src/modules/categories/categories.service';
 import { createTestDb } from '../../helpers/test-db';
 

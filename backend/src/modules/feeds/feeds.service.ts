@@ -3,7 +3,7 @@
 
 import type { FeedCacheValidators, FetchFeedResponse, NormalizedFeed } from '@frontpage/shared';
 import { env } from '../../env';
-import { BadGatewayError } from '../../middleware/errors';
+import { BadGatewayError } from '../../errors';
 import { decodeFeed, fetchFeed, normalizeFeed, parseFeedUrl, type FetchFeedResult } from '../../lib/feed';
 
 type Validators = Partial<FeedCacheValidators>;

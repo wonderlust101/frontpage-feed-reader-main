@@ -3,7 +3,7 @@
 
 import { ITEM_PAGE_SIZE, MAX_ITEM_PAGE_SIZE, UNCATEGORIZED, type ItemOrder } from '@frontpage/shared';
 import { isUuid } from '../../lib/uuid';
-import { BadRequestError, NotFoundError } from '../../middleware/errors';
+import { BadRequestError, NotFoundError } from '../../errors';
 import { decodeCursor } from './items.cursor';
 import type { ItemCursor, ItemListQuery, ItemScope } from './items.types';
 

@@ -4,7 +4,7 @@
 
 import type { RequestHandler } from 'express';
 import { rateLimit } from 'express-rate-limit';
-import { TooManyRequestsError } from './errors';
+import { TooManyRequestsError } from '../errors';
 import { currentUser } from './require-auth';
 
 type PerUserRateLimitOptions = {

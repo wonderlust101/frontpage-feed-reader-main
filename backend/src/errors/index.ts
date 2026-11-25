@@ -1,4 +1,4 @@
-// The error classes, importable from one place: `import { NotFoundError } from '../middleware/errors'`.
+// The error classes, importable from one place: `import { NotFoundError } from '../errors'`.
 
 export { HttpError, isRetryableStatus } from './http-error';
 export { BadRequestError } from './bad-request-error';

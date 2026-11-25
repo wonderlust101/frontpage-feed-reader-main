@@ -2,7 +2,7 @@
 // rejection wins) and the item id.
 
 import { describe, expect, test } from 'bun:test';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { encodeCursor } from '../../../src/modules/items/items.cursor';
 import { parseItemId, parseItemListQuery } from '../../../src/modules/items/items.validation';
 

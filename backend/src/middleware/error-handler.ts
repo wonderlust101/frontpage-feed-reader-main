@@ -2,7 +2,7 @@
 
 import type { ErrorRequestHandler } from 'express';
 import type { ApiErrorResponse } from '@frontpage/shared';
-import { HttpError } from './errors';
+import { HttpError } from '../errors';
 
 // Unexpected errors (bugs) are logged and answered with a generic 500 that hides the details.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {

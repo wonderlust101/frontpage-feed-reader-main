@@ -4,7 +4,7 @@
 
 import { MAX_CUSTOM_TITLE_LENGTH, type SubscribeRequest, type UpdateSubscriptionRequest } from '@frontpage/shared';
 import { isUuid } from '../../lib/uuid';
-import { BadRequestError, NotFoundError } from '../../middleware/errors';
+import { BadRequestError, NotFoundError } from '../../errors';
 
 // The subscription id from the URL; throws `not_found` (404) when it isn't a UUID.
 export function parseSubscriptionId(value: string): string {

@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
 import { currentUser, requireAuth } from '../../src/middleware/require-auth';
-import { UnauthorizedError } from '../../src/middleware/errors';
+import { UnauthorizedError } from '../../src/errors';
 
 describe('requireAuth', () => {
     test('throws unauthorized and never calls next when there is no session', async () => {

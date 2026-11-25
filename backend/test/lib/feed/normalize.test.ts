@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { NormalizedFeed } from '@frontpage/shared';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { MAX_ITEMS, decodeFeed, limitItems, normalizeFeed } from '../../../src/lib/feed';
 import { curatedFixtures, readFixture } from '../../helpers/fixtures';
 

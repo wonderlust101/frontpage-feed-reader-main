@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
 import { errorHandler } from '../../src/middleware/error-handler';
-import { BadGatewayError, ConflictError, GatewayTimeoutError, TooManyRequestsError } from '../../src/middleware/errors';
+import { BadGatewayError, ConflictError, GatewayTimeoutError, TooManyRequestsError } from '../../src/errors';
 
 // A minimal fake Express Response that records the status and JSON body, so the error handler can be tested without a server.
 function fakeRes() {

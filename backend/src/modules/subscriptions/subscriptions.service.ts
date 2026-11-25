@@ -5,7 +5,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { SubscribeRequest, Subscription, UpdateSubscriptionRequest } from '@frontpage/shared';
 import type { Database } from '../../db';
 import { feedIconUrl, parseFeedUrl } from '../../lib/feed';
-import { ConflictError, NotFoundError } from '../../middleware/errors';
+import { ConflictError, NotFoundError } from '../../errors';
 import { assertOwnCategory } from '../categories/categories.service';
 import { ingestFeed } from '../feeds/feeds.ingest';
 import { feeds } from '../feeds/feeds.schema';

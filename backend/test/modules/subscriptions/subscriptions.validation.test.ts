@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from 'bun:test';
 import { MAX_CUSTOM_TITLE_LENGTH } from '@frontpage/shared';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { parseSubscribeRequest, parseSubscriptionId, parseUpdateSubscriptionRequest } from '../../../src/modules/subscriptions/subscriptions.validation';
 
 const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';

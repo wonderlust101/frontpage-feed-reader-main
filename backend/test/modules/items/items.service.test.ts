@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:tes
 import { and, eq, sql } from 'drizzle-orm';
 import type { ItemSummary } from '@frontpage/shared';
 import { categories, feeds, itemReadStates, items, subscriptions, users } from '../../../src/db/schema';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { decodeCursor } from '../../../src/modules/items/items.cursor';
 import { IS_READ, countItems, getItem, listItems } from '../../../src/modules/items/items.service';
 import type { ItemListQuery } from '../../../src/modules/items/items.types';

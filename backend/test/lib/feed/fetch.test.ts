@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { HttpError } from '../../../src/middleware/errors';
+import { HttpError } from '../../../src/errors';
 import { fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { NextFunction, Request, Response } from 'express';
-import { NotFoundError } from '../../src/middleware/errors';
+import { NotFoundError } from '../../src/errors';
 import { notFoundHandler } from '../../src/middleware/not-found-handler';
 
 describe('notFoundHandler', () => {
