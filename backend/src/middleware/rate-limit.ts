@@ -12,7 +12,6 @@ type PerUserRateLimitOptions = {
     message: string;
 };
 
-// Put it after requireAuth: the counter is keyed by the user's id.
 export function perUserRateLimit({ limit, windowMs, message }: PerUserRateLimitOptions): RequestHandler {
     return rateLimit({
         limit,

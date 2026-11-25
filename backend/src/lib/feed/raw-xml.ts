@@ -29,19 +29,9 @@ export function limitItems(xml: string, max: number): { xml: string; limited: bo
     if (!lastKeptItem || !hasMoreItems)
         return { xml, limited: false };
 
-    const isAtom = lastKeptItem[1]!.toLowerCase() === 'entry';
+    const isAtom = lastKeptItem[1]?.toLowerCase() === 'entry';
 
     return { xml: `${keptXml}\n${closingRootTag(xml, isAtom)}\n`, limited: true };
-}
-
-function closingRootTag(xml: string, isAtom: boolean): string {
-    if (isAtom)
-        return '</feed>';
-
-    if (isRdf(xml))
-        return '</rdf:RDF>';
-
-    return '</channel></rss>';
 }
 
 // Runs before parsing, so an empty response or a web page fails fast.
@@ -58,13 +48,6 @@ export function isRdf(xml: string): boolean {
     return /<rdf:rdf[\s>]/i.test(xml.slice(0, HEAD_CHARS));
 }
 
-// It starts like HTML and has no <rss>, <feed> or <rdf:RDF> near the top.
-function looksLikeHtmlPage(xml: string): boolean {
-    const head = xml.slice(0, HTML_SNIFF_CHARS).toLowerCase();
-
-    return /<!doctype html|<html[\s>]/.test(head) && !/<(rss|feed|rdf:rdf)[\s>]/.test(head);
-}
-
 // True when the XML never closes its root element (</rss>, </feed> or </rdf:RDF>), i.e. the feed was cut off and only partly parsed.
 export function looksTruncated(xml: string): boolean {
     // Ignore trailing comments/processing instructions (e.g. cache stats some CMSs append).
@@ -75,4 +58,21 @@ export function looksTruncated(xml: string): boolean {
         .toLowerCase();
 
     return !/<\/(rss|feed|rdf:rdf)>\s*$/.test(tail);
+}
+
+function closingRootTag(xml: string, isAtom: boolean): string {
+    if (isAtom)
+        return '</feed>';
+
+    if (isRdf(xml))
+        return '</rdf:RDF>';
+
+    return '</channel></rss>';
+}
+
+// It starts like HTML and has no <rss>, <feed> or <rdf:RDF> near the top.
+function looksLikeHtmlPage(xml: string): boolean {
+    const head = xml.slice(0, HTML_SNIFF_CHARS).toLowerCase();
+
+    return /<!doctype html|<html[\s>]/.test(head) && !/<(rss|feed|rdf:rdf)[\s>]/.test(head);
 }

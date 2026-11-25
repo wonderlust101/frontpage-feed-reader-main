@@ -35,7 +35,7 @@ export async function getFeed(input: string | undefined, clientValidators: Valid
     const full = hasValidators(validators) ? await fetchUpstream(url, {}) : result;
 
     if (full.notModified)
-        throw new BadGatewayError('http_5xx', 'The feed server answered 304 without a cached copy', { upstreamStatus: 304 });
+        throw unexpectedNotModified('without a cached copy');
 
     return answerFresh(url, full);
 }
@@ -53,6 +53,11 @@ export function fetchUpstream(url: URL, validators: Validators): Promise<FetchFe
         userAgent: env.FEED_USER_AGENT,
         allowLoopback: env.FEED_ALLOW_LOOPBACK,
     });
+}
+
+// A 304 we have no stored copy to answer with; `detail` says why.
+export function unexpectedNotModified(detail: string) {
+    return new BadGatewayError('http_5xx', `The feed server answered 304 ${detail}`, { upstreamStatus: 304 });
 }
 
 export function readFetchedFeed(result: FreshResult, requestedUrl: string): NormalizedFeed {
@@ -106,6 +111,8 @@ function remember(key: string, entry: CacheEntry) {
     cache.delete(key);
     cache.set(key, entry);
 
-    if (cache.size > CACHE_LIMIT)
-        cache.delete(cache.keys().next().value!);
+    const oldestKey = cache.keys().next().value;
+
+    if (cache.size > CACHE_LIMIT && oldestKey !== undefined)
+        cache.delete(oldestKey);
 }

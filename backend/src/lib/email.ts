@@ -84,6 +84,5 @@ function senderAddress(from: string | undefined) {
     if (!from)
         return MAILPIT_FALLBACK_FROM;
 
-    // The part between < and >, when the value has a display name.
     return from.match(/<([^>]+)>/)?.[1] ?? from;
 }

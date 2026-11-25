@@ -32,7 +32,7 @@ function toHttpError(err: unknown): HttpError {
     if (err instanceof HttpError)
         return err;
 
-    const expressError: ExpressError = isObject(err) ? err : {};
+    const expressError: ExpressError = isExpressError(err) ? err : {};
     const status = expressError.status ?? 500;
 
     if (status < 400 || status >= 500)
@@ -44,6 +44,6 @@ function toHttpError(err: unknown): HttpError {
     return new HttpError(status, 'bad_request', expressError.message || 'Bad request');
 }
 
-function isObject(value: unknown): value is ExpressError {
+function isExpressError(value: unknown): value is ExpressError {
     return typeof value === 'object' && value !== null;
 }

@@ -60,7 +60,7 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
 │       │   ├── auth/         #   /api/auth/* (Better Auth; email templates in auth.emails.ts) + "users", "sessions", "accounts", "verifications" tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
-│       │   ├── feeds/        #   GET /api/fetch (routes → controller → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
+│       │   ├── feeds/        #   GET /api/fetch (routes → controller → validation → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
 │       │   ├── items/        #   /api/items (routes → controller → validation + cursor → service; read rule) + "items", "item_read_states" tables
 │       │   ├── categories/   #   "categories" table + the "is this category yours?" check
 │       │   ├── subscriptions/#   /api/subscriptions (routes → controller → validation → service; health rule) + "subscriptions" table
@@ -90,7 +90,7 @@ Each feature lives in `backend/src/modules/<feature>/`, with files named after t
 | `<feature>.schema.ts`     | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it         |
 | `<feature>.types.ts`      | Types used only inside this module                                                                                    |
 
-Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, service, types and its tables, plus `feeds.ingest.ts`, a second service that stores fetched feeds; `subscriptions/` has routes, controller, validation, service and its table, plus `subscriptions.health.ts`, the pure feed-health rule. A module may split out a file like this when one file would hold two unrelated jobs.
+Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, validation, service, types and its tables, plus `feeds.ingest.ts`, a second service that stores fetched feeds; `subscriptions/` has routes, controller, validation, service and its table, plus `subscriptions.health.ts`, the pure feed-health rule. A module may split out a file like this when one file would hold two unrelated jobs.
 
 **Errors.** Every API error has the same shape, whatever the status:
 

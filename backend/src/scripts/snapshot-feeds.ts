@@ -8,13 +8,13 @@ import { env } from '../env';
 import { fetchFeed, limitItems } from '../lib/feed';
 import sampleFeeds from '../../data/sample-feeds.json';
 
-type CuratedFixture = { slug: string; title: string; feedUrl: string; file: string; contentType: string | null };
+export type CuratedFixture = { slug: string; title: string; feedUrl: string; file: string; contentType: string | null };
 
 const OUT_DIR = join(import.meta.dir, '../../test/fixtures/feeds/curated');
 const MAX_BYTES = 150 * 1024;
 const FIXTURE_MAX_ITEMS = 10;
 
-const feeds = sampleFeeds.categories.flatMap((c) => c.feeds);
+const feeds = sampleFeeds.categories.flatMap((category) => category.feeds);
 
 await mkdir(OUT_DIR, { recursive: true });
 const manifest: CuratedFixture[] = [];

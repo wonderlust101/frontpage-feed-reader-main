@@ -9,6 +9,7 @@ import { RequestFilteringHttpAgent, RequestFilteringHttpsAgent } from 'request-f
 import type { FeedCacheValidators, FeedRedirect } from '@frontpage/shared';
 import { HttpError, BadGatewayError, BadRequestError, GatewayTimeoutError, PayloadTooLargeError, isRetryableStatus } from '../../errors';
 import { WEB_PROTOCOLS } from './urls';
+import { hasCode } from '../error-code';
 
 export type FetchFeedOptions = Partial<FeedCacheValidators> & {
     timeoutMs?: number;
@@ -302,7 +303,7 @@ function toFetchError(err: unknown, url: URL, context: RequestContext): HttpErro
     if (context.signal.aborted || (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')))
         return new GatewayTimeoutError('timeout', `The feed took longer than ${context.timeoutMs / 1000}s to respond`);
 
-    if ((err as NodeJS.ErrnoException)?.code === 'ENOTFOUND')
+    if (hasCode(err, 'ENOTFOUND'))
         return new BadGatewayError('network', `Could not resolve host ${url.hostname}`, { retryable: false });
 
     return new BadGatewayError('network', `Could not reach the feed: ${err instanceof Error ? err.message : 'unknown error'}`);

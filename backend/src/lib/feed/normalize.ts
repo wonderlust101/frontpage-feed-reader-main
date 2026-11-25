@@ -6,6 +6,7 @@ import { parseFeed } from '@rowanmanning/feed-parser';
 import type { FeedFormat, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import { UnprocessableEntityError } from '../../errors';
 import { parseFeedDate } from './dates';
+import { hasCode } from '../error-code';
 import { isRdf, limitItems, looksTruncated, rejectNonFeeds } from './raw-xml';
 import { htmlToText, sanitizeFeedHtml, truncate } from './sanitize';
 import { resolveUrl } from './urls';
@@ -110,7 +111,7 @@ function parseXml(xml: string): ParsedFeed {
     try {
         return parseFeed(xml);
     } catch (err) {
-        if ((err as { code?: string })?.code === 'INVALID_FEED')
+        if (hasCode(err, 'INVALID_FEED'))
             throw new UnprocessableEntityError('not_a_feed', 'No RSS or Atom feed was found at this URL');
 
         throw new UnprocessableEntityError('parse_error', `The feed could not be parsed: ${err instanceof Error ? err.message : err}`);

@@ -17,14 +17,14 @@ export class HttpError extends Error {
     readonly upstreamStatus: number | undefined;
     readonly subscriptionId: string | undefined;
 
-    constructor(status: number, code: ApiErrorCode, message: string, opts: HttpErrorOptions = {}) {
+    constructor(status: number, code: ApiErrorCode, message: string, options: HttpErrorOptions = {}) {
         super(message);
         this.name = new.target.name;
         this.status = status;
         this.code = code;
-        this.retryable = opts.retryable ?? isRetryableStatus(status);
-        this.upstreamStatus = opts.upstreamStatus;
-        this.subscriptionId = opts.subscriptionId;
+        this.retryable = options.retryable ?? isRetryableStatus(status);
+        this.upstreamStatus = options.upstreamStatus;
+        this.subscriptionId = options.subscriptionId;
     }
 }
 

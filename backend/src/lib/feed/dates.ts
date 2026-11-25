@@ -146,6 +146,16 @@ function toMonth(value: string): number | undefined {
     return index >= 0 ? index + 1 : undefined;
 }
 
+// Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
+function toFullYear(value: string): number {
+    const year = Number(value);
+
+    if (year >= 100)
+        return year;
+
+    return year < TWO_DIGIT_YEAR_PIVOT ? 2000 + year : 1900 + year;
+}
+
 // "GMT" → 0, "PDT" → -420, "+05:30" → 330; undefined for ambiguous names ("IST") or impossible offsets ("+2500").
 function toOffsetMinutes(zone: string | undefined): number | undefined {
     if (!zone)
@@ -175,31 +185,21 @@ function toOffsetMinutes(zone: string | undefined): number | undefined {
 // Converts date parts in a given time zone to a UTC timestamp (ms since 1970); null for dates that can't exist, like Feb 31 or 25:00.
 function toEpochMs(parts: DateParts, offsetMinutes: number): number | null {
     const utc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second, parts.millisecond);
-    const d = new Date(utc);
+    const date = new Date(utc);
 
     // Date.UTC silently turns impossible dates like Feb 31 into Mar 2, so check every part is unchanged.
     const isRealDate =
-        d.getUTCFullYear() === parts.year &&
-        d.getUTCMonth() === parts.month - 1 &&
-        d.getUTCDate() === parts.day &&
-        d.getUTCHours() === parts.hour &&
-        d.getUTCMinutes() === parts.minute &&
-        d.getUTCSeconds() === parts.second;
+        date.getUTCFullYear() === parts.year &&
+        date.getUTCMonth() === parts.month - 1 &&
+        date.getUTCDate() === parts.day &&
+        date.getUTCHours() === parts.hour &&
+        date.getUTCMinutes() === parts.minute &&
+        date.getUTCSeconds() === parts.second;
 
     return isRealDate ? utc - offsetMinutes * 60_000 : null;
 }
 
-// Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
-function toFullYear(value: string): number {
-    const year = Number(value);
-
-    if (year >= 100)
-        return year;
-
-    return year < TWO_DIGIT_YEAR_PIVOT ? 2000 + year : 1900 + year;
-}
-
 // Lets each part of a date format sit on its own line with an example next to it.
 function pattern(...parts: RegExp[]) {
-    return new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
+    return new RegExp(`^${parts.map((part) => part.source).join('')}$`, 'i');
 }

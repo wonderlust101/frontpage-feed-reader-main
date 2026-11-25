@@ -45,7 +45,7 @@ function optional(value: string | undefined) {
 
 // `fallback` when missing or not a number (e.g. "abc").
 function int(value: string | undefined, fallback: number) {
-    const n = Number.parseInt(value ?? '', 10);
+    const parsed = Number.parseInt(value ?? '', 10);
 
-    return Number.isFinite(n) ? n : fallback;
+    return Number.isFinite(parsed) ? parsed : fallback;
 }

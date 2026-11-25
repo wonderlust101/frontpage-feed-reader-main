@@ -195,8 +195,12 @@ function tagTransforms(baseUrl: string | undefined): Record<string, sanitize.Tra
 function withResolvedUrls(attribs: sanitize.Attributes, names: string[], base?: string): sanitize.Attributes {
     const result = { ...attribs };
 
-    for (const name of names.filter((n) => n in result)) {
-        const value = result[name]!;
+    for (const name of names) {
+        const value = result[name];
+
+        if (value === undefined)
+            continue;
+
         const resolved = name === 'srcset' ? resolveSrcset(value, base) : resolveUrl(value, base, LINK_PROTOCOLS);
 
         if (resolved) {

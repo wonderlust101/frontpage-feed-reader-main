@@ -1,5 +1,4 @@
 // HTTP in/out for /api/auth/*: hands every request to Better Auth (sign-up, sign-in, sign-out, get-session, password reset).
-// Mounted in app.ts before express.json(), because Better Auth reads the raw request body itself.
 
 import type { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';

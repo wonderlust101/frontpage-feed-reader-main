@@ -7,12 +7,12 @@ import { alias, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import type { FeedCacheValidators, FeedErrorCode, FeedRedirect, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import type { Database, Transaction } from '../../db';
 import { parseFeedUrl } from '../../lib/feed';
-import { BadGatewayError, HttpError } from '../../errors';
+import { HttpError } from '../../errors';
 import { bookmarks } from '../bookmarks/bookmarks.schema';
 import { itemReadStates, items } from '../items/items.schema';
 import { subscriptions } from '../subscriptions/subscriptions.schema';
 import { feeds, starterFeeds } from './feeds.schema';
-import { fetchUpstream, keepUnsentValidators, readFetchedFeed, type FreshResult, type NotModifiedResult } from './feeds.service';
+import { fetchUpstream, keepUnsentValidators, readFetchedFeed, unexpectedNotModified, type FreshResult, type NotModifiedResult } from './feeds.service';
 import type { IngestOptions, IngestResult } from './feeds.types';
 
 type StoredFeed = {
@@ -79,7 +79,7 @@ async function fetchForIngest(db: Database, feedUrl: string, stored: StoredFeed 
             return { kind: 'fresh', result, feed: readFetchedFeed(result, feedUrl) };
 
         if (!stored)
-            throw new BadGatewayError('http_5xx', 'The feed server answered 304 to a request without validators', { upstreamStatus: 304 });
+            throw unexpectedNotModified('to a request without validators');
 
         return { kind: 'notModified', result, stored };
     } catch (err) {
@@ -237,7 +237,10 @@ async function upsertFeed(tx: Transaction, url: string, feed: NormalizedFeed, va
         .onConflictDoUpdate({ target: feeds.url, set: { ...columns, updatedAt: now } })
         .returning({ id: feeds.id });
 
-    return row!.id;
+    if (!row)
+        throw new Error(`Storing the feed at ${url} returned no row`);
+
+    return row.id;
 }
 
 // Skips items whose stored hash already matches; items missing from the fetch are kept.

@@ -3,13 +3,14 @@
 
 import type { Request, Response } from 'express';
 import { getFeed } from './feeds.service';
+import { parseFetchUrl } from './feeds.validation';
 
 // Browsers may reuse a feed response for 5 minutes before asking again.
 const CACHE_CONTROL = 'public, max-age=300';
 
-// GET /api/fetch?url=… fetches and normalizes one feed; any error is thrown to the error handler.
+// GET /api/fetch?url=… fetches and normalizes one feed.
 export async function fetchFeedController(req: Request, res: Response) {
-    const url = typeof req.query.url === 'string' ? req.query.url : undefined;
+    const url = parseFetchUrl(req.query);
 
     const result = await getFeed(url, {
         etag: req.get('if-none-match'),
