@@ -1,40 +1,41 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { HttpError } from '../../../src/middleware/errors';
-import { fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed';
+import { HttpError } from '../../../src/errors';
+import { fetchFeed, parseFeedUrl, type FetchFeedOptions } from '../../../src/lib/feed/fetch';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
+import { httpErrorFrom } from '../../helpers/errors';
 
 let upstream: ReturnType<typeof startFeedServer>;
-const opts: FetchFeedOptions = { allowLoopback: true, timeoutMs: 2_000 };
+const fetchOptions: FetchFeedOptions = { allowLoopback: true, timeoutMs: 2_000 };
 
 beforeAll(() => {
     upstream = startFeedServer();
 });
 
-afterAll(() => {
-    upstream.stop();
+afterAll(async () => {
+    await upstream.stop();
 });
 
 // Asserts the promise rejects with an HttpError of this `code` (and `retryable`, if given) and returns the error for further checks.
 async function expectError(promise: Promise<unknown>, code: HttpError['code'], retryable?: boolean) {
-    const err = await promise.then(
-        () => null,
-        (e: unknown) => e,
-    );
-    expect(err).toBeInstanceOf(HttpError);
-    expect((err as HttpError).code).toBe(code);
-    if (retryable !== undefined) {
-        expect((err as HttpError).retryable).toBe(retryable);
-    }
-    return err as HttpError;
+    const err = await httpErrorFrom(promise);
+
+    expect(err.code).toBe(code);
+
+    if (retryable !== undefined)
+        expect(err.retryable).toBe(retryable);
+
+    return err;
 }
 
 describe('fetchFeed', () => {
     test('returns the body, content type and final URL', async () => {
-        const res = await fetchFeed(`${upstream.url}/feed.xml`, opts);
+        const res = await fetchFeed(`${upstream.url}/feed.xml`, fetchOptions);
+
         expect(res.notModified).toBe(false);
-        if (res.notModified) {
+
+        if (res.notModified)
             return;
-        }
+
         expect(new TextDecoder().decode(res.bytes)).toContain('<rss');
         expect(res.contentType).toContain('application/rss+xml');
         expect(res.finalUrl).toBe(`${upstream.url}/feed.xml`);
@@ -42,14 +43,17 @@ describe('fetchFeed', () => {
     });
 
     test('sends a User-Agent and a feed-friendly Accept header', async () => {
-        await fetchFeed(`${upstream.url}/feed.xml`, { ...opts, userAgent: 'TestAgent/1.0' });
+        await fetchFeed(`${upstream.url}/feed.xml`, { ...fetchOptions, userAgent: 'TestAgent/1.0' });
+
         const headers = upstream.lastHeaders['/feed.xml']!;
+
         expect(headers.get('user-agent')).toBe('TestAgent/1.0');
         expect(headers.get('accept')).toContain('application/rss+xml');
     });
 
     test('follows a chain of permanent redirects and reports it as permanent', async () => {
-        const res = await fetchFeed(`${upstream.url}/moved-permanently`, opts);
+        const res = await fetchFeed(`${upstream.url}/moved-permanently`, fetchOptions);
+
         expect(res.finalUrl).toBe(`${upstream.url}/feed.xml`);
         expect(res.redirect).toEqual({
             permanent: true,
@@ -59,42 +63,54 @@ describe('fetchFeed', () => {
     });
 
     test('a temporary hop makes the whole redirect temporary', async () => {
-        const res = await fetchFeed(`${upstream.url}/moved-temporarily`, opts);
+        const res = await fetchFeed(`${upstream.url}/moved-temporarily`, fetchOptions);
+
         expect(res.finalUrl).toBe(`${upstream.url}/feed.xml`);
         expect(res.redirect?.permanent).toBe(false);
     });
 
     test('gives up on redirect loops', async () => {
-        await expectError(fetchFeed(`${upstream.url}/loop`, opts), 'network', false);
+        await expectError(fetchFeed(`${upstream.url}/loop`, fetchOptions), 'network', false);
     });
 
     test('refuses redirects to URLs with credentials', async () => {
-        await expectError(fetchFeed(`${upstream.url}/redirect-with-credentials`, opts), 'blocked_url', false);
+        await expectError(fetchFeed(`${upstream.url}/redirect-with-credentials`, fetchOptions), 'blocked_url', false);
+    });
+
+    test('a redirect without a Location header is a network error', async () => {
+        const err = await expectError(fetchFeed(`${upstream.url}/redirect-without-location`, fetchOptions), 'network');
+
+        expect(err.message).toBe('Redirect (301) without a Location header');
     });
 
     test('refuses redirects to non-http protocols', async () => {
-        await expectError(fetchFeed(`${upstream.url}/redirect-to-file`, opts), 'blocked_url');
+        await expectError(fetchFeed(`${upstream.url}/redirect-to-file`, fetchOptions), 'blocked_url');
     });
 
     test('sends If-None-Match / If-Modified-Since and reports 304s', async () => {
-        const first = await fetchFeed(`${upstream.url}/cached.xml`, opts);
+        const first = await fetchFeed(`${upstream.url}/cached.xml`, fetchOptions);
+
         expect(first.validators).toEqual({ etag: ETAG, lastModified: LAST_MODIFIED });
 
-        const second = await fetchFeed(`${upstream.url}/cached.xml`, { ...opts, ...first.validators });
+        const second = await fetchFeed(`${upstream.url}/cached.xml`, { ...fetchOptions, ...first.validators });
+
         expect(second.notModified).toBe(true);
+
         const headers = upstream.lastHeaders['/cached.xml']!;
+
         expect(headers.get('if-none-match')).toBe(ETAG);
         expect(headers.get('if-modified-since')).toBe(LAST_MODIFIED);
     });
 
     test('times out slow responses', async () => {
         const started = Date.now();
-        await expectError(fetchFeed(`${upstream.url}/slow`, { ...opts, timeoutMs: 200 }), 'timeout', true);
+
+        await expectError(fetchFeed(`${upstream.url}/slow`, { ...fetchOptions, timeoutMs: 200 }), 'timeout', true);
         expect(Date.now() - started).toBeLessThan(900);
     });
 
     test('the timeout also covers a slow body', async () => {
-        await expectError(fetchFeed(`${upstream.url}/slow-body`, { ...opts, timeoutMs: 200 }), 'timeout', true);
+        await expectError(fetchFeed(`${upstream.url}/slow-body`, { ...fetchOptions, timeoutMs: 200 }), 'timeout', true);
     });
 
     test.each([
@@ -103,29 +119,31 @@ describe('fetchFeed', () => {
         ['/rate-limited', 'http_4xx', 429, true],
         ['/error', 'http_5xx', 500, true],
     ] as const)('maps %s to %s', async (path, code, status, retryable) => {
-        const err = await expectError(fetchFeed(`${upstream.url}${path}`, opts), code, retryable);
+        const err = await expectError(fetchFeed(`${upstream.url}${path}`, fetchOptions), code, retryable);
+
         expect(err.upstreamStatus).toBe(status);
     });
 
     test.each(['/gzip', '/deflate', '/brotli'])('decompresses %s responses', async (path) => {
-        const res = await fetchFeed(`${upstream.url}${path}`, opts);
-        if (res.notModified) {
+        const res = await fetchFeed(`${upstream.url}${path}`, fetchOptions);
+
+        if (res.notModified)
             throw new Error('unexpected 304');
-        }
+
         expect(new TextDecoder().decode(res.bytes)).toStartWith('<?xml');
         expect(upstream.lastHeaders[path]?.get('accept-encoding')).toContain('gzip');
     });
 
     test('caps the decompressed size (zip bombs)', async () => {
-        await expectError(fetchFeed(`${upstream.url}/zip-bomb`, opts), 'too_large');
+        await expectError(fetchFeed(`${upstream.url}/zip-bomb`, fetchOptions), 'too_large');
     });
 
     test('caps the body size', async () => {
-        await expectError(fetchFeed(`${upstream.url}/huge`, { ...opts, maxBytes: 1_024 }), 'too_large');
+        await expectError(fetchFeed(`${upstream.url}/huge`, { ...fetchOptions, maxBytes: 1_024 }), 'too_large');
     });
 
     test('reports unreachable hosts as network errors', async () => {
-        await expectError(fetchFeed('http://127.0.0.1:1/feed.xml', opts), 'network', true);
+        await expectError(fetchFeed('http://127.0.0.1:1/feed.xml', fetchOptions), 'network', true);
     });
 });
 
@@ -160,12 +178,12 @@ describe('SSRF protection', () => {
     });
 
     test('checks every redirect hop, not just the first URL', async () => {
-        await expectError(fetchFeed(`${upstream.url}/redirect-to-private`, opts), 'blocked_url', false);
+        await expectError(fetchFeed(`${upstream.url}/redirect-to-private`, fetchOptions), 'blocked_url', false);
     });
 
     test('allowLoopback only opens loopback, not other private ranges', async () => {
-        await expectError(fetchFeed('http://10.1.2.3/feed.xml', opts), 'blocked_url');
-        await expectError(fetchFeed('http://169.254.169.254/latest/meta-data', opts), 'blocked_url');
+        await expectError(fetchFeed('http://10.1.2.3/feed.xml', fetchOptions), 'blocked_url');
+        await expectError(fetchFeed('http://169.254.169.254/latest/meta-data', fetchOptions), 'blocked_url');
     });
 });
 

@@ -1,5 +1,3 @@
-// Type section of the design system page: every role at its real size next to its spec.
-
 import { DocSection } from './doc-section';
 
 const TYPE_ROLES = [
@@ -47,7 +45,6 @@ const TYPE_ROLES = [
     },
 ];
 
-// Renders the type section: every role at its real size next to its spec.
 export function TypeSection() {
     return (
         <DocSection
@@ -56,13 +53,13 @@ export function TypeSection() {
             intro="Bricolage Grotesque sets everything you scan: headlines, section openers, item titles. Onest sets everything you read and operate. The body face is yours to change, so the reader settings (Aa) retune every body sample on this page."
         >
             <dl className="mt-10 rule-t">
-                {TYPE_ROLES.map((type) => (
-                    <div key={type.role} className="grid gap-3 border-b border-rule-soft py-6 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-8">
+                {TYPE_ROLES.map((typeRole) => (
+                    <div key={typeRole.role} className="grid gap-3 border-b border-rule-soft py-6 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-8">
                         <dt>
-                            <span className="block text-ui font-semibold">{type.role}</span>
-                            <span className="mt-1 block text-meta text-muted">{type.spec}</span>
+                            <span className="block text-ui font-semibold">{typeRole.role}</span>
+                            <span className="mt-1 block text-meta text-muted">{typeRole.spec}</span>
                         </dt>
-                        <dd className={`min-w-0 ${type.className}`}>{type.sample}</dd>
+                        <dd className={`min-w-0 ${typeRole.className}`}>{typeRole.sample}</dd>
                     </div>
                 ))}
             </dl>

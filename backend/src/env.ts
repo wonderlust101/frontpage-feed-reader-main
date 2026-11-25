@@ -1,17 +1,14 @@
-// Typed access to environment variables. Each one is documented in backend/.env.example.
-// The deployment's URLs (allowed site origin, the API's own address, the session cookie's domain and prefix) come from
-// the committed map in packages/shared (deployments.ts): Railway names the environment (RAILWAY_ENVIRONMENT_NAME,
-// "production" or "staging"), and anywhere else is local. A variable that is set still wins. A Railway environment
-// with no row in the map gets no defaults, so production's startup checks (auth.service.ts) stop it instead of
-// letting it run with local URLs.
+// Typed environment variables, each documented in backend/.env.example. Deployment URLs default from packages/shared by
+// RAILWAY_ENVIRONMENT_NAME; an unknown Railway environment gets none, so production's startup checks stop it.
 
 import { DEPLOYMENTS, type Deployment } from '@frontpage/shared';
+import { DEFAULT_TIMEOUT_MS, DEFAULT_USER_AGENT } from './lib/feed/fetch';
 
 const deployment = deploymentDefaults(process.env.RAILWAY_ENVIRONMENT_NAME);
 
 export const env = {
     NODE_ENV: process.env.NODE_ENV ?? 'development',
-    PORT: int(process.env.PORT, 4000),
+    PORT: integerOr(process.env.PORT, 4000),
     WEB_ORIGINS: (optional(process.env.WEB_ORIGIN) ?? deployment?.siteUrl ?? '')
         .split(',')
         .map((origin) => origin.trim())
@@ -28,31 +25,27 @@ export const env = {
     EMAIL_FROM: optional(process.env.EMAIL_FROM),
     MAILPIT_URL: optional(process.env.MAILPIT_URL),
 
-    FEED_FETCH_TIMEOUT_MS: int(process.env.FEED_FETCH_TIMEOUT_MS, 10_000),
-    FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? 'Frontpage/0.1 (RSS reader)',
-    FEED_MAX_CONCURRENCY: int(process.env.FEED_MAX_CONCURRENCY, 5),
-    FEED_MIN_REFETCH_MINUTES: int(process.env.FEED_MIN_REFETCH_MINUTES, 15),
+    FEED_FETCH_TIMEOUT_MS: integerOr(process.env.FEED_FETCH_TIMEOUT_MS, DEFAULT_TIMEOUT_MS),
+    FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? DEFAULT_USER_AGENT,
+    FEED_MIN_REFETCH_MINUTES: integerOr(process.env.FEED_MIN_REFETCH_MINUTES, 15),
     FEED_ALLOW_LOOPBACK: process.env.FEED_ALLOW_LOOPBACK === 'true',
-
-    FEED_REFRESH_INTERVAL_MINUTES: int(process.env.FEED_REFRESH_INTERVAL_MINUTES, 30),
 };
 
-// Returns the committed settings for the Railway environment `name` ("production" or "staging"), the local ones when
-// not on Railway (no name), or undefined for a Railway environment the map doesn't know (e.g. a PR environment).
+// undefined for a Railway environment the map doesn't know (e.g. a PR environment); not on Railway means local.
 export function deploymentDefaults(name: string | undefined): Deployment | undefined {
-    if (!name) {
+    if (!name)
         return DEPLOYMENTS.local;
-    }
+
     return name === 'production' || name === 'staging' ? DEPLOYMENTS[name] : undefined;
 }
 
-// An env var with surrounding spaces trimmed, or undefined when it's missing or blank.
 function optional(value: string | undefined) {
     return value?.trim() || undefined;
 }
 
-// Reads a whole-number env var. Returns `fallback` when it's missing or not a number (e.g. "abc").
-function int(value: string | undefined, fallback: number) {
-    const n = Number.parseInt(value ?? '', 10);
-    return Number.isFinite(n) ? n : fallback;
+// `fallback` when missing or not a number (e.g. "abc").
+function integerOr(value: string | undefined, fallback: number) {
+    const parsed = Number.parseInt(value ?? '', 10);
+
+    return Number.isFinite(parsed) ? parsed : fallback;
 }

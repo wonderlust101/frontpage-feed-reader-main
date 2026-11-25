@@ -1,10 +1,7 @@
-// Runs one Better Auth client call and reports a failure in one shape (AuthFailure) that authErrorMessage understands.
-// It also reads how long to wait after too many attempts: Better Auth only sends that in a 429's X-Retry-After header,
-// which the returned error object doesn't include, so the call gets an onError hook that captures it.
+// Better Auth only sends the wait after too many attempts in a 429's X-Retry-After header, which its error object
+// leaves out, so each call gets an onError hook that captures it.
 
-// A failed auth request in one shape: Better Auth's error code, the HTTP status (0 when the request never reached the
-// server), whether the browser itself is offline then (otherwise the server is the one that can't be reached), and the
-// wait in seconds after too many attempts, when the server said.
+// `status` is 0 when the request never reached the server; `offline` says whether the browser was offline then.
 export type AuthFailure = {
     code?: string;
     status: number;
@@ -18,23 +15,23 @@ type CallResult<T> = { data: T; error: null } | { data: null; error: { code?: st
 
 type RequestResult<T> = { data: T; failure: null } | { data: null; failure: AuthFailure };
 
-// Returns the call's data, or a failure: the error code and status, the wait in seconds for a 429, status 0 when the
-// request never got an answer (with `offline` when the browser reports no connection).
-// Example: authRequest((fetchOptions) => authClient.signIn.email(values, fetchOptions))
+// `call` must pass `fetchOptions` on to the auth client, or the 429 wait is never captured.
 export async function authRequest<T>(call: (fetchOptions: ErrorHook) => Promise<CallResult<T>>): Promise<RequestResult<T>> {
     let retryAfterSeconds: number | undefined;
     const fetchOptions: ErrorHook = {
         onError({ response }) {
             const header = response.headers.get('X-Retry-After');
+
             retryAfterSeconds = header ? Number(header) : undefined;
         },
     };
 
     try {
         const result = await call(fetchOptions);
-        if (result.error) {
+
+        if (result.error)
             return { data: null, failure: { code: result.error.code, status: result.error.status, retryAfterSeconds } };
-        }
+
         return { data: result.data, failure: null };
     } catch {
         return { data: null, failure: { status: 0, offline: typeof navigator !== 'undefined' && navigator.onLine === false } };

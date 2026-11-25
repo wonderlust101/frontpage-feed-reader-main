@@ -1,16 +1,13 @@
-'use client';
-
-// An account-only view as a guest sees it (Saved, Weekly digest, Reading stats): its icon with a lock, in the rail or
-// as a drawer row, that opens a preview of the feature instead of leading straight to sign-up. The preview names the
-// feature, says what it does and offers Create account (the view's href), so a guest can look through everything an
-// account adds without leaving the page.
+// An account-only view as a guest sees it: a locked icon or row that opens a preview of the feature, so a guest can
+// see what an account adds without leaving the page.
 
 import Link from 'next/link';
 import { buttonClassName } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import type { ShellView } from './nav-entries';
+import { RAIL_BUTTON_CLASSES, RAIL_IDLE_CLASSES } from './rail-styles';
+import { RailTooltip } from './rail-tooltip';
 import { ShellMenu } from './shell-menu';
-import { RailTooltip } from './sidebar-toggle';
 
 type LockedViewProps = {
     view: ShellView;
@@ -19,41 +16,42 @@ type LockedViewProps = {
 };
 
 const TRIGGER_CLASSES = {
-    rail: 'group relative grid size-11 place-items-center rounded-control text-ink-2 transition-colors duration-150 hover:bg-ink/6 hover:text-ink',
+    rail: `${RAIL_BUTTON_CLASSES} ${RAIL_IDLE_CLASSES}`,
     row: 'flex min-h-11 w-full items-center gap-3 rounded-toggle px-3 text-left text-ui font-medium text-ink-2 transition-colors duration-150 hover:bg-ink/6 hover:text-ink',
 };
 
-// Renders the trigger (`variant` picks the rail's icon or the drawer's row) and the feature's `preview`.
 export function LockedView({ view, preview, variant }: LockedViewProps) {
+    const railTrigger = (
+        <>
+            <Icon name={view.icon} />
+            <span aria-hidden="true" className="absolute right-1 bottom-1 grid size-4 place-items-center rounded-full bg-rail text-ink-2">
+                <Icon name="locked" size="inline" className="size-3" />
+            </span>
+            <span className="sr-only">{view.label}, with an account</span>
+            <RailTooltip>
+                {view.label}
+                <span className="ml-1.5 font-normal">· with an account</span>
+            </RailTooltip>
+        </>
+    );
+
+    const rowTrigger = (
+        <>
+            <Icon name={view.icon} />
+            <span className="min-w-0 truncate">{view.label}</span>
+            <span className="ml-auto flex">
+                <Icon name="locked" size="inline" />
+            </span>
+            <span className="sr-only">, with an account</span>
+        </>
+    );
+
     return (
         <ShellMenu
             label={view.label}
             placement="row"
             triggerClassName={TRIGGER_CLASSES[variant]}
-            trigger={
-                variant === 'rail' ? (
-                    <>
-                        <Icon name={view.icon} />
-                        <span aria-hidden="true" className="absolute right-1 bottom-1 grid size-4 place-items-center rounded-full bg-rail text-ink-2">
-                            <Icon name="locked" size="inline" className="size-3" />
-                        </span>
-                        <span className="sr-only">{view.label}, with an account</span>
-                        <RailTooltip>
-                            {view.label}
-                            <span className="ml-1.5 font-normal">· with an account</span>
-                        </RailTooltip>
-                    </>
-                ) : (
-                    <>
-                        <Icon name={view.icon} />
-                        <span className="min-w-0 truncate">{view.label}</span>
-                        <span className="ml-auto flex">
-                            <Icon name="locked" size="inline" />
-                        </span>
-                        <span className="sr-only">, with an account</span>
-                    </>
-                )
-            }
+            trigger={variant === 'rail' ? railTrigger : rowTrigger}
         >
             <div className="flex items-center gap-3">
                 <span aria-hidden="true" className="grid size-10 flex-none place-items-center rounded-control bg-field-lemon text-on-field">

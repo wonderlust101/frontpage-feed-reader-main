@@ -6,8 +6,7 @@ process.env.WEB_ORIGIN = 'http://localhost:3000';
 process.env.AUTH_URL = 'http://localhost:4000';
 process.env.AUTH_SECRET = 'test-secret-not-for-production-0123456789abcdef';
 
-// Route tests fetch from a local fixture server, which the SSRF guard would otherwise block,
-// and use a short timeout so the timeout path is quick. Live tests (LIVE_FEEDS=1) keep the real defaults.
+// Route tests fetch from a local fixture server the SSRF guard would block; live tests (LIVE_FEEDS=1) keep the defaults.
 if (!process.env.LIVE_FEEDS) {
     process.env.FEED_ALLOW_LOOPBACK = 'true';
     process.env.FEED_FETCH_TIMEOUT_MS = '500';

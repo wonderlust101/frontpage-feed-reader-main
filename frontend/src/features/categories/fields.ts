@@ -1,8 +1,5 @@
-// The field palette: eight flat colors. Lemon is Frontpage's own color (the home field, "All", brand accents), and
-// readers may give it to categories too, like any of the other seven, whatever they are about: "Film" or "Politics".
-// Categories may share a color. A new category starts on NO_FIELD ("No color"), a neutral stone field that behaves
-// exactly like the colored ones (filled tag, filled dot, filled when on); PICKABLE_FIELDS lists it first for that reason.
-// A field's `onColor` is the text color on a surface filled with it; FieldChoices maps category ids to chosen fields.
+// Lemon is Frontpage's own color, yet readers may give it to categories too. NO_FIELD ("No color") behaves exactly
+// like the colored fields, so PICKABLE_FIELDS lists it first. `onColor` is the text color on a filled surface.
 
 export type FieldId = 'lemon' | 'coral' | 'sky' | 'leaf' | 'lilac' | 'tangerine' | 'aqua' | 'rose' | 'none';
 
@@ -14,6 +11,9 @@ export type Field = {
     hex: { light: string; dark: string };
     inkContrast: { light: string; dark: string };
 };
+
+// A category as the capsule filter and switch draw it.
+export type CapsuleCategory = { id: string; name: string; field: Pick<Field, 'id' | 'color' | 'onColor'> };
 
 export type FieldChoices = Record<string, FieldId>;
 
@@ -88,8 +88,6 @@ export const FIELDS: Field[] = [
 
 export const BRAND_FIELD = FIELDS[0];
 
-export const CATEGORY_FIELDS = FIELDS;
-
 export const NO_FIELD: Field = {
     id: 'none',
     name: 'No color',
@@ -99,17 +97,20 @@ export const NO_FIELD: Field = {
     inkContrast: { light: '12.1 : 1', dark: '12.1 : 1' },
 };
 
-export const PICKABLE_FIELDS = [NO_FIELD, ...CATEGORY_FIELDS];
+export const PICKABLE_FIELDS = [NO_FIELD, ...FIELDS];
 
-const FIELD_BY_ID = new Map<FieldId, Field>(PICKABLE_FIELDS.map((field) => [field.id, field]));
+const FIELD_BY_ID = new Map<string, Field>(PICKABLE_FIELDS.map((field) => [field.id, field]));
 
-// Gives each category its field: the reader's choice, else the category's preset (sample data), else "No color".
-// Any number of categories may share a field.
+// The reader's choice, else the category's preset, else "No color".
 export function assignFields(categoryIds: string[], choices: FieldChoices, presets: FieldChoices = {}): Record<string, Field> {
     return Object.fromEntries(categoryIds.map((id) => [id, categoryFieldById(choices[id]) ?? categoryFieldById(presets[id]) ?? NO_FIELD]));
 }
 
-// Returns the field a category may be given, or undefined for unknown ids.
 export function categoryFieldById(id: string | undefined): Field | undefined {
-    return id ? FIELD_BY_ID.get(id as FieldId) : undefined;
+    return id ? FIELD_BY_ID.get(id) : undefined;
+}
+
+// "No color" for a missing or unknown id.
+export function fieldOrNone(id: string | undefined): Field {
+    return categoryFieldById(id) ?? NO_FIELD;
 }

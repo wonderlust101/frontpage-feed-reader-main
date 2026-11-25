@@ -1,6 +1,3 @@
-// Logo section of the design system page: the lockup on each ground, the mark's variants and size ladder,
-// the usage rules, and the exported files.
-
 import { Logo, LogoMark } from '@/components/logo';
 import { DocSection, Specimen } from './doc-section';
 
@@ -44,7 +41,6 @@ const FILES = [
     { path: 'public/brand/frontpage-app-icon-512.png', use: 'App icon raster, 512px' },
 ];
 
-// Renders the logo section.
 export function LogoSection() {
     return (
         <DocSection

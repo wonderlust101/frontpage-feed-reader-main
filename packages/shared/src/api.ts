@@ -1,16 +1,11 @@
 // API request and response shapes: the contract between backend and frontend, imported from "@frontpage/shared".
 // Dates are ISO 8601 UTC strings (or null); only `contentHtml` is HTML (sanitized), all other text is plain.
-// In a Subscription, `title` is the reader's custom title or else the feed's own, `iconUrl` is the feed's image or else
-// the site's /favicon.ico (unchecked, so hide it if it fails to load), and a null `categoryId` means Uncategorized.
-// An item's `feed` follows the same rules. `sortAt` (what lists are sorted by) is `publishedAt`, or else when the article was
-// first seen; `nextCursor` is opaque: send it back as `cursor` for the next page, and null means there are no more.
 
 export type DbStatus = 'connected' | 'skipped' | 'error';
 
 export type HealthResponse = {
     api: 'ok';
     database: DbStatus;
-    error?: string;
 };
 
 export type FeedFormat = 'rss2' | 'atom' | 'rss1';
@@ -102,20 +97,21 @@ export type SessionResponse = {
     session: { id: string; expiresAt: string };
 } | null;
 
-export const MAX_CUSTOM_TITLE_LENGTH = 200;
-
 export type FeedHealth = 'active' | 'stale' | 'error' | 'dead';
 
 export type Subscription = {
     id: string;
     feedId: string;
     url: string;
+    // The reader's custom title, else the feed's own.
     title: string;
     customTitle: string | null;
     feedTitle: string;
     description: string | null;
     siteUrl: string | null;
+    // The feed's image, else the site's /favicon.ico, unchecked: hide it if it fails to load.
     iconUrl: string | null;
+    // null means Uncategorized.
     categoryId: string | null;
     health: FeedHealth;
     lastSuccessAt: string | null;
@@ -142,10 +138,6 @@ export type UpdateSubscriptionRequest = {
     categoryId?: string | null;
 };
 
-export const ITEM_PAGE_SIZE = 30;
-export const MAX_ITEM_PAGE_SIZE = 100;
-export const UNCATEGORIZED = 'uncategorized';
-
 export type ItemOrder = 'newest' | 'oldest';
 
 export type ItemListParams = {
@@ -157,6 +149,7 @@ export type ItemListParams = {
     cursor?: string;
 };
 
+// Same rules as a Subscription's `title`, `iconUrl` and `categoryId`.
 export type ItemFeed = {
     id: string;
     title: string;
@@ -174,6 +167,7 @@ export type ItemSummary = {
     summary: string;
     imageUrl: string | null;
     publishedAt: string | null;
+    // What lists sort by: `publishedAt`, else when the article was first seen.
     sortAt: string;
     hasFullContent: boolean;
     isRead: boolean;
@@ -186,6 +180,7 @@ export type ItemDetail = ItemSummary & {
 
 export type ItemListResponse = {
     items: ItemSummary[];
+    // Opaque: send it back as `cursor` for the next page; null means there are no more.
     nextCursor: string | null;
 };
 
@@ -203,3 +198,11 @@ export type ItemCountsResponse = {
     categories: (ItemCount & { categoryId: string | null })[];
     feeds: (ItemCount & { feedId: string; categoryId: string | null })[];
 };
+
+export const MAX_CUSTOM_TITLE_LENGTH = 200;
+
+export const ITEM_PAGE_SIZE = 30;
+
+export const MAX_ITEM_PAGE_SIZE = 100;
+
+export const UNCATEGORIZED = 'uncategorized';

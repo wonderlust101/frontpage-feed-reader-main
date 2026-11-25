@@ -14,15 +14,16 @@ Bun is the package manager and script runner everywhere.
 
 ## Project structure
 
-The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and `packages/shared/`. Each has its own `package.json`, but there is one `bun.lock` and one (hoisted) `node_modules` at the root. Run `bun install` from the root; add a dependency inside the package that needs it (`cd backend && bun add x`).
+The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `packages/shared/` and `packages/eslint-config/`. Each has its own `package.json`, but there is one `bun.lock` and one (hoisted) `node_modules` at the root. Run `bun install` from the root; add a dependency inside the package that needs it (`cd backend && bun add x`).
 
 `packages/shared` (`@frontpage/shared`) holds code both sides use, starting with the API response types. Backend and frontend import it the same way (`import type { HealthResponse } from "@frontpage/shared"`), so the API contract is defined once.
 
 ```
 .
 ├── packages/
-│   └── shared/               # @frontpage/shared: code used by both sides
-│       └── src/api.ts        #   API response types (the backend ↔ frontend contract)
+│   ├── shared/               # @frontpage/shared: code used by both sides
+│   │   └── src/api.ts        #   API response types (the backend ↔ frontend contract)
+│   └── eslint-config/        # @frontpage/eslint-config: the ESLint Stylistic code style every package lints with
 ├── frontend/                 # Next.js → Vercel (Root Directory: frontend)
 │   ├── vercel.json
 │   ├── .env.example
@@ -33,7 +34,7 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │       │   ├── (auth)/       #   sign-in, sign-up, verify-email, forgot/reset-password, account/password
 │       │   └── design-system/  # /design-system: the living design system page
 │       ├── features/         # app features, mirroring backend/src/modules (auth, categories, items, preferences…)
-│       │   └── <domain>/     #   components/, logic (fields.ts, category-field-store.ts…), later hooks/, actions.ts, types.ts
+│       │   └── <domain>/     #   components/, hooks/ (use-*.ts), logic at the root (fields.ts, schemas.ts…)
 │       ├── components/       # shared, feature-agnostic: ui/ primitives (incl. form pieces), logo.tsx, app-shell/ (rail, category panel, toolbar with search, drawer), stickers.tsx
 │       ├── lib/api.ts        # server-side client for the backend
 │       └── styles/           # tokens.css (design tokens), components.css (component layer)
@@ -47,25 +48,26 @@ The repo is a **Bun workspace** with three packages: `frontend/`, `backend/` and
 │   ├── requests/             # .http files for manual API requests
 │   └── src/
 │       ├── index.ts          # starts the server (PORT, graceful shutdown)
+│       ├── server-lifecycle.ts # shutdown(): close the server and database, then exit (1 if closing fails)
 │       ├── app.ts            # Express app: global middleware + mounts module routers
 │       ├── middleware/       # shared by all modules: error handling, the auth guard and rate limits
 │       │   ├── error-handler.ts      # errorHandler: every thrown error → the standard JSON error body
 │       │   ├── not-found-handler.ts  # notFoundHandler: unknown routes → 404
 │       │   ├── require-auth.ts       # requireAuth: 401 without a session; currentUser(res) in controllers
-│       │   ├── rate-limit.ts         # perUserRateLimit: 429 + X-Retry-After past N requests per signed-in user
-│       │   └── errors/               # one file per error class: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
+│       │   └── rate-limit.ts         # perUserRateLimit: 429 + X-Retry-After past N requests per signed-in user
+│       ├── errors/           # one file per error class, thrown by services and lib: HttpError + BadRequestError (400) … GatewayTimeoutError (504)
 │       ├── env.ts            # typed environment variables
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
-│       │   ├── auth/         #   /api/auth/* (Better Auth) + "users", "sessions", "accounts", "verifications" tables
+│       │   ├── auth/         #   /api/auth/* (Better Auth; email templates in auth.emails.ts) + "users", "sessions", "accounts", "verifications" tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
-│       │   ├── feeds/        #   GET /api/fetch (routes → controller → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
+│       │   ├── feeds/        #   GET /api/fetch (routes → controller → validation → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
 │       │   ├── items/        #   /api/items (routes → controller → validation + cursor → service; read rule) + "items", "item_read_states" tables
 │       │   ├── categories/   #   "categories" table + the "is this category yours?" check
 │       │   ├── subscriptions/#   /api/subscriptions (routes → controller → validation → service; health rule) + "subscriptions" table
 │       │   ├── preferences/  #   "user_preferences" table
 │       │   └── bookmarks/    #   "bookmarks" table
 │       ├── db/               # Drizzle client (index.ts) + schema registry (schema.ts re-exports every module's tables)
-│       ├── lib/              # framework-free helpers used across modules (feed fetching/parsing, email…)
+│       ├── lib/              # framework-free helpers used across modules: feed/ (fetch, decode, raw-xml scans, normalize, sanitize), email, uuid
 │       ├── types/            # backend-only types shared across modules (create when needed; API types go in packages/shared)
 │       └── scripts/          # one-off scripts run with `bun src/scripts/<name>.ts` (e.g. seeding)
 ├── docs/                     # notes/: design records (tracked; planned work is in Jira); spec, guidance, brief (local, git-ignored)
@@ -88,7 +90,7 @@ Each feature lives in `backend/src/modules/<feature>/`, with files named after t
 | `<feature>.schema.ts`     | Drizzle table definitions; **also export it from `src/db/schema.ts`** so drizzle-kit and the db client see it         |
 | `<feature>.types.ts`      | Types used only inside this module                                                                                    |
 
-Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, service, types and its tables, plus `feeds.ingest.ts`, a second service that stores fetched feeds; `subscriptions/` has routes, controller, validation, service and its table, plus `subscriptions.health.ts`, the pure feed-health rule. A module may split out a file like this when one file would hold two unrelated jobs.
+Requests flow **routes → controller → service**: keep handler bodies out of routes files and HTTP details out of services, so services stay reusable (e.g. by background jobs) and testable without Express. Only create the files a module needs: `health/` has routes + controller; `feeds/` has routes, controller, validation, service, types and its tables, plus `feeds.ingest.ts`, a second service that stores fetched feeds; `subscriptions/` has routes, controller, validation, service and its table, plus `subscriptions.health.ts`, the pure feed-health rule. A module may split out a file like this when one file would hold two unrelated jobs.
 
 **Errors.** Every API error has the same shape, whatever the status:
 
@@ -96,19 +98,34 @@ Requests flow **routes → controller → service**: keep handler bodies out of 
 { "error": { "code": "not_found", "message": "Feed not found", "retryable": false } }
 ```
 
-- Services **throw** the class for the status they mean, from `src/middleware/errors/`: `BadRequestError` (400), `UnauthorizedError` (401), `NotFoundError` (404), `ConflictError` (409), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `TooManyRequestsError` (429), `BadGatewayError` (502), `ServiceUnavailableError` (503), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
+- Services **throw** the class for the status they mean, from `src/errors/`: `BadRequestError` (400), `UnauthorizedError` (401), `NotFoundError` (404), `ConflictError` (409), `PayloadTooLargeError` (413), `UnprocessableEntityError` (422), `TooManyRequestsError` (429), `BadGatewayError` (502), `ServiceUnavailableError` (503), `GatewayTimeoutError` (504), e.g. `throw new NotFoundError('not_found', 'Feed not found')`. 5xx, 408 and 429 are retryable unless you pass `{ retryable: false }`.
 - Controllers **don't catch**. Express 5 forwards thrown errors to `src/middleware/error-handler.ts`, the only place error JSON is built. Unknown errors become a logged, generic 500.
-- A new kind of error needs no registration: throw the right class with a new code, and add the code to `ApiErrorCode` in `packages/shared/src/api.ts` so the frontend knows it. A new status is a small file in `src/middleware/errors/` (copy one of the others) plus a line in its `index.ts`.
+- A new kind of error needs no registration: throw the right class with a new code, and add the code to `ApiErrorCode` in `packages/shared/src/api.ts` so the frontend knows it. A new status is a small file in `src/errors/` (copy one of the others) plus a line in its `index.ts`.
 
 The sample feeds live in `backend/data/` because only the backend reads them.
 
 ### Code style
 
-Prettier handles formatting and ESLint adds `curly` (braces on every `if`/`else`/loop body). Beyond that, every source file follows the same layout and comment rules, so any file reads the same way.
+ESLint formats TypeScript (`.ts`, `.tsx`, `.mjs`) with ESLint Stylistic (`packages/eslint-config`); Prettier formats everything else (CSS, JSON, Markdown, YAML). `bun run format` runs both, and `bun run lint` fails on any layout the formatter would change. Prettier skips TS files because it would pull a brace-free `if` body up onto the `if` line. The backend and `packages/shared` also run typescript-eslint's recommended rules (syntax-only: the backend's TypeScript 7 has no JS API for type-aware rules), and backend `src/` warns past complexity 20, nesting depth 3, 5 parameters or 400 lines, limits set above today's code so they only flag new outliers.
+
+**Layout:**
+
+- Braces are optional for a single statement. Without braces, the body goes on the next line, indented. Use braces for several statements, every branch of an `if`/`else` chain, and wherever leaving them out reads worse.
+- A blank line separates steps: after imports and groups of declarations, around `if`/`for`/`while`/`switch`/`try`, and before `return` (the linter enforces these). Inside a component, group the hooks, the derived values, the handlers and the JSX, and leave a blank line between large JSX sections.
+- Prefer early returns to nesting, and `if`/`else` to nested ternaries.
+
+<!-- prettier-ignore -->
+```ts
+if (!user)
+    return null;
+
+for (const item of items)
+    processItem(item);
+```
 
 **File order, top to bottom:**
 
-1. Purpose comment (a few `//` lines), then a blank line
+1. Purpose comment (0–2 `//` lines, 3 at most), then a blank line
 2. Imports
 3. Types
 4. Constants, then module state (`let` variables, caches)
@@ -117,12 +134,16 @@ Prettier handles formatting and ESLint adds `curly` (braces on every `if`/`else`
 
 You meet a file's main function first and read down into the details. Write helpers as `function` declarations, not `const helper = () => …`: functions are hoisted, so a constant near the top (like `const ISO = pattern(…)` in `dates.ts`) can use a helper defined further down. Test files are the exception: their setup and helpers go above the tests.
 
-**Comments** (`//` only, never `/* */` or `/** */`):
+**Comments** (`//` only, never `/* */` or `/** */`). Fewer is better: a comment says _why_, not _what_.
 
-- **Top of file:** optional lines stating the file's purpose and any key design decision, then a blank line.
-- **Every function:** one line saying what it does, what it returns and its edge cases (when it returns null, what it throws); two lines only for unusually complex functions. Comment lines may run past Prettier's `printWidth`, since Prettier never wraps comments.
-- **Nowhere else**, except a one-line _why_ on a genuinely complex line (a regex, a workaround, non-obvious library behaviour). No section dividers and no comments on constants, types or fields.
+- **Top of file:** optional, 0–2 lines (3 at most) on the file's purpose or a key design decision. Don't add one just to restate the file name.
+- **Functions:** none when the name and body explain it. Otherwise exactly one line on what a caller can't see (why it exists, when it returns null, what it throws).
+- **Inside code:** a one-line _why_ next to the line it explains (a regex, a workaround, non-obvious library or browser behaviour, an accessibility decision). No section dividers and no narration.
+- **Tables:** one line above each `pgTable(...)` saying what the table is for (two for complex tables).
 - **Names first:** if code needs a comment to be understood, rename the variable or extract a named constant instead (`MAX_OFFSET_HOURS = 14`, not `14 // max offset`).
+- Roadmap notes and to-dos go in Jira, not in comments.
+
+**Editor setup:** run ESLint's fix on save for TS and restrict Prettier to the other files. WebStorm: Settings → Prettier → "Run for files" `**/*.{css,json,md,yml,yaml,html}`, and Settings → ESLint → "Run eslint --fix on save". VS Code: `"editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" }`, with Prettier as the formatter only for those file types.
 
 ## Planning and tracking
 
@@ -181,7 +202,7 @@ The living reference is **`/design-system`** (`frontend/src/app/design-system/`)
 Decisions worth knowing before changing it:
 
 - **Type leads, color maps.** Bricolage Grotesque for anything scanned, Onest for reading. Color has one job: Lemon (`#ffd000`, the same in both themes) is Frontpage's own, and seven vivid fields (Coral, Sky, Leaf, Lilac, Tangerine, Aqua, Rose) mark categories. Ink text on every field is 7.5:1 or better. No shadows, no gradients.
-- **Category colors are the reader's choice.** Any category can take any field, several can share one, and a new category starts on **No color**, a neutral stone field that behaves exactly like the others. Guests' choices are kept in `localStorage` (`frontpage-category-fields`, via `useCategoryFields` in `features/categories/category-field-store.ts`); signed-in users will need a color column on `categories`.
+- **Category colors are the reader's choice.** Any category can take any field, several can share one, and a new category starts on **No color**, a neutral stone field that behaves exactly like the others. Guests' choices are kept in `localStorage` (`frontpage-category-fields`, via `useCategoryFields` in `features/categories/hooks/use-category-fields.ts`); signed-in users will need a color column on `categories`.
 - **Every color is written once** with `light-dark()`; the theme switch only sets `color-scheme`. Fields keep their full color in dark mode.
 - **Accessibility is designed in, not bolted on.** Two-tone focus rings (ink outline over a ground halo) that show on any field, while text inputs thicken their own edge instead; a high-contrast tier (system `prefers-contrast` or the reader settings) that raises supporting text to 7:1 and thickens rules; forced-colors fallbacks; 44px hit areas on small controls; state never shown by color alone (check marks, line styles, labels).
 - **Readers tune the column.** Text size, line height, reading width, density, typeface, theme and contrast are reader settings (on `/design-system` for now; their home in the app comes later). They are saved in `localStorage` and copied onto `<html>` as data attributes before the first paint (one list in `src/lib/saved-preferences.ts`), and `tokens.css` maps them to CSS custom properties.
@@ -255,7 +276,8 @@ Running with `bun dev` instead of Docker: start only Mailpit with `docker compos
 | `bun run typecheck`                                            | Type-check both projects                                                    |
 | `bun run test`                                                 | Backend and frontend tests (`bun test` in each)                             |
 | `bun run test:watch`                                           | Backend tests, re-run on save                                               |
-| `bun run lint`                                                 | Lint frontend and backend (ESLint; Prettier handles formatting)             |
+| `bun run lint`                                                 | Lint frontend, backend and shared (ESLint, including code layout)           |
+| `bun run format`                                               | Format everything: Prettier (CSS, JSON, Markdown…) then `eslint --fix` (TS) |
 | `bun run db:generate` / `db:migrate` / `db:push` / `db:studio` | Drizzle Kit (backend)                                                       |
 | `bun run docker:up` / `docker:down` / `docker:logs`            | Local Docker stack (see above)                                              |
 
@@ -347,7 +369,7 @@ bunx neon@latest checkout dev --create     # work on a throwaway dev branch (swi
 
 The backend connects with **node-postgres** (`pg`): one shared pool over the pooled `DATABASE_URL`, reused across requests, because the backend is a long-running server. Drizzle Kit migrations use the direct `DATABASE_URL_UNPOOLED`. Push the schema with `bun run db:push` (or `db:generate` + `db:migrate`).
 
-Without `DATABASE_URL` the backend still runs, and `/api/health` reports the database as `skipped`.
+Without `DATABASE_URL` the backend still runs, and `/api/health` reports the database as `skipped`. When the database fails, it reports `error` and the details go only to the server log, since the endpoint is public.
 
 ## Deploying
 

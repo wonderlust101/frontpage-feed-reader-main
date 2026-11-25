@@ -18,10 +18,8 @@ export const app = express();
 
 app.set('trust proxy', 1);
 
-// The site calls the API from another origin (www. → api.), so each auth POST is preceded by a CORS preflight; browsers
-// may cache its answer for up to 2 hours (Chrome's cap), which saves that extra round trip on later requests.
-// Cross-origin pages can only read response headers listed in exposedHeaders: X-Retry-After is how long a rate-limited
-// form tells the reader to wait.
+// The site calls the API from another origin, so browsers may cache the CORS preflight for 2 hours (Chrome's cap).
+// Cross-origin pages can only read exposed headers, and X-Retry-After is how long a rate-limited form must wait.
 app.use(
     cors({
         origin: env.WEB_ORIGINS,

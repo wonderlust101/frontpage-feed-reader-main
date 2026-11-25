@@ -1,10 +1,7 @@
-// User page placeholder: no design yet. The signed-in reader's home will go here, inside the app shell (user/layout.tsx),
-// whose account menu now holds the account actions. The page still checks the session itself, so it streams in behind
-// <Suspense> and sends a signed-out visitor to sign-in with the right return path.
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { ACCOUNT_HOME } from '@/features/auth/redirect-target';
 import { requireUser } from '@/features/auth/require-user';
 
 export const metadata: Metadata = { title: 'Your front page' };
@@ -25,9 +22,8 @@ export default function UserPage() {
     );
 }
 
-// Says who is signed in; redirects to sign-in if nobody is.
 async function SignedInAs() {
-    const user = await requireUser('/user');
+    const user = await requireUser(ACCOUNT_HOME);
 
     return <p>Signed in as {user.name}.</p>;
 }

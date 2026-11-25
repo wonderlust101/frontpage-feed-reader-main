@@ -1,5 +1,4 @@
-// Frontpage's icon set: Lucide icons behind app-level names, so call sites say what they mean ("mark-read")
-// and the drawing can change in one place. One stroke weight everywhere (1.75px, absolute), in the current text color.
+// Lucide icons behind app-level names, so call sites say what they mean and the drawing can change in one place.
 
 import {
     AArrowDown,
@@ -44,19 +43,19 @@ import {
     Info,
     Keyboard,
     LayoutList,
-    Lock,
-    PanelLeftClose,
-    PanelLeftOpen,
     Lightbulb,
     Link,
     ListFilter,
     LoaderCircle,
+    Lock,
     LogIn,
     LogOut,
     Mail,
     Menu,
     Moon,
     Newspaper,
+    PanelLeftClose,
+    PanelLeftOpen,
     Pencil,
     Plus,
     RefreshCw,
@@ -81,7 +80,7 @@ import {
     type LucideIcon,
 } from 'lucide-react';
 
-type IconSize = 'inline' | 'action' | 'nav';
+export type IconSize = 'inline' | 'action' | 'nav';
 
 type IconProps = {
     name: IconName;
@@ -182,14 +181,13 @@ export const ICONS = {
 
 export type IconName = keyof typeof ICONS;
 
-const ICON_SIZES: Record<IconSize, { px: number; className: string }> = {
+export const ICON_SIZES: Record<IconSize, { px: number; className: string }> = {
     inline: { px: 16, className: 'size-4' },
     action: { px: 20, className: 'size-5' },
     nav: { px: 24, className: 'size-6' },
 };
 
-// Renders an icon by its app-level name. Decorative (hidden from screen readers) unless `label` is given,
-// in which case it is announced as an image with that name. Sizes: inline 16px, action 20px, nav 24px.
+// Decorative unless `label` is given, then announced as an image.
 export function Icon({ name, size = 'action', label, className = '' }: IconProps) {
     const Glyph = ICONS[name];
 

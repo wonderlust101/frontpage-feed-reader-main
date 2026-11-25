@@ -1,18 +1,15 @@
-// States section of the design system page: what lists and actions look like when they are empty, loading, offline,
-// failing, confirming or asking first. Every state names what happened and what to do next.
-
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Icon } from '@/components/ui/icon';
 import { Notice } from '@/components/ui/notice';
-import { FeedItemRow, FeedItemSkeleton } from '@/features/items/components/feed-item-row';
-import { SAMPLE_ITEMS, getCategory } from '../_data/sample-data';
+import { FeedItemSkeleton } from '@/features/items/components/feed-item-row';
+import { SAMPLE_ITEMS } from '../_data/sample-data';
 import { DocSection, Specimen } from './doc-section';
 import { ConfirmDemo, ToastDemo } from './feedback-demo';
+import { SampleItemRow } from './sample-item-row';
 
 const SELECTION_ITEMS = SAMPLE_ITEMS.slice(0, 3);
 
-// Renders empty, loading, notice, toast, confirm and selection specimens.
 export function StatesSection() {
     return (
         <DocSection
@@ -81,17 +78,7 @@ export function StatesSection() {
                 >
                     <ul className="rule-t">
                         {SELECTION_ITEMS.map((item, index) => (
-                            <FeedItemRow
-                                key={item.id}
-                                title={item.title}
-                                href="#states"
-                                source={item.source}
-                                time={item.time}
-                                isNew={item.isNew}
-                                health={item.health}
-                                category={getCategory(item.category)}
-                                isSelected={index === 1}
-                            />
+                            <SampleItemRow key={item.id} item={item} href="#states" isSelected={index === 1} />
                         ))}
                     </ul>
                 </Specimen>

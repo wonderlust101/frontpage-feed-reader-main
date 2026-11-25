@@ -1,6 +1,5 @@
 'use client';
 
-// Search field: the text field's shape with a search icon in front and, once there is a query, a clear button.
 // The label is visually hidden because the icon and placeholder already say what the field is for.
 
 import { useRef, type ComponentProps } from 'react';
@@ -13,7 +12,6 @@ type SearchFieldProps = Omit<ComponentProps<'input'>, 'type' | 'id' | 'value' | 
     onChange: (value: string) => void;
 };
 
-// Renders the controlled search input; clearing empties the query and returns focus to the field.
 export function SearchField({ id, label, value, onChange, className = '', ...inputProps }: SearchFieldProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 

@@ -1,5 +1,4 @@
-// Toast: a short confirmation after an action that can be taken back ("Marked 12 items read · Undo"). Solid ink with
-// ground text, 10px corners, announced politely. It never carries an error a reader must act on: those stay inline.
+// A short confirmation for an action that can be taken back. Never an error the reader must act on: those stay inline.
 
 import type { ReactNode } from 'react';
 import { Icon } from './icon';
@@ -10,7 +9,7 @@ type ToastProps = {
     onDismiss: () => void;
 };
 
-// Renders the toast body; place it in a fixed region with role="status" so screen readers hear each new message.
+// Place it in a fixed region with role="status" so screen readers hear each new message.
 export function Toast({ children, onUndo, onDismiss }: ToastProps) {
     return (
         <div className="flex min-h-12 w-full max-w-md items-center gap-2 rounded-control border-[1.5px] border-transparent bg-ink py-1.5 pr-1.5 pl-5 text-ui text-ground">

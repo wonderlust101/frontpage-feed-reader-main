@@ -12,6 +12,7 @@ COPY --chown=bun:bun package.json bun.lock bunfig.toml ./
 COPY --chown=bun:bun backend/package.json backend/
 COPY --chown=bun:bun frontend/package.json frontend/
 COPY --chown=bun:bun packages/shared/package.json packages/shared/
+COPY --chown=bun:bun packages/eslint-config/package.json packages/eslint-config/
 RUN bun install --frozen-lockfile --filter frontpage-backend
 
 COPY --chown=bun:bun packages packages

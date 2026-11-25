@@ -490,7 +490,7 @@
         }
     }
 
-    /* The current row's tint, mixed in OKLab: it blends toward the near-grey panel without OKLCH's hue interpolation, */
+    /* The current row's tint, mixed in OKLab: it blends toward the near-gray panel without OKLCH's hue interpolation, */
     /* which swung Lilac through red on its way to the panel's warm hue. 30% over the panel in light mode, a gentler */
     /* 14% over the workspace tone in dark, where a stronger mix turns Lemon olive and Coral maroon. */
     /* A near-neutral field ("No color") would vanish as a light tint or bar, so in light mode a low-chroma field is */

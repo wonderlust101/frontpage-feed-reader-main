@@ -1,6 +1,5 @@
-// Better Auth's four core tables (users, sessions, accounts, verifications), written by hand to match its built-in schema.
-// The adapter finds tables by model name (mapped in auth.service.ts) and fields by the camelCase property names; SQL names are snake_case.
-// Better Auth creates text ids, so every user_id elsewhere in the schema is text too.
+// Better Auth's four core tables, written by hand to match its schema: the adapter finds fields by these camelCase names
+// (SQL names are snake_case). Better Auth makes text ids, so every user_id elsewhere is text too.
 
 import { relations } from 'drizzle-orm';
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
@@ -72,8 +71,7 @@ export const verifications = pgTable(
     (t) => [index('verifications_identifier_idx').on(t.identifier)],
 );
 
-// How the tables relate, for Better Auth's joins (advanced.database.joins in auth.service.ts): with these, reading a session
-// fetches its user in the same query instead of a second one.
+// For Better Auth's joins: reading a session fetches its user in the same query.
 export const usersRelations = relations(users, ({ many }) => ({ sessions: many(sessions), accounts: many(accounts) }));
 export const sessionsRelations = relations(sessions, ({ one }) => ({ user: one(users, { fields: [sessions.userId], references: [users.id] }) }));
 export const accountsRelations = relations(accounts, ({ one }) => ({ user: one(users, { fields: [accounts.userId], references: [users.id] }) }));

@@ -1,12 +1,11 @@
 // Auth form schemas: password and name limits, email format, code clean-up and the change-password rule.
 
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@frontpage/shared';
 import { describe, expect, test } from 'bun:test';
 import {
     changePasswordSchema,
     codeSchema,
     emailSchema,
-    MAX_PASSWORD_LENGTH,
-    MIN_PASSWORD_LENGTH,
     resetPasswordSchema,
     signInSchema,
     signUpSchema,
@@ -61,6 +60,7 @@ describe('verification code', () => {
 describe('change password', () => {
     test('needs a new password that differs from the current one', () => {
         const result = changePasswordSchema.safeParse({ currentPassword: 'same-password', newPassword: 'same-password', revokeOtherSessions: true });
+
         expect(result.success).toBe(false);
         expect(result.error?.issues[0]?.path).toEqual(['newPassword']);
     });

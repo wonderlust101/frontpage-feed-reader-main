@@ -1,8 +1,6 @@
-// Verify-email page: confirm the address with the 6-digit code the API emails after sign-up.
-
 import type { Metadata } from 'next';
+import { AuthHeading } from '@/features/auth/components/auth-step-frame';
 import { VerifyEmailForm } from '@/features/auth/components/verify-email-form';
-import { AuthHeading } from '@/features/auth/components/auth-heading';
 import { VERIFY_EMAIL_HEADINGS } from '@/features/auth/headings';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';

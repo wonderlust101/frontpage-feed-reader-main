@@ -1,8 +1,7 @@
 'use client';
 
-// A shell menu (Aa, account, guest, a category's actions): a button that opens a native popover panel anchored to it. Escape, a click
-// outside and focus return come from the browser, with no script. Not role="menu": the panel holds ordinary links,
-// buttons and radios, so it is a non-modal dialog named by `label`. Ids come from useId, so a page can hold two.
+// A button with a native popover panel: Escape, outside clicks and focus return come from the browser. Not role="menu":
+// the panel holds ordinary links, buttons and radios, so it is a non-modal dialog named by `label`.
 
 import { useId, type ReactNode } from 'react';
 
@@ -14,8 +13,7 @@ type ShellMenuProps = {
     children: ReactNode;
 };
 
-// Renders the button (showing `trigger`) and the panel; "below" opens under a toolbar button, "beside" to the right of
-// the rail's foot (or above it, in the drawer), "row" to the right of a panel row (or under it, where there is no room).
+// `placement`: "below" a toolbar button, "beside" the rail's foot, or "row" to the right of a panel row (else under it).
 export function ShellMenu({ label, trigger, triggerClassName, placement, children }: ShellMenuProps) {
     const id = useId();
 

@@ -1,10 +1,9 @@
-// Per-reader rate limits for routes behind requireAuth, built on express-rate-limit's in-memory store.
-// Requests are counted per signed-in user, not per IP. The count lives in this process, which is enough for the one
-// long-running Railway server; it resets on restart. The wait goes in X-Retry-After (seconds), the header CORS exposes.
+// Per-reader rate limits, keyed by user id (so they go after requireAuth). The count lives in this process, enough for the
+// one Railway server, and resets on restart; the wait goes in X-Retry-After, the header CORS exposes.
 
 import type { RequestHandler } from 'express';
 import { rateLimit } from 'express-rate-limit';
-import { TooManyRequestsError } from './errors';
+import { TooManyRequestsError } from '../errors';
 import { currentUser } from './require-auth';
 
 type PerUserRateLimitOptions = {
@@ -13,8 +12,6 @@ type PerUserRateLimitOptions = {
     message: string;
 };
 
-// Lets each signed-in user make `limit` requests per `windowMs`; the next one gets X-Retry-After and a 429 `rate_limited` with `message`.
-// Put it after requireAuth: the counter is keyed by the user's id.
 export function perUserRateLimit({ limit, windowMs, message }: PerUserRateLimitOptions): RequestHandler {
     return rateLimit({
         limit,
@@ -25,6 +22,7 @@ export function perUserRateLimit({ limit, windowMs, message }: PerUserRateLimitO
         handler: (req, res, next) => {
             const resetAt = req.rateLimit?.resetTime?.getTime() ?? Date.now() + windowMs;
             const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
+
             res.set('X-Retry-After', String(retryAfterSeconds));
             next(new TooManyRequestsError('rate_limited', message));
         },

@@ -1,24 +1,22 @@
-// Subscriptions: a reader following a global feed, with their own title and category for it. Subscribing checks the feed
-// first: it reuses a stored copy whose last fetch succeeded in the last 15 minutes, and otherwise runs ingestFeed.
-// Every query is scoped by the reader's id, so another reader's subscription or category is simply "not found" (404).
-// Duplicates are caught by the (user, feed) unique key with `on conflict do nothing`, so two racing subscribes, or a URL
-// that redirects to a feed the reader already follows, also get 409 `already_subscribed`.
+// Subscribing reuses a stored feed whose last fetch succeeded within FEED_MIN_REFETCH_MINUTES, else runs ingestFeed. Every
+// query is scoped by the reader's id, and the (user, feed) unique key turns racing duplicates into 409 `already_subscribed`.
 
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { SubscribeRequest, Subscription, UpdateSubscriptionRequest } from '@frontpage/shared';
 import type { Database } from '../../db';
+import { env } from '../../env';
 import { feedIconUrl, parseFeedUrl } from '../../lib/feed';
-import { ConflictError, NotFoundError } from '../../middleware/errors';
+import { ConflictError, NotFoundError } from '../../errors';
 import { assertOwnCategory } from '../categories/categories.service';
 import { ingestFeed } from '../feeds/feeds.ingest';
 import { feeds } from '../feeds/feeds.schema';
 import { itemReadStates, items } from '../items/items.schema';
-import { deriveHealth } from './subscriptions.health';
+import { deriveRowHealth, FEED_HEALTH_COLUMNS } from './subscriptions.health';
 import { subscriptions } from './subscriptions.schema';
 
 type SubscriptionRow = Awaited<ReturnType<typeof selectSubscriptions>>[number];
 
-const FRESH_FETCH_MS = 15 * 60 * 1000;
+const FRESH_FETCH_MS = env.FEED_MIN_REFETCH_MINUTES * 60 * 1000;
 
 const SUBSCRIPTION_COLUMNS = {
     id: subscriptions.id,
@@ -32,12 +30,8 @@ const SUBSCRIPTION_COLUMNS = {
     siteUrl: feeds.siteUrl,
     imageUrl: feeds.imageUrl,
     lastFetchedAt: feeds.lastFetchedAt,
-    lastSuccessAt: feeds.lastSuccessAt,
-    lastErrorCode: feeds.lastErrorCode,
     lastErrorMessage: feeds.lastErrorMessage,
-    consecutiveFailures: feeds.consecutiveFailures,
-    latestItemAt: feeds.latestItemAt,
-    feedCreatedAt: feeds.createdAt,
+    ...FEED_HEALTH_COLUMNS,
 };
 
 const DISPLAY_TITLE_ORDER = sql`lower(coalesce(${subscriptions.customTitle}, ${feeds.title}))`;
@@ -45,17 +39,17 @@ const DISPLAY_TITLE_ORDER = sql`lower(coalesce(${subscriptions.customTitle}, ${f
 // Every subscription of the reader with its feed's health at `now`, sorted by the title they see (ignoring case). One query.
 export async function listSubscriptions(db: Database, userId: string, now = new Date()): Promise<Subscription[]> {
     const rows = await selectSubscriptions(db).where(eq(subscriptions.userId, userId)).orderBy(DISPLAY_TITLE_ORDER, subscriptions.id);
+
     return rows.map((row) => toSubscription(row, now));
 }
 
-// Subscribes the reader to the feed at `input.url` (optionally into one of their categories) and returns the new subscription.
-// Throws the feed's error (e.g. `invalid_url`, `not_a_feed`, `http_4xx`), `category_not_found` (404) or `already_subscribed` (409).
+// Throws the feed's error (e.g. `invalid_url`, `not_a_feed`), `category_not_found` (404) or `already_subscribed` (409).
 export async function subscribe(db: Database, userId: string, input: SubscribeRequest, now = new Date()): Promise<Subscription> {
     const url = parseFeedUrl(input.url).href;
     const categoryId = input.categoryId ?? null;
-    if (categoryId) {
+
+    if (categoryId)
         await assertOwnCategory(db, userId, categoryId);
-    }
 
     // A feed the reader already follows is refused before anything is fetched.
     const [stored] = await db
@@ -63,26 +57,33 @@ export async function subscribe(db: Database, userId: string, input: SubscribeRe
         .from(feeds)
         .where(eq(feeds.url, url));
     const existingId = stored ? await findSubscriptionId(db, userId, stored.id) : undefined;
-    if (existingId) {
-        throw alreadySubscribedError(existingId);
-    }
 
-    const isFresh = stored !== undefined && !stored.lastErrorCode && !!stored.lastSuccessAt && now.getTime() - stored.lastSuccessAt.getTime() < FRESH_FETCH_MS;
-    const feedId = isFresh ? stored.id : (await ingestFeed(db, url, { now })).feedId;
+    if (existingId)
+        throw alreadySubscribedError(existingId);
+
+    let feedId: string;
+
+    if (stored && isRecentlySuccessful(stored, now)) {
+        feedId = stored.id;
+    } else {
+        const ingested = await ingestFeed(db, url, { now });
+
+        feedId = ingested.feedId;
+    }
 
     const [created] = await db
         .insert(subscriptions)
         .values({ userId, feedId, categoryId })
         .onConflictDoNothing({ target: [subscriptions.userId, subscriptions.feedId] })
         .returning({ id: subscriptions.id });
-    if (!created) {
+
+    if (!created)
         throw alreadySubscribedError(await findSubscriptionId(db, userId, feedId));
-    }
+
     return findSubscription(db, userId, created.id, now);
 }
 
-// Renames the reader's subscription and/or moves it to another of their categories (null = Uncategorized), then returns it.
-// Fields missing from `changes` stay as they are. Throws `category_not_found` (404) or `not_found` (404) for anything not theirs.
+// Fields missing from `changes` stay as they are. Throws `category_not_found` or `not_found` (404) for anything not theirs.
 export async function updateSubscription(
     db: Database,
     userId: string,
@@ -90,36 +91,44 @@ export async function updateSubscription(
     changes: UpdateSubscriptionRequest,
     now = new Date(),
 ): Promise<Subscription> {
-    if (changes.categoryId) {
+    if (changes.categoryId)
         await assertOwnCategory(db, userId, changes.categoryId);
-    }
 
     const [updated] = await db
         .update(subscriptions)
         .set(changes)
         .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)))
         .returning({ id: subscriptions.id });
-    if (!updated) {
-        throw new NotFoundError('not_found', 'Subscription not found');
-    }
+
+    if (!updated)
+        throw subscriptionNotFoundError();
+
     return findSubscription(db, userId, updated.id, now);
 }
 
-// Deletes the reader's subscription and their read/unread marks on that feed's items, in one transaction.
-// Bookmarks, the feed and its items stay. Throws `not_found` (404) if the subscription isn't theirs.
+// Also deletes their read marks on that feed, in one transaction; bookmarks, the feed and its items stay.
 export async function unsubscribe(db: Database, userId: string, id: string): Promise<void> {
     await db.transaction(async (tx) => {
         const [deleted] = await tx
             .delete(subscriptions)
             .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)))
             .returning({ feedId: subscriptions.feedId });
-        if (!deleted) {
-            throw new NotFoundError('not_found', 'Subscription not found');
-        }
+
+        if (!deleted)
+            throw subscriptionNotFoundError();
 
         const feedItemIds = tx.select({ id: items.id }).from(items).where(eq(items.feedId, deleted.feedId));
+
         await tx.delete(itemReadStates).where(and(eq(itemReadStates.userId, userId), inArray(itemReadStates.itemId, feedItemIds)));
     });
+}
+
+// Throws `feed_not_found` (404) unless the reader follows the feed, the same answer as for one that doesn't exist.
+export async function assertFollowsFeed(db: Database, userId: string, feedId: string): Promise<void> {
+    const subscriptionId = await findSubscriptionId(db, userId, feedId);
+
+    if (!subscriptionId)
+        throw new NotFoundError('feed_not_found', 'Feed not found');
 }
 
 // Subscriptions joined to their feeds, before filtering: callers add `where` (and `orderBy`).
@@ -140,7 +149,7 @@ function toSubscription(row: SubscriptionRow, now: Date): Subscription {
         siteUrl: row.siteUrl,
         iconUrl: feedIconUrl(row.imageUrl, row.siteUrl),
         categoryId: row.categoryId,
-        health: deriveHealth({ ...row, createdAt: row.feedCreatedAt }, now),
+        health: deriveRowHealth(row, now),
         lastSuccessAt: row.lastSuccessAt?.toISOString() ?? null,
         lastFetchedAt: row.lastFetchedAt?.toISOString() ?? null,
         lastError: row.lastErrorCode ? { code: row.lastErrorCode, message: row.lastErrorMessage ?? '' } : null,
@@ -148,25 +157,38 @@ function toSubscription(row: SubscriptionRow, now: Date): Subscription {
     };
 }
 
-// The id of the reader's subscription to a feed, or undefined if they don't follow it.
 async function findSubscriptionId(db: Database, userId: string, feedId: string): Promise<string | undefined> {
     const [row] = await db
         .select({ id: subscriptions.id })
         .from(subscriptions)
         .where(and(eq(subscriptions.userId, userId), eq(subscriptions.feedId, feedId)));
+
     return row?.id;
 }
 
-// The 409 for a feed the reader already follows, pointing at their subscription when we know it.
+// Points at the reader's existing subscription when we know it.
 function alreadySubscribedError(subscriptionId: string | undefined) {
     return new ConflictError('already_subscribed', 'You already follow this feed', { subscriptionId });
+}
+
+// A stored feed whose last fetch succeeded within FRESH_FETCH_MS is reused instead of fetched again.
+function isRecentlySuccessful(feed: { lastErrorCode: string | null; lastSuccessAt: Date | null }, now: Date): boolean {
+    if (feed.lastErrorCode || !feed.lastSuccessAt)
+        return false;
+
+    return now.getTime() - feed.lastSuccessAt.getTime() < FRESH_FETCH_MS;
 }
 
 // One of the reader's subscriptions, read like the list; throws `not_found` (404) if it isn't theirs (or was just deleted).
 async function findSubscription(db: Database, userId: string, id: string, now: Date): Promise<Subscription> {
     const [row] = await selectSubscriptions(db).where(and(eq(subscriptions.id, id), eq(subscriptions.userId, userId)));
-    if (!row) {
-        throw new NotFoundError('not_found', 'Subscription not found');
-    }
+
+    if (!row)
+        throw subscriptionNotFoundError();
+
     return toSubscription(row, now);
+}
+
+function subscriptionNotFoundError() {
+    return new NotFoundError('not_found', 'Subscription not found');
 }

@@ -1,11 +1,8 @@
-// One entry in the shell's category panel or drawer. The current entry is tinted with its field (.nav-current), carries
-// a field bar that grows into place, is bold and has aria-current, so the place never rests on colour alone. Unread
-// counts are small Bricolage chips (ink on the current row). A row may carry a quick-actions `menu`, beside the link
-// rather than in it: with a mouse it replaces the count while the row is hovered or focused; on touch it stays in view.
-// Labels truncate; the full name stays the link's accessible name.
+// The current row is tinted, bold and has a field bar and aria-current, so the place never rests on color alone. A
+// row's quick-actions `menu` sits beside the link, never inside it.
 
 import Link from 'next/link';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { formatCount } from './nav-entries';
 
 type NavRowProps = {
@@ -18,23 +15,30 @@ type NavRowProps = {
     menu?: ReactNode;
 };
 
-// Renders the row; `lead` is its icon or field dot, `color` its field (Lemon for a view).
 export function NavRow({ href, label, lead, color, isCurrent, count, menu }: NavRowProps) {
     const shownCount = formatCount(count);
+
+    const stateClasses = isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink';
+    const menuRoomClasses = menu ? 'pointer-coarse:pr-12' : '';
+    const linkClasses = `relative flex min-h-11 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 lg:min-h-10 ${menuRoomClasses} ${stateClasses}`;
+
+    // With a mouse, the menu takes the count's place while the row is hovered or focused.
+    const countToneClasses = isCurrent ? 'bg-ink text-ground' : 'bg-ink/8 text-ink-2';
+    const countHidingClasses = menu ? 'pointer-fine:group-focus-within/row:invisible pointer-fine:group-hover/row:invisible' : '';
+    const countClasses = `ml-auto rounded-full px-2 font-display text-meta leading-6 font-semibold ${countToneClasses} ${countHidingClasses}`;
+
     const link = (
         <Link
             href={href}
             aria-current={isCurrent ? 'page' : undefined}
-            className={`relative flex min-h-11 items-center gap-3 rounded-toggle px-3 text-ui transition-colors duration-150 lg:min-h-10 ${menu ? 'pointer-coarse:pr-12' : ''} ${isCurrent ? 'nav-current font-bold text-ink' : 'font-medium text-ink-2 hover:bg-ink/6 hover:text-ink'}`}
-            style={isCurrent ? ({ '--row-field': color } as CSSProperties) : undefined}
+            className={linkClasses}
+            style={isCurrent ? { '--row-field': color } : undefined}
         >
             {isCurrent && <span aria-hidden="true" className="nav-marker absolute inset-y-2 left-0 w-[3px] rounded-full" />}
             {lead}
             <span className="min-w-0 truncate">{label}</span>
             {shownCount && (
-                <span
-                    className={`ml-auto rounded-full px-2 font-display text-meta leading-6 font-semibold ${isCurrent ? 'bg-ink text-ground' : 'bg-ink/8 text-ink-2'} ${menu ? 'pointer-fine:group-focus-within/row:invisible pointer-fine:group-hover/row:invisible' : ''}`}
-                >
+                <span className={countClasses}>
                     {shownCount}
                     <span className="sr-only"> unread</span>
                 </span>
@@ -42,9 +46,9 @@ export function NavRow({ href, label, lead, color, isCurrent, count, menu }: Nav
         </Link>
     );
 
-    if (!menu) {
+    if (!menu)
         return link;
-    }
+
     return (
         <div className="group/row relative">
             {link}
@@ -55,7 +59,7 @@ export function NavRow({ href, label, lead, color, isCurrent, count, menu }: Nav
     );
 }
 
-// Renders a category's field dot, with the hairline that keeps pale fields visible.
+// The hairline keeps pale fields visible.
 export function FieldDot({ color }: { color: string }) {
     return <span aria-hidden="true" className="fill-edge mx-[3px] size-3 flex-none rounded-full" style={{ background: color }} />;
 }

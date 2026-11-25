@@ -11,7 +11,6 @@ type EmptyStateProps = {
     action?: ReactNode;
 };
 
-// Renders the empty state; `children` is the one-line explanation and `action` an optional single button or link.
 export function EmptyState({ icon, title, children, action }: EmptyStateProps) {
     return (
         <div className="flex flex-col items-start gap-3 py-8">

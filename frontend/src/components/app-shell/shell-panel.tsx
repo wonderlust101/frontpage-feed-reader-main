@@ -1,8 +1,4 @@
-'use client';
-
-// The category panel (lg up), beside the rail: the categories, "All items" first. It collapses to nothing
-// (data-sidebar="collapsed"), its width animating and its links leaving the tab order; the inner column keeps its
-// width, so nothing reflows while it moves.
+// The category panel (lg up). Collapsing animates its width while the inner column keeps its own, so nothing reflows.
 
 import { CategoryList, type RowMenu } from './category-list';
 import type { ShellCategory } from './nav-entries';
@@ -15,7 +11,6 @@ type ShellPanelProps = {
     rowMenu?: RowMenu;
 };
 
-// Renders the panel; `id` is what the rail's toggle controls, `currentHref` the current category (or `homeHref`).
 export function ShellPanel({ id, homeHref, categories, currentHref, rowMenu }: ShellPanelProps) {
     return (
         <div

@@ -1,11 +1,11 @@
 // /api/items over HTTP. Tests run without a database, so nobody can be signed in: every route must answer 401 before
-// reading the query or the id. Signed-in behaviour (scopes, paging, ownership) is in items.service.test.ts.
+// reading the query or the id. Signed-in behavior (scopes, paging, ownership) is in items.service.test.ts.
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { itemsRouter } from '../../../src/modules/items/items.routes';
 import { startTestServer } from '../../helpers/test-server';
+import { SAMPLE_UUID } from '../../helpers/factories';
 
-const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
 const UNAUTHORIZED = { error: { code: 'unauthorized', message: 'Sign in to continue', retryable: false } };
 
 let server: Awaited<ReturnType<typeof startTestServer>>;
@@ -24,7 +24,7 @@ function get(path: string) {
 }
 
 describe('/api/items signed out', () => {
-    test.each(['', '/counts', `/${ID}`])('GET /api/items%s → 401 unauthorized', async (path) => {
+    test.each(['', '/counts', `/${SAMPLE_UUID}`])('GET /api/items%s → 401 unauthorized', async (path) => {
         const res = await get(path);
 
         expect(res.status).toBe(401);
@@ -32,7 +32,7 @@ describe('/api/items signed out', () => {
     });
 
     test('auth runs before validation: bad parameters or a bad id are still 401, not 400 or 404', async () => {
-        expect((await get(`?feed=x&category=y&limit=0&cursor=%25`)).status).toBe(401);
+        expect((await get('?feed=x&category=y&limit=0&cursor=%25')).status).toBe(401);
         expect((await get('?limit=1&limit=2')).status).toBe(401);
         expect((await get('?feed=not-a-uuid')).status).toBe(401);
         expect((await get('/not-a-uuid')).status).toBe(401);

@@ -1,19 +1,14 @@
 'use client';
 
-// The app shell as guests see it: the curated categories in the colors this guest chose (their presets until then,
-// painted from CSS properties the early script sets, so there is no flash), each row with a color menu that saves the
-// choice on this device. A client component, because the row menu is a function; the page and the guest menu still
-// render on the server, passed in.
+// A client component because the row menu is a function; the page and guest menu still render on the server.
 
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/app-shell/app-shell';
 import type { ShellCategory, ShellView } from '@/components/app-shell/nav-entries';
-import type { SearchSource } from '@/components/app-shell/search-palette';
+import type { SearchSource } from '@/components/app-shell/search-results';
 import { CategoryRowMenu } from '@/features/categories/components/category-row-menu';
-import { categoryColor } from '@/features/categories/category-field-vars';
-import { NO_FIELD, categoryFieldById } from '@/features/categories/fields';
-import { GUEST_CATEGORIES } from '@/features/categories/guest-categories';
-import { useGuestCategoryFields } from '@/features/categories/use-guest-category-fields';
+import { GUEST_CATEGORIES, guestCategoryColor, guestCategoryHref } from '@/features/categories/guest-categories';
+import { useGuestCategoryFields } from '@/features/categories/hooks/use-guest-category-fields';
 
 type GuestShellProps = {
     views: ShellView[];
@@ -22,27 +17,27 @@ type GuestShellProps = {
     children: ReactNode;
 };
 
-// Renders the shell for /guest with the guest's category colors and color menus.
+// The colors are CSS properties the guest's choices override, so this list never changes.
+const SHELL_CATEGORIES = GUEST_CATEGORIES.map((category) => ({
+    href: guestCategoryHref(category.id),
+    name: category.name,
+    color: guestCategoryColor(category),
+})) satisfies ShellCategory[];
+
 export function GuestShell({ views, sources, account, children }: GuestShellProps) {
     const [fields, choose] = useGuestCategoryFields();
-    const categories = GUEST_CATEGORIES.map((category) => ({
-        href: `/guest/c/${category.id}`,
-        name: category.name,
-        color: categoryColor(category.id, (categoryFieldById(category.preset) ?? NO_FIELD).color),
-    })) satisfies ShellCategory[];
 
-    // Renders a category's color menu.
-    function colorMenu(shellCategory: ShellCategory) {
-        const category = GUEST_CATEGORIES.find((entry) => `/guest/c/${entry.id}` === shellCategory.href);
-        return (
-            category && (
-                <CategoryRowMenu category={{ name: category.name, fieldId: fields[category.id].id }} onRecolor={(fieldId) => choose(category.id, fieldId)} />
-            )
-        );
+    function rowMenu(shellCategory: ShellCategory) {
+        const category = GUEST_CATEGORIES.find((entry) => guestCategoryHref(entry.id) === shellCategory.href);
+
+        if (!category)
+            return null;
+
+        return <CategoryRowMenu category={{ name: category.name, fieldId: fields[category.id].id }} onRecolor={(fieldId) => choose(category.id, fieldId)} />;
     }
 
     return (
-        <AppShell homeHref="/guest" views={views} categories={categories} sources={sources} account={account} rowMenu={colorMenu}>
+        <AppShell homeHref="/guest" views={views} categories={SHELL_CATEGORIES} sources={sources} account={account} rowMenu={rowMenu}>
             {children}
         </AppShell>
     );

@@ -3,20 +3,19 @@
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import express from 'express';
-import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
 import { errorHandler } from '../../src/middleware/error-handler';
 import { perUserRateLimit } from '../../src/middleware/rate-limit';
 import type { AuthSession } from '../../src/modules/auth/auth.types';
+import { startTestServer } from '../helpers/test-server';
 
 const LIMIT = 2;
 const WINDOW_MS = 300;
 
-let server: Server;
-let baseUrl: string;
+let server: Awaited<ReturnType<typeof startTestServer>>;
 
 beforeAll(async () => {
     const app = express();
+
     app.use((req, res, next) => {
         res.locals.auth = { user: { id: req.get('x-user') } } as unknown as AuthSession;
         next();
@@ -26,19 +25,16 @@ beforeAll(async () => {
     });
     app.use(errorHandler);
 
-    server = await new Promise((resolve) => {
-        const s = app.listen(0, () => resolve(s));
-    });
-    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    server = await startTestServer(app);
 });
 
 afterAll(async () => {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await server.close();
 });
 
 // One request to the limited route as `user`.
 function hit(user: string) {
-    return fetch(`${baseUrl}/limited`, { headers: { 'X-User': user } });
+    return fetch(`${server.url}/limited`, { headers: { 'X-User': user } });
 }
 
 describe('perUserRateLimit', () => {
@@ -47,6 +43,7 @@ describe('perUserRateLimit', () => {
         expect((await hit('ada')).status).toBe(204);
 
         const limited = await hit('ada');
+
         expect(limited.status).toBe(429);
         expect(await limited.json()).toEqual({ error: { code: 'rate_limited', message: 'Slow down', retryable: true } });
         expect(Number(limited.headers.get('X-Retry-After'))).toBeGreaterThanOrEqual(1);
@@ -54,22 +51,23 @@ describe('perUserRateLimit', () => {
 
     test('sends no RateLimit-* headers (CORS only exposes X-Retry-After)', async () => {
         const res = await hit('grace');
+
         expect(res.headers.get('RateLimit')).toBeNull();
         expect(res.headers.get('X-RateLimit-Limit')).toBeNull();
     });
 
     test("one user's limit doesn't affect another", async () => {
-        for (let i = 0; i < LIMIT; i++) {
+        for (let i = 0; i < LIMIT; i++)
             await hit('alan');
-        }
+
         expect((await hit('alan')).status).toBe(429);
         expect((await hit('barbara')).status).toBe(204);
     });
 
     test('allows requests again once the window has passed', async () => {
-        for (let i = 0; i < LIMIT; i++) {
+        for (let i = 0; i < LIMIT; i++)
             await hit('linus');
-        }
+
         expect((await hit('linus')).status).toBe(429);
 
         await Bun.sleep(WINDOW_MS + 100);

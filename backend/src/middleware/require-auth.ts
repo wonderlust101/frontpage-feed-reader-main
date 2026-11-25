@@ -3,15 +3,14 @@
 import type { RequestHandler, Response } from 'express';
 import { getSession } from '../modules/auth/auth.service';
 import type { AuthUser } from '../modules/auth/auth.types';
-import { UnauthorizedError } from './errors';
+import { UnauthorizedError } from '../errors';
 
 // Loads the session from the request's cookie into res.locals.auth; throws `unauthorized` (401) when there is none.
 export const requireAuth: RequestHandler = async (req, res, next) => {
     const session = await getSession(req.headers);
 
-    if (!session) {
+    if (!session)
         throw new UnauthorizedError('unauthorized', 'Sign in to continue');
-    }
 
     res.locals.auth = session;
     next();
@@ -21,9 +20,8 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
 export function currentUser(res: Response): AuthUser {
     const user = res.locals.auth?.user;
 
-    if (!user) {
+    if (!user)
         throw new Error('currentUser() needs requireAuth on this route');
-    }
 
     return user;
 }

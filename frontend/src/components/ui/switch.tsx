@@ -1,8 +1,5 @@
-'use client';
-
-// Switch: an on/off setting that applies at once (no save button). The setting's name on the left, a 48 × 28 track on
-// the right. Off: an ink-outlined track with a quiet ink-2 thumb. On: the track fills with Lemon and the ink thumb
-// slides right and shows a check, so the state never rests on color or position alone. Styles in components.css.
+// An on/off setting that applies at once. On shows a check, so the state never rests on color or position alone.
+// Styles live in components.css.
 
 import type { ComponentProps } from 'react';
 
@@ -12,7 +9,6 @@ type SwitchProps = Omit<ComponentProps<'button'>, 'type' | 'role' | 'onChange'> 
     onChange: (on: boolean) => void;
 };
 
-// Renders the switch as role="switch" with aria-checked; `onChange` receives the new state.
 export function Switch({ label, on, onChange, className = '', ...props }: SwitchProps) {
     return (
         <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)} className={`switch ${className}`} {...props}>

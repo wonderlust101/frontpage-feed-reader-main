@@ -1,6 +1,5 @@
-// Backend-only types for feed ingestion (feeds.ingest.ts); they move to @frontpage/shared once an endpoint returns them.
-// In IngestResult, the item counts are all 0 on a 304; `movedFrom` is the old URL when a permanent redirect changed it,
-// and `mergedFeedId` is the duplicate feed that move merged away and deleted.
+// Backend-only until an endpoint returns them. In IngestResult the item counts are 0 on a 304, and `mergedFeedId` is
+// the duplicate feed a permanent redirect merged away.
 
 export type IngestOptions = {
     now?: Date;

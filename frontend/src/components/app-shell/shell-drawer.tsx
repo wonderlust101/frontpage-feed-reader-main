@@ -1,23 +1,21 @@
 'use client';
 
-// Below lg, the shell's navigation lives in a drawer: a menu button in the toolbar opens a native modal <dialog> from
-// the left, so focus stays inside, Escape closes it and focus returns to the button. It also closes on a click on its
-// backdrop or on any link inside, including the link to the page already open (so it can't wait for the URL to change).
+// Below lg the navigation lives in a native modal <dialog>, which gives focus trapping, Escape and focus return. It
+// also closes on any link click, the current page's included, since it can't wait for the URL to change.
 
 import { useRef, type MouseEvent, type ReactNode } from 'react';
 import { Icon } from '@/components/ui/icon';
 
-// Renders the menu button and the drawer holding `children` (the shell's navigation).
 export function ShellDrawer({ children }: { children: ReactNode }) {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
-    // Closes the drawer when the click lands on the backdrop (the dialog itself, which has no padding) or inside a link.
+    // The dialog has no padding, so a click on the dialog itself is a click on its backdrop.
     function closeOnBackdropOrLink(event: MouseEvent<HTMLDialogElement>) {
         const isBackdrop = event.target === event.currentTarget;
         const isLink = event.target instanceof Element && event.target.closest('a') !== null;
-        if (isBackdrop || isLink) {
+
+        if (isBackdrop || isLink)
             event.currentTarget.close();
-        }
     }
 
     return (

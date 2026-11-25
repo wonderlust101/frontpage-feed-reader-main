@@ -2,7 +2,8 @@
 
 import { describe, expect, test } from 'bun:test';
 import { db, requireDatabase } from '../../src/db';
-import { ServiceUnavailableError } from '../../src/middleware/errors';
+import { ServiceUnavailableError } from '../../src/errors';
+import { httpErrorThrownBy } from '../helpers/errors';
 
 describe('requireDatabase without DATABASE_URL', () => {
     test('db is null', () => {
@@ -10,12 +11,7 @@ describe('requireDatabase without DATABASE_URL', () => {
     });
 
     test('throws a retryable 503 database_unavailable', () => {
-        let thrown: unknown;
-        try {
-            requireDatabase();
-        } catch (err) {
-            thrown = err;
-        }
+        const thrown = httpErrorThrownBy(() => requireDatabase());
 
         expect(thrown).toBeInstanceOf(ServiceUnavailableError);
         expect(thrown).toMatchObject({ status: 503, code: 'database_unavailable', retryable: true });

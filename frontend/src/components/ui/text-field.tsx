@@ -1,9 +1,5 @@
-// Labeled text input with an optional hint and error, both under the input in meta size. The error takes the hint's
-// place without moving the form: both share one grid cell and the hint only turns invisible, so the row keeps the
-// hint's height (the hint returns once the field is fixed). The error shows an icon, a thicker border and text,
-// never color alone.
-// Focus thickens the field's own edge by 2px, in its colour: ink, or red when invalid.
-// `action` is a small control drawn inside the input's right edge, such as the password field's show/hide toggle.
+// The error takes the hint's place without moving the form: both share one grid cell and the hint only turns
+// invisible. `action` is a small control inside the input's right edge, such as the password toggle.
 
 import type { ComponentProps, ReactNode } from 'react';
 import { Icon } from './icon';
@@ -14,13 +10,24 @@ type TextFieldProps = Omit<ComponentProps<'input'>, 'id'> & {
     hint?: string;
     error?: string;
     action?: ReactNode;
+    // Another element that describes the field, such as the step's text above the form.
+    describedBy?: string;
 };
 
-// Renders the label, input and the hint or error under it, wiring aria-describedby and aria-invalid for screen readers.
-export function TextField({ id, label, hint, error, action, className = '', ...inputProps }: TextFieldProps) {
+export function TextField({ id, label, hint, error, action, describedBy, className = '', ...inputProps }: TextFieldProps) {
     const hintId = `${id}-hint`;
     const errorId = `${id}-error`;
-    const describedBy = error ? errorId : hint ? hintId : undefined;
+    const describedByIds: string[] = [];
+
+    if (error) {
+        describedByIds.push(errorId);
+    } else if (hint) {
+        describedByIds.push(hintId);
+    }
+
+    if (describedBy)
+        describedByIds.push(describedBy);
+
     const borderClasses = error ? 'border-2 border-error' : 'border-[1.5px] border-control-edge';
 
     return (
@@ -32,7 +39,7 @@ export function TextField({ id, label, hint, error, action, className = '', ...i
                 <input
                     id={id}
                     aria-invalid={error ? true : undefined}
-                    aria-describedby={describedBy}
+                    aria-describedby={describedByIds.join(' ') || undefined}
                     className={`text-field-input h-12 w-full rounded-control bg-control-fill px-5 text-ui text-ink placeholder:text-muted ${action ? 'pr-14' : ''} ${borderClasses}`}
                     {...inputProps}
                 />

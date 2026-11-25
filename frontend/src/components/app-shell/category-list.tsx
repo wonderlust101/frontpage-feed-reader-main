@@ -1,11 +1,8 @@
-// The categories as navigation, shared by the desktop panel and the phone drawer: a "Categories" heading set in
-// Bricolage, "All items" first (the home page, always Lemon: Frontpage's own field, which a reader can't recolor but may
-// still give to a category), then one row each, the current one tinted with its field, each with its quick-actions
-// menu when the layout gives one. With no categories it says where they will appear; when every count is 0, that
-// you're caught up.
+// The category navigation shared by the desktop panel and the phone drawer. "All items" is always Lemon, Frontpage's
+// own field, which a reader can't recolor.
 
 import { useId, type ReactNode } from 'react';
-import type { ShellCategory } from './nav-entries';
+import { VIEW_COLOR, type ShellCategory } from './nav-entries';
 import { FieldDot, NavRow } from './nav-row';
 
 export type RowMenu = (category: ShellCategory) => ReactNode;
@@ -17,9 +14,7 @@ type CategoryListProps = {
     rowMenu?: RowMenu;
 };
 
-const HOME_FIELD = 'var(--color-field-lemon)';
-
-// Renders the heading, the list and its note; `currentHref` is the current category, or `homeHref` for "All items".
+// `currentHref` is the current category's href, or `homeHref` on the home page.
 export function CategoryList({ homeHref, categories, currentHref, rowMenu }: CategoryListProps) {
     const labelId = useId();
     const isCaughtUp = categories.length > 0 && categories.every((category) => category.count === 0);
@@ -35,8 +30,8 @@ export function CategoryList({ homeHref, categories, currentHref, rowMenu }: Cat
                         <NavRow
                             href={homeHref}
                             label="All items"
-                            lead={<FieldDot color={HOME_FIELD} />}
-                            color={HOME_FIELD}
+                            lead={<FieldDot color={VIEW_COLOR} />}
+                            color={VIEW_COLOR}
                             isCurrent={currentHref === homeHref}
                         />
                     </li>

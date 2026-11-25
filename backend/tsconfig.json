@@ -12,7 +12,10 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "verbatimModuleSyntax": true,
-        "noUncheckedIndexedAccess": true
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true
     },
     "include": ["src", "test", "drizzle.config.ts", "neon.ts"]
 }

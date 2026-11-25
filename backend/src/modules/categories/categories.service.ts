@@ -3,16 +3,15 @@
 
 import { and, eq } from 'drizzle-orm';
 import type { Database } from '../../db';
-import { NotFoundError } from '../../middleware/errors';
+import { NotFoundError } from '../../errors';
 import { categories } from './categories.schema';
 
-// Throws `category_not_found` (404) unless the category exists and belongs to the reader.
 export async function assertOwnCategory(db: Database, userId: string, categoryId: string): Promise<void> {
     const [category] = await db
         .select({ id: categories.id })
         .from(categories)
         .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)));
-    if (!category) {
+
+    if (!category)
         throw new NotFoundError('category_not_found', 'Category not found');
-    }
 }

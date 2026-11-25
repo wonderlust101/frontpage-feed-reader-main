@@ -1,8 +1,7 @@
 'use client';
 
-// Password field: the text field with a show/hide toggle inside its right edge. The toggle is a pressed/unpressed
-// button with one fixed name ("Show password"), so screen readers hear whether the password is showing.
-// While Caps Lock is on and the field has focus, the hint row says so (an error still takes its place).
+// The toggle is a pressed/unpressed button with one fixed name, so screen readers hear whether the password shows.
+// While Caps Lock is on, the hint row says so.
 
 import { useState, type ComponentProps, type KeyboardEvent } from 'react';
 import { Icon } from './icon';
@@ -10,7 +9,7 @@ import { TextField } from './text-field';
 
 type PasswordFieldProps = Omit<ComponentProps<typeof TextField>, 'type' | 'action'>;
 
-// Renders a password input that the reader can reveal; every other prop (and a ref) goes to the underlying input.
+// Every other prop (and a ref) goes to the input.
 export function PasswordField({ hint, onKeyDown, onKeyUp, onBlur, ...props }: PasswordFieldProps) {
     const [visible, setVisible] = useState(false);
     const [capsLock, setCapsLock] = useState(false);
@@ -43,7 +42,7 @@ export function PasswordField({ hint, onKeyDown, onKeyUp, onBlur, ...props }: Pa
                     type="button"
                     aria-pressed={visible}
                     aria-controls={props.id}
-                    onClick={() => setVisible(!visible)}
+                    onClick={() => setVisible((shown) => !shown)}
                     className="grid size-11 place-items-center rounded-toggle text-ink-2 hover:bg-ground-2 hover:text-ink"
                 >
                     <Icon name={visible ? 'hide-password' : 'show-password'} label="Show password" />

@@ -1,5 +1,3 @@
-// Color section of the design system page: the field palette, categories of any topic taking fields, then neutrals and status.
-
 import { CategoryTag } from '@/components/ui/tags';
 import { CategoryColors } from '@/features/categories/components/category-colors';
 import { NEUTRALS } from '../_data/neutrals';
@@ -7,7 +5,6 @@ import { CATEGORIES, CATEGORY_PRESETS, READER_CATEGORIES } from '../_data/sample
 import { DocSection, Specimen } from './doc-section';
 import { FieldPalette } from './field-palette';
 
-// Renders the color section: the eight-field palette, categories of any topic taking fields, then the neutral tokens.
 export function ColorSection() {
     return (
         <DocSection
@@ -100,7 +97,6 @@ export function ColorSection() {
     );
 }
 
-// Renders a small swatch with its hex value, used in the neutrals table.
 function Chip({ color }: { color: string }) {
     return (
         <span className="inline-flex items-center gap-2 text-meta tabular-nums">

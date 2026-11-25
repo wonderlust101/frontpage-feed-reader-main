@@ -8,11 +8,10 @@ type ItemThumbnailProps = {
     field: { color: string; onColor: string };
 };
 
-// Renders the image (decorative: the row's title already says what it is) or, when `image` is missing, the fallback tile.
+// The image is decorative: the row's title already says what it is.
 export function ItemThumbnail({ image, source, field }: ItemThumbnailProps) {
-    if (image) {
+    if (image)
         return <Image src={image} alt="" width={144} height={96} sizes="6rem" className="aspect-[3/2] w-24 flex-none rounded-control object-cover" />;
-    }
 
     return (
         <span

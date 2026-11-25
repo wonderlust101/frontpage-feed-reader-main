@@ -1,19 +1,17 @@
-// Turns a failed auth request into one sentence that says what happened and what to do next.
 // Sign-in failures stay vague on purpose ("email or password"), so the form never reveals which emails have accounts.
-// `code` is Better Auth's error code; `status` 0 means the request never reached the server (offline).
 
 import type { AuthFailure } from './auth-request';
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './schemas';
+import { INVALID_EMAIL_MESSAGE, PASSWORD_TOO_LONG_MESSAGE, PASSWORD_TOO_SHORT_MESSAGE } from './schemas';
 
-const ACCOUNT_EXISTS = 'An account with this email already exists. Sign in instead, or reset your password if you have forgotten it.';
+const ACCOUNT_EXISTS_MESSAGE = 'An account with this email already exists. Sign in instead, or reset your password if you have forgotten it.';
 
 const MESSAGES: Record<string, string> = {
     INVALID_EMAIL_OR_PASSWORD: "That email and password don't match. Check both and try again.",
-    USER_ALREADY_EXISTS: ACCOUNT_EXISTS,
-    USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: ACCOUNT_EXISTS,
-    INVALID_EMAIL: 'Enter an email address like name@example.com.',
-    PASSWORD_TOO_SHORT: `Use at least ${MIN_PASSWORD_LENGTH} characters.`,
-    PASSWORD_TOO_LONG: `Use at most ${MAX_PASSWORD_LENGTH} characters.`,
+    USER_ALREADY_EXISTS: ACCOUNT_EXISTS_MESSAGE,
+    USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: ACCOUNT_EXISTS_MESSAGE,
+    INVALID_EMAIL: INVALID_EMAIL_MESSAGE,
+    PASSWORD_TOO_SHORT: PASSWORD_TOO_SHORT_MESSAGE,
+    PASSWORD_TOO_LONG: PASSWORD_TOO_LONG_MESSAGE,
     INVALID_PASSWORD: 'Your current password is incorrect.',
     INVALID_TOKEN: 'This reset link has expired or was already used. Ask for a new one.',
     EMAIL_NOT_VERIFIED: 'Confirm your email address before signing in.',
@@ -23,29 +21,36 @@ const MESSAGES: Record<string, string> = {
     TOO_MANY_ATTEMPTS: 'Too many wrong codes. Send a new one.',
 };
 
-const OFFLINE = "You're offline. Check your connection and try again.";
-const UNREACHABLE = "Can't reach Frontpage right now. Try again in a few minutes.";
-const UNAVAILABLE = 'Accounts are unavailable right now. Try again in a few minutes.';
-const TOO_MANY_REQUESTS = 'Too many tries in a row. Take a minute, then try again.';
-const FALLBACK = 'Something went wrong on our end. Try again in a moment.';
+const OFFLINE_MESSAGE = "You're offline. Check your connection and try again.";
 
-// Returns the sentence for a failure: offline, server unreachable, rate-limited (with the wait when known), server
-// down, a known code, else a generic retry. A request with no answer only blames the connection when the browser says
-// it is offline; otherwise the server is down or unreachable, and the reader shouldn't go checking their wifi.
+const UNREACHABLE_MESSAGE = "Can't reach Frontpage right now. Try again in a few minutes.";
+
+const UNAVAILABLE_MESSAGE = 'Accounts are unavailable right now. Try again in a few minutes.';
+
+const TOO_MANY_TRIES = 'Too many tries in a row.';
+
+const TOO_MANY_REQUESTS_MESSAGE = `${TOO_MANY_TRIES} Take a minute, then try again.`;
+
+const FALLBACK_MESSAGE = 'Something went wrong on our end. Try again in a moment.';
+
+// A request with no answer only blames the connection when the browser says it is offline.
 export function authErrorMessage(failure: AuthFailure): string {
-    if (failure.status === 0) {
-        return failure.offline ? OFFLINE : UNREACHABLE;
-    }
+    if (failure.status === 0)
+        return failure.offline ? OFFLINE_MESSAGE : UNREACHABLE_MESSAGE;
+
     if (failure.status === 429) {
         const seconds = failure.retryAfterSeconds;
-        if (!seconds) {
-            return TOO_MANY_REQUESTS;
-        }
+
+        if (!seconds)
+            return TOO_MANY_REQUESTS_MESSAGE;
+
         const wait = seconds === 1 ? '1 second' : `${seconds} seconds`;
-        return `Too many tries in a row. Try again in ${wait}.`;
+
+        return `${TOO_MANY_TRIES} Try again in ${wait}.`;
     }
-    if (failure.status >= 500) {
-        return UNAVAILABLE;
-    }
-    return (failure.code && MESSAGES[failure.code]) || FALLBACK;
+
+    if (failure.status >= 500)
+        return UNAVAILABLE_MESSAGE;
+
+    return (failure.code && MESSAGES[failure.code]) || FALLBACK_MESSAGE;
 }

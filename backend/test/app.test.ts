@@ -18,6 +18,7 @@ describe('CORS', () => {
         const res = await fetch(`${server.url}/api/health`, {
             headers: { Origin: 'http://localhost:3000' },
         });
+
         expect(res.headers.get('access-control-allow-origin')).toBe('http://localhost:3000');
     });
 
@@ -25,6 +26,7 @@ describe('CORS', () => {
         const res = await fetch(`${server.url}/api/health`, {
             headers: { Origin: 'https://evil.example' },
         });
+
         expect(res.headers.get('access-control-allow-origin')).toBeNull();
     });
 
@@ -32,6 +34,7 @@ describe('CORS', () => {
         const res = await fetch(`${server.url}/api/health`, {
             headers: { Origin: 'http://localhost:3000' },
         });
+
         expect(res.headers.get('access-control-expose-headers')).toBe('X-Retry-After');
     });
 
@@ -40,6 +43,7 @@ describe('CORS', () => {
             method: 'OPTIONS',
             headers: { Origin: 'http://localhost:3000', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' },
         });
+
         expect(res.status).toBe(204);
         expect(res.headers.get('access-control-allow-credentials')).toBe('true');
         expect(res.headers.get('access-control-max-age')).toBe('7200');
@@ -49,6 +53,7 @@ describe('CORS', () => {
 describe('error handling', () => {
     test('unknown routes return a JSON 404', async () => {
         const res = await fetch(`${server.url}/api/does-not-exist`);
+
         expect(res.status).toBe(404);
         expect(await res.json()).toEqual({
             error: { code: 'not_found', message: 'Not found', retryable: false },
@@ -61,6 +66,7 @@ describe('error handling', () => {
             headers: { 'Content-Type': 'application/json' },
             body: '{ not json',
         });
+
         expect(res.status).toBe(400);
         expect(await res.json()).toEqual({
             error: { code: 'invalid_json', message: 'The request body is not valid JSON', retryable: false },

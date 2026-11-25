@@ -1,8 +1,6 @@
-// Forgot-password page: asks for an email and sends a reset link.
-
 import type { Metadata } from 'next';
+import { AuthHeading } from '@/features/auth/components/auth-step-frame';
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
-import { AuthHeading } from '@/features/auth/components/auth-heading';
 import { FORGOT_PASSWORD_HEADINGS } from '@/features/auth/headings';
 import { AuthFrame } from '../_components/auth-frame';
 import { AUTH_PANELS } from '../_data/panels';

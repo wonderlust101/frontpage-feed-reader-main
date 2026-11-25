@@ -1,5 +1,3 @@
-// Space and shape section of the design system page: the spacing scale, density, and the three shapes the system uses.
-
 import { Button } from '@/components/ui/button';
 import { Capsule } from '@/components/ui/capsule';
 import { CategoryTag } from '@/components/ui/tags';
@@ -8,7 +6,8 @@ import { DocSection, Specimen } from './doc-section';
 
 const SPACE_STEPS = [4, 8, 12, 16, 24, 32, 48, 64, 96];
 
-// Renders the space and shape section: the spacing scale, density, and the three shapes the system uses.
+const DENSITY_ROWS = ['Compact fits more rows on screen', 'Comfortable is the default', 'Spacious gives every row room'];
+
 export function SpaceSection() {
     return (
         <DocSection
@@ -30,7 +29,7 @@ export function SpaceSection() {
 
                 <Specimen title="Density" description="Set with Aa in the hero. Rows below use calc(var(--density) × 1rem) for their padding.">
                     <ul className="rule-t">
-                        {['Compact fits more rows on screen', 'Comfortable is the default', 'Spacious gives every row room'].map((row) => (
+                        {DENSITY_ROWS.map((row) => (
                             <li key={row} className="border-b border-rule-soft py-[calc(var(--density)*1rem)] text-ui">
                                 {row}
                             </li>

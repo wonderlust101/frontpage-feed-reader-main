@@ -1,9 +1,5 @@
-// Stickers: Frontpage's die-cut decals, stuck onto a brand field (the auth panel, the design system hero) and, as a
-// small accent, empty states. Pure decoration: hidden from assistive tech, never focusable, never beside a real
-// control. Each is tilted and carries the 3px sticker edge, so none can pass for a capsule, tag or button.
-// Hovering the field (any element with the `sticker-field` class) springs them inward and eases their tilt. With the
-// `stickers-wobble` class (the auth panel), they also wobble briefly as the page opens, then settle for good.
-// Stickers are placed well clear of the text on the field (headline, supporting line, logo); the text gets no plate.
+// Die-cut decals on brand fields. Pure decoration: hidden from assistive tech and never focusable. Each is tilted
+// with a sticker edge, so none can pass for a capsule, tag or button.
 
 import type { CSSProperties } from 'react';
 import { ICONS, type IconName } from '@/components/ui/icon';
@@ -27,7 +23,7 @@ type StickersProps = {
     className?: string;
 };
 
-// Renders the sticker layer; it fills its positioned parent and clips stickers at its edges, like decals run off a page.
+// Fills its positioned parent and clips stickers at its edges, like decals run off a page.
 export function Stickers({ stickers, className = '' }: StickersProps) {
     return (
         <div aria-hidden="true" className={`stickers ${className}`}>
@@ -43,7 +39,7 @@ export function Stickers({ stickers, className = '' }: StickersProps) {
                     '--sticker-order': index,
                     left: sticker.x,
                     top: sticker.y,
-                } as CSSProperties;
+                } satisfies CSSProperties;
 
                 return (
                     <span

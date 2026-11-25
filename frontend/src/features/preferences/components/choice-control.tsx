@@ -1,6 +1,4 @@
-// A labeled set of radio pills, one choice at a time, the legend above and the pills sharing the row equally: the
-// reader settings in the Aa menu, and the design system's specimen switches. `name` groups the radios, so two controls
-// for one setting need different names.
+// `name` groups the radios, so two controls for one setting need different names.
 
 type ChoiceControlProps<Value extends string> = {
     name: string;
@@ -10,7 +8,6 @@ type ChoiceControlProps<Value extends string> = {
     onChange: (value: Value) => void;
 };
 
-// Renders the legend and the pills; `onChange` gets the picked option's value.
 export function ChoiceControl<Value extends string>({ name, legend, options, value, onChange }: ChoiceControlProps<Value>) {
     return (
         <fieldset>

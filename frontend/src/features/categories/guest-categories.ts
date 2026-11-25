@@ -1,8 +1,7 @@
-// The guest's curated categories, in order, with their preset fields and their sources: the same catalogue as
-// backend/data/sample-feeds.json (keep the two in step). Guest mode shows them in the app shell, each with its own
-// page at /guest/c/<id>, and search finds their sources. A guest may recolor them (useGuestCategoryFields).
+// The guest's curated categories: the same catalog as backend/data/sample-feeds.json, so keep the two in step.
 
-import type { FieldId } from './fields';
+import { categoryColor } from './category-field-vars';
+import { fieldOrNone, type FieldId } from './fields';
 
 type GuestCategory = {
     id: string;
@@ -45,3 +44,16 @@ export const GUEST_CATEGORIES = [
 ] as const satisfies readonly GuestCategory[];
 
 export type GuestCategoryId = (typeof GUEST_CATEGORIES)[number]['id'];
+
+export function findGuestCategory(id: string) {
+    return GUEST_CATEGORIES.find((category) => category.id === id);
+}
+
+export function guestCategoryHref(id: string): string {
+    return `/guest/c/${id}`;
+}
+
+// The guest's chosen color when one is saved, else the category's preset.
+export function guestCategoryColor(category: Pick<GuestCategory, 'id' | 'preset'>): string {
+    return categoryColor(category.id, fieldOrNone(category.preset).color);
+}

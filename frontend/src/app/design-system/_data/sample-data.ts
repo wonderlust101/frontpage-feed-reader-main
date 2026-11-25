@@ -1,17 +1,11 @@
-// Sample categories and items for the design system page.
-// The guest categories and their sources come from features/categories/guest-categories.ts; item titles are illustrative.
-// The guest categories come with preset colors (part of the curated sample); a reader can change them in the Color
-// section. New categories start with "No color". READER_CATEGORIES adds example categories a reader might add (not
-// guest feeds): two still on No color, and Football sharing Leaf with Backend & DevOps, since categories may share.
+// Item titles are illustrative. READER_CATEGORIES adds categories a reader might make, two still on "No color".
 
-import type { FeedHealth } from '@/components/ui/health-mark';
-import { NO_FIELD, categoryFieldById, type Field, type FieldChoices } from '@/features/categories/fields';
+import type { HealthMarkState } from '@/components/ui/health-mark';
+import { NO_FIELD, fieldOrNone, type Field, type FieldChoices } from '@/features/categories/fields';
 import { GUEST_CATEGORIES, type GuestCategoryId } from '@/features/categories/guest-categories';
 
-export type CategoryId = GuestCategoryId;
-
-export type Category = {
-    id: CategoryId;
+type Category = {
+    id: GuestCategoryId;
     name: string;
     field: Field;
     sources: string[];
@@ -21,25 +15,27 @@ export type SampleItem = {
     id: string;
     title: string;
     source: string;
-    category: CategoryId;
+    category: GuestCategoryId;
     time: string;
     isNew: boolean;
-    health: FeedHealth;
+    health: HealthMarkState;
 };
+
+export const CATEGORY_IDS = GUEST_CATEGORIES.map((category) => category.id);
 
 export const CATEGORY_PRESETS: FieldChoices = Object.fromEntries(GUEST_CATEGORIES.map((category) => [category.id, category.preset]));
 
 export const CATEGORIES: Category[] = GUEST_CATEGORIES.map(({ preset, sources, ...category }) => ({
     ...category,
     sources: [...sources],
-    field: categoryFieldById(preset) ?? NO_FIELD,
+    field: fieldOrNone(preset),
 }));
 
 export const READER_CATEGORIES: { name: string; field: Field }[] = [
     ...CATEGORIES.map((category) => ({ name: category.name, field: category.field })),
     { name: 'World news', field: NO_FIELD },
-    { name: 'Film & TV', field: categoryFieldById('rose') ?? NO_FIELD },
-    { name: 'Football', field: categoryFieldById('leaf') ?? NO_FIELD },
+    { name: 'Film & TV', field: fieldOrNone('rose') },
+    { name: 'Football', field: fieldOrNone('leaf') },
     { name: 'Cooking', field: NO_FIELD },
 ];
 
@@ -102,11 +98,12 @@ export const SAMPLE_ITEMS: SampleItem[] = [
     },
 ];
 
-// Looks up a category by id; throws when the id is unknown, which only happens if the sample data is edited wrongly.
-export function getCategory(id: CategoryId): Category {
+// Throws on an unknown id, which only happens if the sample data is edited wrongly.
+export function getCategory(id: GuestCategoryId): Category {
     const category = CATEGORIES.find((candidate) => candidate.id === id);
-    if (!category) {
+
+    if (!category)
         throw new Error(`Unknown category: ${id}`);
-    }
+
     return category;
 }

@@ -43,18 +43,21 @@ src/lib/
   saved-preferences.ts             every saved preference (key, data attribute, values) + the early script built from them
   html-preference.ts               client: createHtmlPreference(preference) → a shared hook for one preference
 src/components/app-shell/          feature-agnostic: plain data and ReactNode slots, never imports features/
-  nav-entries.ts                   ShellView, ShellCategory, currentHref(), shellPlace(), formatCount(): pure, tested
+  nav-entries.ts                   ShellView, ShellCategory, findCurrentHref(), shellPlace(), formatCount(): pure, tested
+  use-shell-place.ts               useShellPlace(): shellPlace() for the current pathname
   nav-row.tsx                      a panel/drawer row: field tint (.nav-current), field bar, count, optional menu; FieldDot, AllDots
   category-list.tsx                the categories as navigation (panel and drawer), "All items" first, RowMenu type
   shell-sidebar.tsx                server: the desktop grid of rail, panel and account (account last in tab order)
   shell-rail.tsx                   client: logo, view icons with tooltips, the panel toggle
-  sidebar-toggle.tsx               client: collapses the panel (saved preference, the [ key); RailTooltip
+  sidebar-toggle.tsx               client: collapses the panel (saved preference, the [ key)
+  rail-tooltip.tsx                 RailTooltip: a rail control's tooltip, hidden from screen readers
   shell-panel.tsx                  client: the categories, 256px; collapses by width
   shell-toolbar.tsx                client: the shell's <header>: drawer button (below lg), search, location tag
   search-palette.tsx               client: Ctrl/Cmd + K search and jump (native <dialog>, combobox, "Search in" scope)
+  search-results.ts                buildResultGroups() and the search types: the palette's results as data, pure, tested
   search-match.ts                  matchParts(): marks query matches, pure, unit tested
   shell-menu.tsx                   client: a button and a native popover panel (account, guest, a category's actions)
-  locked-view.tsx                  client: an account-only view (rail icon or drawer row) opening a preview of the feature
+  locked-view.tsx                  an account-only view (rail icon or drawer row) opening a preview of the feature
   shell-drawer.tsx                 client: menu button + native <dialog> holding ShellNav, below lg
   shell-nav.tsx                    client: the drawer's contents (logo, views, categories, account row)
   app-shell.tsx                    server: skip link, rail + panel (lg up), toolbar, <main id="main">
@@ -71,7 +74,7 @@ src/features/auth/
 src/features/categories/
   guest-categories.ts              the guest's curated categories and sources (mirrors backend/data/sample-feeds.json)
   category-field-vars.ts           guest colors as CSS properties on <html>: the early script, categoryColor(id, preset)
-  use-guest-category-fields.ts     client: the guest categories' fields (preset or the guest's choice on this device)
+  hooks/use-guest-category-fields.ts client: the guest categories' fields (preset or the guest's choice on this device)
   library.ts                       a reader's categories and feeds and the pure edits the quick actions make: tested
   components/category-row-menu.tsx client: a category's quick actions (color swatches; rename and delete when allowed)
 src/app/guest/_components/guest-shell.tsx  client: AppShell with the guest's colors and color menus

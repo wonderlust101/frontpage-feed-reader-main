@@ -1,10 +1,9 @@
-// One row of the feed list: time, title, category tag and source, and a status column for New and feed health.
-// Renders an <li>; the caller provides the <ul> (opened with the ink rule, `rule-t`). Row padding follows --density.
-// The title link stretches over the whole row, so the row is the target; the row, not the title, shows focus.
-// `isSelected` marks the item open in the reading pane beside the list.
+// Renders an <li>; the caller provides the <ul>. The title link stretches over the whole row, so the row is the
+// target and shows focus.
 
-import { HealthMark, type FeedHealth } from '@/components/ui/health-mark';
+import { HealthMark, type HealthMarkState } from '@/components/ui/health-mark';
 import { CategoryTag, NewTag } from '@/components/ui/tags';
+import type { ItemCategory } from '../types';
 
 type FeedItemRowProps = {
     title: string;
@@ -12,16 +11,14 @@ type FeedItemRowProps = {
     source: string;
     time: string;
     isNew: boolean;
-    health: FeedHealth;
-    category: { name: string; field: { color: string } };
+    health: HealthMarkState;
+    category: ItemCategory;
     isSelected?: boolean;
 };
 
 const ROW_GRID =
     'grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 border-b border-rule-soft px-3 py-[calc(var(--density)*1.125rem)] sm:grid-cols-[4.5rem_minmax(0,1fr)_auto]';
 
-// Renders the row; unread items get a semibold title and the New tag, unhealthy feeds show their health mark, and the
-// selected item gets a ground-2 fill inside an ink frame.
 export function FeedItemRow({ title, href, source, time, isNew, health, category, isSelected = false }: FeedItemRowProps) {
     const selectedClasses = isSelected ? 'bg-ground-2 outline-[1.5px] -outline-offset-[1.5px] outline-ink' : 'hover:bg-ground-2';
 
@@ -51,8 +48,7 @@ export function FeedItemRow({ title, href, source, time, isNew, health, category
     );
 }
 
-// Renders a placeholder row while items load: rule-soft bars where the time, title and tag will be. Decorative; the
-// list around it carries aria-busy and a visually hidden "Loading items" line.
+// Decorative; the list around it carries aria-busy and a visually hidden "Loading items" line.
 export function FeedItemSkeleton() {
     return (
         <li aria-hidden="true" className={ROW_GRID}>

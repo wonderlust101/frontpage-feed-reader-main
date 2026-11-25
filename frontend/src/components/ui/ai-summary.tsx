@@ -3,7 +3,6 @@
 import type { ReactNode } from 'react';
 import { Icon } from './icon';
 
-// Renders the summary panel around `children`, the generated text.
 export function AiSummary({ children }: { children: ReactNode }) {
     return (
         <aside aria-label="AI summary" className="rounded-panel border border-edge bg-ground-2 px-5 py-4">

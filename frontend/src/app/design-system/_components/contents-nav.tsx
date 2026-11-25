@@ -1,32 +1,33 @@
 'use client';
 
-// Sticky contents rail for the design system page. It marks the section currently in view (scroll-spy),
-// so the reader always sees where they are.
-
 import { useEffect, useState } from 'react';
 
 type ContentsEntry = { id: string; label: string };
 
-// Renders the contents list; the section nearest the top of the viewport gets aria-current and a Lemon marker.
+// The section nearest the top of the viewport is current.
 export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
     const [currentId, setCurrentId] = useState(entries[0]?.id);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
             (observed) => {
-                const visible = observed.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-                if (visible[0]) {
+                const visible = observed
+                    .filter((observation) => observation.isIntersecting)
+                    .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+                if (visible[0])
                     setCurrentId(visible[0].target.id);
-                }
             },
             { rootMargin: '-20% 0px -70% 0px' },
         );
+
         entries.forEach((entry) => {
             const section = document.getElementById(entry.id);
-            if (section) {
+
+            if (section)
                 observer.observe(section);
-            }
         });
+
         return () => observer.disconnect();
     }, [entries]);
 
@@ -35,6 +36,7 @@ export function ContentsNav({ entries }: { entries: ContentsEntry[] }) {
             <ul className="sticky top-24 space-y-1 rule-t pt-3">
                 {entries.map((entry) => {
                     const isCurrent = entry.id === currentId;
+
                     return (
                         <li key={entry.id}>
                             <a

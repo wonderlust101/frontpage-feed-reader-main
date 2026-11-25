@@ -84,31 +84,30 @@ const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
 
 const TWO_DIGIT_YEAR_PIVOT = 70;
 
-// Turns a feed date ("Wed, 02 Oct 2024 15:00:00 GMT" or "2024-10-02T15:00:00Z") into an ISO 8601 UTC string.
-// Returns null rather than guessing: unknown formats or zones, impossible dates, dates before 1995 or over a day ahead.
+// Returns null rather than guessing: unknown formats or zones, impossible dates, before 1995 or over a day ahead.
 export function parseFeedDate(value: string | null | undefined, now: number = Date.now()): string | null {
     const input = value?.replace(/\s+/g, ' ').trim() ?? '';
     const groups = input.match(ISO)?.groups ?? input.match(RFC822)?.groups;
-    if (!groups) {
+
+    if (!groups)
         return null;
-    }
 
     const parts = toDateParts(groups);
     const offset = toOffsetMinutes(groups.zone);
-    if (!parts || offset === undefined) {
+
+    if (!parts || offset === undefined)
         return null;
-    }
 
     const time = toEpochMs(parts, offset);
-    if (time === null) {
+
+    if (time === null)
         return null;
-    }
 
     // Not before 1995 (older than RSS itself) and at most a day ahead (publishers' clocks and time zones drift).
     const isRealisticPublishTime = time >= EARLIEST_FEED_TIME && time <= now + FUTURE_SLACK_MS;
-    if (!isRealisticPublishTime) {
+
+    if (!isRealisticPublishTime)
         return null;
-    }
 
     return new Date(time).toISOString();
 }
@@ -116,9 +115,9 @@ export function parseFeedDate(value: string | null | undefined, now: number = Da
 // The matched pieces of a date as numbers; undefined if the month isn't a real one (e.g. "Octopus").
 function toDateParts(groups: Record<string, string | undefined>): DateParts | undefined {
     const month = groups.month && toMonth(groups.month);
-    if (!groups.year || !groups.day || !month) {
+
+    if (!groups.year || !groups.day || !month)
         return undefined;
-    }
 
     return {
         year: toFullYear(groups.year),
@@ -134,75 +133,73 @@ function toDateParts(groups: Record<string, string | undefined>): DateParts | un
 
 // Month number (1–12) from "10", "Oct", "Sept" or "October"; undefined otherwise (names need 3+ letters of a real month, so "Octopus" fails).
 function toMonth(value: string): number | undefined {
-    if (/^\d+$/.test(value)) {
+    if (/^\d+$/.test(value))
         return Number(value);
-    }
 
     const name = value.toLowerCase().replace(/\.$/, '');
-    if (name.length < 3) {
+
+    if (name.length < 3)
         return undefined;
-    }
 
     const index = MONTHS.findIndex((month) => month.startsWith(name));
+
     return index >= 0 ? index + 1 : undefined;
 }
 
-// Offset from UTC in minutes: "GMT" → 0, "PDT" → -420, "+0530" / "+05:30" / "+05" / "GMT+0530" → 330; no zone means UTC.
-// Returns undefined for unknown or ambiguous names ("IST") and offsets that can't exist ("+2500").
+// Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
+function toFullYear(value: string): number {
+    const year = Number(value);
+
+    if (year >= 100)
+        return year;
+
+    return year < TWO_DIGIT_YEAR_PIVOT ? 2000 + year : 1900 + year;
+}
+
+// "GMT" → 0, "PDT" → -420, "+05:30" → 330; undefined for ambiguous names ("IST") or impossible offsets ("+2500").
 function toOffsetMinutes(zone: string | undefined): number | undefined {
-    if (!zone) {
+    if (!zone)
         return 0;
-    }
 
     const namedHours = ZONE_OFFSET_HOURS[zone.toUpperCase()];
-    if (namedHours !== undefined) {
+
+    if (namedHours !== undefined)
         return namedHours * 60;
-    }
 
     const numeric = zone.match(NUMERIC_OFFSET)?.groups;
-    if (!numeric) {
+
+    if (!numeric)
         return undefined;
-    }
 
     const hours = Number(numeric.hours);
     const extraMinutes = Number(numeric.minutes ?? 0);
-    if (hours > MAX_OFFSET_HOURS || extraMinutes > 59) {
+
+    if (hours > MAX_OFFSET_HOURS || extraMinutes > 59)
         return undefined;
-    }
 
     const minutes = hours * 60 + extraMinutes;
+
     return numeric.sign === '-' ? -minutes : minutes;
 }
 
 // Converts date parts in a given time zone to a UTC timestamp (ms since 1970); null for dates that can't exist, like Feb 31 or 25:00.
 function toEpochMs(parts: DateParts, offsetMinutes: number): number | null {
     const utc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second, parts.millisecond);
-    const d = new Date(utc);
+    const date = new Date(utc);
 
     // Date.UTC silently turns impossible dates like Feb 31 into Mar 2, so check every part is unchanged.
     const isRealDate =
-        d.getUTCFullYear() === parts.year &&
-        d.getUTCMonth() === parts.month - 1 &&
-        d.getUTCDate() === parts.day &&
-        d.getUTCHours() === parts.hour &&
-        d.getUTCMinutes() === parts.minute &&
-        d.getUTCSeconds() === parts.second;
+        date.getUTCFullYear() === parts.year &&
+        date.getUTCMonth() === parts.month - 1 &&
+        date.getUTCDate() === parts.day &&
+        date.getUTCHours() === parts.hour &&
+        date.getUTCMinutes() === parts.minute &&
+        date.getUTCSeconds() === parts.second;
 
     return isRealDate ? utc - offsetMinutes * 60_000 : null;
 }
 
-// Expands two-digit years the usual way ("24" → 2024, "99" → 1999); four-digit years pass through.
-function toFullYear(value: string): number {
-    const year = Number(value);
-    if (year >= 100) {
-        return year;
-    }
-
-    return year < TWO_DIGIT_YEAR_PIVOT ? 2000 + year : 1900 + year;
-}
-
-// Joins regex pieces into one case-insensitive regex that must match the whole string.
 // Lets each part of a date format sit on its own line with an example next to it.
 function pattern(...parts: RegExp[]) {
-    return new RegExp(`^${parts.map((p) => p.source).join('')}$`, 'i');
+    return new RegExp(`^${parts.map((part) => part.source).join('')}$`, 'i');
 }

@@ -1,5 +1,3 @@
-// Guest page placeholder: no design yet. Guest mode will load the curated sample feeds here, without an account.
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 

@@ -1,7 +1,5 @@
-// Buttons, 10px rectangles: primary (ink fill), secondary (ink outline), quiet (underlined text) and destructive.
-// Destructive buttons are drawn in the error color, never filled, and callers keep them apart from other actions.
-// A disabled button fades, except while it is busy (aria-busy: a form is submitting), when its "…ing" label is the
-// status the reader needs, so it keeps full contrast. buttonClassName gives a link the same look.
+// A busy button (aria-busy) keeps full contrast, because its "…ing" label is the status the reader needs.
+// Destructive buttons are never filled, and callers keep them apart from other actions.
 
 import type { ComponentProps } from 'react';
 
@@ -19,12 +17,12 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     destructive: 'h-11 rounded-control border-[1.5px] border-error px-5 text-error hover:bg-ground-2',
 };
 
-// Renders a button in one of the four variants; `type` defaults to "button" so it never submits a form by accident.
+// `type` defaults to "button" so it never submits a form by accident.
 export function Button({ variant = 'primary', className = '', type = 'button', ...props }: ButtonProps) {
     return <button type={type} className={buttonClassName(variant, className)} {...props} />;
 }
 
-// Returns the classes for a button of `variant` plus `extra`, e.g. for a link that should look like a primary button.
+// For a link that should look like a button.
 export function buttonClassName(variant: ButtonVariant, extra = ''): string {
     return `${BASE_CLASSES} ${VARIANT_CLASSES[variant]} ${extra}`;
 }

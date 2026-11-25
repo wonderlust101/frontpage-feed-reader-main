@@ -1,16 +1,19 @@
-// ESLint for the backend. Prettier owns formatting; ESLint only adds rules Prettier can't express,
-// like `curly`: every if/else/loop body needs braces, so it always sits on its own line.
+// Guard rails sit above today's highest values, so they flag new outliers without pushing needless extraction.
 
+import { style, typescript } from '@frontpage/eslint-config';
 import { defineConfig, globalIgnores } from 'eslint/config';
-import tseslint from 'typescript-eslint';
 
 export default defineConfig([
     globalIgnores(['drizzle/**', 'node_modules/**']),
+    ...typescript,
+    ...style,
     {
-        files: ['**/*.ts'],
-        languageOptions: { parser: tseslint.parser },
+        files: ['src/**/*.ts'],
         rules: {
-            curly: ['error', 'all'],
+            complexity: ['warn', 20],
+            'max-depth': ['warn', 3],
+            'max-params': ['warn', 5],
+            'max-lines': ['warn', { max: 400, skipBlankLines: true, skipComments: true }],
         },
     },
 ]);

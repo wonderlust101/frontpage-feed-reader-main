@@ -1,15 +1,9 @@
-// Each auth page's sticker panel: a headline, one line of flavour text under it, and its stickers. Every page uses the
-// same twelve sticker slots: nine for wide screens (the "grounded frame": light along the top, heavier toward the
-// bottom and the form, and always well clear of the logo and the headline) and three for the phone band. A page may
-// leave wide slots empty (null), so the pages share one composition but each has its own decals and lead colour. Slots are in the panel's container units (cqi),
-// so the frame scales with the panel; bottom slots are measured from the bottom so they stay down on tall screens.
-// Wide-only slots drop out on phones, where the panel is a short band: the top-right sticker stays, and three small
-// narrow-only slots (the last three) cluster along the band's bottom edge, right of the flavour line (capped at 62cqi)
-// and partly cut off by the edge, so the band reads as the brand rather than a yellow header.
-// Headlines carry their own line breaks (\n), so the display type wraps in the same places at every width.
+// Every page shares twelve sticker slots: nine for wide screens and three for the phone band, in the panel's container
+// units (cqi) so the frame scales with it. Bottom slots are measured from the bottom, so they stay down on tall screens.
 
+import { RESET_TOKEN_MINUTES } from '@frontpage/shared';
 import type { Sticker } from '@/components/stickers';
-import { FIELDS, type FieldId } from '@/features/categories/fields';
+import { categoryFieldById, type FieldId } from '@/features/categories/fields';
 
 export type AuthPanel = {
     headline: string;
@@ -25,6 +19,14 @@ type Decal = Pick<Sticker, 'field' | 'icon' | 'label'>;
 type WideDecals = readonly [Decal | null, Decal | null, Decal | null, Decal | null, Decal | null, Decal | null, Decal | null, Decal | null, Decal | null];
 
 type BandDecals = readonly [Decal, Decal, Decal];
+
+type PanelInput = {
+    headline: string;
+    line: string;
+    guestLink: boolean;
+    wide: WideDecals;
+    band: BandDecals;
+};
 
 const PAPER = 'var(--color-on-ink)';
 
@@ -44,11 +46,11 @@ const SLOTS: readonly Slot[] = [
 ];
 
 export const AUTH_PANELS = {
-    signIn: panel(
-        'Your feeds\nmissed you.',
-        'Everything new since you left, already sorted.',
-        true,
-        [
+    signIn: panel({
+        headline: 'Your feeds\nmissed you.',
+        line: 'Everything new since you left, already sorted.',
+        guestLink: true,
+        wide: [
             { field: field('rose'), icon: 'mark-unread' },
             { field: field('sky'), icon: 'newsletter', label: 'Newsletters' },
             { field: field('leaf'), label: '24 unread' },
@@ -59,20 +61,20 @@ export const AUTH_PANELS = {
             { field: field('sky'), icon: 'refresh' },
             { field: PAPER, label: 'New!' },
         ],
-        [
+        band: [
             { field: field('sky'), icon: 'newsletter' },
             { field: field('leaf'), icon: 'saved-item' },
             { field: field('coral'), icon: 'feed' },
         ],
-    ),
-    signUp: panel(
-        'Bring your\nfeeds in.',
-        'Blogs, newsletters, news. One tidy front page.',
-        true,
-        [
+    }),
+    signUp: panel({
+        headline: 'Bring your\nfeeds in.',
+        line: 'Blogs, newsletters, news. One tidy front page.',
+        guestLink: true,
+        wide: [
             { field: field('leaf'), icon: 'mark-unread' },
             { field: field('coral'), icon: 'add-feed', label: 'Add a site' },
-            { field: field('sky'), label: 'Pick a colour' },
+            { field: field('sky'), label: 'Pick a color' },
             { field: field('lilac'), icon: 'categories' },
             { field: field('tangerine'), icon: 'save', label: 'Save for later' },
             { field: field('rose'), icon: 'feed' },
@@ -80,38 +82,38 @@ export const AUTH_PANELS = {
             { field: field('sky'), icon: 'newsletter' },
             { field: PAPER, label: 'Yours' },
         ],
-        [
+        band: [
             { field: field('tangerine'), icon: 'add-feed' },
             { field: field('lilac'), icon: 'categories' },
             { field: field('aqua'), icon: 'website' },
         ],
-    ),
-    forgotPassword: panel(
-        'It happens\nto us all.',
-        "Your feeds will keep. We'll get you back in.",
-        true,
-        [
+    }),
+    forgotPassword: panel({
+        headline: 'It happens\nto us all.',
+        line: "Your feeds will keep. We'll get you back in.",
+        guestLink: true,
+        wide: [
             { field: field('leaf'), icon: 'mark-read' },
             { field: field('coral'), icon: 'newsletter', label: 'Reset link' },
             null,
             { field: field('tangerine'), icon: 'account' },
             null,
             { field: field('sky'), icon: 'refresh' },
-            { field: field('lilac'), icon: 'reading-time', label: 'Good for 60 min' },
+            { field: field('lilac'), icon: 'reading-time', label: `Good for ${RESET_TOKEN_MINUTES} min` },
             null,
             null,
         ],
-        [
+        band: [
             { field: field('coral'), icon: 'newsletter' },
             { field: field('tangerine'), icon: 'account' },
             { field: field('sky'), icon: 'refresh' },
         ],
-    ),
-    resetPassword: panel(
-        'Same feeds,\nnew key.',
-        'Everything you saved stays right where it was.',
-        true,
-        [
+    }),
+    resetPassword: panel({
+        headline: 'Same feeds,\nnew key.',
+        line: 'Everything you saved stays right where it was.',
+        guestLink: true,
+        wide: [
             null,
             null,
             null,
@@ -122,17 +124,17 @@ export const AUTH_PANELS = {
             null,
             { field: field('leaf'), label: 'Fresh!' },
         ],
-        [
+        band: [
             { field: field('lilac'), icon: 'healthy' },
             { field: field('tangerine'), icon: 'mark-read' },
             { field: field('aqua'), icon: 'refresh' },
         ],
-    ),
-    verifyEmail: panel(
-        'One tiny\ncode.',
-        'Six digits stand between you and your feeds.',
-        true,
-        [
+    }),
+    verifyEmail: panel({
+        headline: 'One tiny\ncode.',
+        line: 'Six digits stand between you and your feeds.',
+        guestLink: true,
+        wide: [
             null,
             { field: field('sky'), icon: 'newsletter', label: 'Check your inbox' },
             { field: field('coral'), label: '6-digit code' },
@@ -143,17 +145,17 @@ export const AUTH_PANELS = {
             { field: field('lilac'), icon: 'newsletter' },
             null,
         ],
-        [
+        band: [
             { field: field('sky'), icon: 'newsletter' },
             { field: field('coral'), icon: 'notification' },
             { field: field('leaf'), icon: 'mark-read' },
         ],
-    ),
-    changePassword: panel(
-        'Fresh\npassword.',
-        'Same desk. Nothing moves.',
-        false,
-        [
+    }),
+    changePassword: panel({
+        headline: 'Fresh\npassword.',
+        line: 'Same desk. Nothing moves.',
+        guestLink: false,
+        wide: [
             null,
             { field: field('aqua'), icon: 'sign-out', label: 'Sign out other devices' },
             null,
@@ -164,17 +166,17 @@ export const AUTH_PANELS = {
             null,
             { field: PAPER, label: 'Yours' },
         ],
-        [
+        band: [
             { field: field('aqua'), icon: 'account' },
             { field: field('tangerine'), icon: 'healthy' },
             { field: field('lilac'), icon: 'sign-out' },
         ],
-    ),
-    accountUnavailable: panel(
-        'Back in\na moment.',
-        "Your feeds are safe. We just can't reach them right now.",
-        false,
-        [
+    }),
+    accountUnavailable: panel({
+        headline: 'Back in\na moment.',
+        line: "Your feeds are safe. We just can't reach them right now.",
+        guestLink: false,
+        wide: [
             null,
             null,
             null,
@@ -185,29 +187,31 @@ export const AUTH_PANELS = {
             null,
             { field: PAPER, label: 'Hang on' },
         ],
-        [
+        band: [
             { field: field('sky'), icon: 'refresh' },
             { field: field('leaf'), icon: 'healthy' },
             { field: field('tangerine'), icon: 'account' },
         ],
-    ),
+    }),
 } satisfies Record<string, AuthPanel>;
 
-// Builds a panel, placing each decal in its slot (same index; the band decals fill the last three) and skipping empty slots.
-function panel(headline: string, line: string, guestLink: boolean, wide: WideDecals, band: BandDecals): AuthPanel {
+// Each decal goes in the slot with its index; the band decals fill the last three.
+function panel({ headline, line, guestLink, wide, band }: PanelInput): AuthPanel {
     const decals = [...wide, ...band];
     const stickers = SLOTS.flatMap((slot, index) => {
         const decal = decals[index];
+
         return decal ? [{ ...slot, ...decal }] : [];
     });
+
     return { headline, line, guestLink, stickers };
 }
 
-// Returns the CSS colour for a field, e.g. field('coral') → 'var(--color-field-coral)', from the shared field list.
 function field(id: Exclude<FieldId, 'none'>): string {
-    const match = FIELDS.find((candidate) => candidate.id === id);
-    if (!match) {
+    const match = categoryFieldById(id);
+
+    if (!match)
         throw new Error(`Unknown field: ${id}`);
-    }
+
     return match.color;
 }

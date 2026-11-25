@@ -1,12 +1,11 @@
 'use client';
 
-// The reader's settings behind the Aa button: text size, line height, reading width, density, typeface, theme and
-// contrast, in one light popover: Reading open, Display (theme, contrast, density) folded away, and a reset. Each change applies at once to every reading surface and is saved (see
-// reader-preferences.ts), and a sample line at the top reflows as you go, so a setting is seen before it's read.
+// Every change applies at once and is saved, and a sample line at the top reflows, so a setting is seen before it's read.
 
 import { useId } from 'react';
 import { ShellMenu } from '@/components/app-shell/shell-menu';
-import { Icon } from '@/components/ui/icon';
+import { Icon, type IconName } from '@/components/ui/icon';
+import { useContrast, useDensity, useLeading, useMeasure, useReadingFace, useTextSize, useTheme } from '../hooks/use-reader-preferences';
 import {
     CONTRAST_OPTIONS,
     DENSITY_OPTIONS,
@@ -15,27 +14,31 @@ import {
     READING_FACE_OPTIONS,
     TEXT_SIZE_STEPS,
     THEME_OPTIONS,
-    useContrast,
-    useDensity,
-    useLeading,
-    useMeasure,
-    useReadingFace,
-    useTextSize,
-    useTheme,
 } from '../reader-preferences';
 import { ChoiceControl } from './choice-control';
 
-// Renders the Aa button and its panel. Radio names come from useId, so two copies on one page never share a group.
+type SizeStepButtonProps = {
+    icon: IconName;
+    label: string;
+    disabled: boolean;
+    onClick: () => void;
+};
+
+// Radio names come from useId, so two copies on one page never share a group.
 export function ReaderSettings() {
     const id = useId();
     const [textSize, setTextSize] = useTextSize();
     const [leading, setLeading] = useLeading();
     const [measure, setMeasure] = useMeasure();
-    const [density, setDensity] = useDensity();
     const [readingFace, setReadingFace] = useReadingFace();
     const [theme, setTheme] = useTheme();
     const [contrast, setContrast] = useContrast();
+    const [density, setDensity] = useDensity();
     const sizeIndex = TEXT_SIZE_STEPS.findIndex((step) => step.value === textSize);
+
+    function resetToDefaults() {
+        [setTextSize, setLeading, setMeasure, setReadingFace, setTheme, setContrast, setDensity].forEach((reset) => reset('auto'));
+    }
 
     return (
         <ShellMenu
@@ -59,27 +62,21 @@ export function ReaderSettings() {
                         Text size
                     </span>
                     <span className="flex items-center gap-2">
-                        <button
-                            type="button"
+                        <SizeStepButton
+                            icon="text-smaller"
+                            label="Smaller text"
                             disabled={sizeIndex === 0}
                             onClick={() => setTextSize(TEXT_SIZE_STEPS[sizeIndex - 1].value)}
-                            className="tool-button disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            <Icon name="text-smaller" />
-                            <span className="sr-only">Smaller text</span>
-                        </button>
+                        />
                         <output aria-live="polite" className="w-12 text-center text-ui font-semibold">
                             {TEXT_SIZE_STEPS[sizeIndex].label}
                         </output>
-                        <button
-                            type="button"
+                        <SizeStepButton
+                            icon="text-larger"
+                            label="Larger text"
                             disabled={sizeIndex === TEXT_SIZE_STEPS.length - 1}
                             onClick={() => setTextSize(TEXT_SIZE_STEPS[sizeIndex + 1].value)}
-                            className="tool-button disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            <Icon name="text-larger" />
-                            <span className="sr-only">Larger text</span>
-                        </button>
+                        />
                     </span>
                 </div>
                 <ChoiceControl name={`${id}-leading`} legend="Line height" options={LEADING_OPTIONS} value={leading} onChange={setLeading} />
@@ -98,14 +95,21 @@ export function ReaderSettings() {
                 </details>
                 <button
                     type="button"
-                    onClick={() => {
-                        [setTextSize, setLeading, setMeasure, setDensity, setReadingFace, setTheme, setContrast].forEach((reset) => reset('auto'));
-                    }}
+                    onClick={resetToDefaults}
                     className="self-start text-meta font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
                 >
                     Reset to defaults
                 </button>
             </div>
         </ShellMenu>
+    );
+}
+
+function SizeStepButton({ icon, label, disabled, onClick }: SizeStepButtonProps) {
+    return (
+        <button type="button" disabled={disabled} onClick={onClick} className="tool-button disabled:cursor-not-allowed disabled:opacity-40">
+            <Icon name={icon} />
+            <span className="sr-only">{label}</span>
+        </button>
     );
 }

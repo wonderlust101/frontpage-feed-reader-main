@@ -1,21 +1,19 @@
-// The items service against an in-memory Postgres (PGlite): listing by scope, order and unread, cursor paging (including
-// items that share a millisecond and items read mid-paging), the read rule, counts that agree with the lists, the single
-// item, that a reader only ever sees their own data, and how many queries each call makes.
+// The items service against in-memory Postgres (PGlite), including that a reader only ever sees their own data.
 
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { and, eq, sql } from 'drizzle-orm';
 import type { ItemSummary } from '@frontpage/shared';
-import { categories, feeds, itemReadStates, items, subscriptions, users } from '../../../src/db/schema';
-import { HttpError } from '../../../src/middleware/errors';
+import { itemReadStates, items, subscriptions } from '../../../src/db/schema';
 import { decodeCursor } from '../../../src/modules/items/items.cursor';
 import { IS_READ, countItems, getItem, listItems } from '../../../src/modules/items/items.service';
 import type { ItemListQuery } from '../../../src/modules/items/items.types';
 import { createTestDb } from '../../helpers/test-db';
+import { httpErrorFrom } from '../../helpers/errors';
+import { SAMPLE_UUID, newCategory, newFeed, newUser } from '../../helpers/factories';
 
 const NOW = new Date('2026-03-10T12:00:00.000Z');
 const BASE_MS = Date.parse('2026-03-01T10:00:00.000Z');
 const MINUTE_MS = 60 * 1000;
-const RANDOM_ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
 
@@ -41,64 +39,41 @@ function itemId(n: number): string {
     return `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 }
 
-// Inserts a reader and returns their id.
-async function newUser(): Promise<string> {
-    const id = crypto.randomUUID();
-    await testDb.db.insert(users).values({ id, name: 'Reader', email: `${id}@example.com` });
-    return id;
-}
-
-// Inserts a category for `userId` at `position` and returns its id.
-async function newCategory(userId: string, name: string, position = 0): Promise<string> {
-    const [row] = await testDb.db.insert(categories).values({ userId, name, position }).returning({ id: categories.id });
-    return row!.id;
-}
-
 // Inserts a healthy feed called `title` (a new item at NOW) and returns its id.
-async function newFeed(title: string, opts: { imageUrl?: string; siteUrl?: string; lastErrorCode?: 'timeout' } = {}): Promise<string> {
-    const [row] = await testDb.db
-        .insert(feeds)
-        .values({
-            url: `https://feeds.example/${crypto.randomUUID()}`,
-            title,
-            imageUrl: opts.imageUrl ?? null,
-            siteUrl: opts.siteUrl ?? null,
-            lastErrorCode: opts.lastErrorCode ?? null,
-            lastSuccessAt: NOW,
-            latestItemAt: NOW,
-        })
-        .returning({ id: feeds.id });
-    return row!.id;
+async function newHealthyFeed(title: string, overrides: { imageUrl?: string; siteUrl?: string; lastErrorCode?: 'timeout' } = {}): Promise<string> {
+    return newFeed(testDb.db, { title, lastSuccessAt: NOW, latestItemAt: NOW, ...overrides });
 }
 
 // Subscribes `userId` to `feedId`. `readCutoff` is microsecond ISO text, cast in SQL so no digits are lost.
-async function follow(userId: string, feedId: string, opts: { categoryId?: string; customTitle?: string; readCutoff?: string } = {}) {
+async function follow(userId: string, feedId: string, overrides: { categoryId?: string; customTitle?: string; readCutoff?: string } = {}) {
     await testDb.db.insert(subscriptions).values({
         userId,
         feedId,
-        categoryId: opts.categoryId ?? null,
-        customTitle: opts.customTitle ?? null,
-        readCutoff: opts.readCutoff ? sql`${opts.readCutoff}::timestamptz` : null,
+        categoryId: overrides.categoryId ?? null,
+        customTitle: overrides.customTitle ?? null,
+        readCutoff: overrides.readCutoff ? sql`${overrides.readCutoff}::timestamptz` : null,
     });
 }
 
 // Inserts an item in `feedId` first seen at `firstSeenAt` (microsecond ISO text), undated unless `publishedAt` is given; returns its id.
-async function newItem(feedId: string, firstSeenAt: string, opts: { id?: string; publishedAt?: string; title?: string } = {}): Promise<string> {
-    const id = opts.id ?? crypto.randomUUID();
+async function newItem(feedId: string, firstSeenAt: string, overrides: { id?: string; publishedAt?: string; title?: string } = {}): Promise<string> {
+    const id = overrides.id ?? crypto.randomUUID();
+
     await testDb.db.insert(items).values({
         id,
         feedId,
         guid: id,
         url: `https://site.example/${id}`,
-        title: opts.title ?? `Item ${id.slice(-4)}`,
+        title: overrides.title ?? `Item ${id.slice(-4)}`,
         author: 'Jane Doe',
         summary: 'A short excerpt.',
         contentHtml: '<p>The whole article.</p>',
         hasFullContent: true,
         firstSeenAt: sql`${firstSeenAt}::timestamptz`,
-        publishedAt: opts.publishedAt ? sql`${opts.publishedAt}::timestamptz` : null,
+        publishedAt: overrides.publishedAt ? sql`${overrides.publishedAt}::timestamptz` : null,
         contentHash: 'hash',
     });
+
     return id;
 }
 
@@ -116,14 +91,18 @@ function query(overrides: Partial<ItemListQuery> = {}): ItemListQuery {
 async function listAll(userId: string, overrides: Partial<ItemListQuery> = {}): Promise<ItemSummary[]> {
     const all: ItemSummary[] = [];
     let cursor: ItemListQuery['cursor'] = null;
+
     for (let page = 0; page < 100; page++) {
         const result = await listItems(testDb.db, userId, query({ ...overrides, cursor }), NOW);
+
         all.push(...result.items);
-        if (!result.nextCursor) {
+
+        if (!result.nextCursor)
             return all;
-        }
+
         cursor = decodeCursor(result.nextCursor);
     }
+
     throw new Error('listAll: more than 100 pages');
 }
 
@@ -132,24 +111,17 @@ function idsOf(list: { id: string }[]): string[] {
     return list.map((item) => item.id);
 }
 
-// Awaits a call that must fail and returns its HttpError, so the test can check the status and code.
-async function rejection(call: Promise<unknown>): Promise<HttpError> {
-    const err = await call.then(
-        () => null,
-        (e: unknown) => e,
-    );
-    expect(err).toBeInstanceOf(HttpError);
-    return err as HttpError;
-}
-
 describe('listItems: scopes', () => {
     test('"all" lists every feed the reader follows, and nothing from a feed they do not follow', async () => {
-        const reader = await newUser();
-        const [css, design, other] = [await newFeed('CSS'), await newFeed('Design'), await newFeed('Not followed')];
+        const reader = await newUser(testDb.db);
+        const [css, design, other] = [await newHealthyFeed('CSS'), await newHealthyFeed('Design'), await newHealthyFeed('Not followed')];
+
         await follow(reader, css);
         await follow(reader, design);
+
         const cssItem = await newItem(css, minutes(1));
         const designItem = await newItem(design, minutes(2));
+
         await newItem(other, minutes(3));
 
         const page = await listItems(testDb.db, reader, query(), NOW);
@@ -159,15 +131,17 @@ describe('listItems: scopes', () => {
     });
 
     test('a feed, a category and Uncategorized each list only their own items', async () => {
-        const reader = await newUser();
-        const designCategory = await newCategory(reader, 'Design');
-        const [a, b, c] = [await newFeed('A'), await newFeed('B'), await newFeed('C')];
-        await follow(reader, a, { categoryId: designCategory });
-        await follow(reader, b, { categoryId: designCategory });
-        await follow(reader, c);
-        const [itemA, itemB, itemC] = [await newItem(a, minutes(1)), await newItem(b, minutes(2)), await newItem(c, minutes(3))];
+        const reader = await newUser(testDb.db);
+        const designCategory = await newCategory(testDb.db, reader, 'Design');
+        const [feedA, feedB, feedC] = [await newHealthyFeed('A'), await newHealthyFeed('B'), await newHealthyFeed('C')];
 
-        const feedPage = await listItems(testDb.db, reader, query({ scope: { kind: 'feed', feedId: a } }), NOW);
+        await follow(reader, feedA, { categoryId: designCategory });
+        await follow(reader, feedB, { categoryId: designCategory });
+        await follow(reader, feedC);
+
+        const [itemA, itemB, itemC] = [await newItem(feedA, minutes(1)), await newItem(feedB, minutes(2)), await newItem(feedC, minutes(3))];
+
+        const feedPage = await listItems(testDb.db, reader, query({ scope: { kind: 'feed', feedId: feedA } }), NOW);
         const categoryPage = await listItems(testDb.db, reader, query({ scope: { kind: 'category', categoryId: designCategory } }), NOW);
         const uncategorizedPage = await listItems(testDb.db, reader, query({ scope: { kind: 'category', categoryId: null } }), NOW);
 
@@ -177,9 +151,10 @@ describe('listItems: scopes', () => {
     });
 
     test('an empty category, an empty Uncategorized and a feed with no items give an empty page, not a 404', async () => {
-        const reader = await newUser();
-        const emptyCategory = await newCategory(reader, 'Empty');
-        const quietFeed = await newFeed('Quiet');
+        const reader = await newUser(testDb.db);
+        const emptyCategory = await newCategory(testDb.db, reader, 'Empty');
+        const quietFeed = await newHealthyFeed('Quiet');
+
         await follow(reader, quietFeed, { categoryId: emptyCategory });
 
         for (const scope of [
@@ -187,44 +162,50 @@ describe('listItems: scopes', () => {
             { kind: 'category', categoryId: null },
             { kind: 'feed', feedId: quietFeed },
             { kind: 'all' },
-        ] as const) {
+        ] as const)
             expect(await listItems(testDb.db, reader, query({ scope }), NOW)).toEqual({ items: [], nextCursor: null });
-        }
     });
 });
 
 describe('listItems: authorization', () => {
     test('a feed only another reader follows, or a random id → 404 feed_not_found', async () => {
-        const [ada, grace] = [await newUser(), await newUser()];
-        const gracesFeed = await newFeed("Grace's feed");
+        const [ada, grace] = [await newUser(testDb.db), await newUser(testDb.db)];
+        const gracesFeed = await newHealthyFeed("Grace's feed");
+
         await follow(grace, gracesFeed);
         await newItem(gracesFeed, minutes(1));
 
-        for (const feedId of [gracesFeed, RANDOM_ID]) {
-            const err = await rejection(listItems(testDb.db, ada, query({ scope: { kind: 'feed', feedId } }), NOW));
+        for (const feedId of [gracesFeed, SAMPLE_UUID]) {
+            const err = await httpErrorFrom(listItems(testDb.db, ada, query({ scope: { kind: 'feed', feedId } }), NOW));
+
             expect(err).toMatchObject({ status: 404, code: 'feed_not_found', message: 'Feed not found' });
         }
     });
 
     test("another reader's category, or a random id → 404 category_not_found", async () => {
-        const [ada, grace] = [await newUser(), await newUser()];
-        const gracesCategory = await newCategory(grace, 'Design');
-        const feed = await newFeed('Shared');
+        const [ada, grace] = [await newUser(testDb.db), await newUser(testDb.db)];
+        const gracesCategory = await newCategory(testDb.db, grace, 'Design');
+        const feed = await newHealthyFeed('Shared');
+
         await follow(grace, feed, { categoryId: gracesCategory });
         await newItem(feed, minutes(1));
 
-        for (const categoryId of [gracesCategory, RANDOM_ID]) {
-            const err = await rejection(listItems(testDb.db, ada, query({ scope: { kind: 'category', categoryId } }), NOW));
+        for (const categoryId of [gracesCategory, SAMPLE_UUID]) {
+            const err = await httpErrorFrom(listItems(testDb.db, ada, query({ scope: { kind: 'category', categoryId } }), NOW));
+
             expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
         }
     });
 
     test('on a feed both follow, each reader sees their own read state and their own title for it', async () => {
-        const [ada, grace] = [await newUser(), await newUser()];
-        const feed = await newFeed('CSS-Tricks');
+        const [ada, grace] = [await newUser(testDb.db), await newUser(testDb.db)];
+        const feed = await newHealthyFeed('CSS-Tricks');
+
         await follow(ada, feed);
         await follow(grace, feed, { customTitle: "Grace's CSS" });
+
         const item = await newItem(feed, minutes(1));
+
         await mark(grace, item, true);
 
         const [adasItem] = (await listItems(testDb.db, ada, query(), NOW)).items;
@@ -237,8 +218,9 @@ describe('listItems: authorization', () => {
 
 describe('listItems: the read rule', () => {
     test('without a read cutoff or a mark, an item is unread', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed);
         await newItem(feed, minutes(1));
 
@@ -246,9 +228,11 @@ describe('listItems: the read rule', () => {
     });
 
     test('an item first seen before the cutoff is read; at or after it, unread (to the microsecond)', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed, { readCutoff: '2026-03-01T10:00:00.000002Z' });
+
         const before = await newItem(feed, '2026-03-01T10:00:00.000001Z');
         const at = await newItem(feed, '2026-03-01T10:00:00.000002Z');
         const after = await newItem(feed, '2026-03-01T10:00:00.000003Z');
@@ -259,11 +243,14 @@ describe('listItems: the read rule', () => {
     });
 
     test('a mark beats the cutoff both ways: marked unread before it, marked read after it', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const oldItem = await newItem(feed, minutes(1));
         const newItemId = await newItem(feed, minutes(20));
+
         await mark(reader, oldItem, false);
         await mark(reader, newItemId, true);
 
@@ -273,13 +260,18 @@ describe('listItems: the read rule', () => {
     });
 
     test('unreadOnly lists exactly the unread items', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const markedUnread = await newItem(feed, minutes(1));
+
         await newItem(feed, minutes(2));
+
         const fresh = await newItem(feed, minutes(20));
         const markedRead = await newItem(feed, minutes(21));
+
         await mark(reader, markedUnread, false);
         await mark(reader, markedRead, true);
 
@@ -290,9 +282,11 @@ describe('listItems: the read rule', () => {
     });
 
     test('IS_READ works in a hand-written query that joins items, the subscription and the read state (the contract for KAN-25)', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const oldItem = await newItem(feed, minutes(1));
         const freshItem = await newItem(feed, minutes(20));
 
@@ -308,28 +302,30 @@ describe('listItems: the read rule', () => {
 
 describe('listItems: order and paging', () => {
     test('newest and oldest across three interleaved feeds, two per page, give the full order with no repeats', async () => {
-        const reader = await newUser();
-        const feedIds = [await newFeed('A'), await newFeed('B'), await newFeed('C')];
-        for (const feedId of feedIds) {
+        const reader = await newUser(testDb.db);
+        const feedIds = [await newHealthyFeed('A'), await newHealthyFeed('B'), await newHealthyFeed('C')];
+
+        for (const feedId of feedIds)
             await follow(reader, feedId);
-        }
+
         // Item i is published at minute i, round-robin across the feeds (the first is dated differently from when it was seen).
         const created: string[] = [];
-        for (let i = 0; i < 7; i++) {
+
+        for (let i = 0; i < 7; i++)
             created.push(await newItem(feedIds[i % 3]!, minutes(100 + i), { publishedAt: minutes(i) }));
-        }
 
         expect(idsOf(await listAll(reader, { limit: 2 }))).toEqual([...created].reverse());
         expect(idsOf(await listAll(reader, { limit: 2, order: 'oldest' }))).toEqual(created);
     });
 
     test('when the items fill the last page exactly, nextCursor is null: there is never an empty extra page', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed);
-        for (let i = 0; i < 4; i++) {
+
+        for (let i = 0; i < 4; i++)
             await newItem(feed, minutes(i));
-        }
 
         const first = await listItems(testDb.db, reader, query({ limit: 2 }), NOW);
         const second = await listItems(testDb.db, reader, query({ limit: 2, cursor: decodeCursor(first.nextCursor!) }), NOW);
@@ -341,23 +337,27 @@ describe('listItems: order and paging', () => {
     });
 
     test('one item per page across 3 feeds × 5 items loses nothing (each feed reads only one page ahead)', async () => {
-        const reader = await newUser();
+        const reader = await newUser(testDb.db);
         const created: string[] = [];
+
         for (let feedNumber = 0; feedNumber < 3; feedNumber++) {
-            const feed = await newFeed(`Feed ${feedNumber}`);
+            const feed = await newHealthyFeed(`Feed ${feedNumber}`);
+
             await follow(reader, feed);
-            for (let i = 0; i < 5; i++) {
+
+            for (let i = 0; i < 5; i++)
                 created.push(await newItem(feed, minutes(feedNumber * 5 + i)));
-            }
         }
 
         expect(idsOf(await listAll(reader, { limit: 1 }))).toEqual([...created].reverse());
     });
 
     test('items that share a millisecond page in the right order, split by microseconds and then by id', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed);
+
         const x = await newItem(feed, '2026-03-01T10:00:00.123457Z', { id: itemId(1) });
         const y = await newItem(feed, '2026-03-01T10:00:00.123456Z', { id: itemId(3) });
         const z = await newItem(feed, '2026-03-01T10:00:00.123456Z', { id: itemId(2) });
@@ -368,9 +368,11 @@ describe('listItems: order and paging', () => {
     });
 
     test('marking items read between pages of the unread list never skips or repeats an unread item', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed);
+
         // a is the newest: newest first, the unread list starts a, b, c, d, e, f.
         const [f, e, d, c, b, a] = [
             await newItem(feed, minutes(1)),
@@ -382,8 +384,10 @@ describe('listItems: order and paging', () => {
         ];
 
         const page1 = await listItems(testDb.db, reader, query({ unreadOnly: true, limit: 2 }), NOW);
+
         await mark(reader, b, true);
         await mark(reader, d, true);
+
         const newer = await newItem(feed, minutes(50));
         const page2 = await listItems(testDb.db, reader, query({ unreadOnly: true, limit: 2, cursor: decodeCursor(page1.nextCursor!) }), NOW);
         const page3 = await listItems(testDb.db, reader, query({ unreadOnly: true, limit: 2, cursor: decodeCursor(page2.nextCursor!) }), NOW);
@@ -396,9 +400,11 @@ describe('listItems: order and paging', () => {
     });
 
     test('sortAt is the published date, or when the item was first seen if it has none', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed);
+
         const dated = await newItem(feed, minutes(10), { publishedAt: minutes(1) });
         const undated = await newItem(feed, minutes(20));
 
@@ -411,10 +417,12 @@ describe('listItems: order and paging', () => {
 
 describe('listItems: what each item looks like', () => {
     test("carries its feed (the reader's title, icon, category, health) and its own fields, but never the full content", async () => {
-        const reader = await newUser();
-        const category = await newCategory(reader, 'Frontend');
-        const feed = await newFeed('CSS-Tricks', { siteUrl: 'https://css-tricks.com/blog/', lastErrorCode: 'timeout' });
+        const reader = await newUser(testDb.db);
+        const category = await newCategory(testDb.db, reader, 'Frontend');
+        const feed = await newHealthyFeed('CSS-Tricks', { siteUrl: 'https://css-tricks.com/blog/', lastErrorCode: 'timeout' });
+
         await follow(reader, feed, { categoryId: category, customTitle: 'CSS' });
+
         const id = await newItem(feed, minutes(1), { title: 'Container queries' });
 
         const [item] = (await listItems(testDb.db, reader, query(), NOW)).items;
@@ -436,8 +444,9 @@ describe('listItems: what each item looks like', () => {
     });
 
     test("uses the feed's own title and image when the reader has not renamed it", async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Smashing', { imageUrl: 'https://cdn.example/logo.png', siteUrl: 'https://smashing.example/' });
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Smashing', { imageUrl: 'https://cdn.example/logo.png', siteUrl: 'https://smashing.example/' });
+
         await follow(reader, feed);
         await newItem(feed, minutes(1));
 
@@ -449,15 +458,16 @@ describe('listItems: what each item looks like', () => {
 
 describe('countItems', () => {
     test('a reader with nothing gets zeros and empty lists', async () => {
-        expect(await countItems(testDb.db, await newUser())).toEqual({ total: { items: 0, unread: 0 }, categories: [], feeds: [] });
+        expect(await countItems(testDb.db, await newUser(testDb.db))).toEqual({ total: { items: 0, unread: 0 }, categories: [], feeds: [] });
     });
 
     test('lists every category in sidebar order with zeros included, then Uncategorized only when a feed has no category', async () => {
-        const reader = await newUser();
-        const second = await newCategory(reader, 'Second', 2);
-        const first = await newCategory(reader, 'First', 1);
-        const empty = await newCategory(reader, 'Empty', 3);
-        const [a, b, quiet] = [await newFeed('A'), await newFeed('B'), await newFeed('Quiet')];
+        const reader = await newUser(testDb.db);
+        const second = await newCategory(testDb.db, reader, 'Second', 2);
+        const first = await newCategory(testDb.db, reader, 'First', 1);
+        const empty = await newCategory(testDb.db, reader, 'Empty', 3);
+        const [a, b, quiet] = [await newHealthyFeed('A'), await newHealthyFeed('B'), await newHealthyFeed('Quiet')];
+
         await follow(reader, a, { categoryId: first });
         await follow(reader, b);
         await follow(reader, quiet, { categoryId: second });
@@ -479,22 +489,26 @@ describe('countItems', () => {
     });
 
     test('without feeds outside a category, there is no Uncategorized entry', async () => {
-        const reader = await newUser();
-        const category = await newCategory(reader, 'Only');
-        const feed = await newFeed('A');
+        const reader = await newUser(testDb.db);
+        const category = await newCategory(testDb.db, reader, 'Only');
+        const feed = await newHealthyFeed('A');
+
         await follow(reader, feed, { categoryId: category });
 
         expect((await countItems(testDb.db, reader)).categories).toEqual([{ categoryId: category, items: 0, unread: 0 }]);
     });
 
     test("another reader's feeds and marks never count", async () => {
-        const [ada, grace] = [await newUser(), await newUser()];
-        const shared = await newFeed('Shared');
-        const gracesOwn = await newFeed("Grace's own");
+        const [ada, grace] = [await newUser(testDb.db), await newUser(testDb.db)];
+        const shared = await newHealthyFeed('Shared');
+        const gracesOwn = await newHealthyFeed("Grace's own");
+
         await follow(ada, shared);
         await follow(grace, shared);
         await follow(grace, gracesOwn);
+
         const item = await newItem(shared, minutes(1));
+
         await newItem(gracesOwn, minutes(2));
         await mark(grace, item, true);
 
@@ -506,22 +520,27 @@ describe('countItems', () => {
     });
 
     test('for every scope, the counts equal what paging through the list returns', async () => {
-        const [ada, grace] = [await newUser(), await newUser()];
-        const category = await newCategory(ada, 'Design');
-        const [cutFeed, markedFeed, looseFeed] = [await newFeed('Cut'), await newFeed('Marked'), await newFeed('Loose')];
+        const [ada, grace] = [await newUser(testDb.db), await newUser(testDb.db)];
+        const category = await newCategory(testDb.db, ada, 'Design');
+        const [cutFeed, markedFeed, looseFeed] = [await newHealthyFeed('Cut'), await newHealthyFeed('Marked'), await newHealthyFeed('Loose')];
+
         await follow(ada, cutFeed, { categoryId: category, readCutoff: minutes(5) });
         await follow(ada, markedFeed, { categoryId: category });
         await follow(ada, looseFeed);
         await follow(grace, looseFeed);
+
         const cutItems = [];
-        for (let i = 0; i < 8; i++) {
+
+        for (let i = 0; i < 8; i++)
             cutItems.push(await newItem(cutFeed, minutes(i)));
-        }
+
         const markedItems = [];
-        for (let i = 0; i < 5; i++) {
+
+        for (let i = 0; i < 5; i++)
             markedItems.push(await newItem(markedFeed, minutes(i)));
-        }
+
         const looseItems = [await newItem(looseFeed, minutes(1)), await newItem(looseFeed, minutes(2))];
+
         await mark(ada, cutItems[1]!, false);
         await mark(ada, cutItems[7]!, true);
         await mark(ada, markedItems[0]!, true);
@@ -538,6 +557,7 @@ describe('countItems', () => {
 
         // Unread: Cut 3 (minutes 5-7) + 1 marked unread - 1 marked read; Marked 5 - 1 marked read; Loose 2 (Grace's mark is hers).
         expect(counts.total).toEqual({ items: 15, unread: 9 });
+
         for (const [scope, expected] of scopes) {
             expect((await listAll(ada, { scope, limit: 3 })).length).toBe(expected.items);
             expect((await listAll(ada, { scope, limit: 3, unreadOnly: true })).length).toBe(expected.unread);
@@ -547,9 +567,11 @@ describe('countItems', () => {
 
 describe('getItem', () => {
     test('returns the item with its full content, and opening it does not change any read state', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed', { siteUrl: 'https://site.example/' });
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed', { siteUrl: 'https://site.example/' });
+
         await follow(reader, feed);
+
         const id = await newItem(feed, minutes(1), { title: 'Full article' });
         const readStatesBefore = await testDb.db.select().from(itemReadStates);
 
@@ -567,26 +589,32 @@ describe('getItem', () => {
     });
 
     test('shows the reader their own read state for the item', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed, { readCutoff: minutes(10) });
+
         const id = await newItem(feed, minutes(1));
 
         expect((await getItem(testDb.db, reader, id, NOW)).isRead).toBe(true);
     });
 
     test('an item of a feed the reader does not follow, has unfollowed, or that does not exist → the same 404 not_found', async () => {
-        const [ada, grace] = [await newUser(), await newUser()];
-        const gracesFeed = await newFeed("Grace's feed");
-        const unfollowed = await newFeed('Unfollowed');
+        const [ada, grace] = [await newUser(testDb.db), await newUser(testDb.db)];
+        const gracesFeed = await newHealthyFeed("Grace's feed");
+        const unfollowed = await newHealthyFeed('Unfollowed');
+
         await follow(grace, gracesFeed);
         await follow(ada, unfollowed);
+
         const gracesItem = await newItem(gracesFeed, minutes(1));
         const oldItem = await newItem(unfollowed, minutes(2));
+
         await testDb.db.delete(subscriptions).where(eq(subscriptions.userId, ada));
 
-        for (const id of [gracesItem, oldItem, RANDOM_ID]) {
-            const err = await rejection(getItem(testDb.db, ada, id, NOW));
+        for (const id of [gracesItem, oldItem, SAMPLE_UUID]) {
+            const err = await httpErrorFrom(getItem(testDb.db, ada, id, NOW));
+
             expect(err).toMatchObject({ status: 404, code: 'not_found', message: 'Item not found' });
         }
     });
@@ -594,11 +622,14 @@ describe('getItem', () => {
 
 describe('how many queries each call makes', () => {
     test('a list page is one query, whatever the number of feeds; an empty filtered page adds one ownership check', async () => {
-        const reader = await newUser();
-        const quietFeed = await newFeed('Quiet');
+        const reader = await newUser(testDb.db);
+        const quietFeed = await newHealthyFeed('Quiet');
+
         await follow(reader, quietFeed);
+
         for (let i = 0; i < 5; i++) {
-            const feed = await newFeed(`Feed ${i}`);
+            const feed = await newHealthyFeed(`Feed ${i}`);
+
             await follow(reader, feed);
             await newItem(feed, minutes(i));
         }
@@ -613,9 +644,11 @@ describe('how many queries each call makes', () => {
     });
 
     test('counts are two queries and one item is one query', async () => {
-        const reader = await newUser();
-        const feed = await newFeed('Feed');
+        const reader = await newUser(testDb.db);
+        const feed = await newHealthyFeed('Feed');
+
         await follow(reader, feed);
+
         const id = await newItem(feed, minutes(1));
 
         testDb.queries.length = 0;

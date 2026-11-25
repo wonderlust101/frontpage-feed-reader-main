@@ -4,8 +4,7 @@ import { readFixture } from './fixtures';
 export const ETAG = '"v1"';
 export const LAST_MODIFIED = 'Tue, 10 Jun 2025 09:00:00 GMT';
 
-// A fake feed server where each path acts out one HTTP behaviour (redirect, 304, timeout, 500…); `hits` and `lastHeaders` record requests.
-// `serve(path, body, init)` makes a path answer with that body instead (replacing any earlier serve), so a test can change a feed between fetches.
+// Each path acts out one HTTP behavior (redirect, 304, timeout, 500…); `serve()` lets a test change a feed between fetches.
 export function startFeedServer() {
     const hits: Record<string, number> = {};
     const served = new Map<string, { body: Uint8Array | string; init: ResponseInit }>();
@@ -18,22 +17,31 @@ export function startFeedServer() {
         hostname: '127.0.0.1',
         async fetch(req) {
             const { pathname } = new URL(req.url);
+
             hits[pathname] = (hits[pathname] ?? 0) + 1;
             lastHeaders[pathname] = req.headers;
+
             const override = served.get(pathname);
-            if (override) {
+
+            if (override)
                 return new Response(override.body, override.init);
-            }
+
             const xml = { 'Content-Type': 'application/rss+xml; charset=utf-8' };
 
             switch (pathname) {
                 case '/feed.xml':
                     return new Response(rss, { headers: xml });
                 case '/cached.xml':
-                    if (req.headers.get('if-none-match') === ETAG) {
+                    if (req.headers.get('if-none-match') === ETAG)
                         return new Response(null, { status: 304 });
-                    }
+
                     return new Response(rss, { headers: { ...xml, ETag: ETAG, 'Last-Modified': LAST_MODIFIED } });
+                case '/always-not-modified':
+                    return new Response(null, { status: 304 });
+                case '/redirect-without-location':
+                    return new Response(null, { status: 301 });
+                case '/moved-to-cached':
+                    return Response.redirect('/cached.xml', 301);
                 case '/latin1.xml':
                     return new Response(latin1, { headers: { 'Content-Type': 'text/xml; charset=ISO-8859-1' } });
                 case '/moved-permanently':
@@ -48,6 +56,7 @@ export function startFeedServer() {
                     return new Response(null, { status: 302, headers: { Location: 'file:///etc/passwd' } });
                 case '/slow':
                     await Bun.sleep(1_000);
+
                     return new Response(rss, { headers: xml });
                 case '/slow-body':
                     return new Response(

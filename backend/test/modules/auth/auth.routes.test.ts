@@ -20,6 +20,7 @@ describe('/api/auth without a database', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: 'a@example.com', password: 'long enough', name: 'A' }),
         });
+
         expect(res.status).toBe(503);
         expect(await res.json()).toEqual({
             error: { code: 'database_unavailable', message: 'Accounts are unavailable: the API has no database', retryable: true },
@@ -28,6 +29,7 @@ describe('/api/auth without a database', () => {
 
     test('get-session answers 503 too', async () => {
         const res = await fetch(`${server.url}/api/auth/get-session`);
+
         expect(res.status).toBe(503);
     });
 });

@@ -3,8 +3,7 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-
-export type CuratedFixture = { slug: string; title: string; feedUrl: string; file: string; contentType: string | null };
+import type { CuratedFixture } from '../../src/scripts/snapshot-feeds';
 
 export const FIXTURES_DIR = join(import.meta.dir, '../fixtures/feeds');
 

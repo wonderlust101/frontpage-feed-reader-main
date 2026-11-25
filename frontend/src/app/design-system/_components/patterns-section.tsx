@@ -1,13 +1,10 @@
-// Patterns section of the design system page: the feed list and the article view, rendered with the app's own
-// item components and sample data.
-
 import { ArticleView } from '@/features/items/components/article-view';
-import { FeedItemRow } from '@/features/items/components/feed-item-row';
 import { SAMPLE_ITEMS, getCategory } from '../_data/sample-data';
 import { AppShellDemo } from './app-shell-demo';
 import { DocSection, Specimen } from './doc-section';
+import { SampleItemRow } from './sample-item-row';
 
-const frontend = getCategory('frontend');
+const FRONTEND_CATEGORY = getCategory('frontend');
 
 const CODE_SAMPLE = `.card-grid {
   container-type: inline-size;
@@ -19,7 +16,6 @@ const CODE_SAMPLE = `.card-grid {
   }
 }`;
 
-// Renders the feed list and the article specimen; both follow the reader settings.
 export function PatternsSection() {
     return (
         <DocSection
@@ -38,21 +34,9 @@ export function PatternsSection() {
             <div className="grid gap-14 xl:grid-cols-2 xl:gap-x-10">
                 <Specimen title="Feed list" stage="frame" description="Sample data. Titles are illustrative; sources and categories are the guest feeds.">
                     <ul className="rule-t">
-                        {SAMPLE_ITEMS.map((item) => {
-                            const category = getCategory(item.category);
-                            return (
-                                <FeedItemRow
-                                    key={item.id}
-                                    title={item.title}
-                                    href="#article"
-                                    source={item.source}
-                                    time={item.time}
-                                    isNew={item.isNew}
-                                    health={item.health}
-                                    category={category}
-                                />
-                            );
-                        })}
+                        {SAMPLE_ITEMS.map((item) => (
+                            <SampleItemRow key={item.id} item={item} href="#article" />
+                        ))}
                     </ul>
                 </Specimen>
 
@@ -65,7 +49,7 @@ export function PatternsSection() {
                         id="article"
                         titleAs="h4"
                         title="Container queries in practice: three real layouts"
-                        category={frontend}
+                        category={FRONTEND_CATEGORY}
                         source="CSS-Tricks"
                         meta="Today, 09:15 · 6 min read"
                         summary="Three layouts that respond to their own width instead of the viewport, with the CSS for each and the cases where media queries still win."

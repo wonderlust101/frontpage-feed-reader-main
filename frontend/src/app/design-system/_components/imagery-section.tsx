@@ -1,16 +1,15 @@
-// Imagery section of the design system page: the moodboard, how photos from feeds are treated, and the no-image fallback.
 // Moodboard photos are Unsplash stock (credited below); in the app every image comes from the feeds themselves.
 
 import Image, { type StaticImageData } from 'next/image';
+import { ItemThumbnail } from '@/features/items/components/item-thumbnail';
 import concert from '../_assets/concert.jpg';
 import concourse from '../_assets/concourse.jpg';
 import desk from '../_assets/desk.jpg';
 import fog from '../_assets/fog.jpg';
 import oranges from '../_assets/oranges.jpg';
 import reading from '../_assets/reading.jpg';
-import { DocSection, Specimen } from './doc-section';
-import { ItemThumbnail } from '@/features/items/components/item-thumbnail';
 import { getCategory } from '../_data/sample-data';
+import { DocSection, Specimen } from './doc-section';
 
 type MoodPhoto = {
     image: StaticImageData;
@@ -43,7 +42,6 @@ const IMAGE_RULES = [
     'No image? The item shows its category field with the source initial, never a gray box.',
 ];
 
-// Renders the moodboard, the image rules and the thumbnail and fallback specimens.
 export function ImagerySection() {
     const design = getCategory('design');
 
@@ -73,7 +71,7 @@ export function ImagerySection() {
                             <a href={credit.url} className="underline hover:text-ink">
                                 {credit.name}
                             </a>
-                            {index < CREDITS.length - 2 ? ', ' : index === CREDITS.length - 2 ? ' and ' : '.'}
+                            {creditSeparator(index)}
                         </span>
                     ))}
                 </p>
@@ -111,11 +109,21 @@ export function ImagerySection() {
     );
 }
 
-// Renders one moodboard photo, cropped to fill its grid cell.
 function MoodTile({ photo }: { photo: MoodPhoto }) {
     return (
         <div className={`relative overflow-hidden rounded-control ${photo.className}`}>
             <Image src={photo.image} alt={photo.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" placeholder="blur" />
         </div>
     );
+}
+
+// ", " between names, " and " before the last one, "." after it.
+function creditSeparator(index: number): string {
+    if (index === CREDITS.length - 1)
+        return '.';
+
+    if (index === CREDITS.length - 2)
+        return ' and ';
+
+    return ', ';
 }
