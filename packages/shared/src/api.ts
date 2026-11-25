@@ -6,7 +6,6 @@ export type DbStatus = 'connected' | 'skipped' | 'error';
 export type HealthResponse = {
     api: 'ok';
     database: DbStatus;
-    error?: string;
 };
 
 export type FeedFormat = 'rss2' | 'atom' | 'rss1';

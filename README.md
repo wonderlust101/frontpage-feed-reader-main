@@ -368,7 +368,7 @@ bunx neon@latest checkout dev --create     # work on a throwaway dev branch (swi
 
 The backend connects with **node-postgres** (`pg`): one shared pool over the pooled `DATABASE_URL`, reused across requests, because the backend is a long-running server. Drizzle Kit migrations use the direct `DATABASE_URL_UNPOOLED`. Push the schema with `bun run db:push` (or `db:generate` + `db:migrate`).
 
-Without `DATABASE_URL` the backend still runs, and `/api/health` reports the database as `skipped`.
+Without `DATABASE_URL` the backend still runs, and `/api/health` reports the database as `skipped`. When the database fails, it reports `error` and the details go only to the server log, since the endpoint is public.
 
 ## Deploying
 
