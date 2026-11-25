@@ -54,6 +54,8 @@ services:
       # Fake, local-only value so Docker signs cookies like production does. Production refuses to start without its own.
       AUTH_SECRET: local-docker-only-not-a-real-secret-0000
       MAILPIT_URL: http://mailpit:8025
+      # Refresh feeds in the background against the local database (off by default outside Railway).
+      FEED_REFRESH_ENABLED: 'true'
     command: ['bun', '--no-env-file', '--watch', 'src/index.ts']
     volumes:
       - ./backend:/app/backend

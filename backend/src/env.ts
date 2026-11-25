@@ -6,6 +6,9 @@ import { DEFAULT_TIMEOUT_MS, DEFAULT_USER_AGENT } from './lib/feed/fetch';
 
 const deployment = deploymentDefaults(process.env.RAILWAY_ENVIRONMENT_NAME);
 
+// Background refresh runs on Railway unless turned off. Elsewhere it waits to be asked: `bun dev` on the host loads backend/.env, which points at Neon.
+const refreshByDefault = process.env.RAILWAY_ENVIRONMENT_NAME ? 'true' : 'false';
+
 export const env = {
     NODE_ENV: process.env.NODE_ENV ?? 'development',
     PORT: integerOr(process.env.PORT, 4000),
@@ -29,7 +32,10 @@ export const env = {
     FEED_USER_AGENT: process.env.FEED_USER_AGENT ?? DEFAULT_USER_AGENT,
     FEED_MIN_REFETCH_MINUTES: integerOr(process.env.FEED_MIN_REFETCH_MINUTES, 15),
     FEED_ALLOW_LOOPBACK: process.env.FEED_ALLOW_LOOPBACK === 'true',
-    FEED_HOST_MAX_CONCURRENT: integerOr(process.env.FEED_HOST_MAX_CONCURRENT, 2),
+    FEED_REFRESH_ENABLED: (optional(process.env.FEED_REFRESH_ENABLED) ?? refreshByDefault) === 'true',
+    // At least 1: a 0 would run bursts back to back, or refuse every fetch.
+    FEED_REFRESH_TICK_MINUTES: Math.max(1, integerOr(process.env.FEED_REFRESH_TICK_MINUTES, 15)),
+    FEED_HOST_MAX_CONCURRENT: Math.max(1, integerOr(process.env.FEED_HOST_MAX_CONCURRENT, 2)),
     FEED_HOST_MIN_INTERVAL_MS: integerOr(process.env.FEED_HOST_MIN_INTERVAL_MS, 1000),
 };
 
