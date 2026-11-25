@@ -15,7 +15,7 @@ export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 export type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
 
-export const pool = env.DATABASE_URL
+const pool = env.DATABASE_URL
     ? new Pool({
             connectionString: env.DATABASE_URL,
             max: 10,

@@ -1,6 +1,5 @@
-// Downloads one feed safely: 10s timeout, manual redirects, ETag/Last-Modified, decompression, size cap.
-// SSRF: request-filtering-agent checks the IP of every connection actually opened (each redirect hop too),
-// so a hostname can't pass a check and then connect to a private address (DNS rebinding).
+// Downloads one feed safely: timeout, manual redirects, validators, decompression, size cap. request-filtering-agent checks
+// the IP of every connection opened (each redirect hop too), so DNS rebinding can't reach a private address.
 
 import http, { type IncomingMessage } from 'node:http';
 import https from 'node:https';

@@ -1,6 +1,5 @@
-// Lists use keyset pagination: a LATERAL subquery reads at most limit+1 items per followed feed in index order, so page
-// 50 costs the same as page 1. Every query starts from the reader's own subscriptions, so only an empty page needs
-// the ownership check.
+// Keyset pagination: a LATERAL subquery reads at most limit+1 items per followed feed in index order, so page 50 costs
+// the same as page 1. Queries start from the reader's subscriptions, so only an empty page needs an ownership check.
 
 import { and, asc, count, desc, eq, isNull, not, sql, type SQL } from 'drizzle-orm';
 import type { ItemCount, ItemCountsResponse, ItemDetail, ItemListResponse, ItemSummary } from '@frontpage/shared';

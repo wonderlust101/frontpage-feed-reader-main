@@ -6,7 +6,7 @@ import { decodeBuffer, getEncoding, type SnifferOptions } from 'encoding-sniffer
 // The charset parameter of a Content-Type header: `text/xml; charset="ISO-8859-1"` → ISO-8859-1.
 const CHARSET_PARAM = /charset\s*=\s*["']?([^;\s"']+)/i;
 
-// Turns feed bytes into a string using the detected encoding, without a BOM.
+// The byte-order mark is dropped.
 export function decodeFeed(bytes: Uint8Array, contentType?: string | null): string {
     return decodeBuffer(asBuffer(bytes), snifferOptions(contentType));
 }

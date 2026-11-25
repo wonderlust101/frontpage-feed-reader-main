@@ -4,11 +4,11 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:tes
 import { and, eq, sql } from 'drizzle-orm';
 import type { ItemSummary } from '@frontpage/shared';
 import { categories, feeds, itemReadStates, items, subscriptions, users } from '../../../src/db/schema';
-import { HttpError } from '../../../src/errors';
 import { decodeCursor } from '../../../src/modules/items/items.cursor';
 import { IS_READ, countItems, getItem, listItems } from '../../../src/modules/items/items.service';
 import type { ItemListQuery } from '../../../src/modules/items/items.types';
 import { createTestDb } from '../../helpers/test-db';
+import { httpErrorFrom } from '../../helpers/errors';
 
 const NOW = new Date('2026-03-10T12:00:00.000Z');
 const BASE_MS = Date.parse('2026-03-01T10:00:00.000Z');
@@ -140,18 +140,6 @@ function idsOf(list: { id: string }[]): string[] {
     return list.map((item) => item.id);
 }
 
-// Awaits a call that must fail and returns its HttpError, so the test can check the status and code.
-async function rejection(call: Promise<unknown>): Promise<HttpError> {
-    const err = await call.then(
-        () => null,
-        (e: unknown) => e,
-    );
-
-    expect(err).toBeInstanceOf(HttpError);
-
-    return err as HttpError;
-}
-
 describe('listItems: scopes', () => {
     test('"all" lists every feed the reader follows, and nothing from a feed they do not follow', async () => {
         const reader = await newUser();
@@ -215,7 +203,7 @@ describe('listItems: authorization', () => {
         await newItem(gracesFeed, minutes(1));
 
         for (const feedId of [gracesFeed, RANDOM_ID]) {
-            const err = await rejection(listItems(testDb.db, ada, query({ scope: { kind: 'feed', feedId } }), NOW));
+            const err = await httpErrorFrom(listItems(testDb.db, ada, query({ scope: { kind: 'feed', feedId } }), NOW));
 
             expect(err).toMatchObject({ status: 404, code: 'feed_not_found', message: 'Feed not found' });
         }
@@ -230,7 +218,7 @@ describe('listItems: authorization', () => {
         await newItem(feed, minutes(1));
 
         for (const categoryId of [gracesCategory, RANDOM_ID]) {
-            const err = await rejection(listItems(testDb.db, ada, query({ scope: { kind: 'category', categoryId } }), NOW));
+            const err = await httpErrorFrom(listItems(testDb.db, ada, query({ scope: { kind: 'category', categoryId } }), NOW));
 
             expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
         }
@@ -636,7 +624,7 @@ describe('getItem', () => {
         await testDb.db.delete(subscriptions).where(eq(subscriptions.userId, ada));
 
         for (const id of [gracesItem, oldItem, RANDOM_ID]) {
-            const err = await rejection(getItem(testDb.db, ada, id, NOW));
+            const err = await httpErrorFrom(getItem(testDb.db, ada, id, NOW));
 
             expect(err).toMatchObject({ status: 404, code: 'not_found', message: 'Item not found' });
         }

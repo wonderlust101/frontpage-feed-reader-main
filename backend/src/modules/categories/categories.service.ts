@@ -6,7 +6,6 @@ import type { Database } from '../../db';
 import { NotFoundError } from '../../errors';
 import { categories } from './categories.schema';
 
-// Throws `category_not_found` (404) unless the category exists and belongs to the reader.
 export async function assertOwnCategory(db: Database, userId: string, categoryId: string): Promise<void> {
     const [category] = await db
         .select({ id: categories.id })

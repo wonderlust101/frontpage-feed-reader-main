@@ -2,26 +2,12 @@
 // rejection wins) and the item id.
 
 import { describe, expect, test } from 'bun:test';
-import { HttpError } from '../../../src/errors';
 import { encodeCursor } from '../../../src/modules/items/items.cursor';
 import { parseItemId, parseItemListQuery } from '../../../src/modules/items/items.validation';
+import { httpErrorThrownBy } from '../../helpers/errors';
 
 const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
 const NEWEST_CURSOR = encodeCursor({ order: 'newest', sortAt: '2026-03-01T10:00:00.123456Z', id: ID });
-
-// Runs a call that must throw and returns its HttpError, so a test can check the status and code.
-function rejection(call: () => unknown): HttpError {
-    try {
-        call();
-    } catch (err) {
-        if (err instanceof HttpError)
-            return err;
-
-        throw err;
-    }
-
-    throw new Error('expected the call to throw');
-}
 
 describe('parseItemListQuery', () => {
     test('no parameters → everything, all items, newest first, 30 per page, first page', () => {
@@ -73,38 +59,38 @@ describe('parseItemListQuery', () => {
         ['cursor', { cursor: 'garbage' }],
         ['cursor', { cursor: '' }],
     ])('a bad %s (%p) → 400 bad_request', (_name, query) => {
-        expect(rejection(() => parseItemListQuery(query))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseItemListQuery(query))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 
     test('a cursor made for the other order → 400 bad_request', () => {
-        expect(rejection(() => parseItemListQuery({ order: 'oldest', cursor: NEWEST_CURSOR }))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseItemListQuery({ order: 'oldest', cursor: NEWEST_CURSOR }))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 
     test.each(['feed', 'category', 'unread', 'order', 'limit', 'cursor'])('%s sent twice → 400 bad_request', (name) => {
-        const err = rejection(() => parseItemListQuery({ [name]: ['a', 'b'] }));
+        const err = httpErrorThrownBy(() => parseItemListQuery({ [name]: ['a', 'b'] }));
 
         expect(err).toMatchObject({ status: 400, code: 'bad_request' });
         expect(err.message).toBe(`${name} can only be given once`);
     });
 
     test('feed and category together → 400 bad_request', () => {
-        expect(rejection(() => parseItemListQuery({ feed: ID, category: ID }))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseItemListQuery({ feed: ID, category: ID }))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 
     test.each(['not-a-uuid', '', `${ID}x`])('feed=%p → 404 feed_not_found, like a feed the reader does not follow', (feed) => {
-        expect(rejection(() => parseItemListQuery({ feed }))).toMatchObject({ status: 404, code: 'feed_not_found', message: 'Feed not found' });
+        expect(httpErrorThrownBy(() => parseItemListQuery({ feed }))).toMatchObject({ status: 404, code: 'feed_not_found', message: 'Feed not found' });
     });
 
     test.each(['not-a-uuid', '', 'Uncategorized', 'UNCATEGORIZED'])(
         'category=%p → 404 category_not_found (only the exact word means Uncategorized)',
         (category) => {
-            expect(rejection(() => parseItemListQuery({ category }))).toMatchObject({ status: 404, code: 'category_not_found', message: 'Category not found' });
+            expect(httpErrorThrownBy(() => parseItemListQuery({ category }))).toMatchObject({ status: 404, code: 'category_not_found', message: 'Category not found' });
         },
     );
 
     test('a 400 wins over a 404 when a request has both problems', () => {
-        expect(rejection(() => parseItemListQuery({ feed: 'nope', limit: '0' }))).toMatchObject({ status: 400 });
-        expect(rejection(() => parseItemListQuery({ category: 'nope', cursor: 'garbage' }))).toMatchObject({ status: 400 });
+        expect(httpErrorThrownBy(() => parseItemListQuery({ feed: 'nope', limit: '0' }))).toMatchObject({ status: 400 });
+        expect(httpErrorThrownBy(() => parseItemListQuery({ category: 'nope', cursor: 'garbage' }))).toMatchObject({ status: 400 });
     });
 });
 
@@ -115,6 +101,6 @@ describe('parseItemId', () => {
     });
 
     test.each(['not-a-uuid', '', 'counts', `${ID}x`])('%p → 404 not_found', (value) => {
-        expect(rejection(() => parseItemId(value))).toMatchObject({ status: 404, code: 'not_found', message: 'Item not found' });
+        expect(httpErrorThrownBy(() => parseItemId(value))).toMatchObject({ status: 404, code: 'not_found', message: 'Item not found' });
     });
 });

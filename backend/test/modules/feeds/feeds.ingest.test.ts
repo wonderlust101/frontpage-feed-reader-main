@@ -9,6 +9,7 @@ import { ingestFeed } from '../../../src/modules/feeds/feeds.ingest';
 import { ETAG, LAST_MODIFIED, startFeedServer } from '../../helpers/feed-server';
 import { readFixture } from '../../helpers/fixtures';
 import { createTestDb } from '../../helpers/test-db';
+import { httpErrorFrom } from '../../helpers/errors';
 
 type TestItem = { guid: string; title: string; date?: string };
 
@@ -71,18 +72,6 @@ async function newUser(): Promise<string> {
     return id;
 }
 
-// Awaits a call that must fail and returns its HttpError, so the test can check the code.
-async function feedError(call: Promise<unknown>): Promise<HttpError> {
-    const err = await call.then(
-        () => null,
-        (e: unknown) => e,
-    );
-
-    expect(err).toBeInstanceOf(HttpError);
-
-    return err as HttpError;
-}
-
 describe('first ingest', () => {
     test('stores the feed metadata, validators, bookkeeping and every item', async () => {
         server.serve('/css-tricks.xml', readFixture('curated/css-tricks.xml'), {
@@ -121,7 +110,7 @@ describe('first ingest', () => {
     });
 
     test('a URL whose first fetch fails stores nothing', async () => {
-        const err = await feedError(ingestFeed(testDb.db, `${server.url}/missing`, { now: T1 }));
+        const err = await httpErrorFrom(ingestFeed(testDb.db, `${server.url}/missing`, { now: T1 }));
 
         expect(err.code).toBe('http_4xx');
         expect(await testDb.db.select().from(feeds)).toEqual([]);
@@ -251,7 +240,7 @@ describe('304 Not Modified', () => {
     test('a 304 for a URL with no stored feed is a bad gateway, and nothing is stored', async () => {
         const url = `${server.url}/always-not-modified`;
 
-        const err = await feedError(ingestFeed(testDb.db, url, { now: T1 }));
+        const err = await httpErrorFrom(ingestFeed(testDb.db, url, { now: T1 }));
 
         expect(err.code).toBe('http_5xx');
         expect(err.upstreamStatus).toBe(304);
@@ -295,7 +284,7 @@ describe('failures', () => {
         const before = await feedAt(url);
 
         server.serve('/flaky.xml', 'boom', { status: 500 });
-        const err = await feedError(ingestFeed(testDb.db, url, { now: T2 }));
+        const err = await httpErrorFrom(ingestFeed(testDb.db, url, { now: T2 }));
 
         expect(err.code).toBe('http_5xx');
         const after = await feedAt(url);
@@ -312,7 +301,7 @@ describe('failures', () => {
         expect(after!.lastErrorMessage).toContain('500');
         expect((await itemsOf(feedId)).size).toBe(1);
 
-        await feedError(ingestFeed(testDb.db, url, { now: T3 }));
+        await httpErrorFrom(ingestFeed(testDb.db, url, { now: T3 }));
         expect((await feedAt(url))!.consecutiveFailures).toBe(2);
     });
 
@@ -354,7 +343,7 @@ describe('failures', () => {
             await ingestFeed(testDb.db, url, { now: T1 });
 
             fail(path);
-            await feedError(ingestFeed(testDb.db, url, { now: T2 }));
+            await httpErrorFrom(ingestFeed(testDb.db, url, { now: T2 }));
 
             expect(await feedAt(url)).toMatchObject({ lastErrorCode: code, lastErrorStatus: status, consecutiveFailures: 1 });
         });
@@ -365,7 +354,7 @@ describe('failures', () => {
 
         await testDb.db.insert(feeds).values({ url, title: 'Slow feed' });
 
-        const err = await feedError(ingestFeed(testDb.db, url, { now: T1 }));
+        const err = await httpErrorFrom(ingestFeed(testDb.db, url, { now: T1 }));
 
         expect(err.code).toBe('timeout');
         expect(await feedAt(url)).toMatchObject({ lastErrorCode: 'timeout', lastErrorStatus: null, consecutiveFailures: 1, lastFetchedAt: T1 });

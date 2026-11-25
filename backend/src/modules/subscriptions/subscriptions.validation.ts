@@ -1,6 +1,5 @@
-// Checks the subscriptions routes' ids and bodies and turns them into the shared request types; unknown fields are dropped.
-// An id that isn't a UUID is "not found" (404), the same answer as for another reader's id, and never reaches Postgres
-// (which would reject it with an error). The feed URL itself is checked by parseFeedUrl in the service.
+// Unknown fields are dropped. An id that isn't a UUID is a 404, like another reader's id; the feed URL itself is
+// checked by parseFeedUrl in the service.
 
 import { MAX_CUSTOM_TITLE_LENGTH, type SubscribeRequest, type UpdateSubscriptionRequest } from '@frontpage/shared';
 import { isUuid, requireUuid } from '../../lib/uuid';
@@ -54,7 +53,6 @@ function parseCategoryId(value: unknown): string | null {
     throw new BadRequestError('bad_request', 'categoryId must be a category id or null');
 }
 
-// A custom title, trimmed, with "" as null; throws `bad_request` if it isn't a string or null, or is too long.
 function parseCustomTitle(value: unknown): string | null {
     if (value === null)
         return null;

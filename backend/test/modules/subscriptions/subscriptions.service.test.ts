@@ -4,10 +4,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { and, eq, sql } from 'drizzle-orm';
 import { bookmarks, categories, feeds, itemReadStates, items, subscriptions, users } from '../../../src/db/schema';
-import { HttpError } from '../../../src/errors';
 import { listSubscriptions, subscribe, unsubscribe, updateSubscription } from '../../../src/modules/subscriptions/subscriptions.service';
 import { startFeedServer } from '../../helpers/feed-server';
 import { createTestDb } from '../../helpers/test-db';
+import { httpErrorFrom } from '../../helpers/errors';
 
 const T1 = new Date('2026-03-01T10:00:00.000Z');
 const MINUTE_MS = 60 * 1000;
@@ -69,18 +69,6 @@ async function newCategory(userId: string, name: string): Promise<string> {
 // Every stored subscription row of `userId`.
 function subscriptionRowsOf(userId: string) {
     return testDb.db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
-}
-
-// Awaits a call that must fail and returns its HttpError, so the test can check the status and code.
-async function rejection(call: Promise<unknown>): Promise<HttpError> {
-    const err = await call.then(
-        () => null,
-        (e: unknown) => e,
-    );
-
-    expect(err).toBeInstanceOf(HttpError);
-
-    return err as HttpError;
 }
 
 describe('subscribe', () => {
@@ -151,7 +139,7 @@ describe('subscribe', () => {
     test('a page that is not a feed → 422 not_a_feed, and nothing is stored', async () => {
         const reader = await newUser();
 
-        const err = await rejection(subscribe(testDb.db, reader, { url: `${server.url}/html` }, T1));
+        const err = await httpErrorFrom(subscribe(testDb.db, reader, { url: `${server.url}/html` }, T1));
 
         expect(err).toMatchObject({ status: 422, code: 'not_a_feed' });
         expect(await testDb.db.select().from(feeds)).toEqual([]);
@@ -159,14 +147,14 @@ describe('subscribe', () => {
     });
 
     test('a feed that is gone → 502 http_4xx with the upstream status, and nothing is stored', async () => {
-        const err = await rejection(subscribe(testDb.db, await newUser(), { url: `${server.url}/gone` }, T1));
+        const err = await httpErrorFrom(subscribe(testDb.db, await newUser(), { url: `${server.url}/gone` }, T1));
 
         expect(err).toMatchObject({ status: 502, code: 'http_4xx', upstreamStatus: 410 });
         expect(await testDb.db.select().from(feeds)).toEqual([]);
     });
 
     test('an empty URL → 400 invalid_url', async () => {
-        expect(await rejection(subscribe(testDb.db, await newUser(), { url: '' }, T1))).toMatchObject({ status: 400, code: 'invalid_url' });
+        expect(await httpErrorFrom(subscribe(testDb.db, await newUser(), { url: '' }, T1))).toMatchObject({ status: 400, code: 'invalid_url' });
     });
 
     test("subscribes into one of the reader's categories", async () => {
@@ -181,7 +169,7 @@ describe('subscribe', () => {
     test('a categoryId that does not exist → 404 category_not_found, before any fetch', async () => {
         const url = serveFeed('/nowhere.xml', 'Nowhere');
 
-        const err = await rejection(subscribe(testDb.db, await newUser(), { url, categoryId: RANDOM_ID }, T1));
+        const err = await httpErrorFrom(subscribe(testDb.db, await newUser(), { url, categoryId: RANDOM_ID }, T1));
 
         expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
         expect(server.hits['/nowhere.xml']).toBeUndefined();
@@ -194,7 +182,7 @@ describe('subscribing to a feed the reader already follows', () => {
         const url = serveFeed('/twice.xml', 'Twice');
         const first = await subscribe(testDb.db, reader, { url }, T1);
 
-        const err = await rejection(subscribe(testDb.db, reader, { url }, after(DAY_MS)));
+        const err = await httpErrorFrom(subscribe(testDb.db, reader, { url }, after(DAY_MS)));
 
         expect(err).toMatchObject({ status: 409, code: 'already_subscribed', subscriptionId: first.id });
         expect(server.hits['/twice.xml']).toBe(1);
@@ -205,7 +193,7 @@ describe('subscribing to a feed the reader already follows', () => {
         const reader = await newUser();
         const first = await subscribe(testDb.db, reader, { url: `${server.url}/feed.xml` }, T1);
 
-        const err = await rejection(subscribe(testDb.db, reader, { url: `${server.url}/moved-permanently` }, T1));
+        const err = await httpErrorFrom(subscribe(testDb.db, reader, { url: `${server.url}/moved-permanently` }, T1));
 
         expect(err).toMatchObject({ status: 409, code: 'already_subscribed', subscriptionId: first.id });
         expect(await subscriptionRowsOf(reader)).toHaveLength(1);
@@ -357,7 +345,7 @@ describe('unsubscribe', () => {
 
         await unsubscribe(testDb.db, reader, subscription.id);
 
-        expect(await rejection(unsubscribe(testDb.db, reader, subscription.id))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(await httpErrorFrom(unsubscribe(testDb.db, reader, subscription.id))).toMatchObject({ status: 404, code: 'not_found' });
     });
 });
 
@@ -367,8 +355,8 @@ describe('only the owner can touch a subscription', () => {
         const intruder = await newUser();
         const subscription = await subscribe(testDb.db, owner, { url: serveFeed('/owned.xml', 'Owned') }, T1);
 
-        const renaming = await rejection(updateSubscription(testDb.db, intruder, subscription.id, { customTitle: 'Mine now' }, T1));
-        const moving = await rejection(updateSubscription(testDb.db, intruder, subscription.id, { categoryId: null }, T1));
+        const renaming = await httpErrorFrom(updateSubscription(testDb.db, intruder, subscription.id, { customTitle: 'Mine now' }, T1));
+        const moving = await httpErrorFrom(updateSubscription(testDb.db, intruder, subscription.id, { categoryId: null }, T1));
 
         expect(renaming).toMatchObject({ status: 404, code: 'not_found' });
         expect(moving).toMatchObject({ status: 404, code: 'not_found' });
@@ -379,15 +367,15 @@ describe('only the owner can touch a subscription', () => {
         const owner = await newUser();
         const subscription = await subscribe(testDb.db, owner, { url: serveFeed('/keep.xml', 'Keep') }, T1);
 
-        expect(await rejection(unsubscribe(testDb.db, await newUser(), subscription.id))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(await httpErrorFrom(unsubscribe(testDb.db, await newUser(), subscription.id))).toMatchObject({ status: 404, code: 'not_found' });
         expect(await subscriptionRowsOf(owner)).toHaveLength(1);
     });
 
     test('an id that matches no subscription → 404 not_found for update and unsubscribe', async () => {
         const reader = await newUser();
 
-        expect(await rejection(updateSubscription(testDb.db, reader, RANDOM_ID, { customTitle: 'X' }, T1))).toMatchObject({ status: 404, code: 'not_found' });
-        expect(await rejection(unsubscribe(testDb.db, reader, RANDOM_ID))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(await httpErrorFrom(updateSubscription(testDb.db, reader, RANDOM_ID, { customTitle: 'X' }, T1))).toMatchObject({ status: 404, code: 'not_found' });
+        expect(await httpErrorFrom(unsubscribe(testDb.db, reader, RANDOM_ID))).toMatchObject({ status: 404, code: 'not_found' });
     });
 
     test("a reader can't subscribe into another reader's category (404 category_not_found), and nothing is fetched", async () => {
@@ -395,7 +383,7 @@ describe('only the owner can touch a subscription', () => {
         const reader = await newUser();
         const url = serveFeed('/sneaky.xml', 'Sneaky');
 
-        const err = await rejection(subscribe(testDb.db, reader, { url, categoryId: othersCategory }, T1));
+        const err = await httpErrorFrom(subscribe(testDb.db, reader, { url, categoryId: othersCategory }, T1));
 
         expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
         expect(server.hits['/sneaky.xml']).toBeUndefined();
@@ -407,7 +395,7 @@ describe('only the owner can touch a subscription', () => {
         const reader = await newUser();
         const subscription = await subscribe(testDb.db, reader, { url: serveFeed('/mine.xml', 'Mine') }, T1);
 
-        const err = await rejection(updateSubscription(testDb.db, reader, subscription.id, { categoryId: othersCategory }, T1));
+        const err = await httpErrorFrom(updateSubscription(testDb.db, reader, subscription.id, { categoryId: othersCategory }, T1));
 
         expect(err).toMatchObject({ status: 404, code: 'category_not_found' });
         const [row] = await subscriptionRowsOf(reader);

@@ -1,6 +1,5 @@
-// Per-reader rate limits for routes behind requireAuth, built on express-rate-limit's in-memory store.
-// Requests are counted per signed-in user, not per IP. The count lives in this process, which is enough for the one
-// long-running Railway server; it resets on restart. The wait goes in X-Retry-After (seconds), the header CORS exposes.
+// Per-reader rate limits, keyed by user id (so they go after requireAuth). The count lives in this process, enough for the
+// one Railway server, and resets on restart; the wait goes in X-Retry-After, the header CORS exposes.
 
 import type { RequestHandler } from 'express';
 import { rateLimit } from 'express-rate-limit';

@@ -1,6 +1,5 @@
-// Better Auth's four core tables (users, sessions, accounts, verifications), written by hand to match its built-in schema.
-// The adapter finds tables by model name (mapped in auth.service.ts) and fields by the camelCase property names; SQL names are snake_case.
-// Better Auth creates text ids, so every user_id elsewhere in the schema is text too.
+// Better Auth's four core tables, written by hand to match its schema: the adapter finds fields by these camelCase names
+// (SQL names are snake_case). Better Auth makes text ids, so every user_id elsewhere is text too.
 
 import { relations } from 'drizzle-orm';
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';

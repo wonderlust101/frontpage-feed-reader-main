@@ -162,7 +162,6 @@ function byNewestFirst(a: NormalizedItem, b: NormalizedItem): number {
     return 0;
 }
 
-// The non-fatal problems found while reading the feed, as messages for the client.
 function buildWarnings(found: FeedProblems): string[] {
     const warnings: string[] = [];
 
@@ -252,7 +251,6 @@ function joinAuthors(names: string[]): string | null {
     return truncate(names.filter(Boolean).join(', '), AUTHOR_MAX) || null;
 }
 
-// Tries each candidate with parseFeedDate and returns the first valid one as an ISO string, or null.
 function firstDate(candidates: Array<string | Date | null | undefined>, now: number): string | null {
     for (const candidate of candidates) {
         const iso = candidate instanceof Date ? parseFeedDate(candidate.toISOString(), now) : parseFeedDate(candidate, now);

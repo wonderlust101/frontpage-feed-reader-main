@@ -12,7 +12,7 @@ type CuratedFixture = { slug: string; title: string; feedUrl: string; file: stri
 
 const OUT_DIR = join(import.meta.dir, '../../test/fixtures/feeds/curated');
 const MAX_BYTES = 150 * 1024;
-const MAX_ITEMS = 10;
+const FIXTURE_MAX_ITEMS = 10;
 
 const feeds = sampleFeeds.categories.flatMap((c) => c.feeds);
 
@@ -35,7 +35,7 @@ for (const feed of feeds) {
             // Node's latin1 maps bytes 1:1 (TextDecoder's "latin1" doesn't), so trimming can't corrupt characters.
             const latin1 = Buffer.from(bytes).toString('latin1');
 
-            bytes = new Uint8Array(Buffer.from(limitItems(latin1, MAX_ITEMS).xml, 'latin1'));
+            bytes = new Uint8Array(Buffer.from(limitItems(latin1, FIXTURE_MAX_ITEMS).xml, 'latin1'));
         }
 
         await writeFile(join(OUT_DIR, file), bytes);

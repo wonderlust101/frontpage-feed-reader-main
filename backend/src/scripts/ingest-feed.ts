@@ -2,7 +2,7 @@
 // Refuses any database that isn't local, because on the host Bun loads backend/.env, which points at Neon.
 // Usage: docker compose run --rm --no-deps backend bun run ingest:feed <url>
 
-import { db, pool } from '../db';
+import { closeDatabase, db } from '../db';
 import { env } from '../env';
 import { ingestFeed } from '../modules/feeds/feeds.ingest';
 
@@ -25,5 +25,5 @@ if (!db || !host || !LOCAL_HOSTS.has(host)) {
 try {
     console.log(JSON.stringify(await ingestFeed(db, url), null, 2));
 } finally {
-    await pool?.end();
+    await closeDatabase();
 }

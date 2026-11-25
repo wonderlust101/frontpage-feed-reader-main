@@ -4,6 +4,9 @@ import type { ErrorRequestHandler } from 'express';
 import type { ApiErrorResponse } from '@frontpage/shared';
 import { HttpError } from '../errors';
 
+// What Express's own errors (e.g. from the JSON body parser) carry.
+type ExpressError = { status?: number; type?: string; message?: string };
+
 // Unexpected errors (bugs) are logged and answered with a generic 500 that hides the details.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     const error = toHttpError(err);
@@ -29,14 +32,18 @@ function toHttpError(err: unknown): HttpError {
     if (err instanceof HttpError)
         return err;
 
-    const expressError = err as { status?: number; type?: string; message?: string } | undefined;
-    const status = expressError?.status ?? 500;
+    const expressError: ExpressError = isObject(err) ? err : {};
+    const status = expressError.status ?? 500;
 
-    if (status >= 400 && status < 500) {
-        return expressError?.type === 'entity.parse.failed'
-            ? new HttpError(status, 'invalid_json', 'The request body is not valid JSON')
-            : new HttpError(status, 'bad_request', expressError?.message || 'Bad request');
-    }
+    if (status < 400 || status >= 500)
+        return new HttpError(500, 'internal_error', 'Internal server error');
 
-    return new HttpError(500, 'internal_error', 'Internal server error');
+    if (expressError.type === 'entity.parse.failed')
+        return new HttpError(status, 'invalid_json', 'The request body is not valid JSON');
+
+    return new HttpError(status, 'bad_request', expressError.message || 'Bad request');
+}
+
+function isObject(value: unknown): value is ExpressError {
+    return typeof value === 'object' && value !== null;
 }

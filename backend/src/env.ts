@@ -1,6 +1,5 @@
-// Typed environment variables, each documented in backend/.env.example. Deployment URLs default from the committed
-// map in packages/shared by RAILWAY_ENVIRONMENT_NAME; an unknown Railway environment gets no defaults, so production's
-// startup checks stop it instead of letting it run with local URLs.
+// Typed environment variables, each documented in backend/.env.example. Deployment URLs default from packages/shared by
+// RAILWAY_ENVIRONMENT_NAME; an unknown Railway environment gets none, so production's startup checks stop it.
 
 import { DEPLOYMENTS, type Deployment } from '@frontpage/shared';
 

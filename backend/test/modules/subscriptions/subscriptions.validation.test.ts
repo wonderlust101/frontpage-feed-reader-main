@@ -2,24 +2,10 @@
 
 import { describe, expect, test } from 'bun:test';
 import { MAX_CUSTOM_TITLE_LENGTH } from '@frontpage/shared';
-import { HttpError } from '../../../src/errors';
 import { parseSubscribeRequest, parseSubscriptionId, parseUpdateSubscriptionRequest } from '../../../src/modules/subscriptions/subscriptions.validation';
+import { httpErrorThrownBy } from '../../helpers/errors';
 
 const ID = '0b6f7e7c-3a4d-4f1e-9b8a-2c5d6e7f8a9b';
-
-// Runs a call that must throw and returns its HttpError, so a test can check the status and code.
-function rejection(call: () => unknown): HttpError {
-    try {
-        call();
-    } catch (err) {
-        if (err instanceof HttpError)
-            return err;
-
-        throw err;
-    }
-
-    throw new Error('expected the call to throw');
-}
 
 describe('parseSubscriptionId', () => {
     test('accepts a UUID in any case', () => {
@@ -28,7 +14,7 @@ describe('parseSubscriptionId', () => {
     });
 
     test.each(['not-a-uuid', '', `${ID}x`, '123'])('%p → 404 not_found, like an id that is not yours', (value) => {
-        expect(rejection(() => parseSubscriptionId(value))).toMatchObject({ status: 404, code: 'not_found', message: 'Subscription not found' });
+        expect(httpErrorThrownBy(() => parseSubscriptionId(value))).toMatchObject({ status: 404, code: 'not_found', message: 'Subscription not found' });
     });
 });
 
@@ -48,11 +34,11 @@ describe('parseSubscribeRequest', () => {
     });
 
     test.each([undefined, null, 'https://a.test', [['https://a.test']], 42])('body %p → 400 bad_request', (body) => {
-        expect(rejection(() => parseSubscribeRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseSubscribeRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 
     test.each([5, 'design', '', {}])('categoryId %p → 400 bad_request', (categoryId) => {
-        expect(rejection(() => parseSubscribeRequest({ url: 'a.test', categoryId }))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseSubscribeRequest({ url: 'a.test', categoryId }))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 });
 
@@ -74,7 +60,7 @@ describe('parseUpdateSubscriptionRequest', () => {
     });
 
     test('a title one character too long → 400 bad_request', () => {
-        const err = rejection(() => parseUpdateSubscriptionRequest({ customTitle: 'x'.repeat(MAX_CUSTOM_TITLE_LENGTH + 1) }));
+        const err = httpErrorThrownBy(() => parseUpdateSubscriptionRequest({ customTitle: 'x'.repeat(MAX_CUSTOM_TITLE_LENGTH + 1) }));
 
         expect(err).toMatchObject({ status: 400, code: 'bad_request', message: 'customTitle must be at most 200 characters' });
     });
@@ -89,14 +75,14 @@ describe('parseUpdateSubscriptionRequest', () => {
     });
 
     test.each([{}, { feedId: ID }])('a body with neither field (%p) → 400 bad_request', (body) => {
-        expect(rejection(() => parseUpdateSubscriptionRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseUpdateSubscriptionRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 
     test.each([{ customTitle: 5 }, { customTitle: ['A'] }, { categoryId: 5 }, { categoryId: 'abc' }])('%p → 400 bad_request', (body) => {
-        expect(rejection(() => parseUpdateSubscriptionRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseUpdateSubscriptionRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 
     test.each([undefined, null, 'title', [[]]])('body %p → 400 bad_request', (body) => {
-        expect(rejection(() => parseUpdateSubscriptionRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
+        expect(httpErrorThrownBy(() => parseUpdateSubscriptionRequest(body))).toMatchObject({ status: 400, code: 'bad_request' });
     });
 });
