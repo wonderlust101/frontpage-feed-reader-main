@@ -1,20 +1,20 @@
 import type { Metadata } from 'next';
-import { ContentsNav } from './_components/contents-nav';
-import { ComponentsSection } from './_components/components-section';
 import { ColorSection } from './_components/color-section';
-import { SpaceSection } from './_components/space-section';
-import { TypeSection } from './_components/type-section';
+import { ComponentsSection } from './_components/components-section';
+import { ContentsNav } from './_components/contents-nav';
 import { HeroCategorySwitch, HeroChoiceProvider } from './_components/hero-choice';
 import { HeroField } from './_components/hero-field';
 import { IconsSection } from './_components/icons-section';
 import { ImagerySection } from './_components/imagery-section';
 import { LogoSection } from './_components/logo-section';
 import { PatternsSection } from './_components/patterns-section';
+import { SpaceSection } from './_components/space-section';
 import { StatesSection } from './_components/states-section';
+import { TypeSection } from './_components/type-section';
 import { SECTIONS } from './_data/sections';
 
 export const metadata: Metadata = {
-    title: 'Design system · Frontpage',
+    title: 'Design system',
     description: "Frontpage's tokens, type and components, shown working.",
 };
 
