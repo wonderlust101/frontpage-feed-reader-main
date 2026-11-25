@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque, JetBrains_Mono, Lexend, Onest } from 'next/font/google';
 import { CATEGORY_FIELDS_SCRIPT } from '@/features/categories/category-field-vars';
 import { SAVED_PREFERENCES_SCRIPT } from '@/lib/saved-preferences';
+import { SITE_NAME } from '@/lib/site';
 import './globals.css';
 
 const bricolage = Bricolage_Grotesque({
@@ -40,7 +41,7 @@ const lexend = Lexend({
 
 export const metadata: Metadata = {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL),
-    title: { default: 'Frontpage', template: '%s · Frontpage' },
+    title: { default: SITE_NAME, template: `%s · ${SITE_NAME}` },
     description: 'Your personalized front page for tech content.',
 };
 

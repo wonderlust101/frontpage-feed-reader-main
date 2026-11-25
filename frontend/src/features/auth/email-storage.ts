@@ -1,7 +1,7 @@
 // Hands the reader's email between auth steps so it never goes in a URL: to the verify page in the same tab
-// (sessionStorage), and to sign-in from a reset link, which usually opens in a new tab (localStorage, at most an hour).
+// (sessionStorage), and to sign-in from a reset link, which usually opens in a new tab (localStorage, for as long as the reset link lasts).
 
-import { CODE_LIFETIME_MINUTES } from '@frontpage/shared';
+import { CODE_LIFETIME_MINUTES, RESET_TOKEN_MINUTES } from '@frontpage/shared';
 
 const PENDING_KEY = 'frontpage-pending-email';
 
@@ -9,7 +9,7 @@ const SIGN_IN_KEY = 'frontpage-sign-in-email';
 
 const PENDING_MAX_AGE_MS = CODE_LIFETIME_MINUTES * 60 * 1000;
 
-const SIGN_IN_MAX_AGE_MS = 60 * 60 * 1000;
+const SIGN_IN_MAX_AGE_MS = RESET_TOKEN_MINUTES * 60 * 1000;
 
 export function rememberPendingEmail(email: string): void {
     tryStorage(() => sessionStorage.setItem(PENDING_KEY, JSON.stringify({ email, savedAt: Date.now() })), undefined);

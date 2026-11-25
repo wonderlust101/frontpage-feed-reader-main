@@ -7,16 +7,17 @@ import { AppShell } from '@/components/app-shell/app-shell';
 import type { ShellView } from '@/components/app-shell/nav-entries';
 import { AccountBoundary } from '@/features/auth/components/account-boundary';
 import { AccountMenu } from '@/features/auth/components/account-menu';
+import { ACCOUNT_HOME } from '@/features/auth/redirect-target';
 import { currentUser } from '@/features/auth/require-user';
 
 export const metadata: Metadata = { robots: { index: false } };
 
-const READER_VIEWS = [{ href: '/user', label: 'All items', icon: 'all-items' }] satisfies ShellView[];
+const READER_VIEWS = [{ href: ACCOUNT_HOME, label: 'All items', icon: 'all-items' }] satisfies ShellView[];
 
 export default function UserLayout({ children }: LayoutProps<'/user'>) {
     return (
         <AppShell
-            homeHref="/user"
+            homeHref={ACCOUNT_HOME}
             views={READER_VIEWS}
             account={
                 <AccountBoundary>

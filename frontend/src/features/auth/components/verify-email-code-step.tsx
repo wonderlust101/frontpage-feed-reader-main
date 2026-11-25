@@ -1,6 +1,6 @@
 'use client';
 
-// The verify-email code step. While a code is being resent the button stays (busy), so focus doesn't drop.
+// While a code is being resent the button stays (busy), so focus doesn't drop.
 
 import { CODE_LENGTH } from '@frontpage/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,6 +46,7 @@ type ResendCodeProps = {
     onResend: () => void;
 };
 
+// The "new code sent" notice says "in a minute"; change the two together.
 const RESEND_COOLDOWN_SECONDS = 60;
 
 const CODE_FIELD_CODES = ['INVALID_OTP', 'OTP_EXPIRED', 'TOO_MANY_ATTEMPTS'];

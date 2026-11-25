@@ -149,15 +149,15 @@ describe('listItems: scopes', () => {
     test('a feed, a category and Uncategorized each list only their own items', async () => {
         const reader = await newUser(testDb.db);
         const designCategory = await newCategory(testDb.db, reader, 'Design');
-        const [a, b, c] = [await newFeed('A'), await newFeed('B'), await newFeed('C')];
+        const [feedA, feedB, feedC] = [await newFeed('A'), await newFeed('B'), await newFeed('C')];
 
-        await follow(reader, a, { categoryId: designCategory });
-        await follow(reader, b, { categoryId: designCategory });
-        await follow(reader, c);
+        await follow(reader, feedA, { categoryId: designCategory });
+        await follow(reader, feedB, { categoryId: designCategory });
+        await follow(reader, feedC);
 
-        const [itemA, itemB, itemC] = [await newItem(a, minutes(1)), await newItem(b, minutes(2)), await newItem(c, minutes(3))];
+        const [itemA, itemB, itemC] = [await newItem(feedA, minutes(1)), await newItem(feedB, minutes(2)), await newItem(feedC, minutes(3))];
 
-        const feedPage = await listItems(testDb.db, reader, query({ scope: { kind: 'feed', feedId: a } }), NOW);
+        const feedPage = await listItems(testDb.db, reader, query({ scope: { kind: 'feed', feedId: feedA } }), NOW);
         const categoryPage = await listItems(testDb.db, reader, query({ scope: { kind: 'category', categoryId: designCategory } }), NOW);
         const uncategorizedPage = await listItems(testDb.db, reader, query({ scope: { kind: 'category', categoryId: null } }), NOW);
 

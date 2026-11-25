@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent, type MouseEvent } from 'react';
 import { Icon } from '@/components/ui/icon';
 import type { ShellCategory, ShellView } from './nav-entries';
+import { FieldDot } from './nav-row';
 import { matchParts } from './search-match';
 import { buildResultGroups, type ResultGroup, type ResultOption, type SearchFn, type SearchSource } from './search-results';
 
@@ -148,7 +149,7 @@ export function SearchPalette({ views, categories, sources = [], search, current
                         {categories.length > 0 && trimmedQuery && (
                             <ScopeSelect id={scopeId} categories={categories} scopeHref={scopeHref} onChange={setScopeHref} />
                         )}
-                        <kbd className="rounded-tag border border-edge px-1.5 font-sans text-meta font-semibold text-ink-2 pointer-coarse:hidden">Esc</kbd>
+                        <Keycap className="text-meta pointer-coarse:hidden">Esc</Keycap>
                         <button
                             type="button"
                             onClick={() => dialogRef.current?.close()}
@@ -288,7 +289,7 @@ function ResultLead({ lead }: { lead: ResultOption['lead'] }) {
     if ('color' in lead) {
         return (
             <span aria-hidden="true" className={box}>
-                <span className="fill-edge size-3 rounded-full" style={{ background: lead.color }} />
+                <FieldDot color={lead.color} />
             </span>
         );
     }
@@ -358,6 +359,6 @@ function PaletteFooter() {
     );
 }
 
-function Keycap({ children }: { children: string }) {
-    return <kbd className="rounded-tag border border-edge px-1.5 font-sans font-semibold text-ink-2">{children}</kbd>;
+function Keycap({ className = '', children }: { className?: string; children: string }) {
+    return <kbd className={`rounded-tag border border-edge px-1.5 font-sans font-semibold text-ink-2 ${className}`}>{children}</kbd>;
 }

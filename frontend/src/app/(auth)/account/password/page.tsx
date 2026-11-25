@@ -6,6 +6,7 @@ import { FormSkeleton } from '@/components/ui/form-skeleton';
 import { AuthHeading } from '@/features/auth/components/auth-step-frame';
 import { ChangePasswordForm } from '@/features/auth/components/change-password-form';
 import { CHANGE_PASSWORD_HEADINGS } from '@/features/auth/headings';
+import { ACCOUNT_HOME } from '@/features/auth/redirect-target';
 import { requireUser } from '@/features/auth/require-user';
 import { AuthFrame } from '../../_components/auth-frame';
 import { AUTH_PANELS } from '../../_data/panels';
@@ -17,7 +18,7 @@ export default function ChangePasswordPage() {
         <AuthFrame
             panel={AUTH_PANELS.changePassword}
             heading={<AuthHeading {...CHANGE_PASSWORD_HEADINGS.default} />}
-            aside={{ label: 'Back to your account', href: '/user' }}
+            aside={{ label: 'Back to your account', href: ACCOUNT_HOME }}
         >
             <Suspense fallback={<FormSkeleton fields={2} />}>
                 <SignedInChangePasswordForm />

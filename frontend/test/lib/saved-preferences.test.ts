@@ -23,13 +23,13 @@ afterEach(() => {
 
 describe('savedPreferencesScript', () => {
     test('copies every known saved value onto <html>', () => {
-        const stored = storageHolding({
+        const storage = storageHolding({
             'frontpage-theme': 'dark',
             'frontpage-text-size': 'xl',
             'frontpage-reading-face': 'lexend',
             'frontpage-sidebar': 'collapsed',
         });
-        const dataset = runScript(savedPreferencesScript(Object.values(SAVED_PREFERENCES)), stored);
+        const dataset = runScript(savedPreferencesScript(Object.values(SAVED_PREFERENCES)), storage);
 
         expect(dataset).toEqual({ theme: 'dark', textSize: 'xl', readingFace: 'lexend', sidebar: 'collapsed' });
     });

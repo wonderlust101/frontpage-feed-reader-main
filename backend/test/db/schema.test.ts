@@ -124,14 +124,14 @@ describe('foreign keys', () => {
     test('deleting a category moves its subscriptions to Uncategorized', async () => {
         const user = await newUser(testDb.db);
         const [category] = await testDb.db.insert(categories).values({ userId: user, name: 'News', position: 0 }).returning();
-        const [sub] = await testDb.db
+        const [subscription] = await testDb.db
             .insert(subscriptions)
             .values({ userId: user, feedId: await newFeed(), categoryId: category!.id })
             .returning();
 
         await testDb.db.delete(categories).where(eq(categories.id, category!.id));
 
-        const [after] = await testDb.db.select().from(subscriptions).where(eq(subscriptions.id, sub!.id));
+        const [after] = await testDb.db.select().from(subscriptions).where(eq(subscriptions.id, subscription!.id));
 
         expect(after!.categoryId).toBeNull();
     });

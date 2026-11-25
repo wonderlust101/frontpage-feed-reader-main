@@ -3,8 +3,7 @@
 // For a title the page's metadata can't know (an error boundary, a step the URL decides); restored on unmount.
 
 import { useEffect } from 'react';
-
-const SITE_NAME = 'Frontpage';
+import { SITE_NAME } from '@/lib/site';
 
 export function DocumentTitle({ title }: { title: string }) {
     useEffect(() => {

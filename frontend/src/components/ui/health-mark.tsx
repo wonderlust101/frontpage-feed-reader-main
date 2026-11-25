@@ -2,7 +2,7 @@
 
 export type HealthMarkState = 'healthy' | 'stale' | 'failing';
 
-const HEALTH_COLORS: Record<HealthMarkState, string> = {
+const HEALTH_CLASSES: Record<HealthMarkState, string> = {
     healthy: 'text-ink-2',
     stale: 'text-warning font-semibold',
     failing: 'text-error font-semibold',
@@ -18,7 +18,7 @@ export function HealthMark({ health, showLabel = true }: { health: HealthMarkSta
     const label = HEALTH_LABELS[health];
 
     return (
-        <span className={`inline-flex items-center gap-2 text-meta ${HEALTH_COLORS[health]}`}>
+        <span className={`inline-flex items-center gap-2 text-meta ${HEALTH_CLASSES[health]}`}>
             <span className="health-line" data-health={health} aria-hidden="true" />
             {showLabel ? label : <span className="sr-only">Feed {label.toLowerCase()}</span>}
         </span>

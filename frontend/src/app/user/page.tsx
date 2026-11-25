@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { ACCOUNT_HOME } from '@/features/auth/redirect-target';
 import { requireUser } from '@/features/auth/require-user';
 
 export const metadata: Metadata = { title: 'Your front page' };
@@ -22,7 +23,7 @@ export default function UserPage() {
 }
 
 async function SignedInAs() {
-    const user = await requireUser('/user');
+    const user = await requireUser(ACCOUNT_HOME);
 
     return <p>Signed in as {user.name}.</p>;
 }

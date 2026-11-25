@@ -16,7 +16,7 @@ import {
     type SwitchLinkTarget,
 } from '../hooks/use-auth-step';
 
-export function AuthHeadingProvider({ children }: { children: ReactNode }) {
+export function AuthStepProvider({ children }: { children: ReactNode }) {
     const [step, setStep] = useState<Heading | null>(null);
     const [links, setLinks] = useState<FrameLinks | null>(null);
     const descriptionId = useId();

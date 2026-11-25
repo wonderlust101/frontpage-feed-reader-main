@@ -109,7 +109,7 @@ export function parseFeedUrl(input: string | undefined | null): URL {
     return url;
 }
 
-// Follows up to 5 redirects itself, to report permanent moves. Every failure is an HttpError (`timeout`, `http_4xx`…).
+// Follows up to `maxRedirects` redirects itself (5 by default), to report permanent moves. Every failure is an HttpError (`timeout`, `http_4xx`…).
 export async function fetchFeed(input: string | URL, options: FetchFeedOptions = {}): Promise<FetchFeedResult> {
     const {
         timeoutMs = DEFAULT_TIMEOUT_MS,

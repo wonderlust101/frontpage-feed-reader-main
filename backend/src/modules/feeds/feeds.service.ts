@@ -77,6 +77,20 @@ export function keepUnsentValidators(sent: FeedCacheValidators, stored: FeedCach
     };
 }
 
+// The cached entry for a URL (or undefined); reading it also marks it as most recently used.
+function recall(key: string): CacheEntry | undefined {
+    const entry = cache.get(key);
+
+    if (entry)
+        remember(key, entry);
+
+    return entry;
+}
+
+function hasValidators(validators: Validators): boolean {
+    return Boolean(validators.etag || validators.lastModified);
+}
+
 function answerFresh(requestedUrl: URL, result: FreshResult): FetchFeedResponse {
     const fetchedAt = new Date().toISOString();
     const feed = readFetchedFeed(result, requestedUrl.href);
@@ -93,20 +107,6 @@ function answerNotModified(result: NotModifiedResult, entry: CacheEntry): FetchF
     const validators = keepUnsentValidators(result.validators, entry.validators);
 
     return { feed: entry.feed, fetchedAt: new Date().toISOString(), notModified: true, cache: validators, redirect: result.redirect };
-}
-
-function hasValidators(validators: Validators): boolean {
-    return Boolean(validators.etag || validators.lastModified);
-}
-
-// The cached entry for a URL (or undefined); reading it also marks it as most recently used.
-function recall(key: string): CacheEntry | undefined {
-    const entry = cache.get(key);
-
-    if (entry)
-        remember(key, entry);
-
-    return entry;
 }
 
 // Saves an entry as most recently used and evicts the oldest past CACHE_LIMIT (a Map keeps insertion order, so the first key is the oldest).

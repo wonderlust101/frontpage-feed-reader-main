@@ -1,5 +1,6 @@
 // Better Auth against a real (in-memory) Postgres built from our migrations: proves the hand-written schema matches what Better Auth expects.
 
+import { CODE_LIFETIME_MINUTES } from '@frontpage/shared';
 import { afterAll, afterEach, beforeAll, describe, expect, setSystemTime, test } from 'bun:test';
 import { env } from '../../../src/env';
 import type { Email } from '../../../src/lib/email';
@@ -8,7 +9,7 @@ import { createTestDb } from '../../helpers/test-db';
 
 const PASSWORD = 'correct horse battery';
 const NEW_PASSWORD = 'staple battery horse';
-const CODE_LIFETIME_MS = 5 * 60 * 1000;
+const CODE_LIFETIME_MS = CODE_LIFETIME_MINUTES * 60 * 1000;
 const API = 'http://localhost:4000';
 
 let testDb: Awaited<ReturnType<typeof createTestDb>>;

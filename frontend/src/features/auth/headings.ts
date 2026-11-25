@@ -39,7 +39,7 @@ export const RESET_PASSWORD_HEADINGS = {
 
 export const VERIFY_EMAIL_HEADINGS = {
     default: { title: 'Confirm your email', description: "Just checking it's really you, so you can always get back in." },
-    emailStep: { title: 'Where should the code go?', description: "Pop in your email and we'll send six digits over." },
+    emailStep: { title: 'Where should the code go?', description: `Pop in your email and we'll send ${CODE_LENGTH} digits over.` },
 } satisfies Record<string, Heading>;
 
 export const ACCOUNT_UNAVAILABLE_HEADING = {

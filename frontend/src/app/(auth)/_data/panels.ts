@@ -1,6 +1,7 @@
 // Every page shares twelve sticker slots: nine for wide screens and three for the phone band, in the panel's container
 // units (cqi) so the frame scales with it. Bottom slots are measured from the bottom, so they stay down on tall screens.
 
+import { RESET_TOKEN_MINUTES } from '@frontpage/shared';
 import type { Sticker } from '@/components/stickers';
 import { categoryFieldById, type FieldId } from '@/features/categories/fields';
 
@@ -98,7 +99,7 @@ export const AUTH_PANELS = {
             { field: field('tangerine'), icon: 'account' },
             null,
             { field: field('sky'), icon: 'refresh' },
-            { field: field('lilac'), icon: 'reading-time', label: 'Good for 60 min' },
+            { field: field('lilac'), icon: 'reading-time', label: `Good for ${RESET_TOKEN_MINUTES} min` },
             null,
             null,
         ],

@@ -3,12 +3,12 @@
 import type { AuthFailure } from './auth-request';
 import { INVALID_EMAIL_MESSAGE, PASSWORD_TOO_LONG_MESSAGE, PASSWORD_TOO_SHORT_MESSAGE } from './schemas';
 
-const ACCOUNT_EXISTS = 'An account with this email already exists. Sign in instead, or reset your password if you have forgotten it.';
+const ACCOUNT_EXISTS_MESSAGE = 'An account with this email already exists. Sign in instead, or reset your password if you have forgotten it.';
 
 const MESSAGES: Record<string, string> = {
     INVALID_EMAIL_OR_PASSWORD: "That email and password don't match. Check both and try again.",
-    USER_ALREADY_EXISTS: ACCOUNT_EXISTS,
-    USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: ACCOUNT_EXISTS,
+    USER_ALREADY_EXISTS: ACCOUNT_EXISTS_MESSAGE,
+    USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: ACCOUNT_EXISTS_MESSAGE,
     INVALID_EMAIL: INVALID_EMAIL_MESSAGE,
     PASSWORD_TOO_SHORT: PASSWORD_TOO_SHORT_MESSAGE,
     PASSWORD_TOO_LONG: PASSWORD_TOO_LONG_MESSAGE,

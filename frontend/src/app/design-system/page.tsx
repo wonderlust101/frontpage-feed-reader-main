@@ -26,7 +26,7 @@ export default function DesignSystemPage() {
                 <HeroCategorySwitch />
                 <div className="mx-auto grid w-full max-w-page gap-x-16 px-gutter pt-16 lg:grid-cols-[11rem_minmax(0,1fr)]">
                     <ContentsNav entries={SECTIONS} />
-                    <main id="main" className="min-w-0">
+                    <main id="main" tabIndex={-1} className="min-w-0">
                         <LogoSection />
                         <ColorSection />
                         <ImagerySection />

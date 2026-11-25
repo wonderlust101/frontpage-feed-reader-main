@@ -27,18 +27,17 @@ const SHELL_CATEGORIES = GUEST_CATEGORIES.map((category) => ({
 export function GuestShell({ views, sources, account, children }: GuestShellProps) {
     const [fields, choose] = useGuestCategoryFields();
 
-    function colorMenu(shellCategory: ShellCategory) {
+    function rowMenu(shellCategory: ShellCategory) {
         const category = GUEST_CATEGORIES.find((entry) => guestCategoryHref(entry.id) === shellCategory.href);
 
-        return (
-            category && (
-                <CategoryRowMenu category={{ name: category.name, fieldId: fields[category.id].id }} onRecolor={(fieldId) => choose(category.id, fieldId)} />
-            )
-        );
+        if (!category)
+            return null;
+
+        return <CategoryRowMenu category={{ name: category.name, fieldId: fields[category.id].id }} onRecolor={(fieldId) => choose(category.id, fieldId)} />;
     }
 
     return (
-        <AppShell homeHref="/guest" views={views} categories={SHELL_CATEGORIES} sources={sources} account={account} rowMenu={colorMenu}>
+        <AppShell homeHref="/guest" views={views} categories={SHELL_CATEGORIES} sources={sources} account={account} rowMenu={rowMenu}>
             {children}
         </AppShell>
     );

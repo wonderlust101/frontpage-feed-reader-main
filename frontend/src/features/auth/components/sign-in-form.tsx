@@ -35,6 +35,7 @@ export function SignInForm({ next, arrival }: SignInFormProps) {
     const [wrongCredentials, setWrongCredentials] = useState(false);
     const [sendingCode, setSendingCode] = useState(false);
     const [attemptFailed, setAttemptFailed] = useState(false);
+
     const {
         register,
         handleSubmit,

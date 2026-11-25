@@ -23,6 +23,7 @@ type RailViewLinkProps = {
     view: ShellView;
     isCurrent: boolean;
     isHome: boolean;
+    isPanelCollapsed: boolean;
 };
 
 const MARK_CLASSES = 'bg-field-lemon text-on-field shadow-[inset_0_0_0_1.5px_var(--color-on-field)]';
@@ -30,6 +31,8 @@ const MARK_CLASSES = 'bg-field-lemon text-on-field shadow-[inset_0_0_0_1.5px_var
 const HOME_MARK_CLASSES = `${RAIL_IDLE_CLASSES} sidebar-collapsed:bg-field-lemon sidebar-collapsed:text-on-field sidebar-collapsed:shadow-[inset_0_0_0_1.5px_var(--color-on-field)]`;
 
 export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailProps) {
+    const [sidebar] = useSidebar();
+
     return (
         <div className="flex w-16 flex-none flex-col items-center gap-2 bg-rail pt-3">
             <Link href={homeHref} className="group relative mb-2 rounded-control">
@@ -44,7 +47,12 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
                             {view.preview ? (
                                 <LockedView view={view} preview={view.preview} variant="rail" />
                             ) : (
-                                <RailViewLink view={view} isCurrent={view.href === currentView} isHome={view.href === homeHref} />
+                                <RailViewLink
+                                    view={view}
+                                    isCurrent={view.href === currentView}
+                                    isHome={view.href === homeHref}
+                                    isPanelCollapsed={sidebar === 'collapsed'}
+                                />
                             )}
                         </li>
                     ))}
@@ -57,10 +65,9 @@ export function ShellRail({ homeHref, views, currentView, panelId }: ShellRailPr
     );
 }
 
-function RailViewLink({ view, isCurrent, isHome }: RailViewLinkProps) {
-    const [sidebar] = useSidebar();
+function RailViewLink({ view, isCurrent, isHome, isPanelCollapsed }: RailViewLinkProps) {
     const shownCount = formatCount(view.count);
-    const isMarkedCurrent = isCurrent && (!isHome || sidebar === 'collapsed');
+    const isMarkedCurrent = isCurrent && (!isHome || isPanelCollapsed);
 
     return (
         <Link href={view.href} aria-current={isMarkedCurrent ? 'true' : undefined} className={`${RAIL_BUTTON_CLASSES} ${markClasses(isCurrent, isHome)}`}>
@@ -77,7 +84,7 @@ function RailViewLink({ view, isCurrent, isHome }: RailViewLinkProps) {
     );
 }
 
-// The home mark follows the panel through a CSS variant, so it is right from the first paint, before `sidebar` is read.
+// The home mark follows the panel through a CSS variant, so it is right from the first paint, before the hook reads it.
 function markClasses(isCurrent: boolean, isHome: boolean): string {
     if (!isCurrent)
         return RAIL_IDLE_CLASSES;

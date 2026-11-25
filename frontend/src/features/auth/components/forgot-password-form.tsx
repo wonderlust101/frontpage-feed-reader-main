@@ -67,6 +67,11 @@ export function ForgotPasswordForm() {
         setSentTo(email);
     }
 
+    function changeEmail() {
+        setSentTo(null);
+        setChangingEmail(true);
+    }
+
     if (sentTo) {
         return (
             <div className="flex flex-col gap-6">
@@ -75,13 +80,7 @@ export function ForgotPasswordForm() {
                 </FormNotice>
                 <p className="text-ui text-ink-2">Nothing after a few minutes? Peek in your spam folder, or try another address.</p>
                 <div>
-                    <Button
-                        variant="secondary"
-                        onClick={() => {
-                            setSentTo(null);
-                            setChangingEmail(true);
-                        }}
-                    >
+                    <Button variant="secondary" onClick={changeEmail}>
                         Use another email
                     </Button>
                 </div>

@@ -265,14 +265,14 @@ function firstDate(candidates: Array<string | Date | null | undefined>, now: num
 
 // The text of every child element with one of these tag names, in tag order, e.g. ['pubdate', 'date'] → all <pubDate>s, then all <dc:date>s.
 function rawText(item: ParsedItem, tags: string[]): string[] {
-    const out: string[] = [];
+    const texts: string[] = [];
 
     for (const tag of tags) {
         for (const element of item.element.findElementsWithName(tag))
-            out.push(element.textContent);
+            texts.push(element.textContent);
     }
 
-    return out;
+    return texts;
 }
 
 // A stable "urn:frontpage:…" id from any text (same input, same id); used when an item has no usable or short-enough guid or link.

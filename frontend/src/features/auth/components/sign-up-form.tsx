@@ -27,6 +27,7 @@ const EMAIL_TAKEN_CODES = ['USER_ALREADY_EXISTS', 'USER_ALREADY_EXISTS_USE_ANOTH
 export function SignUpForm() {
     const router = useRouter();
     const [takenEmail, setTakenEmail] = useState<string | null>(null);
+
     const {
         register,
         handleSubmit,

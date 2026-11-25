@@ -1,5 +1,5 @@
-// Hrefs identify entries, so they must be unique within one navigation. A view with a `preview` is account-only:
-// never current, and its href is where its Create account button leads.
+// Hrefs identify the entries a reader can open, so those are unique; a view with a `preview` is account-only (never
+// current) and its href is where its Create account button leads, so several share one and view lists key on label.
 
 import type { IconName } from '@/components/ui/icon';
 

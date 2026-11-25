@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { Logo } from '@/components/logo';
 import { Stickers } from '@/components/stickers';
 import { SkipLink } from '@/components/ui/skip-link';
-import { AuthGuestLink, AuthHeadingProvider, AuthPanelText, AuthSwitchLink } from '@/features/auth/components/auth-step-frame';
+import { AuthGuestLink, AuthStepProvider, AuthPanelText, AuthSwitchLink } from '@/features/auth/components/auth-step-frame';
 import type { SwitchLinkTarget } from '@/features/auth/hooks/use-auth-step';
 import { BRAND_FIELD } from '@/features/categories/fields';
 import type { AuthPanel } from '../_data/panels';
@@ -22,7 +22,7 @@ type AuthFrameProps = {
 // `heading` and `panelText` may be <Suspense> wrappers, for a page that picks them from the URL.
 export function AuthFrame({ panel, panelText, heading, aside, children }: AuthFrameProps) {
     return (
-        <AuthHeadingProvider>
+        <AuthStepProvider>
             <div className="flex flex-1">
                 <SkipLink href="#form" className="focus:top-4 focus:left-4">
                     Skip to form
@@ -61,6 +61,6 @@ export function AuthFrame({ panel, panelText, heading, aside, children }: AuthFr
                     </main>
                 </div>
             </div>
-        </AuthHeadingProvider>
+        </AuthStepProvider>
     );
 }

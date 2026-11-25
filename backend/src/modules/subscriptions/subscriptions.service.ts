@@ -1,4 +1,4 @@
-// Subscribing reuses a stored feed whose last fetch succeeded in the last 15 minutes, else runs ingestFeed. Every
+// Subscribing reuses a stored feed whose last fetch succeeded within FEED_MIN_REFETCH_MINUTES, else runs ingestFeed. Every
 // query is scoped by the reader's id, and the (user, feed) unique key turns racing duplicates into 409 `already_subscribed`.
 
 import { and, eq, inArray, sql } from 'drizzle-orm';
@@ -123,7 +123,6 @@ export async function unsubscribe(db: Database, userId: string, id: string): Pro
     });
 }
 
-// Subscriptions joined to their feeds, before filtering: callers add `where` (and `orderBy`).
 // Throws `feed_not_found` (404) unless the reader follows the feed, the same answer as for one that doesn't exist.
 export async function assertFollowsFeed(db: Database, userId: string, feedId: string): Promise<void> {
     const subscriptionId = await findSubscriptionId(db, userId, feedId);
@@ -132,6 +131,7 @@ export async function assertFollowsFeed(db: Database, userId: string, feedId: st
         throw new NotFoundError('feed_not_found', 'Feed not found');
 }
 
+// Subscriptions joined to their feeds, before filtering: callers add `where` (and `orderBy`).
 function selectSubscriptions(db: Database) {
     return db.select(SUBSCRIPTION_COLUMNS).from(subscriptions).innerJoin(feeds, eq(feeds.id, subscriptions.feedId));
 }
@@ -157,6 +157,20 @@ function toSubscription(row: SubscriptionRow, now: Date): Subscription {
     };
 }
 
+async function findSubscriptionId(db: Database, userId: string, feedId: string): Promise<string | undefined> {
+    const [row] = await db
+        .select({ id: subscriptions.id })
+        .from(subscriptions)
+        .where(and(eq(subscriptions.userId, userId), eq(subscriptions.feedId, feedId)));
+
+    return row?.id;
+}
+
+// Points at the reader's existing subscription when we know it.
+function alreadySubscribedError(subscriptionId: string | undefined) {
+    return new ConflictError('already_subscribed', 'You already follow this feed', { subscriptionId });
+}
+
 // A stored feed whose last fetch succeeded within FRESH_FETCH_MS is reused instead of fetched again.
 function isRecentlySuccessful(feed: { lastErrorCode: string | null; lastSuccessAt: Date | null }, now: Date): boolean {
     if (feed.lastErrorCode || !feed.lastSuccessAt)
@@ -175,20 +189,6 @@ async function findSubscription(db: Database, userId: string, id: string, now: D
     return toSubscription(row, now);
 }
 
-async function findSubscriptionId(db: Database, userId: string, feedId: string): Promise<string | undefined> {
-    const [row] = await db
-        .select({ id: subscriptions.id })
-        .from(subscriptions)
-        .where(and(eq(subscriptions.userId, userId), eq(subscriptions.feedId, feedId)));
-
-    return row?.id;
-}
-
 function subscriptionNotFoundError() {
     return new NotFoundError('not_found', 'Subscription not found');
-}
-
-// Points at the reader's existing subscription when we know it.
-function alreadySubscribedError(subscriptionId: string | undefined) {
-    return new ConflictError('already_subscribed', 'You already follow this feed', { subscriptionId });
 }
