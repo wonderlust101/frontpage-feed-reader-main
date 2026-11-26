@@ -23,7 +23,7 @@ test/
 ├── modules/<feature>/      ← src/modules/<feature>/: HTTP routes via startTestServer(), services via createTestDb()
 ├── live/*.live.test.ts     ← real network; skipped unless LIVE_FEEDS=1
 ├── helpers/                ← shared test code, no tests
-│   ├── test-server.ts      ← startTestServer(app?): the API (or a test's own app) on a random port
+│   ├── test-server.ts      ← startTestServer(app?): the API (or a test's own app) on a random port; startFetchTestServer(): /api/fetch without sign-in
 │   ├── feed-server.ts      ← fake upstream feed server (redirects, 304, timeouts, 4xx/5xx); serve() swaps a path's body
 │   ├── errors.ts           ← httpErrorFrom() / httpErrorThrownBy(): the HttpError a call rejects or throws with
 │   ├── factories.ts        ← newUser(db), newCategory(db, …) and SAMPLE_UUID, shared by the database tests

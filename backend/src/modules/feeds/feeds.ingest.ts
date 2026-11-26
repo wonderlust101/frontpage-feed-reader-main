@@ -7,10 +7,11 @@ import { alias, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import type { FeedCacheValidators, FeedErrorCode, FeedRedirect, NormalizedFeed, NormalizedItem } from '@frontpage/shared';
 import type { Database, Transaction } from '../../db';
 import { parseFeedUrl } from '../../lib/feed';
-import { HttpError } from '../../errors';
+import { HttpError, TooManyRequestsError } from '../../errors';
 import { bookmarks } from '../bookmarks/bookmarks.schema';
 import { itemReadStates, items } from '../items/items.schema';
 import { subscriptions } from '../subscriptions/subscriptions.schema';
+import { nextFetchAt } from './feeds.backoff';
 import { feeds, starterFeeds } from './feeds.schema';
 import { fetchUpstream, keepUnsentValidators, readFetchedFeed, unexpectedNotModifiedError, type FreshResult, type NotModifiedResult } from './feeds.service';
 import type { IngestOptions, IngestResult } from './feeds.types';
@@ -19,6 +20,7 @@ type StoredFeed = {
     id: string;
     etag: string | null;
     lastModified: string | null;
+    consecutiveFailures: number;
 };
 
 type FetchOutcome =
@@ -46,7 +48,7 @@ export async function ingestFeed(db: Database, url: string, options: IngestOptio
     const now = options.now ?? new Date();
     const feedUrl = parseFeedUrl(url).href;
     const [storedRow] = await db
-        .select({ id: feeds.id, etag: feeds.etag, lastModified: feeds.lastModified })
+        .select({ id: feeds.id, etag: feeds.etag, lastModified: feeds.lastModified, consecutiveFailures: feeds.consecutiveFailures })
         .from(feeds)
         .where(eq(feeds.url, feedUrl));
     const stored = storedRow ?? null;
@@ -69,7 +71,7 @@ export async function ingestFeed(db: Database, url: string, options: IngestOptio
     });
 }
 
-// Records a failed fetch on the stored feed before rethrowing. A 304 needs a stored copy for it to stand for.
+// Records a failed fetch on the stored feed before rethrowing (except a busy host). A 304 needs a stored copy for it to stand for.
 async function fetchForIngest(db: Database, feedUrl: string, stored: StoredFeed | null, now: Date): Promise<FetchOutcome> {
     try {
         const sentValidators = { etag: stored?.etag ?? null, lastModified: stored?.lastModified ?? null };
@@ -83,15 +85,17 @@ async function fetchForIngest(db: Database, feedUrl: string, stored: StoredFeed 
 
         return { kind: 'notModified', result, stored };
     } catch (err) {
-        if (stored && err instanceof HttpError)
-            await recordFailure(db, stored.id, err, now);
+        // A busy host is our own limit, not the feed failing, so it leaves the stored feed untouched.
+        if (stored && err instanceof HttpError && !(err instanceof TooManyRequestsError))
+            await recordFailure(db, stored, err, now);
 
         throw err;
     }
 }
 
-// Records a failed fetch on a stored feed in one atomic update, so concurrent failures can't lose a count.
-async function recordFailure(db: Database, feedId: string, err: HttpError, now: Date) {
+// Records a failed fetch on a stored feed in one atomic update, so concurrent failures can't lose a count. The backoff
+// uses the count read before the fetch: a rare concurrent failure only makes one wait a step shorter.
+async function recordFailure(db: Database, stored: StoredFeed, err: HttpError, now: Date) {
     await db
         .update(feeds)
         .set({
@@ -101,8 +105,9 @@ async function recordFailure(db: Database, feedId: string, err: HttpError, now: 
             lastErrorMessage: err.message.slice(0, ERROR_MESSAGE_MAX),
             lastErrorStatus: err.upstreamStatus ?? null,
             consecutiveFailures: sql`${feeds.consecutiveFailures} + 1`,
+            nextFetchAt: nextFetchAt(now, { failures: stored.consecutiveFailures + 1, retryable: err.retryable }),
         })
-        .where(eq(feeds.id, feedId));
+        .where(eq(feeds.id, stored.id));
 }
 
 // Returns the URL to store the result under. Temporary redirects change nothing.
@@ -210,6 +215,7 @@ function successColumns(now: Date) {
     return {
         lastFetchedAt: now,
         lastSuccessAt: now,
+        nextFetchAt: nextFetchAt(now),
         consecutiveFailures: 0,
         lastErrorCode: null,
         lastErrorMessage: null,

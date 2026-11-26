@@ -394,6 +394,23 @@ describe('failures', () => {
         expect(await feedAt(url)).toMatchObject({ lastErrorCode: 'timeout', lastErrorStatus: null, consecutiveFailures: 1, lastFetchedAt: T1 });
     });
 
+    test("a busy host isn't the feed failing: the 429 is rethrown and nothing is recorded", async () => {
+        server.serve('/busy-host.xml', rss([POST_A]));
+
+        const url = `${server.url}/busy-host.xml`;
+
+        await ingestFeed(testDb.db, url, { now: T1 });
+
+        const before = await feedAt(url);
+
+        spyOn(feedsService.hostLimiter, 'acquire').mockResolvedValue(null);
+
+        const err = await httpErrorFrom(ingestFeed(testDb.db, url, { now: T2 }));
+
+        expect(err).toMatchObject({ status: 429, code: 'rate_limited', retryAfterSeconds: 5 });
+        expect(await feedAt(url)).toEqual(before);
+    });
+
     test('a database error rolls everything back and records nothing', async () => {
         server.serve('/db-error.xml', rss([POST_A]));
 
@@ -413,6 +430,56 @@ describe('failures', () => {
         }
 
         expect(await feedAt(url)).toMatchObject({ title: 'Before', lastFetchedAt: null, lastSuccessAt: null, consecutiveFailures: 0, lastErrorCode: null });
+    });
+});
+
+describe('next fetch time', () => {
+    // Checks the feed at `url` is due again about `minutes` after `from`, within the ±10% jitter.
+    async function expectNextFetchIn(url: string, from: Date, minutes: number) {
+        const feed = await feedAt(url);
+        const actualMinutes = (feed!.nextFetchAt.getTime() - from.getTime()) / 60_000;
+
+        expect(actualMinutes).toBeGreaterThanOrEqual(minutes * 0.9);
+        expect(actualMinutes).toBeLessThanOrEqual(minutes * 1.1);
+    }
+
+    test('a new feed, then a 304, are each fetched again in about 15 minutes (±10%)', async () => {
+        const url = `${server.url}/cached.xml`;
+
+        await ingestFeed(testDb.db, url, { now: T1 });
+
+        await expectNextFetchIn(url, T1, 15);
+
+        const second = await ingestFeed(testDb.db, url, { now: T2 });
+
+        expect(second.notModified).toBe(true);
+        await expectNextFetchIn(url, T2, 15);
+    });
+
+    test('temporary failures back off 30 min, 1 h, 2 h (±10%)', async () => {
+        server.serve('/backs-off.xml', rss([POST_A]));
+
+        const url = `${server.url}/backs-off.xml`;
+
+        await ingestFeed(testDb.db, url, { now: T1 });
+        server.serve('/backs-off.xml', 'boom', { status: 500 });
+
+        for (const minutes of [30, 60, 120]) {
+            await httpErrorFrom(ingestFeed(testDb.db, url, { now: T2 }));
+            await expectNextFetchIn(url, T2, minutes);
+        }
+    });
+
+    test('a permanent failure (410 Gone) waits about 6 hours (±10%)', async () => {
+        server.serve('/goes-away.xml', rss([POST_A]));
+
+        const url = `${server.url}/goes-away.xml`;
+
+        await ingestFeed(testDb.db, url, { now: T1 });
+        server.serve('/goes-away.xml', 'gone', { status: 410 });
+        await httpErrorFrom(ingestFeed(testDb.db, url, { now: T2 }));
+
+        await expectNextFetchIn(url, T2, 6 * 60);
     });
 });
 

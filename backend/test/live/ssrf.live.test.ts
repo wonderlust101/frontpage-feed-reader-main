@@ -3,13 +3,13 @@
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import type { FeedErrorResponse } from '@frontpage/shared';
-import { startTestServer } from '../helpers/test-server';
+import { startFetchTestServer } from '../helpers/test-server';
 
 describe.skipIf(!process.env.LIVE_FEEDS)('live SSRF protection via GET /api/fetch', () => {
-    let api: Awaited<ReturnType<typeof startTestServer>>;
+    let api: Awaited<ReturnType<typeof startFetchTestServer>>;
 
     beforeAll(async () => {
-        api = await startTestServer();
+        api = await startFetchTestServer();
     });
 
     afterAll(async () => {

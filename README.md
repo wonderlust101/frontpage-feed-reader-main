@@ -47,8 +47,8 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │   ├── test/                 # bun:test tests mirroring src/ (see backend/test/README.md)
 │   ├── requests/             # .http files for manual API requests
 │   └── src/
-│       ├── index.ts          # starts the server (PORT, graceful shutdown)
-│       ├── server-lifecycle.ts # shutdown(): close the server and database, then exit (1 if closing fails)
+│       ├── index.ts          # starts the server and the background feed refresh (PORT, graceful shutdown)
+│       ├── server-lifecycle.ts # shutdown(): stop the feed refresh and the server, close the database, then exit (1 if closing fails)
 │       ├── app.ts            # Express app: global middleware + mounts module routers
 │       ├── middleware/       # shared by all modules: error handling, the auth guard and rate limits
 │       │   ├── error-handler.ts      # errorHandler: every thrown error → the standard JSON error body
@@ -60,7 +60,7 @@ The repo is a **Bun workspace** with four packages: `frontend/`, `backend/`, `pa
 │       ├── modules/          # one folder per feature; each owns its routes, logic and tables
 │       │   ├── auth/         #   /api/auth/* (Better Auth; email templates in auth.emails.ts) + "users", "sessions", "accounts", "verifications" tables
 │       │   ├── health/       #   GET /api/health (routes → controller)
-│       │   ├── feeds/        #   GET /api/fetch (routes → controller → validation → service), ingestion (feeds.ingest.ts) + "feeds", "starter_feeds" tables
+│       │   ├── feeds/        #   GET /api/fetch (routes → controller → validation → service; per-host fetch limit), ingestion (feeds.ingest.ts), background refresh (feeds.scheduler.ts, feeds.backoff.ts) + "feeds", "starter_feeds" tables
 │       │   ├── items/        #   /api/items (routes → controller → validation + cursor → service, read-state writes; read rule) + "items", "item_read_states" tables
 │       │   ├── categories/   #   "categories" table + the "is this category yours?" check
 │       │   ├── subscriptions/#   /api/subscriptions (routes → controller → validation → service; health rule) + "subscriptions" table
@@ -249,9 +249,36 @@ Running with `bun dev` instead of Docker: start only Mailpit with `docker compos
 
 - **Only changes are written.** Before writing, it reads the stored `content_hash` of the fetched items (a SHA-256 of every stored field) and sends only new or edited items, in one `INSERT … ON CONFLICT`. An unchanged feed sends no item rows, so the database isn't asked to rewrite up to 500 articles and their search index on every fetch. An edited article keeps its `id` and `first_seen_at`, so it never looks new again; articles that drop out of the feed are kept.
 - **The fetch runs outside the transaction**, so a slow feed never holds one open. Every database write of one ingest runs in a single transaction.
-- **Fetch bookkeeping:** every fetch sets `last_fetched_at`. A success (a 304 counts) sets `last_success_at`, resets `consecutive_failures` and clears the last error. A failure records the error code, message and upstream status and adds one to `consecutive_failures`, as a single atomic update. A URL we don't store yet whose first fetch fails stores nothing: the caller gets the error.
+- **Fetch bookkeeping:** every fetch sets `last_fetched_at`. A success (a 304 counts) sets `last_success_at`, resets `consecutive_failures` and clears the last error. A failure records the error code, message and upstream status and adds one to `consecutive_failures`, as a single atomic update. Both set `next_fetch_at` (see [Background refresh](#background-refresh)); a busy host (429 from our own limit) records nothing. A URL we don't store yet whose first fetch fails stores nothing: the caller gets the error.
 - **Permanent redirects** (301 or 308 on every hop) move `feeds.url`. If another feed already has the new URL, the two are merged: items, subscriptions, bookmarks, read states and the starter-feed entry move onto that feed (its own copy wins where both have one), and the old row is deleted.
 - **Trying it by hand:** `docker compose run --rm --no-deps backend bun run ingest:feed <url>` ingests one feed into the local Docker database and prints what changed. The script refuses any database host but `localhost` or `db`, so it can't write to Neon.
+
+## Background refresh
+
+`backend/src/modules/feeds/feeds.scheduler.ts` keeps stored feeds fresh without a reader waiting. It runs inside the API server (`index.ts` starts it) on Railway and in Docker. On the host it is off unless `FEED_REFRESH_ENABLED=true`, because `bun dev` there loads `backend/.env`, which points at Neon.
+
+- **Bursts, not a steady tick.** Every `FEED_REFRESH_TICK_MINUTES` (15) a burst refreshes every feed due before the next burst, then the scheduler sleeps. Between bursts nothing queries the database, so Neon can scale to zero; a query every minute would keep its compute awake around the clock. A feed can be fetched up to one tick early, so a healthy feed is refreshed about every 15 minutes.
+- **Only feeds someone reads.** A burst takes feeds with a subscription or a `starter_feeds` row (the guest catalog). A feed nobody follows any more stays stored but isn't fetched; subscribing to it again fetches it if its last success is over 15 minutes old.
+- **Claims make it safe to run twice.** A worker takes one due feed at a time with `UPDATE … WHERE id IN (SELECT … FOR UPDATE SKIP LOCKED) RETURNING`, which also moves that feed's `next_fetch_at` just past the burst's window. While a deploy briefly runs the old and new server side by side, each feed is still fetched once, and a feed whose fetch never finished (a crash, or a busy host) comes back next burst. A burst also skips feeds it has already fetched: with jitter, a refreshed feed can be due again inside the window.
+- **One slow feed never holds up the others.** Five workers run at once, each feed takes at most the 10-second fetch timeout, and each feed is ingested in its own short transaction with the fetch outside it (an item's `first_seen_at` is its transaction's start time, so long transactions would let "mark all as read" cover items no reader has seen yet).
+- **Backoff.** Every delay gets ±10% jitter so feeds drift apart, and none is longer than 24 hours, so even a dead feed is checked daily and recovers by itself. "Dead" stays derived from the fetch columns, not stored (`subscriptions.health.ts`).
+
+    | After                                                                         | Next fetch in                       |
+    | ----------------------------------------------------------------------------- | ----------------------------------- |
+    | A success or a 304                                                            | 15 min (`FEED_MIN_REFETCH_MINUTES`) |
+    | A temporary failure (5xx, 408, 429, timeout, dropped connection)              | 30 min, 1 h, 2 h, 4 h … 24 h        |
+    | A permanent failure (other 4xx, not a feed, too large, unknown host, blocked) | 6 h, 12 h, 24 h                     |
+
+- **Logs:** one summary line per burst that found work. A failing feed logs its id, host and error code, never its full URL, which can carry a private token.
+- **Shutdown:** SIGTERM stops claiming at once and waits for the burst in progress before the database closes. If the process is killed first, the unfinished transaction rolls back and the claim brings the feed back next burst.
+
+## Fetch limits
+
+Every feed download, whether a preview, a subscribe or ingestion, goes through `fetchUpstream()` (`backend/src/modules/feeds/feeds.service.ts`), so these limits apply to all of them:
+
+- **Per feed host, at most 2 downloads at once, started at least 1 second apart** (`FEED_HOST_MAX_CONCURRENT`, `FEED_HOST_MIN_INTERVAL_MS`; `backend/src/lib/feed/host-limiter.ts`), so a burst of feeds on one site never floods it. A download waits up to 5 seconds for a slot; if none frees up, the request answers 429 `rate_limited` with `X-Retry-After: 5`, and nothing is recorded against the feed, since the feed didn't fail. The host is the one in the URL we ask for: a redirect to another host isn't limited separately.
+- **`GET /api/fetch` needs a session and allows 30 calls per reader per 10 minutes**, like subscribing. It makes the server download any URL the caller names, so left public it was a free fetch proxy. Per-IP limits would have kept it open to guests, but nothing in the site calls it today, so sign-in is the simpler and safer choice. Its responses are `Cache-Control: private`, so shared caches never keep a signed-in answer.
+- Both limits live in the server's memory: they reset on restart, which is enough for the one Railway server.
 
 ## Items API
 
@@ -439,7 +466,7 @@ Example requests for every route are in [`backend/requests/api.http`](backend/re
 | Method | Path                            | Description                                                                                                                                                                                                                                                   |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/health`                   | `{ api: "ok", database: "connected" \| "skipped" \| "error" }`                                                                                                                                                                                                |
-| GET    | `/api/fetch`                    | `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304                                                                                                          |
+| GET    | `/api/fetch`                    | Signed in: `?url=` fetches and normalizes one feed (`FetchFeedResponse`) without storing it; passes ETag / Last-Modified through, so an unchanged feed is a 304; 30 per reader per 10 min                                                                     |
 | \*     | `/api/auth/*`                   | Better Auth: sign-up, sign-in, sign-out, session, email verification by code, password reset and change (see [Auth](#auth))                                                                                                                                   |
 | GET    | `/api/subscriptions`            | Signed in: the reader's subscriptions (`SubscriptionListResponse`) with each feed's health (active / stale / error / dead), sorted by title                                                                                                                   |
 | POST   | `/api/subscriptions`            | Signed in: `{ url, categoryId? }` fetches and checks the feed, then subscribes → 201 + `Location`; 409 `already_subscribed`; 30 per reader per 10 min                                                                                                         |

@@ -3,10 +3,16 @@ import type { NextFunction, Request, Response } from 'express';
 import { errorHandler } from '../../src/middleware/error-handler';
 import { BadGatewayError, ConflictError, GatewayTimeoutError, TooManyRequestsError } from '../../src/errors';
 
-// A minimal fake Express Response that records the status and JSON body, so the error handler can be tested without a server.
+// A minimal fake Express Response that records the status, headers and JSON body, so the error handler can be tested without a server.
 function fakeRes() {
     const sent: { status?: number; body?: unknown } = {};
+    const headers: Record<string, string> = {};
     const res = {
+        set: mock((name: string, value: string) => {
+            headers[name] = value;
+
+            return res;
+        }),
         status: mock((code: number) => {
             sent.status = code;
 
@@ -19,16 +25,21 @@ function fakeRes() {
         }),
     };
 
-    return { res: res as unknown as Response, sent };
+    return { res: res as unknown as Response, sent, headers };
 }
 
 // Runs the error handler on `err` and returns the status and body it sent.
 function handle(err: unknown) {
-    const { res, sent } = fakeRes();
+    return handleWithHeaders(err).sent;
+}
+
+// Like handle(), plus the headers it set.
+function handleWithHeaders(err: unknown) {
+    const { res, sent, headers } = fakeRes();
 
     errorHandler(err, {} as Request, res, (() => {}) as NextFunction);
 
-    return sent;
+    return { sent, headers };
 }
 
 afterEach(() => {
@@ -66,6 +77,17 @@ describe('errorHandler', () => {
             status: 429,
             body: { error: { code: 'rate_limited', message: 'Slow down', retryable: true } },
         });
+    });
+
+    test('an error with retryAfterSeconds sends it as X-Retry-After, outside the body', () => {
+        const { sent, headers } = handleWithHeaders(new TooManyRequestsError('rate_limited', 'Busy', { retryAfterSeconds: 5 }));
+
+        expect(headers).toEqual({ 'X-Retry-After': '5' });
+        expect(sent.body).toEqual({ error: { code: 'rate_limited', message: 'Busy', retryable: true } });
+    });
+
+    test('an error without retryAfterSeconds sets no header', () => {
+        expect(handleWithHeaders(new TooManyRequestsError('rate_limited', 'Slow down')).headers).toEqual({});
     });
 
     test('malformed JSON from the body parser → 400 invalid_json', () => {

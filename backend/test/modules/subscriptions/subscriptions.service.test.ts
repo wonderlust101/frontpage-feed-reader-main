@@ -1,9 +1,10 @@
 // The subscriptions service against an in-memory Postgres (PGlite) and the local fake feed server: subscribing (fetch,
 // reuse, errors, duplicates), listing with health, renaming and moving, unsubscribing, and that only the owner can touch a subscription.
 
-import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import { and, eq, sql } from 'drizzle-orm';
 import { bookmarks, feeds, itemReadStates, items, subscriptions } from '../../../src/db/schema';
+import { hostLimiter } from '../../../src/modules/feeds/feeds.service';
 import { listSubscriptions, subscribe, unsubscribe, updateSubscription } from '../../../src/modules/subscriptions/subscriptions.service';
 import { startFeedServer } from '../../helpers/feed-server';
 import { createTestDb } from '../../helpers/test-db';
@@ -29,6 +30,10 @@ afterAll(async () => {
 
 beforeEach(async () => {
     await testDb.db.execute(sql`truncate table feeds, users cascade`);
+});
+
+afterEach(() => {
+    mock.restore();
 });
 
 // `ms` milliseconds after T1.
@@ -135,6 +140,19 @@ describe('subscribe', () => {
 
         expect(err).toMatchObject({ status: 502, code: 'http_4xx', upstreamStatus: 410 });
         expect(await testDb.db.select().from(feeds)).toEqual([]);
+    });
+
+    test('a busy feed host → 429 rate_limited with a wait, and nothing is stored', async () => {
+        const reader = await newUser(testDb.db);
+        const url = serveFeed('/busy.xml', 'Busy');
+
+        spyOn(hostLimiter, 'acquire').mockResolvedValue(null);
+
+        const err = await httpErrorFrom(subscribe(testDb.db, reader, { url }, T1));
+
+        expect(err).toMatchObject({ status: 429, code: 'rate_limited', retryable: true, retryAfterSeconds: 5 });
+        expect(await testDb.db.select().from(feeds)).toEqual([]);
+        expect(await subscriptionRowsOf(reader)).toEqual([]);
     });
 
     test('an empty URL → 400 invalid_url', async () => {

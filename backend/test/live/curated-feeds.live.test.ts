@@ -4,15 +4,15 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import type { FeedErrorResponse, FetchFeedResponse } from '@frontpage/shared';
 import sampleFeeds from '../../data/sample-feeds.json';
-import { startTestServer } from '../helpers/test-server';
+import { startFetchTestServer } from '../helpers/test-server';
 
 const feeds = sampleFeeds.categories.flatMap((category) => category.feeds);
 
 describe.skipIf(!process.env.LIVE_FEEDS)('live curated feeds via GET /api/fetch', () => {
-    let api: Awaited<ReturnType<typeof startTestServer>>;
+    let api: Awaited<ReturnType<typeof startFetchTestServer>>;
 
     beforeAll(async () => {
-        api = await startTestServer();
+        api = await startFetchTestServer();
     });
 
     afterAll(async () => {

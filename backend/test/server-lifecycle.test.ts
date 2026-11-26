@@ -5,9 +5,9 @@ import { shutdown } from '../src/server-lifecycle';
 const server = { close: (done: () => void) => done() };
 
 // Runs shutdown and resolves with the exit code it chose.
-function exitCodeOf(closeDatabase: () => Promise<void>): Promise<number> {
+function exitCodeOf(closeDatabase: () => Promise<void>, stopScheduler?: () => Promise<void>): Promise<number> {
     return new Promise((resolve) => {
-        shutdown(server, closeDatabase, resolve);
+        shutdown(server, { stopScheduler, closeDatabase }, resolve);
     });
 }
 
@@ -28,5 +28,24 @@ describe('shutdown', () => {
 
         expect(await exitCodeOf(() => Promise.reject(new Error('pool already ended')))).toBe(1);
         expect(logged).toHaveBeenCalledWith('Shutdown failed:', 'pool already ended');
+    });
+
+    test('stops the scheduler at once, and closes the database only after its burst has finished', async () => {
+        let finishBurst = () => {};
+        const stopScheduler = mock(() => new Promise<void>((resolve) => {
+            finishBurst = resolve;
+        }));
+        const closeDatabase = mock(() => Promise.resolve());
+        const exitCode = exitCodeOf(closeDatabase, stopScheduler);
+
+        expect(stopScheduler).toHaveBeenCalledTimes(1);
+
+        await Bun.sleep(10);
+        expect(closeDatabase).not.toHaveBeenCalled();
+
+        finishBurst();
+
+        expect(await exitCode).toBe(0);
+        expect(closeDatabase).toHaveBeenCalledTimes(1);
     });
 });
